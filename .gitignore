@@ -1,0 +1,6 @@
+input/
+cmake-*
+.idea/
+*.obj
+*.ply
+*.swp
