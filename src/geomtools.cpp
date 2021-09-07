@@ -35,8 +35,29 @@ bool point_in_circle(const Point_3& pt, const Point_2& center, const double& rad
     return false;
 }
 
- void
- mark_domains(CDT& ct,
+void cdt_to_mesh(const CDT& cdt, Mesh& mesh) {
+    std::map<CDT::Vertex_handle, int> indices;
+    std::vector<Mesh::vertex_index> mesh_vertex;
+    std::vector<Mesh::face_index> face_index;
+    mesh_vertex.reserve(cdt.dimension());
+
+    int counter = 0;
+    for (CDT::Finite_vertices_iterator it = cdt.finite_vertices_begin(); it != cdt.finite_vertices_end(); ++it) {
+        mesh_vertex.emplace_back(mesh.add_vertex(it->point()));
+        //        outstream << it->point() << std::endl;
+        indices.insert(std::pair<CDT::Vertex_handle, int>(it, counter++));
+    }
+
+    for (CDT::Finite_faces_iterator it = cdt.finite_faces_begin(); it != cdt.finite_faces_end(); ++it) {
+
+        int v1 = indices[it->vertex(0)];
+        int v2 = indices[it->vertex(1)];
+        int v3 = indices[it->vertex(2)];
+        mesh.add_face(mesh_vertex[v1], mesh_vertex[v2], mesh_vertex[v3]);
+    }
+}
+
+void mark_domains(CDT& ct,
              Face_handle start,
              int index,
              std::list<CDT::Edge>& border )

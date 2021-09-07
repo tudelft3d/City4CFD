@@ -7,7 +7,11 @@ Terrain::Terrain(int pid)
     : TopoFeature(pid) {}
 
 void Terrain::threeDfy(const Point_set_3& pointCloud, const std::vector<PolyFeature*>& features) {
-    //-- TODO: smoothing
+    //-- Add ground points from the point cloud to terrain
+    this->set_cdt(pointCloud); // CDT's got to go first if performing smoothing
+
+    //-- Smoothing
+    this->smooth(pointCloud);
 
     //-- Add buildings as constraints to the terrain
     for (auto &feature : features) {
@@ -17,10 +21,10 @@ void Terrain::threeDfy(const Point_set_3& pointCloud, const std::vector<PolyFeat
     }
 
     //-- Add ground points from the point cloud to terrain
-    this->set_cdt(pointCloud);
+//    this->set_cdt(pointCloud);
 
     //-- Store the CGAL terrain in the triangle-vertex data structure
-    this->triangulate_mesh();
+    this->get_mesh();
 }
 
 void Terrain::constrain_footprint(const Polygon_with_holes_2& poly, const std::vector<double>& heights) {
@@ -36,7 +40,7 @@ void Terrain::constrain_footprint(const Polygon_with_holes_2& poly, const std::v
         _cdt.insert_constraint(vh[i], vh[i + 1]);
     }
 
-    //-- Add inner ring points
+    //-- Add inner ring points - TODO:necessary reminder to rewrite polygons into something more comfortable
     if (poly.has_holes()) {
         for (auto& polyHoles : poly.holes()) {
             vh.clear();
@@ -49,33 +53,49 @@ void Terrain::constrain_footprint(const Polygon_with_holes_2& poly, const std::v
             }
         }
     }
-
 }
+
 
 void Terrain::set_cdt(const Point_set_3& pointCloud) {
     _cdt.insert(pointCloud.points().begin(), pointCloud.points().end());
 }
 
-void Terrain::triangulate_mesh() { // Don't know how to handle it for now
-    std::map<CDT::Vertex_handle, int> indices;
-    std::vector<Mesh::vertex_index> mesh_vertex;
-    std::vector<Mesh::face_index> face_index;
-    mesh_vertex.reserve(_cdt.dimension());
-
-    int counter = 0;
-    for (CDT::Finite_vertices_iterator it = _cdt.finite_vertices_begin(); it != _cdt.finite_vertices_end(); ++it) {
-        mesh_vertex.emplace_back(_mesh.add_vertex(it->point()));
-        //        outstream << it->point() << std::endl;
-        indices.insert(std::pair<CDT::Vertex_handle, int>(it, counter++));
+//-- Taken from CGAL's example
+void Terrain::smooth(const Point_set_3& pointCloud) {
+    // Smooth terrain
+    // Smooth heights with 5 successive Gaussian filters
+#ifdef CGAL_LINKED_WITH_TBB
+    using Concurrency_tag = CGAL::Parallel_tag;
+#else
+    using Concurrency_tag = CGAL::Sequential_tag;
+#endif
+    double spacing = CGAL::compute_average_spacing<Concurrency_tag>(pointCloud, 6);
+    spacing *= 2;
+    double gaussian_variance = 4 * spacing * spacing;
+    for (CDT::Vertex_handle vh : _cdt.finite_vertex_handles())
+    {
+        double z = vh->point().z();
+        double total_weight = 1;
+        CDT::Vertex_circulator circ = _cdt.incident_vertices (vh),
+                start = circ;
+        do
+        {
+            if (!_cdt.is_infinite(circ))
+            {
+                double sq_dist = CGAL::squared_distance (vh->point(), circ->point());
+                double weight = std::exp(- sq_dist / gaussian_variance);
+                z += weight * circ->point().z();
+                total_weight += weight;
+            }
+        }
+        while (++ circ != start);
+        z /= total_weight;
+        vh->point() = Point_3 (vh->point().x(), vh->point().y(), z);
     }
+}
 
-    for (CDT::Finite_faces_iterator it = _cdt.finite_faces_begin(); it != _cdt.finite_faces_end(); ++it) {
-
-        int v1 = indices[it->vertex(0)];
-        int v2 = indices[it->vertex(1)];
-        int v3 = indices[it->vertex(2)];
-        _mesh.add_face(mesh_vertex[v1], mesh_vertex[v2], mesh_vertex[v3]);
-    }
+void Terrain::get_mesh() { // Don't know how to handle it for now
+    cdt_to_mesh(_cdt, _mesh);
 }
 
 void Terrain::output_feature(std::string& fs,

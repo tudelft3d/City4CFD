@@ -12,7 +12,7 @@ void LoD12::lod12reconstruct(Mesh& mesh) {
     this->get_mesh(mesh);
 }
 
-void LoD12::get_mesh(Mesh& _mesh) {
+void LoD12::get_mesh(Mesh& mesh) {
     CDT cdt_buildings;
 
     //-- Map CDT and Mesh vertices
@@ -38,18 +38,18 @@ void LoD12::get_mesh(Mesh& _mesh) {
             } else {
                 cdt_handle.emplace_back(cdt_buildings.insert(Point_3(vert->x(), vert->y(), _base_heights.back())));
             }
-            mesh_vertex.emplace_back(_mesh.add_vertex(cdt_handle.back()->point()));
+            mesh_vertex.emplace_back(mesh.add_vertex(cdt_handle.back()->point()));
             cdtToMesh[cdt_handle.back()] = mesh_vertex.back();
 
-            mesh_vertex.emplace_back(_mesh.add_vertex(Point_3(vert->x(), vert->y(), _height)));
+            mesh_vertex.emplace_back(mesh.add_vertex(Point_3(vert->x(), vert->y(), _height)));
         }
 
         //- Add constraints and create mesh faces for sides
         for (auto i = 0; i < cdt_handle.size() - 1; ++i) {
             cdt_buildings.insert_constraint(cdt_handle[i], cdt_handle[i + 1]);
 
-            auto it1 = _mesh.vertices_begin();
-            auto it2 = _mesh.vertices_begin();
+            auto it1 = mesh.vertices_begin();
+            auto it2 = mesh.vertices_begin();
 
             auto v1 = cdtToMesh[cdt_handle[i]];
             auto v2 = cdtToMesh[cdt_handle[i + 1]];
@@ -57,26 +57,26 @@ void LoD12::get_mesh(Mesh& _mesh) {
             std::advance(it1, v1.idx() + 1);
             std::advance(it2, v2.idx() + 1);
 
-            _mesh.add_face(v1, v2, *it1);
-            _mesh.add_face(v2, *it2, *it1);
+            mesh.add_face(v1, v2, *it1);
+            mesh.add_face(v2, *it2, *it1);
         }
     }
 
     //- Handle top
     mark_domains(cdt_buildings);
-    for (auto &it : cdt_buildings.finite_face_handles()) {
+    for (auto& it : cdt_buildings.finite_face_handles()) {
         if (!it->info().in_domain()) continue;
 
-        auto it1 = _mesh.vertices_begin();
-        auto it2 = _mesh.vertices_begin();
-        auto it3 = _mesh.vertices_begin();
+        auto it1 = mesh.vertices_begin();
+        auto it2 = mesh.vertices_begin();
+        auto it3 = mesh.vertices_begin();
 
         std::advance(it1, cdtToMesh[it->vertex(0)]);
         std::advance(it2, cdtToMesh[it->vertex(1)]);
         std::advance(it3, cdtToMesh[it->vertex(2)]);
 
-//        _mesh.add_face(*it1, *it2, *it3); // Don't need bottom face
-        _mesh.add_face(*std::next(it1), *std::next(it2), *std::next(it3));
+//        mesh.add_face(*it1, *it2, *it3); // Don't need bottom face
+        mesh.add_face(*std::next(it1), *std::next(it2), *std::next(it3));
     }
 
 }
