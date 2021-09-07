@@ -49,7 +49,7 @@ void get_obj(const Mesh& mesh,
                 faceIdx.push_back(it->second);
             }
         }
-        // Check for problematic faces
+        //- Check for problematic faces
         sort(faceIdx.begin(), faceIdx.end());
         auto it = std::unique( faceIdx.begin(), faceIdx.end() );
         bool wasUnique = (it == faceIdx.end() );

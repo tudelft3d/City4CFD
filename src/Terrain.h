@@ -23,10 +23,10 @@ public:
 private:
     CDT _cdt;
 
-    void constrain_footprint(const Polygon_with_holes_2& poly, const std::vector<double>& heights);
     void set_cdt(const Point_set_3 &pointCloud);
-    void triangulate_mesh();
-
+    void constrain_footprint(const Polygon_with_holes_2& poly, const std::vector<double>& heights);
+    void smooth(const Point_set_3& pointCloud);
+    void get_mesh();
 };
 
 

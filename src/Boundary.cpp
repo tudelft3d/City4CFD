@@ -76,25 +76,8 @@ void Boundary::get_mesh() {
         _mesh.add_face(mesh_vertex_side[v2 + 1], mesh_vertex_side[v2], mesh_vertex_side[v1 + 1]);
     }
 
-//    //-- Add mesh faces for top
-    // Set top with CDT
-    std::map<CDT::Vertex_handle, int> indices;
-    std::vector<Mesh::vertex_index> mesh_vertex;
-    mesh_vertex.reserve(cdt_top.dimension());
-    int counter = 0;
-
-    for (CDT::Finite_vertices_iterator it = cdt_top.finite_vertices_begin(); it != cdt_top.finite_vertices_end(); ++it) {
-        mesh_vertex.emplace_back(_meshTop.add_vertex(it->point()));
-//        outstream << it->point() << std::endl;
-        indices.insert(std::pair<CDT::Vertex_handle, int>(it, counter++));
-    }
-
-    for (CDT::Finite_faces_iterator it = cdt_top.finite_faces_begin(); it != cdt_top.finite_faces_end(); ++it) {
-        int v1 = indices[it->vertex(0)];
-        int v2 = indices[it->vertex(1)];
-        int v3 = indices[it->vertex(2)];
-        _meshTop.add_face(mesh_vertex[v1], mesh_vertex[v2], mesh_vertex[v3]);
-    }
+    //-- Add mesh faces for top
+    cdt_to_mesh(cdt_top, _meshTop);
 }
 
 
