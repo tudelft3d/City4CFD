@@ -22,5 +22,4 @@ private:
     void create_mesh(Mesh& mesh);
 };
 
-
 #endif //CITYCFD_LOD12_H

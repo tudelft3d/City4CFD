@@ -24,5 +24,4 @@ private:
     double _height;
 };
 
-
 #endif //CITYCFD_BUILDING_H

@@ -12,8 +12,7 @@ std::string gen_key_bucket(const Point_3* p) {
 
 //-- Output functions
 void output_obj(const TopoFeature* terrain, const std::vector<PolyFeature*>& buildings, const TopoFeature* boundary, bool outputSeparately) {
-    std::unordered_map<std::string, unsigned long> _dPts;
-    //-- Create output file
+    std::unordered_map<std::string, unsigned long> dPts;
     std::vector<std::ofstream> of;
     std::vector<std::string>   fs, bs;
 
@@ -26,33 +25,33 @@ void output_obj(const TopoFeature* terrain, const std::vector<PolyFeature*>& bui
     }
     //-- Output terrain
     bs[count] += "\ng Terrain";
-    get_obj(terrain->get_mesh(), fs[count], bs[count], _dPts);
+    get_obj(terrain->get_mesh(), fs[count], bs[count], dPts);
 
     if (outputSeparately) {
-        ++count; _dPts.clear();
+        ++count; dPts.clear();
         of.emplace_back().open("Building.obj"); fs.emplace_back(); bs.emplace_back();
     }
     //-- Output buildings
     bs[count] += "\ng Building";
     for (auto& f : buildings) {
         if (!f->is_active()) continue;
-        get_obj(f->get_mesh(), fs[count], bs[count], _dPts);
+        get_obj(f->get_mesh(), fs[count], bs[count], dPts);
     }
 
     if (outputSeparately) {
-        ++count; _dPts.clear();
+        ++count; dPts.clear();
         of.emplace_back().open("Sides.obj"); fs.emplace_back(); bs.emplace_back();
     }
     //-- Output side and top boundary
     bs[count] += "\ng Sides";
-    get_obj(boundary->get_mesh(), fs[count], bs[count], _dPts);
+    get_obj(boundary->get_mesh(), fs[count], bs[count], dPts);
 
     if (outputSeparately) {
-        ++count; _dPts.clear();
+        ++count; dPts.clear();
         of.emplace_back().open("Top.obj"); fs.emplace_back(); bs.emplace_back();
     }
     bs[count] += "\ng Top";
-    get_obj(dynamic_cast<const Boundary*>(boundary)->get_top_mesh(), fs[count], bs[count], _dPts);
+    get_obj(dynamic_cast<const Boundary*>(boundary)->get_top_mesh(), fs[count], bs[count], dPts);
 
     //-- Write to file
     int i = 0;

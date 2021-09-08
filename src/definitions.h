@@ -128,7 +128,7 @@ struct ConfigData {
     // note: handle when radiusOfInterst is larger than dimOfDomain
 };
 
-//-- Global numbers
+//-- Global variables
 const double infty     = 1e6;
 const double smallnum  = 1e-6;
 

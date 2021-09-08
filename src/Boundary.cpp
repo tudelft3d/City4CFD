@@ -67,7 +67,6 @@ void Boundary::threeDfy() {
 
     //-- Add mesh faces for side
     for (auto i = 0; i < mesh_vertex_side.size() - 3; i= i + 2) {
-
         // -- i + 1 is i lifted up
         int v1 = i;
         int v2 = i + 2;

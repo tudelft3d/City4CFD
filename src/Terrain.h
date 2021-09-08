@@ -29,5 +29,4 @@ protected:
     void create_mesh();
 };
 
-
 #endif //CITYCFD_TERRAIN_H

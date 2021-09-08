@@ -84,5 +84,3 @@ void LoD12::create_mesh(Mesh& mesh) {
 double LoD12::get_height() {
     return _height;
 }
-
-

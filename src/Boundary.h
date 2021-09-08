@@ -36,5 +36,4 @@ private:
     double               _topHeight = topHeightConfig;
 };
 
-
 #endif //CITYCFD_BOUNDARY_H

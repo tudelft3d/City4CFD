@@ -42,14 +42,13 @@ void cdt_to_mesh(const CDT& cdt, Mesh& mesh) {
     mesh_vertex.reserve(cdt.dimension());
 
     int counter = 0;
-    for (CDT::Finite_vertices_iterator it = cdt.finite_vertices_begin(); it != cdt.finite_vertices_end(); ++it) {
+    for (auto it : cdt.finite_vertex_handles()) {
         mesh_vertex.emplace_back(mesh.add_vertex(it->point()));
         //        outstream << it->point() << std::endl;
         indices.insert(std::pair<CDT::Vertex_handle, int>(it, counter++));
     }
 
-    for (CDT::Finite_faces_iterator it = cdt.finite_faces_begin(); it != cdt.finite_faces_end(); ++it) {
-
+    for (auto it : cdt.finite_face_handles()) {
         int v1 = indices[it->vertex(0)];
         int v2 = indices[it->vertex(1)];
         int v3 = indices[it->vertex(2)];

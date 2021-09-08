@@ -14,7 +14,7 @@ void Terrain::threeDfy(const Point_set_3& pointCloud, const std::vector<PolyFeat
     this->smooth(pointCloud);
 
     //-- Add buildings as constraints to the terrain
-    for (auto &feature : features) {
+    for (auto& feature : features) {
         if (feature->is_active()) {
             this->constrain_footprint(feature->get_poly(), feature->get_base_heights());
         }
@@ -54,7 +54,6 @@ void Terrain::constrain_footprint(const Polygon_with_holes_2& poly, const std::v
         }
     }
 }
-
 
 void Terrain::set_cdt(const Point_set_3& pointCloud) {
     _cdt.insert(pointCloud.points().begin(), pointCloud.points().end());
@@ -105,6 +104,7 @@ const CDT& Terrain::get_cdt() const {
 TopoClass Terrain::get_class() const {
     return TERRAIN;
 }
+
 std::string Terrain::get_class_name() const {
     return "Terrain";
 }

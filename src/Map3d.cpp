@@ -65,10 +65,12 @@ void Map3d::set_boundaries() {
         std::cout << "--> Domain size not defined in config, calculating automatically" << std::endl;
         //- Domain boundaries deferred until all building heights in the influ region are determined
     } else {
-        //-- Deactivate point cloud points that are out of bounds
+        //- Deactivate point cloud points that are out of bounds
         _boundary->set_bounds_to_pc(_pointCloud);
         _boundary->set_bounds_to_pc(_pointCloudBuildings);
 //        _pointCloud.collect_garbage();
+
+        //- Add flat buffer zone between the terrain and boundary
         _boundary->add_buffer(_pointCloud);
     }
 }
@@ -78,7 +80,7 @@ void Map3d::set_footprint_elevation() {
     SearchTree searchTree;
     searchTree.insert(_pointCloud.points().begin(), _pointCloud.points().end());
 
-    for (auto f : _lsFeatures) {
+    for (auto& f : _lsFeatures) {
         if (f->is_active() && f->get_class() != BUILDING) continue; // For now only building footprints
         try {
             f->calc_footprint_elevation(searchTree);
@@ -159,41 +161,12 @@ void Map3d::output() {
             break;
 
     }
-
-/*
-    //-- Create output file
-    std::ofstream of;
-    of.open("mesh.obj");
-    std::string fs, bs;
-
-    //-- Output terrain
-    _terrain->output_feature(fs, bs, _dPts);
-
-    //-- Output buildings
-    bs += "\ng Building"; // temp
-    for (auto& f : _lsFeatures) {
-        if (!f->is_active()) continue;
-        f->output_feature(fs, bs, _dPts);
-    }
-
-    //-- Output side and top boundary
-    _boundary->threeDfy();
-    _boundary->output_feature(fs, bs, _dPts);
-
-    of << fs << bs;
-    of.close();
-*/
 }
 
 void Map3d::clear_features() {
-    delete _configData;
-    delete _terrain;
-    delete _boundary;
-    _configData = nullptr;
-    _terrain    = nullptr;
-    _boundary   = nullptr;
+    delete _configData; delete _terrain; delete _boundary;
+    _configData = nullptr; _terrain = nullptr; _boundary = nullptr;
     for (auto f : _lsFeatures) {
-        delete f;
-        f = nullptr;
+        delete f; f = nullptr;
     }
 }
