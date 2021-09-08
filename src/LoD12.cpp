@@ -9,10 +9,10 @@ void LoD12::lod12reconstruct(Mesh& mesh) {
     //-- Reconstruction is just simple average/median/percentile
     _height = avg(_building_pts);
 
-    this->get_mesh(mesh);
+    this->create_mesh(mesh);
 }
 
-void LoD12::get_mesh(Mesh& mesh) {
+void LoD12::create_mesh(Mesh& mesh) {
     CDT cdt_buildings;
 
     //-- Map CDT and Mesh vertices

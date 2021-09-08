@@ -19,7 +19,7 @@ private:
     const std::vector<double>& _base_heights;
     const std::vector<double>& _building_pts;
 
-    void get_mesh(Mesh& mesh);
+    void create_mesh(Mesh& mesh);
 };
 
 

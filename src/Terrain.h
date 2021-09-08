@@ -16,17 +16,17 @@ public:
     void threeDfy(const Point_set_3& pointCloud, const std::vector<PolyFeature*>& features);
 
     const CDT&   get_cdt() const;
-    TopoClass    get_class() const;
     std::string  get_class_name() const;
-    void         output_feature(std::string& fs, std::string& bs, std::unordered_map<std::string, unsigned long>& dPts) const override;
 
-private:
+    TopoClass    get_class() const override;
+
+protected:
     CDT _cdt;
 
     void set_cdt(const Point_set_3 &pointCloud);
     void constrain_footprint(const Polygon_with_holes_2& poly, const std::vector<double>& heights);
     void smooth(const Point_set_3& pointCloud);
-    void get_mesh();
+    void create_mesh();
 };
 
 

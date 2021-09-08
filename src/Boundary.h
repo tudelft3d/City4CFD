@@ -16,10 +16,11 @@ public:
     void set_bounds_to_pc(Point_set_3& pointCloud) const;
     void set_bounds_to_cdt(CDT& cdt) const;
     void add_buffer(Point_set_3& pointCloud);
-    void get_mesh();
+    void threeDfy();
+
+    const Mesh& get_top_mesh() const;
 
     TopoClass get_class() const override;
-    void      output_feature(std::string& fs, std::string& bs, std::unordered_map<std::string, unsigned long>& dPts) const override;
 
 private:
     //-- HARDCODED data, should be there from the config--//

@@ -19,7 +19,6 @@ public:
     void      threeDfy(const SearchTree& searchTree) override;
 
     TopoClass get_class() const override;
-    void      output_feature(std::string& fs, std::string& bs, std::unordered_map<std::string, unsigned long>& dPts) const override;
 
 private:
     double _height;

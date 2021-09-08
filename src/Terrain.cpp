@@ -24,7 +24,7 @@ void Terrain::threeDfy(const Point_set_3& pointCloud, const std::vector<PolyFeat
 //    this->set_cdt(pointCloud);
 
     //-- Store the CGAL terrain in the triangle-vertex data structure
-    this->get_mesh();
+    this->create_mesh();
 }
 
 void Terrain::constrain_footprint(const Polygon_with_holes_2& poly, const std::vector<double>& heights) {
@@ -94,16 +94,9 @@ void Terrain::smooth(const Point_set_3& pointCloud) {
     }
 }
 
-void Terrain::get_mesh() { // Don't know how to handle it for now
+void Terrain::create_mesh() {
     cdt_to_mesh(_cdt, _mesh);
 }
-
-void Terrain::output_feature(std::string& fs,
-                             std::string& bs,
-                             std::unordered_map<std::string, unsigned long>& dPts) const {
-    bs += "\ng Terrain";
-    get_obj(_mesh, fs, bs, dPts);
-};
 
 const CDT& Terrain::get_cdt() const {
     return _cdt;

@@ -4,6 +4,10 @@
 TopoFeature::TopoFeature(const int pid)
     : _mesh(), _id(pid), _f_active(true) {}
 
+const Mesh& TopoFeature::get_mesh() const {
+    return _mesh;
+}
+
 int TopoFeature::get_id() const {
     return _id;
 }

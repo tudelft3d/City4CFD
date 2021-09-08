@@ -104,6 +104,9 @@ void Map3d::threeDfy() {
         f->threeDfy(searchTree);
     }
 
+    //-- Reconstruct boundaries
+    _boundary->threeDfy();
+
     //-- Measure execution time
     auto endTime = std::chrono::steady_clock::now();
     auto diffTime = endTime - startTime;
@@ -144,9 +147,20 @@ bool Map3d::read_polygons(const char* gisdata) {
 }
 
 void Map3d::output() {
-    bool output_separately = false;
-    // TODO: config file to output as single model or separately
+    switch (_configData->outputFormat) {
+        case OBJ:
+            output_obj(_terrain, _lsFeatures, _boundary, _configData->outputSeparately);
+            break;
+        case STL:
+//            output_stl(_terrain, _lsFeatures, _boundary, _configData->output_separately);
+            break;
+        case CityJSON:
+//            output_cityjson(_terrain, _lsFeatures, _boundary, _configData->output_separately);
+            break;
 
+    }
+
+/*
     //-- Create output file
     std::ofstream of;
     of.open("mesh.obj");
@@ -157,17 +171,18 @@ void Map3d::output() {
 
     //-- Output buildings
     bs += "\ng Building"; // temp
-    for (auto &f : _lsFeatures) {
+    for (auto& f : _lsFeatures) {
         if (!f->is_active()) continue;
         f->output_feature(fs, bs, _dPts);
     }
 
     //-- Output side and top boundary
-    _boundary->get_mesh();
+    _boundary->threeDfy();
     _boundary->output_feature(fs, bs, _dPts);
 
     of << fs << bs;
     of.close();
+*/
 }
 
 void Map3d::clear_features() {

@@ -110,6 +110,25 @@ typedef enum {
     BOUNDARY    = 6
 } TopoClass;
 
+typedef enum {
+    OBJ       = 0,
+    CityJSON  = 1,
+    STL       = 2,
+} OutputFormat;
+
+//-- Config file struct
+// TODO; hardcoded for now
+struct ConfigData {
+    Point_2     pointOfInterest = Point_2(85420,446221);
+    double radiusOfInterest = 350.0;
+    double dimOfDomain = 1000.0;
+    double topHeight   = 100.0;
+    OutputFormat outputFormat = OBJ;
+    bool         outputSeparately = false;
+    // note: handle when radiusOfInterst is larger than dimOfDomain
+};
+
+//-- Global numbers
 const double infty     = 1e6;
 const double smallnum  = 1e-6;
 

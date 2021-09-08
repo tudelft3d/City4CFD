@@ -3,21 +3,17 @@
 
 #include "iostream"
 #include "definitions.h"
+#include "TopoFeature.h"
+#include "Boundary.h"
 
-// TODO; hardcoded for now
-struct ConfigData {
-    Point_2     pointOfInterest = Point_2(85420,446221);
-    double radiusOfInterest = 350.0;
-    double dimOfDomain = 1000.0;
-    double topHeight   = 100.0;
-    // note: handle when radiusOfInterst is larger than dimOfDomain
-};
+//-- Input functions
 
+
+//-- Output functions
+void output_obj(const TopoFeature* terrain, const std::vector<PolyFeature*>& buildings, const TopoFeature* bnd, bool outputSeparately);
 
 void          read_config();
 std::string   gen_key_bucket(const Point_3* p);
-void          get_obj(const Mesh& mesh, std::string& fs, std::string& bs);
 void          get_obj(const Mesh& mesh, std::string& fs, std::string& bs, std::unordered_map<std::string, unsigned long>& dPts);
-void          get_obj(const Mesh& mesh, std::string& fs, std::string& bs, std::string& className);
 
 #endif //CITYCFD_IO_H

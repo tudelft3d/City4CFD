@@ -11,11 +11,11 @@ public:
     ~TopoFeature()                   = default;
 
     virtual TopoClass get_class() const = 0;
-    virtual void      output_feature(std::string& fs, std::string& bs, std::unordered_map<std::string, unsigned long>& dPts) const = 0;
 
-    int  get_id() const;
-    bool is_active() const;
-    void deactivate();
+    const Mesh& get_mesh() const;
+    int   get_id() const;
+    bool  is_active() const;
+    void  deactivate();
 
 protected:
     Mesh       _mesh;
@@ -34,7 +34,6 @@ public:
 
     virtual void      calc_footprint_elevation(const SearchTree& searchTree);
     virtual void      threeDfy(const SearchTree& searchTree) = 0;
-    virtual void      output_feature(std::string& fs, std::string& bs, std::unordered_map<std::string, unsigned long>& dPts) const = 0;
 
     void check_influ_region(const Point_2& pointOfInterest, const double& radiusOfInfluRegion);
 

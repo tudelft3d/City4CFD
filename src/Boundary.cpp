@@ -44,7 +44,7 @@ void Boundary::add_buffer(Point_set_3& pointCloud) {
     _outerPts.push_back(_outerPts[0]); // Put first point at the end to close the loop
 }
 
-void Boundary::get_mesh() {
+void Boundary::threeDfy() {
     //-- Create mesh out of this building
     std::vector<Mesh::vertex_index> mesh_vertex_side;
     std::vector<Mesh::vertex_index> mesh_vertex_top;
@@ -80,15 +80,8 @@ void Boundary::get_mesh() {
     cdt_to_mesh(cdt_top, _meshTop);
 }
 
-
-void Boundary::output_feature(std::string& fs,
-                              std::string& bs,
-                              std::unordered_map<std::string, unsigned long>& dPts) const {
-    bs += "\ng Sides";
-    get_obj(_mesh, fs, bs, dPts);
-
-    bs += "\ng Top";
-    get_obj(_meshTop, fs, bs, dPts);
+const Mesh& Boundary::get_top_mesh() const {
+    return _meshTop;
 }
 
 TopoClass Boundary::get_class() const {

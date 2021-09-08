@@ -10,18 +10,56 @@ std::string gen_key_bucket(const Point_3* p) {
     return ss.str();
 }
 
-void get_obj(const Mesh& mesh, std::string& fs, std::string& bs) {
-    for (auto &vert : mesh.vertices()) {
-        fs += "\nv " + gen_key_bucket(&mesh.point(vert));
+//-- Output functions
+void output_obj(const TopoFeature* terrain, const std::vector<PolyFeature*>& buildings, const TopoFeature* boundary, bool outputSeparately) {
+    std::unordered_map<std::string, unsigned long> _dPts;
+    //-- Create output file
+    std::vector<std::ofstream> of;
+    std::vector<std::string>   fs, bs;
+
+    int count = 0;
+    if (outputSeparately) {
+        of.reserve(4);
+        of.emplace_back().open("Terrain.obj"); fs.emplace_back(); bs.emplace_back();
+    } else {
+        of.emplace_back().open("Mesh.obj"); fs.emplace_back(); bs.emplace_back();
+    }
+    //-- Output terrain
+    bs[count] += "\ng Terrain";
+    get_obj(terrain->get_mesh(), fs[count], bs[count], _dPts);
+
+    if (outputSeparately) {
+        ++count; _dPts.clear();
+        of.emplace_back().open("Building.obj"); fs.emplace_back(); bs.emplace_back();
+    }
+    //-- Output buildings
+    bs[count] += "\ng Building";
+    for (auto& f : buildings) {
+        if (!f->is_active()) continue;
+        get_obj(f->get_mesh(), fs[count], bs[count], _dPts);
     }
 
-    for (auto& face : mesh.faces()) {
-        bs += "\nf";
-        for (auto index : CGAL::vertices_around_face(mesh.halfedge(face), mesh)) {
-            bs += " " + std::to_string(index.idx() + 1);
-        }
+    if (outputSeparately) {
+        ++count; _dPts.clear();
+        of.emplace_back().open("Sides.obj"); fs.emplace_back(); bs.emplace_back();
     }
+    //-- Output side and top boundary
+    bs[count] += "\ng Sides";
+    get_obj(boundary->get_mesh(), fs[count], bs[count], _dPts);
 
+    if (outputSeparately) {
+        ++count; _dPts.clear();
+        of.emplace_back().open("Top.obj"); fs.emplace_back(); bs.emplace_back();
+    }
+    bs[count] += "\ng Top";
+    get_obj(dynamic_cast<const Boundary*>(boundary)->get_top_mesh(), fs[count], bs[count], _dPts);
+
+    //-- Write to file
+    int i = 0;
+    do {
+        of[i] << fs[i] << bs[i];
+        of[i].close();
+    } while (i++ < count);
 }
 
 void get_obj(const Mesh& mesh,
@@ -51,28 +89,14 @@ void get_obj(const Mesh& mesh,
         }
         //- Check for problematic faces
         sort(faceIdx.begin(), faceIdx.end());
-        auto it = std::unique( faceIdx.begin(), faceIdx.end() );
-        bool wasUnique = (it == faceIdx.end() );
+        auto it = std::unique(faceIdx.begin(), faceIdx.end());
+        bool wasUnique = (it == faceIdx.end());
 
         if (wasUnique) {
             bs += "\nf";
             bs += bsTemp;
         } else {
 //            std::cerr << "Found duplicates!" << std::endl;
-        }
-    }
-}
-
-void get_obj(const Mesh &mesh, std::string &fs, std::string &bs, std::string &className) {
-    fs += "o " + className;
-    for (auto &vert : mesh.vertices()) {
-        fs += "\nv " + gen_key_bucket(&mesh.point(vert));
-    }
-
-    for (auto &face : mesh.faces()) {
-        bs += "\nf";
-        for (auto index : CGAL::vertices_around_face(mesh.halfedge(face), mesh)) {
-            bs += " " + std::to_string(index.idx() + 1);
         }
     }
 }

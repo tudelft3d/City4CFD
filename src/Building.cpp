@@ -64,11 +64,3 @@ void Building::threeDfy(const SearchTree& searchTree) {
 TopoClass Building::get_class() const {
     return BUILDING;
 }
-
-void Building::output_feature(std::string &fs,
-                              std::string &bs,
-                              std::unordered_map<std::string,
-                              unsigned long> &dPts) const {
-//    bs += "\no Building_" + std::to_string(this->get_id());
-    get_obj(_mesh, fs, bs, dPts);
-}
