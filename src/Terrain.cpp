@@ -94,7 +94,7 @@ void Terrain::smooth(const Point_set_3& pointCloud) {
 }
 
 void Terrain::create_mesh() {
-    cdt_to_mesh(_cdt, _mesh);
+    geomtools::cdt_to_mesh(_cdt, _mesh);
 }
 
 const CDT& Terrain::get_cdt() const {

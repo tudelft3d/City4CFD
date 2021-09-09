@@ -18,7 +18,7 @@ void Boundary::set_bounds_to_pc(Point_set_3& pointCloud) const { // Will try to 
     auto it = pointCloud.points().begin();
     int count = 0;
     while (it != pointCloud.points().end()) {
-        if (!point_in_circle(*it, pointOfInterest, 0.8 * _dimOfDomain)) {
+        if (!geomtools::point_in_circle(*it, pointOfInterest, 0.8 * _dimOfDomain)) {
             pointCloud.remove(pointCloud.begin() + count);
         } else {
             ++it;
@@ -76,7 +76,7 @@ void Boundary::threeDfy() {
     }
 
     //-- Add mesh faces for top
-    cdt_to_mesh(cdt_top, _meshTop);
+    geomtools::cdt_to_mesh(cdt_top, _meshTop);
 }
 
 const Mesh& Boundary::get_top_mesh() const {

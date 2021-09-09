@@ -4,14 +4,14 @@ void read_config() {
 
 }
 
-std::string gen_key_bucket(const Point_3* p) {
+std::string IO::gen_key_bucket(const Point_3* p) {
     std::stringstream ss;
     ss << std::fixed << std::setprecision(3) << p->x() << " " << p->y() << " " << std::setprecision(2) << p->z();
     return ss.str();
 }
 
 //-- Output functions
-void output_obj(const TopoFeature* terrain, const std::vector<PolyFeature*>& buildings, const TopoFeature* boundary, bool outputSeparately) {
+void IO::output_obj(const TopoFeature* terrain, const std::vector<PolyFeature*>& buildings, const TopoFeature* boundary, bool outputSeparately) {
     std::unordered_map<std::string, unsigned long> dPts;
     std::vector<std::ofstream> of;
     std::vector<std::string>   fs, bs;
@@ -61,10 +61,10 @@ void output_obj(const TopoFeature* terrain, const std::vector<PolyFeature*>& bui
     } while (i++ < count);
 }
 
-void get_obj(const Mesh& mesh,
-             std::string& fs,
-             std::string& bs,
-             std::unordered_map<std::string, unsigned long>& dPts)
+void IO::get_obj(const Mesh& mesh,
+                 std::string& fs,
+                 std::string& bs,
+                 std::unordered_map<std::string, unsigned long>& dPts)
 {
     for (auto& face : mesh.faces()) {
         std::vector<unsigned long> faceIdx;

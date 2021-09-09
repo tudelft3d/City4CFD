@@ -9,7 +9,7 @@ void LoD12::lod12reconstruct(Mesh& mesh) {
     //-- Reconstruction is just simple average/median/percentile
 //    _height = avg(_building_pts);
 //    _height = median(_building_pts);
-    _height = percentile(_building_pts, 0.9); //TODO percentile harcoded for now, add it from config
+    _height = geomtools::percentile(_building_pts, 0.9); //TODO percentile harcoded for now, add it from config
 
     this->create_mesh(mesh);
 }
@@ -65,7 +65,7 @@ void LoD12::create_mesh(Mesh& mesh) {
     }
 
     //- Handle top
-    mark_domains(cdt_buildings);
+    geomtools::mark_domains(cdt_buildings);
     for (auto& it : cdt_buildings.finite_face_handles()) {
         if (!it->info().in_domain()) continue;
 

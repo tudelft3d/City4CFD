@@ -23538,7 +23538,7 @@ class basic_json
     @liveexample{The example shows the serialization of a JSON value to a byte
     vector in CBOR format.,to_cbor}
 
-    @sa http://cbor.io
+    @sa http://cbor.IO
     @sa @ref from_cbor(detail::input_adapter&&, const bool, const bool, const cbor_tag_handler_t) for the
         analogous deserialization
     @sa @ref to_msgpack(const basic_json&) for the related MessagePack format
@@ -23943,7 +23943,7 @@ class basic_json
     @liveexample{The example shows the deserialization of a byte vector in CBOR
     format to a JSON value.,from_cbor}
 
-    @sa http://cbor.io
+    @sa http://cbor.IO
     @sa @ref to_cbor(const basic_json&) for the analogous serialization
     @sa @ref from_msgpack(detail::input_adapter&&, const bool, const bool) for the
         related MessagePack format

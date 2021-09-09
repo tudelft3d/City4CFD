@@ -142,7 +142,7 @@ bool Map3d::read_polygons(const char* gisdata) {
 void Map3d::output() {
     switch (_configData->outputFormat) {
         case OBJ:
-            output_obj(_terrain, _lsFeatures, _boundary, _configData->outputSeparately);
+            IO::output_obj(_terrain, _lsFeatures, _boundary, _configData->outputSeparately);
             break;
         case STL:
 //            output_stl(_terrain, _lsFeatures, _boundary, _configData->output_separately);

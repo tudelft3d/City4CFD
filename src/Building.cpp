@@ -23,12 +23,12 @@ void Building::calc_footprint_elevation(const SearchTree& searchTree) {
 //        for (auto& pt : result) {
 //            poly_height.push_back(pt.z());
 //        }
-        _base_heights.emplace_back(avg(poly_height));
+        _base_heights.emplace_back(geomtools::avg(poly_height));
     }
 
     //-- In case of inner rings, set inner points as average of outer points, as the last element in _base_heights
     if (_poly.has_holes()) {
-        _base_heights.emplace_back(avg(_base_heights));
+        _base_heights.emplace_back(geomtools::avg(_base_heights));
     }
 }
 
@@ -43,7 +43,7 @@ void Building::threeDfy(const SearchTree& searchTree) {
     //-- Check if subset point lies inside the polygon
     std::vector<double> building_pts;
     for (auto& pt : subsetPts) {
-        if (check_inside(pt, _poly)) {
+        if (geomtools::check_inside(pt, _poly)) {
             building_pts.push_back(pt.z());
         }
     }

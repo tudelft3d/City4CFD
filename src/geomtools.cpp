@@ -1,6 +1,6 @@
 #include "geomtools.h"
 
-double avg(const std::vector<double>& values) {
+double geomtools::avg(const std::vector<double>& values) {
     if (values.empty()) throw std::length_error("Can't calculate average of a zero-sized vector!");
     double average = 0;
     for (auto& value : values) {
@@ -9,7 +9,7 @@ double avg(const std::vector<double>& values) {
     return (average / (double)values.size());
 }
 
-double median(std::vector<double> values) {
+double geomtools::median(std::vector<double> values) {
     if (values.empty()) throw std::length_error("Can't calculate median of a zero-sized vector!");
     std::sort(values.begin(), values.end());
     if (values.size() % 2 != 0) {
@@ -21,7 +21,7 @@ double median(std::vector<double> values) {
     }
 }
 
-double percentile(std::vector<double> values, const double percentile) {
+double geomtools::percentile(std::vector<double> values, const double percentile) {
     if (values.empty()) throw std::length_error("Can't calculate percentile of a zero-sized vector!");
     std::sort(values.begin(), values.end());
     unsigned long i = values.size() * percentile;
@@ -29,7 +29,7 @@ double percentile(std::vector<double> values, const double percentile) {
 }
 
 //-- Check if the point is inside a polygon on a 2D projection
-bool check_inside(const Point_3& pt2, const Polygon_with_holes_2& polygon) {
+bool geomtools::check_inside(const Point_3& pt2, const Polygon_with_holes_2& polygon) {
     Point_2 pt(pt2.x(), pt2.y());
 
     //-- Check if the point falls within the outer surface
@@ -45,7 +45,7 @@ bool check_inside(const Point_3& pt2, const Polygon_with_holes_2& polygon) {
     return false;
 }
 
-bool point_in_circle(const Point_3& pt, const Point_2& center, const double& radius) {
+bool geomtools::point_in_circle(const Point_3& pt, const Point_2& center, const double& radius) {
     if (pow(pt.x() - center.x(), 2)
       + pow(pt.y() - center.y(), 2)
       < pow(radius, 2)) {
@@ -54,7 +54,7 @@ bool point_in_circle(const Point_3& pt, const Point_2& center, const double& rad
     return false;
 }
 
-void cdt_to_mesh(const CDT& cdt, Mesh& mesh) {
+void geomtools::cdt_to_mesh(const CDT& cdt, Mesh& mesh) {
     std::map<CDT::Vertex_handle, int> indices;
     std::vector<Mesh::vertex_index> mesh_vertex;
     std::vector<Mesh::face_index> face_index;
@@ -76,7 +76,7 @@ void cdt_to_mesh(const CDT& cdt, Mesh& mesh) {
 }
 
 //-- CGAL's default implementation on determining what's inside or outside CDT
-void mark_domains(CDT& ct,
+void geomtools::mark_domains(CDT& ct,
              Face_handle start,
              int index,
              std::list<CDT::Edge>& border )
@@ -103,7 +103,7 @@ void mark_domains(CDT& ct,
     }
 }
 
-void mark_domains(CDT& cdt) {
+void geomtools::mark_domains(CDT& cdt) {
     for(CDT::Face_handle f : cdt.all_face_handles()){
         f->info().nesting_level = -1;
     }
