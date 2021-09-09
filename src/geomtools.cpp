@@ -1,12 +1,31 @@
 #include "geomtools.h"
 
 double avg(const std::vector<double>& values) {
-    if (values.size() == 0)  std::cerr <<"Can't calculate average of a zero-sized vector!" << std::endl;
+    if (values.empty()) throw std::length_error("Can't calculate average of a zero-sized vector!");
     double average = 0;
-    for (auto &value : values) {
+    for (auto& value : values) {
         average += value;
     }
     return (average / (double)values.size());
+}
+
+double median(std::vector<double> values) {
+    if (values.empty()) throw std::length_error("Can't calculate median of a zero-sized vector!");
+    std::sort(values.begin(), values.end());
+    if (values.size() % 2 != 0) {
+        unsigned long i = (values.size() + 1) / 2;
+        return values[i];
+    } else {
+        unsigned long i = values.size() / 2;
+        return ((values[i] + values[i+1]) / 2);
+    }
+}
+
+double percentile(std::vector<double> values, const double percentile) {
+    if (values.empty()) throw std::length_error("Can't calculate percentile of a zero-sized vector!");
+    std::sort(values.begin(), values.end());
+    unsigned long i = values.size() * percentile;
+    return values[i];
 }
 
 //-- Check if the point is inside a polygon on a 2D projection
@@ -17,7 +36,7 @@ bool check_inside(const Point_3& pt2, const Polygon_with_holes_2& polygon) {
     if (CGAL::bounded_side_2(polygon.outer_boundary().begin(), polygon.outer_boundary().end(), pt) == CGAL::ON_BOUNDED_SIDE) {
         // Check if the point falls within one of the holes - TODO: do I even need this?
         for (auto it_hole = polygon.holes_begin(); it_hole != polygon.holes_end(); ++it_hole) {
-            if (!CGAL::bounded_side_2(it_hole->begin(), it_hole->end(), pt ) == CGAL::ON_UNBOUNDED_SIDE) {
+            if (!CGAL::bounded_side_2(it_hole->begin(), it_hole->end(), pt) == CGAL::ON_UNBOUNDED_SIDE) {
                 return false;
             }
         }
@@ -42,13 +61,13 @@ void cdt_to_mesh(const CDT& cdt, Mesh& mesh) {
     mesh_vertex.reserve(cdt.dimension());
 
     int counter = 0;
-    for (auto it : cdt.finite_vertex_handles()) {
+    for (const auto& it : cdt.finite_vertex_handles()) {
         mesh_vertex.emplace_back(mesh.add_vertex(it->point()));
         //        outstream << it->point() << std::endl;
         indices.insert(std::pair<CDT::Vertex_handle, int>(it, counter++));
     }
 
-    for (auto it : cdt.finite_face_handles()) {
+    for (const auto& it : cdt.finite_face_handles()) {
         int v1 = indices[it->vertex(0)];
         int v2 = indices[it->vertex(1)];
         int v3 = indices[it->vertex(2)];
@@ -56,6 +75,7 @@ void cdt_to_mesh(const CDT& cdt, Mesh& mesh) {
     }
 }
 
+//-- CGAL's default implementation on determining what's inside or outside CDT
 void mark_domains(CDT& ct,
              Face_handle start,
              int index,

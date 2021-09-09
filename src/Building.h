@@ -12,7 +12,7 @@ public:
     using PolyFeature::PolyFeature;
     Building() = default;
     Building(const int pid);
-    Building(const json &poly, const int pid);
+    Building(const json& poly, const int pid);
     ~Building() = default;
 
     void      calc_footprint_elevation(const SearchTree& searchTree) override;

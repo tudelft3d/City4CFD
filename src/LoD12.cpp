@@ -7,7 +7,9 @@ LoD12::LoD12(const Polygon_with_holes_2& poly,
 
 void LoD12::lod12reconstruct(Mesh& mesh) {
     //-- Reconstruction is just simple average/median/percentile
-    _height = avg(_building_pts);
+//    _height = avg(_building_pts);
+//    _height = median(_building_pts);
+    _height = percentile(_building_pts, 0.9); //TODO percentile harcoded for now, add it from config
 
     this->create_mesh(mesh);
 }
@@ -78,7 +80,6 @@ void LoD12::create_mesh(Mesh& mesh) {
 //        mesh.add_face(*it1, *it2, *it3); // Don't need bottom face
         mesh.add_face(*std::next(it1), *std::next(it2), *std::next(it3));
     }
-
 }
 
 double LoD12::get_height() {

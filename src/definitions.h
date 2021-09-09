@@ -59,7 +59,8 @@ typedef CGAL::Search_traits_3<Kernel>                 Traits;
 //typedef CGAL::Kd_tree<Traits>                         SearchTree;
 typedef CGAL::Orthogonal_k_neighbor_search<Traits>    Neighbor_search;
 typedef Neighbor_search::Tree                         SearchTree;
-typedef CGAL::Fuzzy_iso_box<Traits> Fuzzy_iso_box;
+typedef CGAL::Fuzzy_iso_box<Traits>                   Fuzzy_iso_box;
+typedef CGAL::Fuzzy_sphere<Traits>                    Fuzzy_sphere;
 
 //-- CGAL CDT
 struct FaceInfo2

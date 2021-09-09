@@ -3,19 +3,26 @@
 Building::Building(const int pid)
     : PolyFeature(pid), _height(-9999.0) {}
 
-Building::Building(const json &poly, int pid)
+Building::Building(const json& poly, const int pid)
     : PolyFeature(poly, pid), _height(-9999.0) {}
 
-void Building::calc_footprint_elevation(const SearchTree &searchTree) {
+void Building::calc_footprint_elevation(const SearchTree& searchTree) {
     //-- Calculate elevation of polygon outer boundary
     //-- Point elevation is the average of 5 nearest neighbors from the PC
-    for (auto &polypt : _poly.outer_boundary()) {
+    for (auto& polypt : _poly.outer_boundary()) {
         Point_3 query(polypt.x() , polypt.y(), 0);
         Neighbor_search search(searchTree, query, 5);
+//        Fuzzy_sphere search_radius(query, 5);
+//        std::list<Point_3> result;
+//        searchTree.search(std::back_inserter(result), search_radius);
+
         std::vector<double> poly_height;
         for (Neighbor_search::iterator it = search.begin(); it != search.end(); ++it) {
             poly_height.push_back(it->first.z());
         }
+//        for (auto& pt : result) {
+//            poly_height.push_back(pt.z());
+//        }
         _base_heights.emplace_back(avg(poly_height));
     }
 

@@ -87,7 +87,7 @@ void get_obj(const Mesh& mesh,
             }
         }
         //- Check for problematic faces
-        sort(faceIdx.begin(), faceIdx.end());
+        std::sort(faceIdx.begin(), faceIdx.end());
         auto it = std::unique(faceIdx.begin(), faceIdx.end());
         bool wasUnique = (it == faceIdx.end());
 

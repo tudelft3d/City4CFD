@@ -19,8 +19,6 @@ void Map3d::reconstruct() {
 
     //-- Add semantics
 
-    //-- Add boundary
-    this->add_boundary();
 }
 
 void Map3d::set_features() {
@@ -113,13 +111,6 @@ void Map3d::threeDfy() {
     auto endTime = std::chrono::steady_clock::now();
     auto diffTime = endTime - startTime;
     std::cout << "-> Calculations executed in " << std::chrono::duration<double> (diffTime).count() << " s" << std::endl;
-}
-
-void Map3d::add_boundary() {
-    //-- Add sides
-
-    //-- Add top
-
 }
 
 //-- Input functions are temporary, will bemoved to IO

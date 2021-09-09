@@ -35,9 +35,7 @@ private:
     void set_boundaries();
     void set_footprint_elevation();
     void threeDfy();
-    void add_boundary();
     void clear_features();
-
 };
 
 #endif //CITYCFD_MAP3D_H

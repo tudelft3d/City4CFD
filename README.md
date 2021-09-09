@@ -4,7 +4,7 @@ A code that reconstructs 3D city models specifically for CFD simulations
 # todo
 ## Short-term
     - CityJSON and STL export
-    - LoD1.2 different means of height calc
+    - Global config file
 
 ## Longer-term
     - BGT poly processing
