@@ -1,7 +1,8 @@
 #include "Boundary.h"
 
 // TODO: put more thought into this constructor once the time comes
-Boundary::Boundary(const ConfigData& configData)
+/*
+Boundary::Boundary()
     :TopoFeature(), _outerPts() {
     if (configData.dimOfDomain != -infty) {
         _dimOfDomain = configData.dimOfDomain;
@@ -11,14 +12,15 @@ Boundary::Boundary(const ConfigData& configData)
         _topHeight = configData.topHeight;
     }
 }
+*/
 
 //-- Deactivate point cloud points that are out of bounds
-void Boundary::set_bounds_to_pc(Point_set_3& pointCloud) const { // Will try to template it to include CDT
+void Boundary::set_bounds_to_pc(Point_set_3& pointCloud) { // Will try to template it to include CDT
     //- 80% of the total domain size. The rest is left for the buffer zone
     auto it = pointCloud.points().begin();
     int count = 0;
     while (it != pointCloud.points().end()) {
-        if (!geomtools::point_in_circle(*it, pointOfInterest, 0.8 * _dimOfDomain)) {
+        if (!geomtools::point_in_circle(*it, config::pointOfInterest, 0.8 * config::dimOfDomain)) {
             pointCloud.remove(pointCloud.begin() + count);
         } else {
             ++it;
@@ -34,8 +36,8 @@ void Boundary::add_buffer(Point_set_3& pointCloud) {
     const double angInt = 2 * M_PI / (double)nPts;
     double ang = 0;
     for (auto i = 0; i < nPts; ++i) {
-        double xPt = pointOfInterest.x() + _dimOfDomain * cos(ang + angInt);
-        double yPt = pointOfInterest.y() + _dimOfDomain * sin(ang + angInt);
+        double xPt = config::pointOfInterest.x() + config::dimOfDomain * cos(ang + angInt);
+        double yPt = config::pointOfInterest.y() + config::dimOfDomain * sin(ang + angInt);
         ang = ang + angInt;
         Point_3 pt(xPt, yPt, 0.0); // Height set at 0 for now. Could be average of the edge or average of the whole terrain
         _outerPts.push_back(pt); // for top and sides
@@ -52,14 +54,14 @@ void Boundary::threeDfy() {
     //-- Top needs DT, sides are done manually
     CDT cdt_top;
     for (auto &pt : _outerPts) {
-        cdt_top.insert(Point_3(pt.x(), pt.y(), _topHeight));
+        cdt_top.insert(Point_3(pt.x(), pt.y(), config::topHeight));
     }
 
     int count = 0;
     //-- Add mesh vertices and store them in a vector
     for (auto it = _outerPts.begin(); it != _outerPts.end(); ++it) {
         mesh_vertex_side.emplace_back(_mesh.add_vertex(*it));
-        mesh_vertex_side.emplace_back(_mesh.add_vertex(Point_3(it->x(), it->y(), _topHeight)));
+        mesh_vertex_side.emplace_back(_mesh.add_vertex(Point_3(it->x(), it->y(), config::topHeight)));
     }
 
     //-- Add middle top point to mesh

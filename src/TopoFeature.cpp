@@ -43,7 +43,7 @@ PolyFeature::PolyFeature(const json& poly, const int pid)
 
 void PolyFeature::calc_footprint_elevation(const SearchTree& searchTree) {}
 
-void PolyFeature::check_influ_region(const Point_2& pointOfInterest, const double& radiusOfInfluRegion) {
+void PolyFeature::check_influ_region() {
     // TODO: really gotta rewrite those polygons, cgal implementation is awful
     //-- Temporary - will rewrite polygons
     std::vector<Polygon_2> rings;
@@ -56,9 +56,9 @@ void PolyFeature::check_influ_region(const Point_2& pointOfInterest, const doubl
     //-- Include all polygons that have at least one vertex in the influence region
     for (auto& poly : rings) {
         for (auto& vert : poly) {
-            if (pow(pointOfInterest.x() - vert.x(), 2)
-              + pow(pointOfInterest.y() - vert.y(), 2)
-              < pow(radiusOfInfluRegion,2)) {
+            if (pow(config::pointOfInterest.x() - vert.x(), 2)
+              + pow(config::pointOfInterest.y() - vert.y(), 2)
+              < pow(config::radiusOfInfluRegion,2)) {
                 return;
             }
         }

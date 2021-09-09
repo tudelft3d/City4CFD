@@ -11,7 +11,7 @@ public:
     ~LoD12() = default;
 
     void   lod12reconstruct(Mesh &mesh);
-    double get_height();
+    double get_height() const;
 
 private:
     double _height;

@@ -9,7 +9,7 @@ void LoD12::lod12reconstruct(Mesh& mesh) {
     //-- Reconstruction is just simple average/median/percentile
 //    _height = avg(_building_pts);
 //    _height = median(_building_pts);
-    _height = geomtools::percentile(_building_pts, 0.9); //TODO percentile harcoded for now, add it from config
+    _height = geomtools::percentile(_building_pts, config::buildingPercentile);
 
     this->create_mesh(mesh);
 }
@@ -82,6 +82,6 @@ void LoD12::create_mesh(Mesh& mesh) {
     }
 }
 
-double LoD12::get_height() {
+double LoD12::get_height() const {
     return _height;
 }

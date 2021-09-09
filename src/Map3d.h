@@ -2,6 +2,7 @@
 #define CITYCFD_MAP3D_H
 
 #include "definitions.h"
+#include "config.h"
 #include "io.h"
 #include "TopoFeature.h"
 #include "Terrain.h"
@@ -22,7 +23,6 @@ public:
     void output();
 
 private:
-     ConfigData*                _configData;
      Point_set_3                _pointCloud;
      Point_set_3                _pointCloudBuildings;
      json                       _polygons;

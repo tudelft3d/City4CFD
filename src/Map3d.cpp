@@ -40,7 +40,7 @@ void Map3d::set_boundaries() {
     //-- Set the influence region --//
     //- Define radius of interest
     double radiusOfInfluRegion;
-    if (_configData->radiusOfInterest == -infty) {
+    if (config::radiusOfInfluRegion == -infty) {
         std::cout << "--> Radius of interest not defined in config, calculating automatically" << std::endl;
         //-- Find building where the point of interest lies in and define radius of interest with BPG
         for (auto& f : _lsFeatures) {
@@ -48,24 +48,23 @@ void Map3d::set_boundaries() {
             //TODO function that searches for the building where point lies
             // no building found - throw exception
         }
-    } else radiusOfInfluRegion = _configData->radiusOfInterest;
+    } else radiusOfInfluRegion = config::radiusOfInfluRegion;
 
     //-- Deactivate buildings that are out of the influence region
     for (auto& f : _lsFeatures) {
         if (f->get_class() != BUILDING) continue;
-        f->check_influ_region(_configData->pointOfInterest, radiusOfInfluRegion);
+        f->check_influ_region();
     }
 
     //-- Set the domain size --//
     // TODO: make it relative depending on round or rectangular domain
-    double dimOfDomain;
-    if (_configData->dimOfDomain == -infty) {
+    if (config::dimOfDomain == -infty) {
         std::cout << "--> Domain size not defined in config, calculating automatically" << std::endl;
         //- Domain boundaries deferred until all building heights in the influ region are determined
     } else {
-        //- Deactivate point cloud points that are out of bounds
-        _boundary->set_bounds_to_pc(_pointCloud);
-        _boundary->set_bounds_to_pc(_pointCloudBuildings);
+        //- Deactivate point cloud points that are out of bounds - static function of Boundary
+        Boundary::set_bounds_to_pc(_pointCloud);
+        Boundary::set_bounds_to_pc(_pointCloudBuildings);
 //        _pointCloud.collect_garbage();
 
         //- Add flat buffer zone between the terrain and boundary
@@ -115,7 +114,6 @@ void Map3d::threeDfy() {
 
 //-- Input functions are temporary, will bemoved to IO
 bool Map3d::read_config(const char *points_xyz) { //TODO still needs implementing
-    _configData = new ConfigData();
     return true;
 }
 
@@ -140,9 +138,9 @@ bool Map3d::read_polygons(const char* gisdata) {
 }
 
 void Map3d::output() {
-    switch (_configData->outputFormat) {
+    switch (config::outputFormat) {
         case OBJ:
-            IO::output_obj(_terrain, _lsFeatures, _boundary, _configData->outputSeparately);
+            IO::output_obj(_terrain, _lsFeatures, _boundary);
             break;
         case STL:
 //            output_stl(_terrain, _lsFeatures, _boundary, _configData->output_separately);
@@ -155,8 +153,8 @@ void Map3d::output() {
 }
 
 void Map3d::clear_features() {
-    delete _configData; delete _terrain; delete _boundary;
-    _configData = nullptr; _terrain = nullptr; _boundary = nullptr;
+    delete _terrain; delete _boundary;
+    _terrain = nullptr; _boundary = nullptr;
     for (auto f : _lsFeatures) {
         delete f; f = nullptr;
     }

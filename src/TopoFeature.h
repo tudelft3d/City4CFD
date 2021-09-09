@@ -2,6 +2,7 @@
 #define CITYCFD_TOPOFEATURE_H
 
 #include "definitions.h"
+#include "config.h"
 #include "geomtools.h"
 
 class TopoFeature {
@@ -35,7 +36,7 @@ public:
     virtual void      calc_footprint_elevation(const SearchTree& searchTree);
     virtual void      threeDfy(const SearchTree& searchTree) = 0;
 
-    void check_influ_region(const Point_2& pointOfInterest, const double& radiusOfInfluRegion);
+    void check_influ_region();
 
     const Polygon_with_holes_2& get_poly() const;
     const std::vector<double>&  get_base_heights() const;

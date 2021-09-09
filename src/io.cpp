@@ -11,7 +11,8 @@ std::string IO::gen_key_bucket(const Point_3* p) {
 }
 
 //-- Output functions
-void IO::output_obj(const TopoFeature* terrain, const std::vector<PolyFeature*>& buildings, const TopoFeature* boundary, bool outputSeparately) {
+void IO::output_obj(const TopoFeature* terrain, const std::vector<PolyFeature*>& buildings, const TopoFeature* boundary) {
+    using namespace config;
     std::unordered_map<std::string, unsigned long> dPts;
     std::vector<std::ofstream> of;
     std::vector<std::string>   fs, bs;
