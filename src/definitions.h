@@ -44,15 +44,24 @@
 
 #include "nlohmann/json.hpp"
 
-//-- CGAL basics
+//-- CGAL Basics
 typedef CGAL::Exact_predicates_inexact_constructions_kernel  Kernel;
 typedef CGAL::Projection_traits_xy_3<Kernel>                 Projection_traits;
 
-//-- CGAL point
+//-- CGAL Point
 typedef Kernel::Point_2            Point_2;
 typedef Kernel::Point_3            Point_3;
 typedef Kernel::Segment_3          Segment_3;
 typedef CGAL::Point_set_3<Point_3> Point_set_3;
+
+//-- CGAL Mesh
+using Mesh = CGAL::Surface_mesh<Point_3>;
+
+//-- CGAL Normal
+namespace PMP = CGAL::Polygon_mesh_processing;
+typedef Kernel::Vector_3                              Vector;
+typedef boost::graph_traits<Mesh>::vertex_descriptor  vertex_descriptor;
+typedef boost::graph_traits<Mesh>::face_descriptor    face_descriptor;
 
 //-- CGAL tree search
 typedef CGAL::Search_traits_3<Kernel>                 Traits;
@@ -84,8 +93,6 @@ typedef CGAL::Polygon_with_holes_2<Kernel>                                      
 typedef CDT::Face_handle                                                            Face_handle;
 typedef CDT::Vertex_handle                                                          Vertex_handle;
 
-//-- tesh
-using Mesh = CGAL::Surface_mesh<Point_3>;
 
 typedef nlohmann::json  json;
 

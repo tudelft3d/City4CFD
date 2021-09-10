@@ -1,10 +1,10 @@
 #include "Building.h"
 
 Building::Building(const int pid)
-    : PolyFeature(pid), _height(-9999.0) {}
+    : PolyFeature(pid), _height(-infty) {}
 
 Building::Building(const json& poly, const int pid)
-    : PolyFeature(poly, pid), _height(-9999.0) {}
+    : PolyFeature(poly, pid), _height(-infty) {}
 
 void Building::calc_footprint_elevation(const SearchTree& searchTree) {
     //-- Calculate elevation of polygon outer boundary
@@ -12,6 +12,7 @@ void Building::calc_footprint_elevation(const SearchTree& searchTree) {
     for (auto& polypt : _poly.outer_boundary()) {
         Point_3 query(polypt.x() , polypt.y(), 0);
         Neighbor_search search(searchTree, query, 5);
+        // TODO: radius search instead of NN?
 //        Fuzzy_sphere search_radius(query, 5);
 //        std::list<Point_3> result;
 //        searchTree.search(std::back_inserter(result), search_radius);

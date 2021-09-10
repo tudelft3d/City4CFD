@@ -37,14 +37,12 @@ int main() {
     //-- Calculate elevations and triangulate
     map3d.reconstruct();
 
-    //-- Add semantics
-
     //-- Output data
     map3d.output();
 
     auto endTime = std::chrono::steady_clock::now();
     auto diffTime = endTime - startTime;
-    std::cout << "-> All calculations executed in " << std::chrono::duration<double> (diffTime).count() << " s" << std::endl;
+    std::cout << "-> Program executed in " << std::chrono::duration<double> (diffTime).count() << " s" << std::endl;
 
     return 0;
 }

@@ -4,12 +4,16 @@
 #include "definitions.h"
 
 namespace config {
-
+    //-- Domain size
    extern Point_2      pointOfInterest;
    extern double       radiusOfInfluRegion;
    extern double       dimOfDomain;
    extern double       topHeight;
+
+   //-- Reconstruction
    extern double       buildingPercentile;
+
+   //-- Output flags
    extern OutputFormat outputFormat;
    extern bool         outputSeparately;
     // note: handle when radiusOfInterst is larger than dimOfDomain

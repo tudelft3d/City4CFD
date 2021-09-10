@@ -39,7 +39,6 @@ void Map3d::set_features() {
 void Map3d::set_boundaries() {
     //-- Set the influence region --//
     //- Define radius of interest
-    double radiusOfInfluRegion;
     if (config::radiusOfInfluRegion == -infty) {
         std::cout << "--> Radius of interest not defined in config, calculating automatically" << std::endl;
         //-- Find building where the point of interest lies in and define radius of interest with BPG
@@ -48,7 +47,7 @@ void Map3d::set_boundaries() {
             //TODO function that searches for the building where point lies
             // no building found - throw exception
         }
-    } else radiusOfInfluRegion = config::radiusOfInfluRegion;
+    }
 
     //-- Deactivate buildings that are out of the influence region
     for (auto& f : _lsFeatures) {
@@ -78,7 +77,7 @@ void Map3d::set_footprint_elevation() {
     searchTree.insert(_pointCloud.points().begin(), _pointCloud.points().end());
 
     for (auto& f : _lsFeatures) {
-        if (f->is_active() && f->get_class() != BUILDING) continue; // For now only building footprints
+        if (!f->is_active() || f->get_class() != BUILDING) continue; // For now only building footprints
         try {
             f->calc_footprint_elevation(searchTree);
         } catch (std::exception& e) {
@@ -99,7 +98,7 @@ void Map3d::threeDfy() {
     searchTree.insert(_pointCloudBuildings.points().begin(), _pointCloudBuildings.points().end());
 
     for (auto& f : _lsFeatures) {
-        if (f->is_active() && f->get_class() != BUILDING) continue;
+        if (!f->is_active() || f->get_class() != BUILDING) continue;
         f->threeDfy(searchTree);
     }
 
@@ -142,8 +141,8 @@ void Map3d::output() {
         case OBJ:
             IO::output_obj(_terrain, _lsFeatures, _boundary);
             break;
-        case STL:
-//            output_stl(_terrain, _lsFeatures, _boundary, _configData->output_separately);
+        case STL: // Only ASCII stl for now
+            IO::output_stl(_terrain, _lsFeatures, _boundary);
             break;
         case CityJSON:
 //            output_cityjson(_terrain, _lsFeatures, _boundary, _configData->output_separately);

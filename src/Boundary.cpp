@@ -81,6 +81,10 @@ void Boundary::threeDfy() {
     geomtools::cdt_to_mesh(cdt_top, _meshTop);
 }
 
+Mesh& Boundary::get_top_mesh() {
+    return _meshTop;
+}
+
 const Mesh& Boundary::get_top_mesh() const {
     return _meshTop;
 }

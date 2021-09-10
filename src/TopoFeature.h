@@ -13,6 +13,7 @@ public:
 
     virtual TopoClass get_class() const = 0;
 
+    Mesh&       get_mesh();
     const Mesh& get_mesh() const;
     int   get_id() const;
     bool  is_active() const;

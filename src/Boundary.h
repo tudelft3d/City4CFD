@@ -18,6 +18,7 @@ public:
     void add_buffer(Point_set_3& pointCloud);
     void threeDfy();
 
+    Mesh& get_top_mesh();
     const Mesh& get_top_mesh() const;
 
     TopoClass get_class() const override;
