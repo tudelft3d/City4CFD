@@ -150,3 +150,38 @@ void IO::get_stl(Mesh& mesh, std::string& fs) {
         fs += "\nendfacet";
     }
 }
+
+void IO::output_cityjson(const TopoFeature* terrain, const std::vector<PolyFeature*>& buildings,
+                         const TopoFeature* bnd) {
+    std::ofstream of;
+    nlohmann::json j;
+
+    j["type"] = "CityJSON";
+    j["version"] = "1.0";
+    j["metadata"] = {};
+//    double b[] = {bg::get<bg::min_corner, 0>(_bbox),
+//                  bg::get<bg::min_corner, 1>(_bbox),
+//                  0,
+//                  bg::get<bg::max_corner, 0>(_bbox),
+//                  bg::get<bg::max_corner, 1>(_bbox),
+//                  0};
+//    j["metadata"]["geographicalExtent"] = b;
+    j["metadata"]["referenceSystem"] = "urn:ogc:def:crs:EPSG::7415";
+    std::unordered_map< std::string, unsigned long > dPts;
+    for (auto& f : _lsFeatures) {
+        f->get_cityjson(j, dPts);
+    }
+    //-- vertices
+    std::vector<std::string> thepts;
+    thepts.resize(dPts.size());
+    for (auto& p : dPts)
+        thepts[p.second] = p.first;
+    dPts.clear();
+    for (auto& p : thepts) {
+        std::vector<std::string> c;
+        boost::split(c, p, boost::is_any_of(" "));
+        j["vertices"].push_back({std::stod(c[0], NULL), std::stod(c[1], NULL), std::stod(c[2], NULL) });
+    }
+    of << j.dump() << std::endl;
+
+}

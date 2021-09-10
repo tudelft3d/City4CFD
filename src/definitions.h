@@ -93,7 +93,9 @@ typedef CGAL::Polygon_with_holes_2<Kernel>                                      
 typedef CDT::Face_handle                                                            Face_handle;
 typedef CDT::Vertex_handle                                                          Vertex_handle;
 
-
+//-- Boost
+namespace bg=boost::geometry;
+//-- JSON
 typedef nlohmann::json  json;
 
 struct vertex {

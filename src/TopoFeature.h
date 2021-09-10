@@ -15,9 +15,9 @@ public:
 
     Mesh&       get_mesh();
     const Mesh& get_mesh() const;
-    int   get_id() const;
-    bool  is_active() const;
-    void  deactivate();
+    int         get_id() const;
+    bool        is_active() const;
+    void        deactivate();
 
 protected:
     Mesh       _mesh;

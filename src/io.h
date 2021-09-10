@@ -13,8 +13,11 @@ namespace IO {
     //-- Output functions
     void output_obj(const TopoFeature* terrain, const std::vector<PolyFeature*> &buildings, const TopoFeature* bnd);
     void get_obj(const Mesh& mesh, std::string& fs, std::string& bs, std::unordered_map<std::string, unsigned long>& dPts);
+
     void output_stl(TopoFeature* terrain, std::vector<PolyFeature*> &buildings, TopoFeature* bnd);
     void get_stl(Mesh& mesh, std::string& fs);
+
+    void output_cityjson(const TopoFeature* terrain, const std::vector<PolyFeature*> &buildings, const TopoFeature* bnd);
 
     //-- Templated function
     template <typename T>
