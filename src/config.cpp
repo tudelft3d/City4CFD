@@ -12,10 +12,11 @@ namespace config {
     double topHeight = 300.;
 
     //-- Reconstruction related
+    double lod                = 1.2;
     double buildingPercentile = 0.9;
 
     //-- Output flags
-    OutputFormat outputFormat = OBJ;
+    OutputFormat outputFormat = CityJSON;
     bool outputSeparately = false;
 }
 

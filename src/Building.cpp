@@ -1,10 +1,7 @@
 #include "Building.h"
 
-Building::Building(const int pid)
-    : PolyFeature(pid), _height(-infty) {}
-
-Building::Building(const json& poly, const int pid)
-    : PolyFeature(poly, pid), _height(-infty) {}
+Building::Building(const json& poly)
+    : PolyFeature(poly), _height(-infty) {}
 
 void Building::calc_footprint_elevation(const SearchTree& searchTree) {
     //-- Calculate elevation of polygon outer boundary
@@ -58,7 +55,7 @@ void Building::threeDfy(const SearchTree& searchTree) {
 
     //-- LoD12 reconstruction
     LoD12 lod12(_poly, _base_heights, building_pts);
-    lod12.lod12reconstruct(_mesh);
+    lod12.lod12reconstruct(_mesh, _height);
 
     double lowHeight = 4.0; // Hardcoded low height here
     // TODO: exception/warning handling
@@ -68,6 +65,21 @@ void Building::threeDfy(const SearchTree& searchTree) {
         return;
     }
 }
+
+void Building::get_cityjson_info(nlohmann::json& b) {
+    //todo - sides and top semantic surfaces
+    b["type"] = "Building";
+    b["attributes"];
+//    get_cityjson_attributes(b, _attributes);
+//    float hbase = z_to_float(this->get_height_base());
+//    float h = z_to_float(this->get_height());
+//    b["attributes"]["TerrainHeight"] = _base_heights.back(); // temp - will calculate avg for every footprint
+    b["attributes"]["measuredHeight"] = _height - _base_heights.back();
+}
+
+std::string Building::get_cityjson_primitive() const {
+    return "MultiSurface";
+};
 
 TopoClass Building::get_class() const {
     return BUILDING;

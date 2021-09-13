@@ -3,5 +3,6 @@ cmake-*
 .idea/
 *.obj
 *.stl
+*.json
 *.ply
 *.swp

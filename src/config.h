@@ -14,6 +14,7 @@ namespace config {
    extern double       topHeight;
 
    //-- Reconstruction
+   extern double       lod;
    extern double       buildingPercentile;
 
    //-- Output flags

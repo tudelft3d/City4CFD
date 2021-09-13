@@ -49,6 +49,28 @@ void Boundary::add_buffer(Point_set_3& pointCloud) {
     _outerPts.push_back(_outerPts[0]); // Put first point at the end to close the loop
 }
 
+std::vector<double> Boundary::get_domain_bbox() {
+    //todo: proper bbox calculation
+    double maxx(-infty), maxy(-infty), maxz(-infty);
+    double minx(infty),  miny(infty),  minz(infty);
+
+    for (auto& pt : _outerPts) {
+        if (pt.x() > maxx) maxx = pt.x();
+        else if (pt.x() < minx) minx = pt.x();
+
+        if (pt.y() > maxy) maxy = pt.y();
+        else if (pt.y() < miny) miny = pt.y();
+
+//        if (pt.z() > maxz) maxz = pt.z();
+//        else if (pt.z() < minz) minz = pt.z();
+    }
+    minz = -5;
+    maxz = 100;
+
+    return std::vector<double> {minx, miny, minz, maxx, maxy, maxz};
+}
+
+
 //-- Sides class
 void Sides::threeDfy() {
     std::vector<Mesh::vertex_index> mesh_vertex_side;
@@ -87,7 +109,7 @@ void Top::threeDfy() {
 
     //-- Top is done by making a CDT of outerPts
     CDT cdt_top;
-    for (auto &pt : _outerPts) {
+    for (auto& pt : _outerPts) {
         cdt_top.insert(Point_3(pt.x(), pt.y(), config::topHeight));
     }
 

@@ -22,13 +22,13 @@ void Map3d::reconstruct() {
 }
 
 void Map3d::set_features() {
+    unsigned long pid = 0; // for now
     //-- First feature is the terrain
     _terrain = new Terrain();
 
     //-- Add polygons as features -- ONLY BUILDING and BAG for now
-    int pid = 1; // for now
     for (auto poly : _polygons["features"]) {
-        Building* building = new Building(poly, pid++);
+        Building* building = new Building(poly);
         _lsFeatures.push_back(building);
     }
 
@@ -79,9 +79,6 @@ void Map3d::set_boundaries() {
         //- Add flat buffer zone between the terrain and boundary
         Boundary::add_buffer(_pointCloud);
     }
-
-    //-- Testing for speedup - remove excess buildings from _lsFeatures
-    this->collect_garbage();
 }
 
 void Map3d::set_footprint_elevation() {
@@ -154,67 +151,32 @@ bool Map3d::read_polygons(const char* gisdata) {
 void Map3d::output() {
     switch (config::outputFormat) {
         case OBJ:
-            this->output_obj();
+            IO::output_obj(_allFeatures);
             break;
         case STL: // Only ASCII stl for now
-            this->output_stl();
+            IO::output_stl(_allFeatures);
             break;
         case CityJSON:
-//            this->output_cityjson();
+            //-- Remove inactives and add ID's to features - obj and stl don't need id
+            // just temp for now
+            this->prep_feature_output();
+            IO::output_cityjson(_allFeatures);
             break;
 
     }
 }
 
-void Map3d::output_obj() {
-    using namespace config;
-    std::vector<std::ofstream> of;
-    std::vector<std::string>   fs(topoClassName.size()), bs(topoClassName.size());
-
-    std::vector<std::unordered_map<std::string, unsigned long>> dPts(topoClassName.size());
-    //-- Output points
-    for (auto& f : _allFeatures) {
-        if (!f->is_active()) continue;
-        if (outputSeparately)
-            f->get_obj_pts(fs[f->get_class()], bs[f->get_class()], dPts[f->get_class()]);
-        else
-            f->get_obj_pts(fs[f->get_class()], bs[f->get_class()], dPts[0]);
+void Map3d::prep_feature_output() { // Temp impl, might change
+    for (unsigned long i = 0; i < _allFeatures.size();) {
+        if (_allFeatures[i]->is_active()) {
+            _allFeatures[i]->set_id(i++);
+        }
+        else {
+            _allFeatures[i] = nullptr;
+            _allFeatures.erase(_allFeatures.begin() + i);
+        }
     }
-
-    //-- Add class name and output to file
-    if (!outputSeparately) of.emplace_back().open(fileName + ".obj");
-    for (int i = 0; i < fs.size(); ++i) {
-        if (bs[i].empty()) continue;
-        if (outputSeparately) of.emplace_back().open(fileName + "_" + topoClassName.at(i) + ".obj");
-
-        of.back() << fs[i] << "\ng " << topoClassName.at(i) << bs[i];
-    }
-    for (auto& f : of) f.close();
-}
-
-void Map3d::output_stl() {
-    using namespace config;
-    std::vector<std::ofstream> of;
-    std::vector<std::string>   fs(topoClassName.size());
-
-    //-- Get all triangles
-    for (auto& f : _allFeatures) {
-        if (!f->is_active()) continue;
-        f->get_stl_pts(fs[f->get_class()]);
-    }
-
-    //-- Add class name and output to file
-    if (!outputSeparately) of.emplace_back().open(fileName + ".stl");
-    for (int i = 0; i < fs.size(); ++i) {
-        if (fs[i].empty()) continue;
-        if (outputSeparately) of.emplace_back().open(fileName + "_" + topoClassName.at(i) + ".stl");
-
-        of.back() << "\nsolid " << topoClassName.at(i);
-        of.back() << fs[i];
-        of.back() << "\nendsolid " << topoClassName.at(i);
-    }
-    for (auto& f : of) f.close();
-}
+};
 
 void Map3d::collect_garbage() { // Just a test for now, could be helpful when other polygons get implemented
     for (unsigned long i = 0; i < _allFeatures.size();) {

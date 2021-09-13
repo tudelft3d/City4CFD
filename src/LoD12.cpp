@@ -5,11 +5,12 @@ LoD12::LoD12(const Polygon_with_holes_2& poly,
              const std::vector<double>& building_pts)
     : _height(),  _poly(poly), _base_heights(base_heights), _building_pts(building_pts) {}
 
-void LoD12::lod12reconstruct(Mesh& mesh) {
+void LoD12::lod12reconstruct(Mesh& mesh, double& height) {
     //-- Reconstruction is just simple average/median/percentile
 //    _height = avg(_building_pts);
 //    _height = median(_building_pts);
     _height = geomtools::percentile(_building_pts, config::buildingPercentile);
+    height = _height;
 
     this->create_mesh(mesh);
 }

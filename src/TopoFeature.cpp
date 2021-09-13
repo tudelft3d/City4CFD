@@ -5,7 +5,7 @@ TopoFeature::TopoFeature()
         : _mesh(), _id(), _f_active(true) {}
 
 TopoFeature::TopoFeature(const int pid)
-    : _mesh(), _id(pid), _f_active(true) {}
+    : _mesh(), _id(std::to_string(pid)), _f_active(true) {}
 
 Mesh& TopoFeature::get_mesh() {
     return _mesh;
@@ -15,7 +15,11 @@ const Mesh& TopoFeature::get_mesh() const {
     return _mesh;
 }
 
-int TopoFeature::get_id() const {
+void TopoFeature::set_id(unsigned long id) {
+    _id = std::to_string(id);
+}
+
+std::string TopoFeature::get_id() const {
     return _id;
 }
 
@@ -27,23 +31,18 @@ void TopoFeature::deactivate() {
     _f_active = false;
 }
 
-void TopoFeature::get_obj_pts(std::string &fs,
-                              std::string &bs,
-                              std::unordered_map<std::string, unsigned long> &dPts) {
-    IO::get_obj_pts(_mesh, fs, bs, dPts);
+void TopoFeature::get_cityjson_info(nlohmann::json &j) {
+    //TEMP UNTIL ALL FUNCTIONS ARE IMPLEMENTED
 }
 
-void TopoFeature::get_stl_pts(std::string &fs) {
-    IO::get_stl_pts(_mesh, fs);
+std::string TopoFeature::get_cityjson_primitive() const {
+    //TEMP UNTIL ALL FUNCTIONS ARE IMPLEMENTED
+    return "Nope";
 }
 
 //-- PolyFeature class
-PolyFeature::PolyFeature(const int pid)
-    : TopoFeature(pid), _poly(), _base_heights() {}
-
-
-PolyFeature::PolyFeature(const json& poly, const int pid)
-    : PolyFeature(pid) {
+PolyFeature::PolyFeature(const json& poly)
+    : TopoFeature() {
     //-- Store the polygon
     for (auto& polyEdges : poly["geometry"]["coordinates"]) {
         Polygon_2 tempPoly;

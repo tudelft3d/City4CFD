@@ -11,12 +11,13 @@ class Building : public PolyFeature {
 public:
     using PolyFeature::PolyFeature;
     Building() = default;
-    Building(const int pid);
-    Building(const json& poly, const int pid);
+    Building(const json& poly);
     ~Building() = default;
 
-    void      calc_footprint_elevation(const SearchTree& searchTree) override;
-    void      threeDfy(const SearchTree& searchTree) override;
+    void        calc_footprint_elevation(const SearchTree& searchTree) override;
+    void        threeDfy(const SearchTree& searchTree) override;
+    void        get_cityjson_info(nlohmann::json& b) override;
+    std::string get_cityjson_primitive() const override;
 
     TopoClass   get_class() const override;
     std::string get_class_name() const override;

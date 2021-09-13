@@ -10,7 +10,7 @@ public:
     LoD12(const Polygon_with_holes_2& poly, const std::vector<double>& base_heights, const std::vector<double>& building_pts);
     ~LoD12() = default;
 
-    void   lod12reconstruct(Mesh &mesh);
+    void   lod12reconstruct(Mesh &mesh, double& height);
     double get_height() const;
 
 private:
