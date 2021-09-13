@@ -17,6 +17,8 @@ public:
 
     const CDT&   get_cdt() const;
 
+    void         get_cityjson_info(nlohmann::json& b) override;
+    std::string  get_cityjson_primitive() const override;
     TopoClass    get_class() const override;
     std::string  get_class_name() const override;
 

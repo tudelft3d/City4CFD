@@ -97,6 +97,15 @@ void Terrain::create_mesh() {
     geomtools::cdt_to_mesh(_cdt, _mesh);
 }
 
+void Terrain::get_cityjson_info(nlohmann::json& b) {
+    b["type"] = "TINRelief";
+//    b["attributes"]; // commented out until I have attributes to add
+}
+
+std::string Terrain::get_cityjson_primitive() const {
+    return "CompositeSurface";
+}
+
 const CDT& Terrain::get_cdt() const {
     return _cdt;
 }

@@ -63,8 +63,8 @@ void IO::output_cityjson(std::vector<TopoFeature*>& allFeatures) {
     j["metadata"]["referenceSystem"] = "urn:ogc:def:crs:EPSG::7415";
     std::unordered_map<std::string, unsigned long> dPts;
     for (auto& f : allFeatures) {
-        // TESTING ONLY BUILDINGS NOW
-        if (f->get_class() != BUILDING) continue;
+        // Only Buildings and Terrain for now
+        if (f->get_class() != BUILDING && f->get_class() != TERRAIN) continue;
         //-- Get feature info
         nlohmann::json b;
         f->get_cityjson_info(b);
@@ -78,7 +78,7 @@ void IO::output_cityjson(std::vector<TopoFeature*>& allFeatures) {
         j["CityObjects"][f->get_id()] = b;
     }
 
-    //-- Vertices
+    //-- Vertices - store them in a vector to quickly sort
     std::vector<std::string> thepts;
     thepts.resize(dPts.size());
     for (auto& p : dPts)
