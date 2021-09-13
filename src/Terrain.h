@@ -16,9 +16,9 @@ public:
     void threeDfy(const Point_set_3& pointCloud, const std::vector<PolyFeature*>& features);
 
     const CDT&   get_cdt() const;
-    std::string  get_class_name() const;
 
     TopoClass    get_class() const override;
+    std::string  get_class_name() const override;
 
 protected:
     CDT _cdt;

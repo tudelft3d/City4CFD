@@ -1,6 +1,9 @@
 #include "TopoFeature.h"
 
 //-- TopoFeature class
+TopoFeature::TopoFeature()
+        : _mesh(), _id(), _f_active(true) {}
+
 TopoFeature::TopoFeature(const int pid)
     : _mesh(), _id(pid), _f_active(true) {}
 
@@ -22,6 +25,16 @@ bool TopoFeature::is_active() const {
 
 void TopoFeature::deactivate() {
     _f_active = false;
+}
+
+void TopoFeature::get_obj_pts(std::string &fs,
+                              std::string &bs,
+                              std::unordered_map<std::string, unsigned long> &dPts) {
+    IO::get_obj_pts(_mesh, fs, bs, dPts);
+}
+
+void TopoFeature::get_stl_pts(std::string &fs) {
+    IO::get_stl_pts(_mesh, fs);
 }
 
 //-- PolyFeature class

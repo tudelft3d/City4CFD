@@ -21,20 +21,25 @@ public:
     bool read_point_cloud_buildings(const char* points_xyz);
     bool read_polygons(const char* gisdata);
     void output();
+    void output_obj();
+    void output_stl();
+    void output_cityjson();
 
 private:
      Point_set_3                _pointCloud;
      Point_set_3                _pointCloudBuildings;
      json                       _polygons;
      Terrain*                   _terrain;
-     Boundary*                  _boundary;
+     std::vector<Boundary*>     _boundaries;
      std::vector<PolyFeature*>  _lsFeatures;
+     std::vector<TopoFeature*>  _allFeatures;
      std::unordered_map<std::string, unsigned long> _dPts;
 
     void set_features();
     void set_boundaries();
     void set_footprint_elevation();
     void threeDfy();
+    void collect_garbage();
     void clear_features();
 };
 

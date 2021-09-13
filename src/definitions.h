@@ -111,14 +111,42 @@ struct Triangle {
 };
 
 typedef enum {
-    BUILDING    = 0,
-    WATER       = 1,
-    BRIDGE      = 2,
-    ROAD        = 3,
-    TERRAIN     = 4,
-    FOREST      = 5,
-    BOUNDARY    = 6
+    TERRAIN     = 0,
+    BUILDING    = 1,
+    BOUNDARY    = 2,
+    WATER       = 3,
+    BRIDGE      = 4,
+    ROAD        = 5,
+    FOREST      = 6,
+    SIDES       = 7,
+    TOP         = 8,
 } TopoClass;
+
+
+/*
+const std::unordered_map<TopoClass, std::string> topoClassName {
+        {TERRAIN,  "Terrain"},
+        {BUILDING, "Building"},
+        {BOUNDARY, "Boundary"},
+        {WATER,    "Terrain"},
+        {BRIDGE,   "Bridge"},
+        {ROAD,     "Road"},
+        {FOREST,   "Forest"}
+};
+ */
+
+const std::map<int, std::string> topoClassName {
+        {0, "Terrain"},
+        {1, "Building"},
+        {2, "Boundary"},
+        {3, "Terrain"},
+        {4, "Bridge"},
+        {5, "Road"},
+        {6, "Forest"},
+        {7, "Sides"},
+        {8, "Top"},
+};
+
 
 typedef enum {
     OBJ       = 0,

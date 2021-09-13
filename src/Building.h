@@ -18,7 +18,8 @@ public:
     void      calc_footprint_elevation(const SearchTree& searchTree) override;
     void      threeDfy(const SearchTree& searchTree) override;
 
-    TopoClass get_class() const override;
+    TopoClass   get_class() const override;
+    std::string get_class_name() const override;
 
 private:
     double _height;

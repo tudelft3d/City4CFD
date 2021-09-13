@@ -4,6 +4,9 @@
 #include "definitions.h"
 
 namespace config {
+    //-- Output info
+    extern std::string fileName;
+
     //-- Domain size
    extern Point_2      pointOfInterest;
    extern double       radiusOfInfluRegion;

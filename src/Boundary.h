@@ -10,22 +10,35 @@
 class Boundary : public TopoFeature {
 public:
     Boundary() = default;
-    //TODO: get domain info from the config file
     ~Boundary() = default;
 
+    virtual void threeDfy() = 0;
+
     static void set_bounds_to_pc(Point_set_3& pointCloud);
+    static void add_buffer(Point_set_3& pointCloud);
     void set_bounds_to_cdt(CDT& cdt) const;
-    void add_buffer(Point_set_3& pointCloud);
+
+    TopoClass   get_class() const = 0;
+    std::string get_class_name() const = 0;
+
+protected:
+    static std::vector<Point_3> _outerPts;
+};
+
+class Sides : public Boundary {
+public:
     void threeDfy();
 
-    Mesh& get_top_mesh();
-    const Mesh& get_top_mesh() const;
+    TopoClass   get_class() const override;
+    std::string get_class_name() const override;
 
-    TopoClass get_class() const override;
+};
 
-private:
-    std::vector<Point_3> _outerPts;
-    Mesh                 _meshTop; // _mesh from TopoFeature is for the sides
+class Top : public Boundary {
+    void threeDfy();
+
+    TopoClass   get_class() const override;
+    std::string get_class_name() const override;
 };
 
 #endif //CITYCFD_BOUNDARY_H

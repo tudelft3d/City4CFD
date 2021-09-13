@@ -2,6 +2,9 @@
 
 //-- Config values are hardcoded until I add config file reading
 namespace config {
+    //-- File info
+    std::string fileName = "Mesh";
+
     //-- Domain dimensions
     Point_2 pointOfInterest = Point_2(85420, 446221);
     double radiusOfInfluRegion = 350.0;

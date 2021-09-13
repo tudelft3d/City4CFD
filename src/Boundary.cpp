@@ -14,6 +14,9 @@ Boundary::Boundary()
 }
 */
 
+//-- Static member definition
+std::vector<Point_3> Boundary::_outerPts;
+
 //-- Deactivate point cloud points that are out of bounds
 void Boundary::set_bounds_to_pc(Point_set_3& pointCloud) { // Will try to template it to include CDT
     //- 80% of the total domain size. The rest is left for the buffer zone
@@ -46,18 +49,10 @@ void Boundary::add_buffer(Point_set_3& pointCloud) {
     _outerPts.push_back(_outerPts[0]); // Put first point at the end to close the loop
 }
 
-void Boundary::threeDfy() {
-    //-- Create mesh out of this building
+//-- Sides class
+void Sides::threeDfy() {
     std::vector<Mesh::vertex_index> mesh_vertex_side;
-    std::vector<Mesh::vertex_index> mesh_vertex_top;
 
-    //-- Top needs DT, sides are done manually
-    CDT cdt_top;
-    for (auto &pt : _outerPts) {
-        cdt_top.insert(Point_3(pt.x(), pt.y(), config::topHeight));
-    }
-
-    int count = 0;
     //-- Add mesh vertices and store them in a vector
     for (auto it = _outerPts.begin(); it != _outerPts.end(); ++it) {
         mesh_vertex_side.emplace_back(_mesh.add_vertex(*it));
@@ -76,19 +71,34 @@ void Boundary::threeDfy() {
         _mesh.add_face(mesh_vertex_side[v2], mesh_vertex_side[v1], mesh_vertex_side[v1 + 1]);
         _mesh.add_face(mesh_vertex_side[v2 + 1], mesh_vertex_side[v2], mesh_vertex_side[v1 + 1]);
     }
+}
+
+TopoClass Sides::get_class() const {
+    return SIDES;
+}
+
+std::string Sides::get_class_name() const {
+    return "Sides";
+}
+
+//-- Top class
+void Top::threeDfy() {
+    std::vector<Mesh::vertex_index> mesh_vertex_top;
+
+    //-- Top is done by making a CDT of outerPts
+    CDT cdt_top;
+    for (auto &pt : _outerPts) {
+        cdt_top.insert(Point_3(pt.x(), pt.y(), config::topHeight));
+    }
 
     //-- Add mesh faces for top
-    geomtools::cdt_to_mesh(cdt_top, _meshTop);
+    geomtools::cdt_to_mesh(cdt_top, _mesh);
 }
 
-Mesh& Boundary::get_top_mesh() {
-    return _meshTop;
+TopoClass Top::get_class() const {
+    return TOP;
 }
 
-const Mesh& Boundary::get_top_mesh() const {
-    return _meshTop;
-}
-
-TopoClass Boundary::get_class() const {
-    return BOUNDARY;
+std::string Top::get_class_name() const {
+    return "Top";
 }

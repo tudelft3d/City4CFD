@@ -4,20 +4,15 @@
 #include "iostream"
 #include "definitions.h"
 #include "config.h"
-#include "TopoFeature.h"
-#include "Boundary.h"
 
 namespace IO {
     //-- Input functions
 
     //-- Output functions
-    void output_obj(const TopoFeature* terrain, const std::vector<PolyFeature*> &buildings, const TopoFeature* bnd);
-    void get_obj(const Mesh& mesh, std::string& fs, std::string& bs, std::unordered_map<std::string, unsigned long>& dPts);
+    void get_obj_pts(const Mesh& mesh, std::string& fs, std::string& bs, std::unordered_map<std::string, unsigned long>& dPts);
+    void get_stl_pts(Mesh& mesh, std::string& fs);
 
-    void output_stl(TopoFeature* terrain, std::vector<PolyFeature*> &buildings, TopoFeature* bnd);
-    void get_stl(Mesh& mesh, std::string& fs);
-
-    void output_cityjson(const TopoFeature* terrain, const std::vector<PolyFeature*> &buildings, const TopoFeature* bnd);
+//    void output_cityjson(const TopoFeature* terrain, const std::vector<PolyFeature*> &buildings, const TopoFeature* bnd);
 
     //-- Templated function
     template <typename T>

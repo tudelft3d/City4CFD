@@ -72,3 +72,7 @@ void Building::threeDfy(const SearchTree& searchTree) {
 TopoClass Building::get_class() const {
     return BUILDING;
 }
+
+std::string Building::get_class_name() const {
+    return "Building";
+}

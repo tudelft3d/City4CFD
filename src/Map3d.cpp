@@ -33,7 +33,17 @@ void Map3d::set_features() {
     }
 
     //-- Boundary
-    _boundary = new Boundary();
+    Sides* sides = new Sides(); Top* top = new Top();
+    _boundaries.push_back(sides); _boundaries.push_back(top);
+
+    //-- Group all features in one data structure
+    _allFeatures.push_back(_terrain);
+    for (auto& f : _lsFeatures) {
+        _allFeatures.push_back(f);
+    }
+    for (auto& b : _boundaries) {
+        _allFeatures.push_back(b);
+    }
 }
 
 void Map3d::set_boundaries() {
@@ -67,8 +77,11 @@ void Map3d::set_boundaries() {
 //        _pointCloud.collect_garbage();
 
         //- Add flat buffer zone between the terrain and boundary
-        _boundary->add_buffer(_pointCloud);
+        Boundary::add_buffer(_pointCloud);
     }
+
+    //-- Testing for speedup - remove excess buildings from _lsFeatures
+    this->collect_garbage();
 }
 
 void Map3d::set_footprint_elevation() {
@@ -103,7 +116,9 @@ void Map3d::threeDfy() {
     }
 
     //-- Reconstruct boundaries
-    _boundary->threeDfy();
+    for (auto& b : _boundaries) {
+        b->threeDfy();
+    }
 
     //-- Measure execution time
     auto endTime = std::chrono::steady_clock::now();
@@ -139,22 +154,95 @@ bool Map3d::read_polygons(const char* gisdata) {
 void Map3d::output() {
     switch (config::outputFormat) {
         case OBJ:
-            IO::output_obj(_terrain, _lsFeatures, _boundary);
+            this->output_obj();
             break;
         case STL: // Only ASCII stl for now
-            IO::output_stl(_terrain, _lsFeatures, _boundary);
+            this->output_stl();
             break;
         case CityJSON:
-//            output_cityjson(_terrain, _lsFeatures, _boundary, _configData->output_separately);
+//            this->output_cityjson();
             break;
 
     }
 }
 
+void Map3d::output_obj() {
+    using namespace config;
+    std::vector<std::ofstream> of;
+    std::vector<std::string>   fs(topoClassName.size()), bs(topoClassName.size());
+
+    std::vector<std::unordered_map<std::string, unsigned long>> dPts(topoClassName.size());
+    //-- Output points
+    for (auto& f : _allFeatures) {
+        if (!f->is_active()) continue;
+        if (outputSeparately)
+            f->get_obj_pts(fs[f->get_class()], bs[f->get_class()], dPts[f->get_class()]);
+        else
+            f->get_obj_pts(fs[f->get_class()], bs[f->get_class()], dPts[0]);
+    }
+
+    //-- Add class name and output to file
+    if (!outputSeparately) of.emplace_back().open(fileName + ".obj");
+    for (int i = 0; i < fs.size(); ++i) {
+        if (bs[i].empty()) continue;
+        if (outputSeparately) of.emplace_back().open(fileName + "_" + topoClassName.at(i) + ".obj");
+
+        of.back() << fs[i] << "\ng " << topoClassName.at(i) << bs[i];
+    }
+    for (auto& f : of) f.close();
+}
+
+void Map3d::output_stl() {
+    using namespace config;
+    std::vector<std::ofstream> of;
+    std::vector<std::string>   fs(topoClassName.size());
+
+    //-- Get all triangles
+    for (auto& f : _allFeatures) {
+        if (!f->is_active()) continue;
+        f->get_stl_pts(fs[f->get_class()]);
+    }
+
+    //-- Add class name and output to file
+    if (!outputSeparately) of.emplace_back().open(fileName + ".stl");
+    for (int i = 0; i < fs.size(); ++i) {
+        if (fs[i].empty()) continue;
+        if (outputSeparately) of.emplace_back().open(fileName + "_" + topoClassName.at(i) + ".stl");
+
+        of.back() << "\nsolid " << topoClassName.at(i);
+        of.back() << fs[i];
+        of.back() << "\nendsolid " << topoClassName.at(i);
+    }
+    for (auto& f : of) f.close();
+}
+
+void Map3d::collect_garbage() { // Just a test for now, could be helpful when other polygons get implemented
+    for (unsigned long i = 0; i < _allFeatures.size();) {
+        if (_allFeatures[i]->is_active()) ++i;
+        else {
+            _allFeatures[i] = nullptr;
+            _allFeatures.erase(_allFeatures.begin() + i);
+        }
+    }
+    for (unsigned long i = 0; i < _lsFeatures.size();) {
+        if (_lsFeatures[i]->is_active()) ++i;
+        else {
+            delete _lsFeatures[i]; _lsFeatures[i] = nullptr;
+            _lsFeatures.erase(_lsFeatures.begin() + i);
+        }
+    }
+}
+
 void Map3d::clear_features() {
-    delete _terrain; delete _boundary;
-    _terrain = nullptr; _boundary = nullptr;
-    for (auto f : _lsFeatures) {
+    for (auto f : _allFeatures) {
+        f = nullptr;
+    }
+    delete _terrain;
+    _terrain = nullptr;
+    for (auto& f : _lsFeatures) {
         delete f; f = nullptr;
+    }
+    for (auto& b : _boundaries) {
+        delete b; b = nullptr;
     }
 }
