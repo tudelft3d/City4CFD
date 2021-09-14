@@ -24,7 +24,7 @@ void Building::calc_footprint_elevation(const SearchTree& searchTree) {
         _base_heights.emplace_back(geomtools::avg(poly_height));
     }
 
-    //-- In case of inner rings, set inner points as average of outer points, as the last element in _base_heights
+    //-- In case of inner rings, set inner points as average of outer points, as the last element in _baseHeights
     if (_poly.has_holes()) {
         _base_heights.emplace_back(geomtools::avg(_base_heights));
     }
@@ -66,15 +66,34 @@ void Building::threeDfy(const SearchTree& searchTree) {
     }
 }
 
-void Building::get_cityjson_info(nlohmann::json& b) {
-    //todo - sides and top semantic surfaces
+void Building::get_cityjson_info(nlohmann::json& b) const {
     b["type"] = "Building";
-    b["attributes"];
+//  b["attributes"];
 //    get_cityjson_attributes(b, _attributes);
 //    float hbase = z_to_float(this->get_height_base());
 //    float h = z_to_float(this->get_height());
-//    b["attributes"]["TerrainHeight"] = _base_heights.back(); // temp - will calculate avg for every footprint
+//    b["attributes"]["TerrainHeight"] = _baseHeights.back(); // temp - will calculate avg for every footprint
     b["attributes"]["measuredHeight"] = _height - _base_heights.back();
+}
+
+void Building::get_cityjson_semantics(nlohmann::json& g) const { // Temp for checking CGAL mesh properties
+    Face_property semantics;
+    bool foundProperty;
+    boost::tie(semantics, foundProperty) = _mesh.property_map<face_descriptor, std::string>("f:semantics");
+    //   auto semantics = _mesh.property_map<face_descriptor, std::string>("f:semantics");
+    if (!foundProperty) throw std::runtime_error("Semantic property map not found!");
+
+    std::unordered_map<std::string, int> surfaceId;
+    surfaceId["RoofSurface"]   = 0; g["semantics"]["surfaces"][0]["type"] = "RoofSurface";
+    surfaceId["GroundSurface"] = 1; g["semantics"]["surfaces"][1]["type"] = "GroundSurface";
+    surfaceId["WallSurface"]   = 2; g["semantics"]["surfaces"][2]["type"] = "WallSurface";
+
+    for (auto& faceIdx : _mesh.faces()) {
+        auto it = surfaceId.find(semantics[faceIdx]);
+        if (it == surfaceId.end()) throw std::runtime_error("Could not find semantic attribute!");
+
+        g["semantics"]["values"][faceIdx.idx()] = it->second;
+    }
 }
 
 std::string Building::get_cityjson_primitive() const {

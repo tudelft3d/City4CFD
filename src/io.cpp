@@ -73,6 +73,9 @@ void IO::output_cityjson(std::vector<TopoFeature*>& allFeatures) {
         nlohmann::json g;
         IO::get_cityjson_geom(f->get_mesh(), g, dPts, f->get_cityjson_primitive());
 
+        //-- Get feature semantics
+        f->get_cityjson_semantics(g);
+
         //-- Append to main json struct
         b["geometry"].push_back(g);
         j["CityObjects"][f->get_id()] = b;
@@ -101,7 +104,7 @@ void IO::get_obj_pts(const Mesh& mesh,
                      std::unordered_map<std::string, unsigned long>& dPts)
 {
     for (auto& face : mesh.faces()) {
-        std::vector<unsigned long> faceIdx;
+        std::vector<unsigned long> faceIdx; faceIdx.reserve(3);
         std::string fsTemp;
         std::string bsTemp;
         for (auto index : CGAL::vertices_around_face(mesh.halfedge(face), mesh)) {
@@ -155,8 +158,8 @@ void IO::get_cityjson_geom(const Mesh& mesh, nlohmann::json& g, std::unordered_m
     g["lod"] = config::lod;
     g["boundaries"];
     for (auto& face : mesh.faces()) {
-        std::vector<unsigned long> faceIdx;
-        std::vector<unsigned long> tempPoly;
+        std::vector<unsigned long> faceIdx;  faceIdx.reserve(3);
+        std::vector<unsigned long> tempPoly; tempPoly.reserve(3);
         for (auto index : CGAL::vertices_around_face(mesh.halfedge(face), mesh)) {
             std::string pt = gen_key_bucket(mesh.point(index));
             auto it = dPts.find(pt);

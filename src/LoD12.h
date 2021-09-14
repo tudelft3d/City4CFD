@@ -16,8 +16,8 @@ public:
 private:
     double _height;
     const Polygon_with_holes_2& _poly;
-    const std::vector<double>& _base_heights;
-    const std::vector<double>& _building_pts;
+    const std::vector<double>&  _baseHeights;
+    const std::vector<double>&  _buildingPts;
 
     void create_mesh(Mesh& mesh);
 };

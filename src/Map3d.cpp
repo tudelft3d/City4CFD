@@ -162,7 +162,6 @@ void Map3d::output() {
             this->prep_feature_output();
             IO::output_cityjson(_allFeatures);
             break;
-
     }
 }
 

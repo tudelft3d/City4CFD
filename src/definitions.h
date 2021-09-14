@@ -55,13 +55,15 @@ typedef Kernel::Segment_3          Segment_3;
 typedef CGAL::Point_set_3<Point_3> Point_set_3;
 
 //-- CGAL Mesh
-using Mesh = CGAL::Surface_mesh<Point_3>;
+//using Mesh = CGAL::Surface_mesh<Point_3>;
+typedef CGAL::Surface_mesh<Point_3> Mesh;
+typedef Mesh::Vertex_index                          vertex_descriptor;
+typedef Mesh::Face_index                            face_descriptor;
+typedef Mesh::Property_map<face_descriptor, std::string> Face_property;
 
 //-- CGAL Normal
 namespace PMP = CGAL::Polygon_mesh_processing;
-typedef Kernel::Vector_3                              Vector;
-typedef boost::graph_traits<Mesh>::vertex_descriptor  vertex_descriptor;
-typedef boost::graph_traits<Mesh>::face_descriptor    face_descriptor;
+typedef Kernel::Vector_3 Vector;
 
 //-- CGAL tree search
 typedef CGAL::Search_traits_3<Kernel>                 Traits;

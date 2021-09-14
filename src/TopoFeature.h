@@ -11,10 +11,11 @@ public:
     TopoFeature(const int pid);
     ~TopoFeature()                   = default;
 
-    virtual TopoClass   get_class() const = 0;
-    virtual std::string get_class_name() const = 0;
-    virtual void get_cityjson_info(nlohmann::json& b);
-    virtual std::string get_cityjson_primitive() const;
+    virtual TopoClass    get_class() const = 0;
+    virtual std::string  get_class_name() const = 0;
+    virtual void         get_cityjson_info(nlohmann::json& b) const;
+    virtual void         get_cityjson_semantics(nlohmann::json& g) const;
+    virtual std::string  get_cityjson_primitive() const;
 
     Mesh&       get_mesh();
     const Mesh& get_mesh() const;
@@ -41,7 +42,8 @@ public:
     virtual std::string get_class_name() const = 0;
     virtual void        calc_footprint_elevation(const SearchTree& searchTree);
     virtual void        threeDfy(const SearchTree& searchTree) = 0;
-    virtual void        get_cityjson_info(nlohmann::json& b) = 0;
+    virtual void        get_cityjson_info(nlohmann::json& b) const = 0;
+    virtual void        get_cityjson_semantics(nlohmann::json& g) const = 0;
     virtual std::string get_cityjson_primitive() const = 0;
 
     void check_influ_region();

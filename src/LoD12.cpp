@@ -3,19 +3,23 @@
 LoD12::LoD12(const Polygon_with_holes_2& poly,
              const std::vector<double>& base_heights,
              const std::vector<double>& building_pts)
-    : _height(),  _poly(poly), _base_heights(base_heights), _building_pts(building_pts) {}
+    : _height(), _poly(poly), _baseHeights(base_heights), _buildingPts(building_pts) {}
 
 void LoD12::lod12reconstruct(Mesh& mesh, double& height) {
     //-- Reconstruction is just simple average/median/percentile
-//    _height = avg(_building_pts);
-//    _height = median(_building_pts);
-    _height = geomtools::percentile(_building_pts, config::buildingPercentile);
+//    _height = avg(_buildingPts);
+//    _height = median(_buildingPts);
+    _height = geomtools::percentile(_buildingPts, config::buildingPercentile);
     height = _height;
 
     this->create_mesh(mesh);
 }
 
 void LoD12::create_mesh(Mesh& mesh) {
+    // Test - add semantics with face properties
+    auto surfaceType = mesh.add_property_map<face_descriptor , std::string>("f:semantics", "").first;
+    face_descriptor fIdx;
+
     CDT cdt_buildings;
 
     //-- Map CDT and Mesh vertices
@@ -37,9 +41,9 @@ void LoD12::create_mesh(Mesh& mesh) {
         ++polyCount;
         for (auto vert = poly.vertices_begin(); vert != poly.vertices_end(); ++vert) { // Loop over poly vertices
             if (polyCount == 1) {
-                cdt_handle.emplace_back(cdt_buildings.insert(Point_3(vert->x(), vert->y(), _base_heights[count++])));
+                cdt_handle.emplace_back(cdt_buildings.insert(Point_3(vert->x(), vert->y(), _baseHeights[count++])));
             } else {
-                cdt_handle.emplace_back(cdt_buildings.insert(Point_3(vert->x(), vert->y(), _base_heights.back())));
+                cdt_handle.emplace_back(cdt_buildings.insert(Point_3(vert->x(), vert->y(), _baseHeights.back())));
             }
             mesh_vertex.emplace_back(mesh.add_vertex(cdt_handle.back()->point()));
             cdtToMesh[cdt_handle.back()] = mesh_vertex.back();
@@ -60,8 +64,8 @@ void LoD12::create_mesh(Mesh& mesh) {
             std::advance(it1, v1.idx() + 1);
             std::advance(it2, v2.idx() + 1);
 
-            mesh.add_face(v1, v2, *it1);
-            mesh.add_face(v2, *it2, *it1);
+            fIdx = mesh.add_face(v1, v2, *it1);   surfaceType[fIdx] = "WallSurface";
+            fIdx = mesh.add_face(v2, *it2, *it1); surfaceType[fIdx] = "WallSurface";
         }
     }
 
@@ -78,8 +82,11 @@ void LoD12::create_mesh(Mesh& mesh) {
         std::advance(it2, cdtToMesh[it->vertex(1)]);
         std::advance(it3, cdtToMesh[it->vertex(2)]);
 
-//        mesh.add_face(*it1, *it2, *it3); // Don't need bottom face
-        mesh.add_face(*std::next(it1), *std::next(it2), *std::next(it3));
+ //       mesh.add_face(*it1, *it3, *it2); // Bottom face
+ //       surfaceType[fIdx] = "GroundSurface";
+
+        fIdx = mesh.add_face(*std::next(it1), *std::next(it2), *std::next(it3));
+        surfaceType[fIdx] = "RoofSurface";
     }
 }
 

@@ -31,9 +31,14 @@ void TopoFeature::deactivate() {
     _f_active = false;
 }
 
-void TopoFeature::get_cityjson_info(nlohmann::json &j) {
+void TopoFeature::get_cityjson_info(nlohmann::json& j) const {
     //TEMP UNTIL ALL FUNCTIONS ARE IMPLEMENTED
 }
+
+void TopoFeature::get_cityjson_semantics(nlohmann::json& g) const {
+    // TEMP until I figure what to do with this
+}
+
 
 std::string TopoFeature::get_cityjson_primitive() const {
     //TEMP UNTIL ALL FUNCTIONS ARE IMPLEMENTED
