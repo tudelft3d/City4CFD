@@ -3,10 +3,10 @@ A code that reconstructs 3D city models specifically for CFD simulations
 
 # todo
 ## Short-term
-    - CityJSON and STL export
+    - BGT poly processing
 
 ## Longer-term
-    - BGT poly processing
     - Point cloud processing
+        -   PC/polygon crs check
     - Domain/influ region calc according to BPG
     - Config file reading

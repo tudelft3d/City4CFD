@@ -4,8 +4,14 @@
 #include "definitions.h"
 
 namespace config {
+    //-- Input info
+    extern const char* points_xyz;
+    extern const char* gisdata;
+    extern const char* buildings_xyz;
+    extern const char* topoSem; // It'll be a vector of all files
+
     //-- Output info
-    extern std::string fileName;
+    extern std::string outputFileName;
 
     //-- Domain size
    extern Point_2      pointOfInterest;

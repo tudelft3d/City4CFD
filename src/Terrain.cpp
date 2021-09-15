@@ -15,7 +15,7 @@ void Terrain::threeDfy(const Point_set_3& pointCloud, const std::vector<PolyFeat
 
     //-- Add buildings as constraints to the terrain
     for (auto& feature : features) {
-        if (feature->is_active()) {
+        if (feature->is_active() && feature->get_class() == BUILDING) {
             this->constrain_footprint(feature->get_poly(), feature->get_base_heights());
         }
     }

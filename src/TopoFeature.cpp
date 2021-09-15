@@ -7,6 +7,8 @@ TopoFeature::TopoFeature()
 TopoFeature::TopoFeature(const int pid)
     : _mesh(), _id(std::to_string(pid)), _f_active(true) {}
 
+TopoFeature::~TopoFeature() = default;
+
 Mesh& TopoFeature::get_mesh() {
     return _mesh;
 }
@@ -46,7 +48,9 @@ std::string TopoFeature::get_cityjson_primitive() const {
 }
 
 //-- PolyFeature class
-PolyFeature::PolyFeature(const json& poly)
+PolyFeature::PolyFeature() = default;
+
+PolyFeature::PolyFeature(const nlohmann::json& poly)
     : TopoFeature() {
     //-- Store the polygon
     for (auto& polyEdges : poly["geometry"]["coordinates"]) {
@@ -61,6 +65,8 @@ PolyFeature::PolyFeature(const json& poly)
         }
     }
 }
+
+PolyFeature::~PolyFeature() = default;
 
 void PolyFeature::calc_footprint_elevation(const SearchTree& searchTree) {}
 

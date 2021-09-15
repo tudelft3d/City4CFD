@@ -2,8 +2,14 @@
 
 //-- Config values are hardcoded until I add config file reading
 namespace config {
-    //-- File info
-    std::string fileName = "Mesh";
+    //-- Input info
+    const char* points_xyz = "data/input/ground_simplified.ply";
+    const char* gisdata    = "data/input/tudcampus.geojson";
+    const char* buildings_xyz    = "data/input/building_simplified.xyz";
+    const char* topoSem = "data/input/Water.geojson";
+
+    //-- Output info
+    std::string outputFileName = "Mesh";
 
     //-- Domain dimensions
     Point_2 pointOfInterest = Point_2(85420, 446221);
@@ -16,7 +22,7 @@ namespace config {
     double buildingPercentile = 0.9;
 
     //-- Output flags
-    OutputFormat outputFormat = CityJSON;
+    OutputFormat outputFormat = OBJ;
     bool outputSeparately = false;
 }
 

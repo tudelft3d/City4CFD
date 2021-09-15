@@ -10,9 +10,9 @@
 class Building : public PolyFeature {
 public:
     using PolyFeature::PolyFeature;
-    Building() = default;
-    Building(const json& poly);
-    ~Building() = default;
+    Building();
+    Building(const nlohmann::json& poly);
+    ~Building();
 
     void        calc_footprint_elevation(const SearchTree& searchTree) override;
     void        threeDfy(const SearchTree& searchTree) override;

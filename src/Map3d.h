@@ -8,29 +8,27 @@
 #include "Terrain.h"
 #include "Building.h"
 #include "Boundary.h"
+#include "SemanticPoly.h"
 
 class Map3d {
 public:
-    Map3d()  = default;
+    Map3d();
     ~Map3d();
 
     void reconstruct();
 
-    bool read_config(const char* points_xyz);
-    bool read_point_cloud(const char* points_xyz);
-    bool read_point_cloud_buildings(const char* points_xyz);
-    bool read_polygons(const char* gisdata);
-
+    bool read_data();
     void output();
 
 private:
-     Point_set_3                _pointCloud;
-     Point_set_3                _pointCloudBuildings;
-     json                       _polygons;
-     Terrain*                   _terrain;
-     std::vector<Boundary*>     _boundaries;
-     std::vector<PolyFeature*>  _lsFeatures;
-     std::vector<TopoFeature*>  _allFeatures;
+     Point_set_3                  _pointCloud;
+     Point_set_3                  _pointCloudBuildings;
+     nlohmann::json               _polygonsBuildings;
+     std::vector<nlohmann::json>  _polygonsSemanticLayers;
+     Terrain*                     _terrain;
+     std::vector<Boundary*>       _boundaries;
+     std::vector<PolyFeature*>    _lsFeatures;
+     std::vector<TopoFeature*>    _allFeatures;
 
     void set_features();
     void set_boundaries();

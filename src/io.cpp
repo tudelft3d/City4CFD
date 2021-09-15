@@ -1,5 +1,24 @@
 #include "io.h"
 
+//-- Input functions
+bool IO::read_config(const char* file){ //todo
+    return true;
+}
+
+bool IO::read_point_cloud(const char* file, Point_set_3& pc) {
+    std::ifstream ifile(file, std::ios_base::binary);
+    ifile >> pc;
+    std::cerr << "POINT CLOUD: "<< pc.size() << " point read" << std::endl;
+    return true;
+}
+
+bool IO::read_polygons(const char* file, nlohmann::json& j) {
+    std::ifstream ifs(file);
+    j = nlohmann::json::parse(ifs);
+    return true;
+}
+
+//-- Output functions
 void IO::output_obj(std::vector<TopoFeature*>& allFeatures) {
     using namespace config;
     std::vector<std::ofstream> of;
@@ -16,10 +35,10 @@ void IO::output_obj(std::vector<TopoFeature*>& allFeatures) {
     }
 
     //-- Add class name and output to file
-    if (!outputSeparately) of.emplace_back().open(fileName + ".obj");
+    if (!outputSeparately) of.emplace_back().open(outputFileName + ".obj");
     for (int i = 0; i < fs.size(); ++i) {
         if (bs[i].empty()) continue;
-        if (outputSeparately) of.emplace_back().open(fileName + "_" + topoClassName.at(i) + ".obj");
+        if (outputSeparately) of.emplace_back().open(outputFileName + "_" + topoClassName.at(i) + ".obj");
 
         of.back() << fs[i] << "\ng " << topoClassName.at(i) << bs[i];
     }
@@ -38,10 +57,10 @@ void IO::output_stl(std::vector<TopoFeature*>& allFeatures) {
     }
 
     //-- Add class name and output to file
-    if (!outputSeparately) of.emplace_back().open(fileName + ".stl");
+    if (!outputSeparately) of.emplace_back().open(outputFileName + ".stl");
     for (int i = 0; i < fs.size(); ++i) {
         if (fs[i].empty()) continue;
-        if (outputSeparately) of.emplace_back().open(fileName + "_" + topoClassName.at(i) + ".stl");
+        if (outputSeparately) of.emplace_back().open(outputFileName + "_" + topoClassName.at(i) + ".stl");
 
         of.back() << "\nsolid " << topoClassName.at(i);
         of.back() << fs[i];
@@ -93,11 +112,10 @@ void IO::output_cityjson(std::vector<TopoFeature*>& allFeatures) {
         j["vertices"].push_back({std::stod(c[0], NULL), std::stod(c[1], NULL), std::stod(c[2], NULL) });
     }
 
-    of.open(fileName + ".json");
+    of.open(outputFileName + ".json");
     of << j.dump() << std::endl;
 }
 
-//-- Output functions
 void IO::get_obj_pts(const Mesh& mesh,
                      std::string& fs,
                      std::string& bs,

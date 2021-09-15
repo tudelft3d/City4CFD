@@ -1,5 +1,7 @@
 #include "Map3d.h"
 
+Map3d::Map3d() = default;
+
 Map3d::~Map3d() {
     this->clear_features();
 }
@@ -22,14 +24,25 @@ void Map3d::reconstruct() {
 }
 
 void Map3d::set_features() {
-    unsigned long pid = 0; // for now
     //-- First feature is the terrain
     _terrain = new Terrain();
 
-    //-- Add polygons as features -- ONLY BUILDING and BAG for now
-    for (auto poly : _polygons["features"]) {
+    //-- Add polygons as features
+    //- Buildings
+    for (auto& poly : _polygonsBuildings["features"]) {
         Building* building = new Building(poly);
         _lsFeatures.push_back(building);
+    }
+    //- Other polygons
+    int count = 0;
+    for (auto& semanticLayer : _polygonsSemanticLayers) {
+        for (auto& poly : semanticLayer["features"]) {
+            if (poly["geometry"]["type"] != "Polygon") continue; // Make sure only polygons are added
+
+            SemanticPoly* semanticPoly = new SemanticPoly(poly, count);
+            _lsFeatures.push_back(semanticPoly);
+        }
+        ++count;
     }
 
     //-- Boundary
@@ -123,28 +136,18 @@ void Map3d::threeDfy() {
     std::cout << "-> Calculations executed in " << std::chrono::duration<double> (diffTime).count() << " s" << std::endl;
 }
 
-//-- Input functions are temporary, will bemoved to IO
-bool Map3d::read_config(const char *points_xyz) { //TODO still needs implementing
-    return true;
-}
+bool Map3d::read_data() { // This will change with time
+    //-- Read ground points
+    IO::read_point_cloud(config::points_xyz, _pointCloud);
+    //-- Read building points
+    IO::read_point_cloud(config::buildings_xyz, _pointCloudBuildings);
 
-bool Map3d::read_point_cloud(const char* points_xyz) {
-    std::ifstream ifile(points_xyz, std::ios_base::binary);
-    ifile >> _pointCloud;
-    std::cerr << "POINT CLOUD: "<< _pointCloud.size() << " point read" << std::endl;
-    return true;
-}
+    //-- Read building polygons
+    IO::read_polygons(config::gisdata, _polygonsBuildings);
+    //-- Read semantic polygons - will add it to a vector later
+    _polygonsSemanticLayers.emplace_back();
+    IO::read_polygons(config::topoSem, _polygonsSemanticLayers.back());
 
-bool Map3d::read_point_cloud_buildings(const char* points_xyz) {
-    std::ifstream ifile(points_xyz, std::ios_base::binary);
-    ifile >> _pointCloudBuildings;
-    std::cerr << "POINT CLOUD BUILDINGS: "<< _pointCloudBuildings.size() << " point read" << std::endl;
-    return true;
-}
-
-bool Map3d::read_polygons(const char* gisdata) {
-    std::ifstream ifs(gisdata);
-    _polygons = json::parse(ifs);
     return true;
 }
 

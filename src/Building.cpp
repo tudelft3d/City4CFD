@@ -1,7 +1,11 @@
 #include "Building.h"
 
-Building::Building(const json& poly)
+Building::Building() = default;
+
+Building::Building(const nlohmann::json& poly)
     : PolyFeature(poly), _height(-infty) {}
+
+Building::~Building() = default;
 
 void Building::calc_footprint_elevation(const SearchTree& searchTree) {
     //-- Calculate elevation of polygon outer boundary

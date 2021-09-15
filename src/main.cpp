@@ -1,6 +1,7 @@
 #include <iostream>
 #include "nlohmann/json.hpp"
 #include "definitions.h"
+#include "io.h"
 #include "Map3d.h"
 #include <chrono>
 
@@ -13,24 +14,16 @@ int main() {
     const char* buildings_xyz    = "data/input/building_simplified.xyz";
     const char* config = "";
 
+    //-- Read configuration file TODO
+    if(!IO::read_config(config)){
+        return 1;
+    };
+
     //-- Create the main class
     Map3d map3d;
 
-    //-- Read configuration file TODO
-    if(!map3d.read_config(config)){
-        return 1;
-    };
-
-    //-- Read point cloud points
-    if(!map3d.read_point_cloud(points_xyz)){
-        return 1;
-    };
-    if(!map3d.read_point_cloud_buildings(buildings_xyz)){
-        return 1;
-    };
-
-    //-- Read polygons
-    if(!map3d.read_polygons(gisdata)){
+    //-- Read point cloud and polygons, and store them in Map3d
+    if(!map3d.read_data()){
         return 1;
     };
 

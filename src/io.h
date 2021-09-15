@@ -9,6 +9,9 @@
 
 namespace IO {
     //-- Input functions
+    bool read_config(const char* file);
+    bool read_point_cloud(const char* file, Point_set_3& pc);
+    bool read_polygons(const char* file, nlohmann::json& j);
 
     //-- Output functions
     void output_obj(std::vector<TopoFeature*>& allFeatures);

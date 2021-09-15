@@ -97,8 +97,6 @@ typedef CDT::Vertex_handle                                                      
 
 //-- Boost
 namespace bg=boost::geometry;
-//-- JSON
-typedef nlohmann::json  json;
 
 struct vertex {
     double x;
@@ -113,15 +111,16 @@ struct Triangle {
 };
 
 typedef enum {
-    TERRAIN     = 0,
-    BUILDING    = 1,
-    BOUNDARY    = 2,
-    WATER       = 3,
-    BRIDGE      = 4,
-    ROAD        = 5,
-    FOREST      = 6,
-    SIDES       = 7,
-    TOP         = 8,
+    TERRAIN          = 0,
+    BUILDING         = 1,
+    BOUNDARY         = 2,
+    WATER            = 3,
+    BRIDGE           = 4,
+    ROAD             = 5,
+    FOREST           = 6,
+    SIDES            = 7,
+    TOP              = 8,
+    SEMANTICLAYER    = 9,
 } TopoClass;
 
 
@@ -147,6 +146,7 @@ const std::map<int, std::string> topoClassName {
         {6, "Forest"},
         {7, "Sides"},
         {8, "Top"},
+        {9, "SemanticLayer"},
 };
 
 
