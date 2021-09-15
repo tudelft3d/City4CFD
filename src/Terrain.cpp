@@ -8,23 +8,34 @@ Terrain::Terrain(int pid)
 
 void Terrain::threeDfy(const Point_set_3& pointCloud, const std::vector<PolyFeature*>& features) {
     //-- Add ground points from the point cloud to terrain
-    this->set_cdt(pointCloud); // CDT's got to go first if performing smoothing
+//    this->set_cdt(pointCloud); // CDT's got to go first if performing smoothing
 
-    //-- Smoothing
-    this->smooth(pointCloud);
+//    //-- Smoothing
+//    this->smooth(pointCloud);
 
     //-- Add buildings as constraints to the terrain
+    int count = 0;
     for (auto& feature : features) {
-        if (feature->is_active() && feature->get_class() == BUILDING) {
+        //debug
+        if (count >= 98) continue;
+//        if (feature->is_active() && feature->get_class() == BUILDING) {
+        if (feature->is_active()) {
+            std::cout << "Constrained feature " << count++ << " of class" << feature->get_class_name() << std::endl;
             this->constrain_footprint(feature->get_poly(), feature->get_base_heights());
         }
     }
 
+    std::cout << "Done constraining" << std::endl;
+
     //-- Add ground points from the point cloud to terrain
-//    this->set_cdt(pointCloud);
+    this->set_cdt(pointCloud);
+
+    std::cout << "Done constructing CDT" << std::endl;
 
     //-- Store the CGAL terrain in the triangle-vertex data structure
     this->create_mesh();
+
+    std::cout << "Done making mesh" << std::endl;
 }
 
 void Terrain::constrain_footprint(const Polygon_with_holes_2& poly, const std::vector<double>& heights) {

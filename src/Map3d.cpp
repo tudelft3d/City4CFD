@@ -10,14 +10,25 @@ void Map3d::reconstruct() {
     //-- Prepare features
     this->set_features();
 
+    std::cout << "Features done" << std::endl;
+    std::cout << "Num of features: " << _lsFeatures.size() << std::endl;
+
     //-- Define influence region, domain limits and boundaries
     this->set_boundaries();
+
+    std::cout << "Bnds done" << std::endl;
+    this->collect_garbage();
+    std::cout << "Num of features: " << _lsFeatures.size() << std::endl;
 
     //-- Find polygon footprint elevation from point cloud
     this->set_footprint_elevation();
 
+    std::cout << "Elevation done" << std::endl;
+
     //-- Reconstruct 3D features with respective algorithms
     this->threeDfy();
+
+    std::cout << "3dfy done" << std::endl;
 
     //-- Add semantics
 
@@ -72,9 +83,9 @@ void Map3d::set_boundaries() {
         }
     }
 
-    //-- Deactivate buildings that are out of the influence region
+    //-- Deactivate features that are out of the influence region
     for (auto& f : _lsFeatures) {
-        if (f->get_class() != BUILDING) continue;
+//        if (f->get_class() != BUILDING) continue;
         f->check_influ_region();
     }
 
@@ -100,7 +111,8 @@ void Map3d::set_footprint_elevation() {
     searchTree.insert(_pointCloud.points().begin(), _pointCloud.points().end());
 
     for (auto& f : _lsFeatures) {
-        if (!f->is_active() || f->get_class() != BUILDING) continue; // For now only building footprints
+//        if (!f->is_active() || f->get_class() != BUILDING) continue; // For now only building footprints
+        if (!f->is_active()) continue; // Checking for surface layers
         try {
             f->calc_footprint_elevation(searchTree);
         } catch (std::exception& e) {

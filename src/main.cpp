@@ -9,9 +9,6 @@ int main() {
     auto startTime = std::chrono::steady_clock::now();
 
     //-- Data input - this needs to be sorted
-    const char* points_xyz = "data/input/ground_simplified.ply";
-    const char* gisdata    = "data/input/tudcampus.geojson";
-    const char* buildings_xyz    = "data/input/building_simplified.xyz";
     const char* config = "";
 
     //-- Read configuration file TODO
