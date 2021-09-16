@@ -6,7 +6,7 @@ namespace config {
     const char* points_xyz = "data/input/ground_simplified.ply";
     const char* gisdata    = "data/input/tudcampus.geojson";
     const char* buildings_xyz    = "data/input/building_simplified.xyz";
-    const char* topoSem = "data/input/Water.geojson";
+    const char* topoSem = "data/input/Vegetation.geojson";
 
     //-- Output info
     std::string outputFileName = "Mesh";
@@ -23,7 +23,7 @@ namespace config {
 
     //-- Output flags
     OutputFormat outputFormat = OBJ;
-    bool outputSeparately = false;
+    bool outputSeparately = true;
 }
 
 bool config::read_config_file() {return true;}

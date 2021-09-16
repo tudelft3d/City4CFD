@@ -29,6 +29,7 @@ private:
      std::vector<Boundary*>       _boundaries;
      std::vector<PolyFeature*>    _lsFeatures;
      std::vector<TopoFeature*>    _allFeatures;
+     std::vector<std::vector<SemanticPoly*>> _surfaceLayers;
 
     void set_features();
     void set_boundaries();

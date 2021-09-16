@@ -46,12 +46,14 @@ void Map3d::set_features() {
     }
     //- Other polygons
     int count = 0;
+    _surfaceLayers.resize(_polygonsSemanticLayers.size());
     for (auto& semanticLayer : _polygonsSemanticLayers) {
         for (auto& poly : semanticLayer["features"]) {
             if (poly["geometry"]["type"] != "Polygon") continue; // Make sure only polygons are added
 
             SemanticPoly* semanticPoly = new SemanticPoly(poly, count);
             _lsFeatures.push_back(semanticPoly);
+            _surfaceLayers[count].push_back(semanticPoly);
         }
         ++count;
     }
@@ -68,6 +70,11 @@ void Map3d::set_features() {
     for (auto& b : _boundaries) {
         _allFeatures.push_back(b);
     }
+//    for (auto& layer : _surfaceLayers) {
+//        for (auto& f : layer) {
+//            _allFeatures.push_back(f);
+//        }
+//    }
 }
 
 void Map3d::set_boundaries() {
@@ -83,10 +90,10 @@ void Map3d::set_boundaries() {
         }
     }
 
-    //-- Deactivate features that are out of the influence region
+    //-- Deactivate features that are out of their scope
     for (auto& f : _lsFeatures) {
 //        if (f->get_class() != BUILDING) continue;
-        f->check_influ_region();
+        f->check_feature_scope();
     }
 
     //-- Set the domain size --//
@@ -125,8 +132,30 @@ void Map3d::threeDfy() {
     //-- Measure execution time
     auto startTime = std::chrono::steady_clock::now();
 
+    // TESTING - constrain surface layers
+    int count = 0;
+    for (auto& layer : _surfaceLayers) {
+        for (auto& f : layer) {
+            if (!f->is_active()) continue;
+            std::cout << "Constraining feature " << count++ << " of class" << f->get_class_name() << std::endl;
+            _terrain->constrain_footprint(f->get_poly(), f->get_base_heights());
+        }
+    }
+    std::cout << "Done constraining" << std::endl;
+
     //-- CDT the terrain
     _terrain->threeDfy(_pointCloud, _lsFeatures);
+
+    //TEST Now create mesh out of surface layers
+//    for (auto& layer : _surfaceLayers) {
+//        for (auto& f : layer) {
+//            if (!f->is_active()) continue;
+//            f->threeDfy(_terrain->get_cdt());
+//        }
+//    }
+    //-- BIG TOTAL TESTING
+    geomtools::cdt_to_mesh(_terrain->get_cdt(), _surfaceLayers[0][0]->get_mesh(), 0);
+    _allFeatures.push_back(_surfaceLayers[0][0]);
 
     //-- Reconstruct buildings
     SearchTree searchTree;
@@ -198,6 +227,15 @@ void Map3d::collect_garbage() { // Just a test for now, could be helpful when ot
         else {
             _allFeatures[i] = nullptr;
             _allFeatures.erase(_allFeatures.begin() + i);
+        }
+    }
+    for (auto& layer : _surfaceLayers) {
+        for (unsigned long i = 0;  i < layer.size();) {
+            if (layer[i]->is_active()) ++i;
+            else {
+                layer[i] = nullptr;
+                layer.erase(layer.begin() + i);
+            }
         }
     }
     for (unsigned long i = 0; i < _lsFeatures.size();) {

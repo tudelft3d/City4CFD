@@ -7,31 +7,40 @@ Terrain::Terrain(int pid)
     : TopoFeature(pid) {}
 
 void Terrain::threeDfy(const Point_set_3& pointCloud, const std::vector<PolyFeature*>& features) {
+    //-- Add surface layers as constraints to the terrain
+//    int count = 0;
+//    for (auto& feature : features) {
+//        //debug
+////        if (count >= 1161) continue;
+//        if (feature->is_active() && feature->get_class() != BUILDING) {
+//            std::cout << "Constrained feature " << count++ << " of class" << feature->get_class_name() << std::endl;
+//            this->constrain_footprint(feature->get_poly(), feature->get_base_heights());
+//        }
+//    }
+
+
     //-- Add ground points from the point cloud to terrain
-//    this->set_cdt(pointCloud); // CDT's got to go first if performing smoothing
+    this->set_cdt(pointCloud); // CDT's got to go first if performing smoothing
 
 //    //-- Smoothing
-//    this->smooth(pointCloud);
+    this->smooth(pointCloud);
 
+    //-- Add ground points from the point cloud to terrain
+//    this->set_cdt(pointCloud);
+
+    std::cout << "Done constructing CDT" << std::endl;
     //-- Add buildings as constraints to the terrain
     int count = 0;
     for (auto& feature : features) {
         //debug
-        if (count >= 98) continue;
-//        if (feature->is_active() && feature->get_class() == BUILDING) {
-        if (feature->is_active()) {
+        if (feature->is_active() && feature->get_class() == BUILDING) {
+//        if (feature->is_active()) {
             std::cout << "Constrained feature " << count++ << " of class" << feature->get_class_name() << std::endl;
             this->constrain_footprint(feature->get_poly(), feature->get_base_heights());
         }
     }
 
-    std::cout << "Done constraining" << std::endl;
-
-    //-- Add ground points from the point cloud to terrain
-    this->set_cdt(pointCloud);
-
-    std::cout << "Done constructing CDT" << std::endl;
-
+    geomtools::mark_surface_layer(this->get_cdt(), 0);
     //-- Store the CGAL terrain in the triangle-vertex data structure
     this->create_mesh();
 
@@ -115,6 +124,10 @@ void Terrain::get_cityjson_info(nlohmann::json& b) const {
 
 std::string Terrain::get_cityjson_primitive() const {
     return "CompositeSurface";
+}
+
+CDT& Terrain::get_cdt() {
+    return _cdt;
 }
 
 const CDT& Terrain::get_cdt() const {

@@ -38,16 +38,15 @@ public:
     PolyFeature(const nlohmann::json& poly);
     ~PolyFeature();
 
+    virtual void        check_feature_scope();
     virtual void        calc_footprint_elevation(const SearchTree& searchTree);
-    virtual void        threeDfy(const SearchTree& searchTree) = 0;
+    virtual void        threeDfy(const SearchTree& searchTree);
     virtual void        get_cityjson_info(nlohmann::json& b) const = 0;
     virtual void        get_cityjson_semantics(nlohmann::json& g) const = 0;
     virtual std::string get_cityjson_primitive() const = 0;
 
     virtual TopoClass   get_class() const = 0;
     virtual std::string get_class_name() const = 0;
-
-    void check_influ_region();
 
     const Polygon_with_holes_2& get_poly() const;
     const std::vector<double>&  get_base_heights() const;

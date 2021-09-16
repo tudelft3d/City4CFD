@@ -70,7 +70,7 @@ PolyFeature::~PolyFeature() = default;
 
 void PolyFeature::calc_footprint_elevation(const SearchTree& searchTree) {}
 
-void PolyFeature::check_influ_region() {
+void PolyFeature::check_feature_scope() {
     // TODO: really gotta rewrite those polygons, cgal implementation is awful
     //-- Temporary - will rewrite polygons
     std::vector<Polygon_2> rings;
@@ -100,4 +100,8 @@ const Polygon_with_holes_2& PolyFeature::get_poly() const {
 
 const std::vector<double>& PolyFeature::get_base_heights() const {
     return _base_heights;
+}
+
+void PolyFeature::threeDfy(const SearchTree& searchTree) {
+    //TEMP
 }

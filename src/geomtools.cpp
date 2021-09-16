@@ -54,12 +54,14 @@ bool geomtools::point_in_circle(const Point_3& pt, const Point_2& center, const 
     return false;
 }
 
-void geomtools::cdt_to_mesh(const CDT& cdt, Mesh& mesh) {
+void geomtools::cdt_to_mesh(const CDT& cdt, Mesh& mesh, const int surfaceLayerID) {
     std::map<CDT::Vertex_handle, int> indices;
     std::vector<Mesh::vertex_index> mesh_vertex;
     std::vector<Mesh::face_index> face_index;
     mesh_vertex.reserve(cdt.dimension());
 
+//    //TESTING
+//    geomtools::mark_domains(cdt);
     int counter = 0;
     for (const auto& it : cdt.finite_vertex_handles()) {
         mesh_vertex.emplace_back(mesh.add_vertex(it->point()));
@@ -68,6 +70,8 @@ void geomtools::cdt_to_mesh(const CDT& cdt, Mesh& mesh) {
     }
 
     for (const auto& it : cdt.finite_face_handles()) {
+        if (it->info().surfaceLayer != surfaceLayerID) continue; // TESTING
+
         int v1 = indices[it->vertex(0)];
         int v2 = indices[it->vertex(1)];
         int v3 = indices[it->vertex(2)];
@@ -115,6 +119,15 @@ void geomtools::mark_domains(CDT& cdt) {
         Face_handle n = e.first->neighbor(e.second);
         if(n->info().nesting_level == -1){
             mark_domains(cdt, n, e.first->info().nesting_level+1, border);
+        }
+    }
+}
+
+void geomtools::mark_surface_layer(CDT& cdt, const int surfaceLayerIdx) {
+    geomtools::mark_domains(cdt);
+    for (auto& f : cdt.finite_face_handles()) {
+        if (f->info().in_domain() && f->info().surfaceLayer == -9999) {
+            f->info().surfaceLayer = surfaceLayerIdx;
         }
     }
 }

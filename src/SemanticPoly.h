@@ -12,14 +12,17 @@ public:
     SemanticPoly(const nlohmann::json& poly, int semanticLayerID);
     ~SemanticPoly();
 
+    virtual void        check_feature_scope() override;
     virtual void        calc_footprint_elevation(const SearchTree& searchTree) override;
-    virtual void        threeDfy(const SearchTree& searchTree) override;
     virtual void        get_cityjson_info(nlohmann::json& b) const override;
     virtual void        get_cityjson_semantics(nlohmann::json& g) const override;
     virtual std::string get_cityjson_primitive() const override;
 
     virtual TopoClass   get_class() const override;
     virtual std::string get_class_name() const override;
+
+    void threeDfy(const CDT& cdt) ;
+    int  get_layer_id() const;
 
 private:
     int    _semanticLayerID;

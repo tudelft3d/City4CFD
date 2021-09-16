@@ -81,6 +81,7 @@ struct FaceInfo2
     bool in_domain(){
         return nesting_level%2 == 1;
     }
+    int surfaceLayer = -9999; // Face handle to output mesh for specific surface layer
 };
 
 typedef CGAL::Triangulation_vertex_base_with_id_2<Projection_traits>                Vb;
@@ -94,9 +95,6 @@ typedef CGAL::Polygon_2<Kernel>                                                 
 typedef CGAL::Polygon_with_holes_2<Kernel>                                          Polygon_with_holes_2;
 typedef CDT::Face_handle                                                            Face_handle;
 typedef CDT::Vertex_handle                                                          Vertex_handle;
-
-//-- Boost
-namespace bg=boost::geometry;
 
 struct vertex {
     double x;
@@ -155,18 +153,6 @@ typedef enum {
     CityJSON  = 1,
     STL       = 2,
 } OutputFormat;
-
-//-- Config file struct - moved to a separate file and a namespace
-// TODO; hardcoded for now
-//struct ConfigData {
-//    Point_2     pointOfInterest = Point_2(85420,446221);
-//    double radiusOfInterest = 350.0;
-//    double dimOfDomain = 1000.0;
-//    double topHeight   = 100.0;
-//    OutputFormat outputFormat = OBJ;
-//    bool         outputSeparately = false;
-//    // note: handle when radiusOfInterst is larger than dimOfDomain
-//};
 
 //-- Global constants
 const double infty     = 1e6;
