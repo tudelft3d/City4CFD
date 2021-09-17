@@ -152,7 +152,7 @@ void geomtools::mark_surface_layer(CDT& ct,
         for (int i = 0; i < features.size(); ++i) {
             if (geomtools::check_inside(chkPoint, features[i]->get_poly())){
                 surfaceFeature = 1;
-                features.erase(features.begin() + i);
+//                features.erase(features.begin() + i);
                 break;
             }
         }
@@ -181,7 +181,7 @@ void geomtools::mark_surface_layer(CDT& ct,
 void geomtools::mark_surface_layer(CDT& cdt, std::vector<PolyFeature*> features) {
     //-- Filter out inactive features // temp remove buildilngs too
     for (unsigned long i = 0; i < features.size();) {
-        if (!features[i]->is_active() || features[i]->get_class() != BUILDING) {
+        if (!features[i]->is_active() || features[i]->get_class() == BUILDING) {
 //        if (!features[i]->is_active()) {
             features.erase(features.begin() + i);
         }
