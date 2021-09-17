@@ -34,9 +34,9 @@ bool geomtools::check_inside(const Point_3& pt2, const Polygon_with_holes_2& pol
 
     //-- Check if the point falls within the outer surface
     if (CGAL::bounded_side_2(polygon.outer_boundary().begin(), polygon.outer_boundary().end(), pt) == CGAL::ON_BOUNDED_SIDE) {
-        // Check if the point falls within one of the holes - TODO: do I even need this?
+        // Check if the point falls within one of the holes
         for (auto it_hole = polygon.holes_begin(); it_hole != polygon.holes_end(); ++it_hole) {
-            if (!CGAL::bounded_side_2(it_hole->begin(), it_hole->end(), pt) == CGAL::ON_UNBOUNDED_SIDE) {
+            if (CGAL::bounded_side_2(it_hole->begin(), it_hole->end(), pt) == CGAL::ON_BOUNDED_SIDE) {
                 return false;
             }
         }
@@ -128,6 +128,77 @@ void geomtools::mark_surface_layer(CDT& cdt, const int surfaceLayerIdx) {
     for (auto& f : cdt.finite_face_handles()) {
         if (f->info().in_domain() && f->info().surfaceLayer == -9999) {
             f->info().surfaceLayer = surfaceLayerIdx;
+        }
+    }
+}
+
+void geomtools::mark_surface_layer(CDT& ct,
+                             Face_handle start,
+                             int index,
+                             std::list<CDT::Edge>& border,
+                             std::vector<PolyFeature*>& features)
+{
+    if(start->info().nesting_level != -1){
+        return;
+    }
+
+    //-- Check which polygon contains the constrained (i.e. non-terrain) point
+    // -- I can add parts of this eventually to a new function
+    Point_3 chkPoint = CGAL::centroid(start->vertex(0)->point(),
+                                      start->vertex(1)->point(),
+                                      start->vertex(2)->point());
+    int surfaceFeature = -1;
+    if (index != 0) {
+        for (int i = 0; i < features.size(); ++i) {
+            if (geomtools::check_inside(chkPoint, features[i]->get_poly())){
+                surfaceFeature = 1;
+                features.erase(features.begin() + i);
+                break;
+            }
+        }
+    }
+
+    std::list<Face_handle> queue;
+    queue.push_back(start);
+    while(! queue.empty()){
+        Face_handle fh = queue.front();
+        queue.pop_front();
+        if(fh->info().nesting_level == -1){
+            fh->info().nesting_level = index;
+            if (surfaceFeature != -1 && index%2 == 1) fh->info().surfaceLayer = 1;
+            for(int i = 0; i < 3; i++){
+                CDT::Edge e(fh,i);
+                Face_handle n = fh->neighbor(i);
+                if(n->info().nesting_level == -1){
+                    if(ct.is_constrained(e)) border.push_back(e);
+                    else queue.push_back(n);
+                }
+            }
+        }
+    }
+}
+
+void geomtools::mark_surface_layer(CDT& cdt, std::vector<PolyFeature*> features) {
+    //-- Filter out inactive features // temp remove buildilngs too
+    for (unsigned long i = 0; i < features.size();) {
+        if (!features[i]->is_active() || features[i]->get_class() != BUILDING) {
+//        if (!features[i]->is_active()) {
+            features.erase(features.begin() + i);
+        }
+        else ++i;
+    }
+
+    for(CDT::Face_handle f : cdt.all_face_handles()){
+        f->info().nesting_level = -1;
+    }
+    std::list<CDT::Edge> border;
+    mark_surface_layer(cdt, cdt.infinite_face(), 0, border, features);
+    while(! border.empty()){
+        CDT::Edge e = border.front();
+        border.pop_front();
+        Face_handle n = e.first->neighbor(e.second);
+        if(n->info().nesting_level == -1){
+            mark_surface_layer(cdt, n, e.first->info().nesting_level+1, border, features);
         }
     }
 }

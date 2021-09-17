@@ -28,6 +28,7 @@ void Terrain::threeDfy(const Point_set_3& pointCloud, const std::vector<PolyFeat
     //-- Add ground points from the point cloud to terrain
 //    this->set_cdt(pointCloud);
 
+//    geomtools::mark_surface_layer(this->get_cdt(), 0);
     std::cout << "Done constructing CDT" << std::endl;
     //-- Add buildings as constraints to the terrain
     int count = 0;
@@ -40,7 +41,10 @@ void Terrain::threeDfy(const Point_set_3& pointCloud, const std::vector<PolyFeat
         }
     }
 
-    geomtools::mark_surface_layer(this->get_cdt(), 0);
+    // -- Once it's marke, it needs to make sure which layer it belongs to
+//    geomtools::mark_surface_layer(this->get_cdt(), 1);
+    geomtools::mark_surface_layer(this->get_cdt(), features);
+
     //-- Store the CGAL terrain in the triangle-vertex data structure
     this->create_mesh();
 

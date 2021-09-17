@@ -154,9 +154,11 @@ void Map3d::threeDfy() {
 //        }
 //    }
     //-- BIG TOTAL TESTING
-    geomtools::cdt_to_mesh(_terrain->get_cdt(), _surfaceLayers[0][0]->get_mesh(), 0);
-    _allFeatures.push_back(_surfaceLayers[0][0]);
+//    geomtools::cdt_to_mesh(_terrain->get_cdt(), _surfaceLayers[0][0]->get_mesh(), 0);
+//    _allFeatures.push_back(_surfaceLayers[0][0]);
 
+    geomtools::cdt_to_mesh(_terrain->get_cdt(), _surfaceLayers[0][1]->get_mesh(), 1);
+    _allFeatures.push_back(_surfaceLayers[0][1]);
     //-- Reconstruct buildings
     SearchTree searchTree;
     searchTree.insert(_pointCloudBuildings.points().begin(), _pointCloudBuildings.points().end());
