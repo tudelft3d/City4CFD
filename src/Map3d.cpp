@@ -46,12 +46,12 @@ void Map3d::set_features() {
     }
     //- Other polygons
     int count = 0;
-    _surfaceLayers.resize(_polygonsSemanticLayers.size());
-    for (auto& semanticLayer : _polygonsSemanticLayers) {
+    _surfaceLayers.resize(_polygonsSurfaceLayers.size());
+    for (auto& semanticLayer : _polygonsSurfaceLayers) {
         for (auto& poly : semanticLayer["features"]) {
             if (poly["geometry"]["type"] != "Polygon") continue; // Make sure only polygons are added
 
-            SemanticPoly* semanticPoly = new SemanticPoly(poly, count);
+            SurfaceLayer* semanticPoly = new SurfaceLayer(poly, count);
             _lsFeatures.push_back(semanticPoly);
             _surfaceLayers[count].push_back(semanticPoly);
         }
@@ -192,8 +192,8 @@ bool Map3d::read_data() { // This will change with time
     //-- Read building polygons
     IO::read_polygons(config::gisdata, _polygonsBuildings);
     //-- Read semantic polygons - will add it to a vector later
-    _polygonsSemanticLayers.emplace_back();
-    IO::read_polygons(config::topoSem, _polygonsSemanticLayers.back());
+    _polygonsSurfaceLayers.emplace_back();
+    IO::read_polygons(config::topoSem, _polygonsSurfaceLayers.back());
 
     return true;
 }

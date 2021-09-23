@@ -1,13 +1,13 @@
-#include "SemanticPoly.h"
+#include "SurfaceLayer.h"
 
-SemanticPoly::SemanticPoly() = default;
+SurfaceLayer::SurfaceLayer() = default;
 
-SemanticPoly::SemanticPoly(const nlohmann::json& poly, int semanticLayerID)
-    : PolyFeature(poly), _semanticLayerID(semanticLayerID) {}
+SurfaceLayer::SurfaceLayer(const nlohmann::json& poly, int surfaceLayerID)
+    : PolyFeature(poly, surfaceLayerID) {}
 
-SemanticPoly::~SemanticPoly() = default;
+SurfaceLayer::~SurfaceLayer() = default;
 
-void SemanticPoly::check_feature_scope() {
+void SurfaceLayer::check_feature_scope() {
     // TODO: really gotta rewrite those polygons, cgal implementation is awful
     //-- Temporary - will rewrite polygons
     std::vector<Polygon_2> rings;
@@ -30,30 +30,26 @@ void SemanticPoly::check_feature_scope() {
     }
 }
 
-void SemanticPoly::threeDfy(CDT& cdt) {
-    geomtools::cdt_to_mesh(cdt, _mesh, this->get_layer_id());
+void SurfaceLayer::threeDfy(CDT& cdt) {
+//    geomtools::cdt_to_mesh(cdt, _mesh, this->get_layer_id());
 }
 
-void SemanticPoly::get_cityjson_info(nlohmann::json& b) const {
-
-}
-
-void SemanticPoly::get_cityjson_semantics(nlohmann::json& g) const {
+void SurfaceLayer::get_cityjson_info(nlohmann::json& b) const {
 
 }
 
-std::string SemanticPoly::get_cityjson_primitive() const {
+void SurfaceLayer::get_cityjson_semantics(nlohmann::json& g) const {
+
+}
+
+std::string SurfaceLayer::get_cityjson_primitive() const {
     return "Dunno yet";
 }
 
-TopoClass SemanticPoly::get_class() const {
+TopoClass SurfaceLayer::get_class() const {
     return SEMANTICLAYER;
 }
 
-std::string SemanticPoly::get_class_name() const {
+std::string SurfaceLayer::get_class_name() const {
     return "SemanticLayer";
-}
-
-int SemanticPoly::get_layer_id() const {
-    return _semanticLayerID;
 }

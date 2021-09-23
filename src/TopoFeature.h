@@ -36,6 +36,7 @@ public:
     using TopoFeature::TopoFeature;
     PolyFeature();
     PolyFeature(const nlohmann::json& poly);
+    PolyFeature(const nlohmann::json& poly, const int outputLayerID);
     ~PolyFeature();
 
     virtual void        check_feature_scope();
@@ -50,11 +51,12 @@ public:
     void  calc_footprint_elevation(const SearchTree& searchTree);
     const Polygon_with_holes_2& get_poly() const;
     const std::vector<double>&  get_base_heights() const;
+    const int                   get_output_layer_id() const;
 
 protected:
-    Polygon_with_holes_2               _poly;
-    std::vector<double>                _base_heights;
-
+    Polygon_with_holes_2        _poly;
+    std::vector<double>         _base_heights;
+    int                         _outputLayerID; // 1- Building, 2 onwards - surface layers
 };
 
 #endif //CITYCFD_TOPOFEATURE_H

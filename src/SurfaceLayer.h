@@ -1,16 +1,16 @@
-#ifndef CITYCFD_SEMANTICPOLY_H
-#define CITYCFD_SEMANTICPOLY_H
+#ifndef CITYCFD_SURFACELAYER_H
+#define CITYCFD_SURFACELAYER_H
 
 #include "definitions.h"
 #include "config.h"
 #include "TopoFeature.h"
 
-class SemanticPoly : public PolyFeature {
+class SurfaceLayer : public PolyFeature {
 public:
     using PolyFeature::PolyFeature;
-    SemanticPoly();
-    SemanticPoly(const nlohmann::json& poly, int semanticLayerID);
-    ~SemanticPoly();
+    SurfaceLayer();
+    SurfaceLayer(const nlohmann::json& poly, int semanticLayerID);
+    ~SurfaceLayer();
 
     virtual void        check_feature_scope() override;
     virtual void        get_cityjson_info(nlohmann::json& b) const override;
@@ -21,12 +21,10 @@ public:
     virtual std::string get_class_name() const override;
 
     void threeDfy(CDT& cdt) ;
-    int  get_layer_id() const;
 
 private:
-    int    _semanticLayerID;
 
 };
 
 
-#endif //CITYCFD_SEMANTICPOLY_H
+#endif //CITYCFD_SURFACELAYER_H

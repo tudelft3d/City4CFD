@@ -8,7 +8,7 @@
 #include "Terrain.h"
 #include "Building.h"
 #include "Boundary.h"
-#include "SemanticPoly.h"
+#include "SurfaceLayer.h"
 
 class Map3d {
 public:
@@ -24,12 +24,12 @@ private:
      Point_set_3                  _pointCloud;
      Point_set_3                  _pointCloudBuildings;
      nlohmann::json               _polygonsBuildings;
-     std::vector<nlohmann::json>  _polygonsSemanticLayers;
+     std::vector<nlohmann::json>  _polygonsSurfaceLayers;
      Terrain*                     _terrain;
      std::vector<Boundary*>       _boundaries;
      std::vector<PolyFeature*>    _lsFeatures;
      std::vector<TopoFeature*>    _allFeatures;
-     std::vector<std::vector<SemanticPoly*>> _surfaceLayers;
+     std::vector<std::vector<SurfaceLayer*>> _surfaceLayers;
 
     void set_features();
     void set_boundaries();

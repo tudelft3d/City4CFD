@@ -148,18 +148,18 @@ void geomtools::mark_surface_layer(CDT& ct,
     Point_3 chkPoint = CGAL::centroid(start->vertex(0)->point(),
                                       start->vertex(1)->point(),
                                       start->vertex(2)->point());
-    int surfaceFeature = -1;
+    int surfaceLayer = -1; //-- Default value is unmarked triangle, i.e. general terrain
     // todo until I figure out better way to handle polygons, I have to loop over all polygons to resolve conflicts
-    // todo for now I can set the order of importance in the features vector
+    // todo for now I have the order of importance in the features vector
     if (index != 0) {
         for (auto & feature : features) {
             if (geomtools::check_inside(chkPoint, feature->get_poly())){
-//                surfaceFeature = 1;
+//                surfaceLayer = 1;
 //                break;
                 if (feature->get_class() == BUILDING) {
-                   surfaceFeature = -1; // That's terrain
-                    break;
-                } else surfaceFeature = 1;
+                    surfaceLayer = -1; // Same as terrain
+                   break;
+                } else surfaceLayer = feature->get_output_layer_id();
             }
         }
     }
@@ -171,7 +171,7 @@ void geomtools::mark_surface_layer(CDT& ct,
         queue.pop_front();
         if(fh->info().nesting_level == -1){
             fh->info().nesting_level = index;
-            if (surfaceFeature != -1) fh->info().surfaceLayer = 1;
+            if (surfaceLayer != -1) fh->info().surfaceLayer = surfaceLayer;
             for(int i = 0; i < 3; i++){
                 CDT::Edge e(fh,i);
                 Face_handle n = fh->neighbor(i);

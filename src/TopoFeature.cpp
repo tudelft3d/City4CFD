@@ -48,15 +48,16 @@ std::string TopoFeature::get_cityjson_primitive() const {
 }
 
 //-- PolyFeature class
-PolyFeature::PolyFeature() = default;
+PolyFeature::PolyFeature()
+    : TopoFeature(), _outputLayerID(-1) {}
 
 PolyFeature::PolyFeature(const nlohmann::json& poly)
-    : TopoFeature() {
+    : TopoFeature(), _outputLayerID(-1) {
     //-- Store the polygon
     nlohmann::json polygonStart;
     if (poly["geometry"]["type"] == "Polygon") {
         polygonStart = poly["geometry"]["coordinates"];
-    } else if (poly["geometry"]["type"] == "MultiPolygon") {
+    } else if (poly["geometry"]["type"] == "MultiPolygon") { // Quick dirty add of multipolygons from bgt
         polygonStart = poly["geometry"]["coordinates"];
 //        if (polygonStart.size() > 1) throw std::runtime_error(poly["geometry"]["type"]);
 
@@ -78,6 +79,11 @@ PolyFeature::PolyFeature(const nlohmann::json& poly)
             _poly.add_hole(tempPoly);
         }
     }
+}
+
+PolyFeature::PolyFeature(const nlohmann::json& poly, const int outputLayerID)
+    : PolyFeature(poly) {
+    _outputLayerID = outputLayerID;
 }
 
 PolyFeature::~PolyFeature() = default;
@@ -140,6 +146,10 @@ const Polygon_with_holes_2& PolyFeature::get_poly() const {
 
 const std::vector<double>& PolyFeature::get_base_heights() const {
     return _base_heights;
+}
+
+const int PolyFeature::get_output_layer_id() const {
+    return _outputLayerID;
 }
 
 void PolyFeature::threeDfy(const SearchTree& searchTree) {
