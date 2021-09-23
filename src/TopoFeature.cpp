@@ -53,11 +53,25 @@ PolyFeature::PolyFeature() = default;
 PolyFeature::PolyFeature(const nlohmann::json& poly)
     : TopoFeature() {
     //-- Store the polygon
-    for (auto& polyEdges : poly["geometry"]["coordinates"]) {
+    nlohmann::json polygonStart;
+    if (poly["geometry"]["type"] == "Polygon") {
+        polygonStart = poly["geometry"]["coordinates"];
+    } else if (poly["geometry"]["type"] == "MultiPolygon") {
+        polygonStart = poly["geometry"]["coordinates"];
+//        if (polygonStart.size() > 1) throw std::runtime_error(poly["geometry"]["type"]);
+
+        //-- GOTTA SEE WHAT TO DO HERE
+        polygonStart = polygonStart[0];
+    } else {
+        throw std::runtime_error(poly["geometry"]["type"]);
+    }
+//    for (auto& polyEdges : poly["geometry"]["coordinates"]) {
+    for (auto& polyEdges : polygonStart) {
         Polygon_2 tempPoly;
         for (auto& coords : polyEdges) {
            tempPoly.push_back(Point_2(coords[0], coords[1]));
         }
+
         if (_poly.is_unbounded()) {
             _poly = Polygon_with_holes_2(tempPoly);
         } else {
@@ -68,7 +82,33 @@ PolyFeature::PolyFeature(const nlohmann::json& poly)
 
 PolyFeature::~PolyFeature() = default;
 
-void PolyFeature::calc_footprint_elevation(const SearchTree& searchTree) {}
+void PolyFeature::calc_footprint_elevation(const SearchTree& searchTree) {
+    //-- Calculate elevation of polygon outer boundary
+    //-- Point elevation is the average of 5 nearest neighbors from the PC
+    for (auto& polypt : _poly.outer_boundary()) {
+        Point_3 query(polypt.x() , polypt.y(), 0);
+        Neighbor_search search(searchTree, query, 5);
+        // TODO: radius search instead of NN?
+//        Fuzzy_sphere search_radius(query, 5);
+//        std::list<Point_3> result;
+//        searchTree.search(std::back_inserter(result), search_radius);
+
+        std::vector<double> poly_height;
+        for (Neighbor_search::iterator it = search.begin(); it != search.end(); ++it) {
+            poly_height.push_back(it->first.z());
+//            poly_height.push_back(0); // test
+        }
+//        for (auto& pt : result) {
+//            poly_height.push_back(pt.z());
+//        }
+        _base_heights.emplace_back(geomtools::avg(poly_height));
+    }
+
+    //-- In case of inner rings, set inner points as average of outer points, as the last element in _baseHeights
+    if (_poly.has_holes()) {
+        _base_heights.emplace_back(geomtools::avg(_base_heights));
+    }
+}
 
 void PolyFeature::check_feature_scope() {
     // TODO: really gotta rewrite those polygons, cgal implementation is awful

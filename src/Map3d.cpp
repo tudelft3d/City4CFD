@@ -132,8 +132,19 @@ void Map3d::threeDfy() {
     //-- Measure execution time
     auto startTime = std::chrono::steady_clock::now();
 
-    // TESTING - constrain surface layers
+    // TESTING - constrain buildings first
     int count = 0;
+    for (auto& feature : _lsFeatures) {
+        //debug
+        if (feature->is_active() && feature->get_class() == BUILDING) {
+//        if (feature->is_active()) {
+            std::cout << "Constrained feature " << count++ << " of class" << feature->get_class_name() << std::endl;
+            _terrain->constrain_footprint(feature->get_poly(), feature->get_base_heights());
+        }
+    }
+
+    // TESTING - constrain surface layers
+    count = 0;
     for (auto& layer : _surfaceLayers) {
         for (auto& f : layer) {
             if (!f->is_active()) continue;
@@ -146,19 +157,12 @@ void Map3d::threeDfy() {
     //-- CDT the terrain
     _terrain->threeDfy(_pointCloud, _lsFeatures);
 
-    //TEST Now create mesh out of surface layers
-//    for (auto& layer : _surfaceLayers) {
-//        for (auto& f : layer) {
-//            if (!f->is_active()) continue;
-//            f->threeDfy(_terrain->get_cdt());
-//        }
-//    }
     //-- BIG TOTAL TESTING
-//    geomtools::cdt_to_mesh(_terrain->get_cdt(), _surfaceLayers[0][0]->get_mesh(), 0);
-//    _allFeatures.push_back(_surfaceLayers[0][0]);
+    geomtools::cdt_to_mesh(_terrain->get_cdt(), _surfaceLayers[0][0]->get_mesh(), 1);
+    _allFeatures.push_back(_surfaceLayers[0][0]);
 
-    geomtools::cdt_to_mesh(_terrain->get_cdt(), _surfaceLayers[0][1]->get_mesh(), 1);
-    _allFeatures.push_back(_surfaceLayers[0][1]);
+//    geomtools::cdt_to_mesh(_terrain->get_cdt(), _surfaceLayers[0][1]->get_mesh(), 1);
+//    _allFeatures.push_back(_surfaceLayers[0][1]);
     //-- Reconstruct buildings
     SearchTree searchTree;
     searchTree.insert(_pointCloudBuildings.points().begin(), _pointCloudBuildings.points().end());

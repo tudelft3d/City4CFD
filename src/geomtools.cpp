@@ -54,7 +54,7 @@ bool geomtools::point_in_circle(const Point_3& pt, const Point_2& center, const 
     return false;
 }
 
-void geomtools::cdt_to_mesh(const CDT& cdt, Mesh& mesh, const int surfaceLayerID) {
+void geomtools::cdt_to_mesh(CDT& cdt, Mesh& mesh, const int surfaceLayerID) {
     std::map<CDT::Vertex_handle, int> indices;
     std::vector<Mesh::vertex_index> mesh_vertex;
     std::vector<Mesh::face_index> face_index;
@@ -71,6 +71,7 @@ void geomtools::cdt_to_mesh(const CDT& cdt, Mesh& mesh, const int surfaceLayerID
 
     for (const auto& it : cdt.finite_face_handles()) {
         if (it->info().surfaceLayer != surfaceLayerID) continue; // TESTING
+//        if (!it->info().in_domain()) continue; // TESTING
 
         int v1 = indices[it->vertex(0)];
         int v2 = indices[it->vertex(1)];
@@ -148,12 +149,17 @@ void geomtools::mark_surface_layer(CDT& ct,
                                       start->vertex(1)->point(),
                                       start->vertex(2)->point());
     int surfaceFeature = -1;
+    // todo until I figure out better way to handle polygons, I have to loop over all polygons to resolve conflicts
+    // todo for now I can set the order of importance in the features vector
     if (index != 0) {
-        for (int i = 0; i < features.size(); ++i) {
-            if (geomtools::check_inside(chkPoint, features[i]->get_poly())){
-                surfaceFeature = 1;
-//                features.erase(features.begin() + i);
-                break;
+        for (auto & feature : features) {
+            if (geomtools::check_inside(chkPoint, feature->get_poly())){
+//                surfaceFeature = 1;
+//                break;
+                if (feature->get_class() == BUILDING) {
+                   surfaceFeature = -1; // That's terrain
+                    break;
+                } else surfaceFeature = 1;
             }
         }
     }
@@ -165,7 +171,7 @@ void geomtools::mark_surface_layer(CDT& ct,
         queue.pop_front();
         if(fh->info().nesting_level == -1){
             fh->info().nesting_level = index;
-            if (surfaceFeature != -1 && index%2 == 1) fh->info().surfaceLayer = 1;
+            if (surfaceFeature != -1) fh->info().surfaceLayer = 1;
             for(int i = 0; i < 3; i++){
                 CDT::Edge e(fh,i);
                 Face_handle n = fh->neighbor(i);
@@ -179,10 +185,10 @@ void geomtools::mark_surface_layer(CDT& ct,
 }
 
 void geomtools::mark_surface_layer(CDT& cdt, std::vector<PolyFeature*> features) {
-    //-- Filter out inactive features // temp remove buildilngs too
+    //-- Filter out inactive features // temp remove buildings too
     for (unsigned long i = 0; i < features.size();) {
-        if (!features[i]->is_active() || features[i]->get_class() == BUILDING) {
-//        if (!features[i]->is_active()) {
+//        if (!features[i]->is_active() || features[i]->get_class() == BUILDING) {
+        if (!features[i]->is_active()) {
             features.erase(features.begin() + i);
         }
         else ++i;

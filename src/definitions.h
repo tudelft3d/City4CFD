@@ -97,18 +97,6 @@ typedef CGAL::Polygon_with_holes_2<Kernel>                                      
 typedef CDT::Face_handle                                                            Face_handle;
 typedef CDT::Vertex_handle                                                          Vertex_handle;
 
-struct vertex {
-    double x;
-    double y;
-    double z;
-};
-
-struct Triangle {
-    int v0;
-    int v1;
-    int v2;
-};
-
 typedef enum {
     TERRAIN          = 0,
     BUILDING         = 1,

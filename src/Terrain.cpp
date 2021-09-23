@@ -23,7 +23,7 @@ void Terrain::threeDfy(const Point_set_3& pointCloud, const std::vector<PolyFeat
     this->set_cdt(pointCloud); // CDT's got to go first if performing smoothing
 
 //    //-- Smoothing
-    this->smooth(pointCloud);
+//    this->smooth(pointCloud);
 
     //-- Add ground points from the point cloud to terrain
 //    this->set_cdt(pointCloud);
@@ -31,15 +31,15 @@ void Terrain::threeDfy(const Point_set_3& pointCloud, const std::vector<PolyFeat
 //    geomtools::mark_surface_layer(this->get_cdt(), 0);
     std::cout << "Done constructing CDT" << std::endl;
     //-- Add buildings as constraints to the terrain
-    int count = 0;
-    for (auto& feature : features) {
-        //debug
-        if (feature->is_active() && feature->get_class() == BUILDING) {
-//        if (feature->is_active()) {
-            std::cout << "Constrained feature " << count++ << " of class" << feature->get_class_name() << std::endl;
-            this->constrain_footprint(feature->get_poly(), feature->get_base_heights());
-        }
-    }
+//    int count = 0;
+//    for (auto& feature : features) {
+//        //debug
+//        if (feature->is_active() && feature->get_class() == BUILDING) {
+////        if (feature->is_active()) {
+//            std::cout << "Constrained feature " << count++ << " of class" << feature->get_class_name() << std::endl;
+//            this->constrain_footprint(feature->get_poly(), feature->get_base_heights());
+//        }
+//    }
 
     // -- Once it's marke, it needs to make sure which layer it belongs to
 //    geomtools::mark_surface_layer(this->get_cdt(), 1);
@@ -55,6 +55,7 @@ void Terrain::constrain_footprint(const Polygon_with_holes_2& poly, const std::v
     std::vector<Vertex_handle> vh;
     //-- Add outer ring points
     int count = 0;
+
     for (auto& polyVertex : poly.outer_boundary()) {
         vh.emplace_back(_cdt.insert(Point_3(polyVertex.x(), polyVertex.y(), heights[count++])));
     }
