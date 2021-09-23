@@ -28,7 +28,7 @@ void Terrain::threeDfy(const Point_set_3& pointCloud, const std::vector<PolyFeat
     //-- Add ground points from the point cloud to terrain
 //    this->set_cdt(pointCloud);
 
-//    geomtools::mark_surface_layer(this->get_cdt(), 0);
+//    geomtools::mark_surface_layers(this->get_cdt(), 0);
     std::cout << "Done constructing CDT" << std::endl;
     //-- Add buildings as constraints to the terrain
 //    int count = 0;
@@ -42,10 +42,9 @@ void Terrain::threeDfy(const Point_set_3& pointCloud, const std::vector<PolyFeat
 //    }
 
     // -- Once it's marke, it needs to make sure which layer it belongs to
-//    geomtools::mark_surface_layer(this->get_cdt(), 1);
-    geomtools::mark_surface_layer(this->get_cdt(), features);
+    geomtools::mark_surface_layers(this->get_cdt(), features);
 
-    //-- Store the CGAL terrain in the triangle-vertex data structure
+    //-- Store the CGAL terrain and surface layers in separate meshses
     this->create_mesh();
 
     std::cout << "Done making mesh" << std::endl;
@@ -120,6 +119,13 @@ void Terrain::smooth(const Point_set_3& pointCloud) {
 
 void Terrain::create_mesh() {
     geomtools::cdt_to_mesh(_cdt, _mesh);
+
+    int layerNum = 1; // Config or some other way
+    for (int i = 1; i <= layerNum; ++i) {
+        std::shared_ptr<Mesh> mesh;
+        geomtools::cdt_to_mesh(_cdt, *mesh, i);
+        _surfaceLayerMeshes.push_back(mesh);
+    }
 }
 
 void Terrain::get_cityjson_info(nlohmann::json& b) const {
@@ -145,4 +151,8 @@ TopoClass Terrain::get_class() const {
 
 std::string Terrain::get_class_name() const {
     return "Terrain";
+}
+
+const std::vector<std::shared_ptr<Mesh>>& Terrain::get_surface_layer_meshes() const {
+    return _surfaceLayerMeshes;
 }

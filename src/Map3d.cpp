@@ -63,16 +63,16 @@ void Map3d::set_features() {
     _boundaries.push_back(sides); _boundaries.push_back(top);
 
     //-- Group all features in one data structure
-    _allFeatures.push_back(_terrain);
+    _outputFeatures.push_back(_terrain);
     for (auto& f : _lsFeatures) {
-        _allFeatures.push_back(f);
+        _outputFeatures.push_back(f);
     }
     for (auto& b : _boundaries) {
-        _allFeatures.push_back(b);
+        _outputFeatures.push_back(b);
     }
 //    for (auto& layer : _surfaceLayers) {
 //        for (auto& f : layer) {
-//            _allFeatures.push_back(f);
+//            _outputFeatures.push_back(f);
 //        }
 //    }
 }
@@ -159,10 +159,10 @@ void Map3d::threeDfy() {
 
     //-- BIG TOTAL TESTING
     geomtools::cdt_to_mesh(_terrain->get_cdt(), _surfaceLayers[0][0]->get_mesh(), 1);
-    _allFeatures.push_back(_surfaceLayers[0][0]);
+    _outputFeatures.push_back(_surfaceLayers[0][0]);
 
 //    geomtools::cdt_to_mesh(_terrain->get_cdt(), _surfaceLayers[0][1]->get_mesh(), 1);
-//    _allFeatures.push_back(_surfaceLayers[0][1]);
+//    _outputFeatures.push_back(_surfaceLayers[0][1]);
     //-- Reconstruct buildings
     SearchTree searchTree;
     searchTree.insert(_pointCloudBuildings.points().begin(), _pointCloudBuildings.points().end());
@@ -201,38 +201,38 @@ bool Map3d::read_data() { // This will change with time
 void Map3d::output() {
     switch (config::outputFormat) {
         case OBJ:
-            IO::output_obj(_allFeatures);
+            IO::output_obj(_outputFeatures);
             break;
         case STL: // Only ASCII stl for now
-            IO::output_stl(_allFeatures);
+            IO::output_stl(_outputFeatures);
             break;
         case CityJSON:
             //-- Remove inactives and add ID's to features - obj and stl don't need id
             // just temp for now
             this->prep_feature_output();
-            IO::output_cityjson(_allFeatures);
+            IO::output_cityjson(_outputFeatures);
             break;
     }
 }
 
 void Map3d::prep_feature_output() { // Temp impl, might change
-    for (unsigned long i = 0; i < _allFeatures.size();) {
-        if (_allFeatures[i]->is_active()) {
-            _allFeatures[i]->set_id(i++);
+    for (unsigned long i = 0; i < _outputFeatures.size();) {
+        if (_outputFeatures[i]->is_active()) {
+            _outputFeatures[i]->set_id(i++);
         }
         else {
-            _allFeatures[i] = nullptr;
-            _allFeatures.erase(_allFeatures.begin() + i);
+            _outputFeatures[i] = nullptr;
+            _outputFeatures.erase(_outputFeatures.begin() + i);
         }
     }
 };
 
 void Map3d::collect_garbage() { // Just a test for now, could be helpful when other polygons get implemented
-    for (unsigned long i = 0; i < _allFeatures.size();) {
-        if (_allFeatures[i]->is_active()) ++i;
+    for (unsigned long i = 0; i < _outputFeatures.size();) {
+        if (_outputFeatures[i]->is_active()) ++i;
         else {
-            _allFeatures[i] = nullptr;
-            _allFeatures.erase(_allFeatures.begin() + i);
+            _outputFeatures[i] = nullptr;
+            _outputFeatures.erase(_outputFeatures.begin() + i);
         }
     }
     for (auto& layer : _surfaceLayers) {
@@ -254,7 +254,7 @@ void Map3d::collect_garbage() { // Just a test for now, could be helpful when ot
 }
 
 void Map3d::clear_features() {
-    for (auto f : _allFeatures) {
+    for (auto f : _outputFeatures) {
         f = nullptr;
     }
     delete _terrain;

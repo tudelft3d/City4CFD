@@ -3,7 +3,7 @@
 Building::Building() = default;
 
 Building::Building(const nlohmann::json& poly)
-    : PolyFeature(poly, 1), _height(-infty) {}
+    : PolyFeature(poly, 0), _height(-infty) {}
 
 Building::~Building() = default;
 

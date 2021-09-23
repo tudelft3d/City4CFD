@@ -14,9 +14,9 @@ namespace IO {
     bool read_polygons(const char* file, nlohmann::json& j);
 
     //-- Output functions
-    void output_obj(std::vector<TopoFeature*>& allFeatures);
-    void output_stl(std::vector<TopoFeature*>& allFeatures);
-    void output_cityjson(std::vector<TopoFeature*>& allFeatures);
+    void output_obj(const std::vector<TopoFeature*>& allFeatures);
+    void output_stl(const std::vector<TopoFeature*>& allFeatures);
+    void output_cityjson(const std::vector<TopoFeature*>& allFeatures);
 
     void get_obj_pts(const Mesh& mesh, std::string& fs, std::string& bs, std::unordered_map<std::string, unsigned long>& dPts);
     void get_stl_pts(Mesh& mesh, std::string& fs);

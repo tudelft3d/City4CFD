@@ -16,7 +16,7 @@ namespace geomtools {
     void   mark_domains(CDT& ct, Face_handle start, int index, std::list<CDT::Edge>& border);
     void   mark_domains(CDT& cdt);
     void   mark_surface_layer(CDT& cdt, const int surfaceLayerIdx);
-    void   mark_surface_layer(CDT& cdt, std::vector<PolyFeature*> features);
+    void   mark_surface_layers(CDT& cdt, std::vector<PolyFeature*> features);
     void   mark_surface_layer(CDT& ct, Face_handle start, int index, std::list<CDT::Edge>& border,
                             std::vector<PolyFeature*>& features);
 }

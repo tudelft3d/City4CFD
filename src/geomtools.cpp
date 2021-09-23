@@ -60,8 +60,6 @@ void geomtools::cdt_to_mesh(CDT& cdt, Mesh& mesh, const int surfaceLayerID) {
     std::vector<Mesh::face_index> face_index;
     mesh_vertex.reserve(cdt.dimension());
 
-//    //TESTING
-//    geomtools::mark_domains(cdt);
     int counter = 0;
     for (const auto& it : cdt.finite_vertex_handles()) {
         mesh_vertex.emplace_back(mesh.add_vertex(it->point()));
@@ -70,8 +68,7 @@ void geomtools::cdt_to_mesh(CDT& cdt, Mesh& mesh, const int surfaceLayerID) {
     }
 
     for (const auto& it : cdt.finite_face_handles()) {
-        if (it->info().surfaceLayer != surfaceLayerID) continue; // TESTING
-//        if (!it->info().in_domain()) continue; // TESTING
+        if (it->info().surfaceLayer != surfaceLayerID) continue;
 
         int v1 = indices[it->vertex(0)];
         int v2 = indices[it->vertex(1)];
@@ -184,7 +181,7 @@ void geomtools::mark_surface_layer(CDT& ct,
     }
 }
 
-void geomtools::mark_surface_layer(CDT& cdt, std::vector<PolyFeature*> features) {
+void geomtools::mark_surface_layers(CDT& cdt, std::vector<PolyFeature*> features) {
     //-- Filter out inactive features // temp remove buildings too
     for (unsigned long i = 0; i < features.size();) {
 //        if (!features[i]->is_active() || features[i]->get_class() == BUILDING) {

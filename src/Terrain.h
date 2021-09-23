@@ -24,8 +24,11 @@ public:
     std::string  get_class_name() const override;
     void         constrain_footprint(const Polygon_with_holes_2& poly, const std::vector<double>& heights); //testing
 
+    const std::vector<std::shared_ptr<Mesh>>& get_surface_layer_meshes() const;
+
 protected:
-    CDT _cdt;
+    CDT  _cdt;
+    std::vector<std::shared_ptr<Mesh>> _surfaceLayerMeshes; // Vector or list for the mesh?
 
     void set_cdt(const Point_set_3 &pointCloud);
     void smooth(const Point_set_3& pointCloud);

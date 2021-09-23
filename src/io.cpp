@@ -19,7 +19,7 @@ bool IO::read_polygons(const char* file, nlohmann::json& j) {
 }
 
 //-- Output functions
-void IO::output_obj(std::vector<TopoFeature*>& allFeatures) {
+void IO::output_obj(const std::vector<TopoFeature*>& allFeatures) {
     using namespace config;
     std::vector<std::ofstream> of;
     std::vector<std::string>   fs(topoClassName.size()), bs(topoClassName.size());
@@ -45,7 +45,7 @@ void IO::output_obj(std::vector<TopoFeature*>& allFeatures) {
     for (auto& f : of) f.close();
 }
 
-void IO::output_stl(std::vector<TopoFeature*>& allFeatures) {
+void IO::output_stl(const std::vector<TopoFeature*>& allFeatures) {
     using namespace config;
     std::vector<std::ofstream> of;
     std::vector<std::string>   fs(topoClassName.size());
@@ -69,7 +69,7 @@ void IO::output_stl(std::vector<TopoFeature*>& allFeatures) {
     for (auto& f : of) f.close();
 }
 
-void IO::output_cityjson(std::vector<TopoFeature*>& allFeatures) {
+void IO::output_cityjson(const std::vector<TopoFeature*>& allFeatures) {
     using namespace config;
     std::ofstream of;
     nlohmann::json j;
