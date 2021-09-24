@@ -18,6 +18,7 @@ bool IO::read_polygons(const char* file, nlohmann::json& j) {
     return true;
 }
 
+//todo make output vectors depend on outputLayerID's rather than topoClasses - needed for many surfaceLayers
 //-- Output functions
 void IO::output_obj(const std::vector<TopoFeature*>& allFeatures) {
     using namespace config;

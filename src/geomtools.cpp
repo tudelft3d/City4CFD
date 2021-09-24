@@ -151,8 +151,6 @@ void geomtools::mark_surface_layer(CDT& ct,
     if (index != 0) {
         for (auto & feature : features) {
             if (geomtools::check_inside(chkPoint, feature->get_poly())){
-//                surfaceLayer = 1;
-//                break;
                 if (feature->get_class() == BUILDING) {
                     surfaceLayer = -1; // Same as terrain
                    break;

@@ -22,12 +22,10 @@ void Map3d::reconstruct() {
 
     //-- Find polygon footprint elevation from point cloud
     this->set_footprint_elevation();
-
     std::cout << "Elevation done" << std::endl;
 
     //-- Reconstruct 3D features with respective algorithms
     this->threeDfy();
-
     std::cout << "3dfy done" << std::endl;
 }
 
@@ -44,19 +42,18 @@ void Map3d::set_features() {
     //- Other polygons
     int count = 0;
     for (auto& surfaceLayer : _polygonsSurfaceLayers) {
+        ++count; //- Surface layer ID is 1 onwards
         for (auto& poly : surfaceLayer["features"]) {
             if (poly["geometry"]["type"] != "Polygon") continue; // Make sure only polygons are added
 
             SurfaceLayer* semanticPoly = new SurfaceLayer(poly, count);
             _lsFeatures.push_back(semanticPoly);
         }
-        ++count;
     }
 
     //-- Boundary
     Sides* sides = new Sides(); Top* top = new Top();
     _boundaries.push_back(sides); _boundaries.push_back(top);
-
 }
 
 void Map3d::set_boundaries() {

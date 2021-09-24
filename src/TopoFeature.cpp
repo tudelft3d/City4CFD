@@ -102,7 +102,6 @@ void PolyFeature::calc_footprint_elevation(const SearchTree& searchTree) {
         std::vector<double> poly_height;
         for (Neighbor_search::iterator it = search.begin(); it != search.end(); ++it) {
             poly_height.push_back(it->first.z());
-//            poly_height.push_back(0); // test
         }
 //        for (auto& pt : result) {
 //            poly_height.push_back(pt.z());

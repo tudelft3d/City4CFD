@@ -42,7 +42,7 @@ void Terrain::threeDfy(const Point_set_3& pointCloud, const std::vector<PolyFeat
     //-- Mark surface layer
     geomtools::mark_surface_layers(this->get_cdt(), features);
 
-    //-- Store the CGAL terrain and surface layers in separate meshses
+    //-- Store the CGAL terrain and surface layers in separate meshes
     this->create_mesh();
 
     std::cout << "Done making mesh" << std::endl;
@@ -83,7 +83,6 @@ void Terrain::set_cdt(const Point_set_3& pointCloud) {
 
 //-- Taken from CGAL's example
 void Terrain::smooth(const Point_set_3& pointCloud) {
-    // Smooth terrain
     // Smooth heights with 5 successive Gaussian filters
 #ifdef CGAL_LINKED_WITH_TBB
     using Concurrency_tag = CGAL::Parallel_tag;
