@@ -61,7 +61,7 @@ PolyFeature::PolyFeature(const nlohmann::json& poly)
         polygonStart = poly["geometry"]["coordinates"];
 //        if (polygonStart.size() > 1) throw std::runtime_error(poly["geometry"]["type"]);
 
-        //-- GOTTA SEE WHAT TO DO HERE
+        //--todo GOTTA SEE WHAT TO DO HERE
         polygonStart = polygonStart[0];
     } else {
         throw std::runtime_error(poly["geometry"]["type"]);
@@ -94,7 +94,7 @@ void PolyFeature::calc_footprint_elevation(const SearchTree& searchTree) {
     for (auto& polypt : _poly.outer_boundary()) {
         Point_3 query(polypt.x() , polypt.y(), 0);
         Neighbor_search search(searchTree, query, 5);
-        // TODO: radius search instead of NN?
+        // TODO: will have to calculate polygon elevation from CDT using somethin like NNI
 //        Fuzzy_sphere search_radius(query, 5);
 //        std::list<Point_3> result;
 //        searchTree.search(std::back_inserter(result), search_radius);
@@ -116,7 +116,7 @@ void PolyFeature::calc_footprint_elevation(const SearchTree& searchTree) {
     }
 }
 
-void PolyFeature::check_feature_scope() {
+void PolyFeature::check_feature_scope() { // todo maybe move it to buildings, make it pure virtual
     // TODO: really gotta rewrite those polygons, cgal implementation is awful
     //-- Temporary - will rewrite polygons
     std::vector<Polygon_2> rings;

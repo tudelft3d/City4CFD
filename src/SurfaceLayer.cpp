@@ -2,8 +2,13 @@
 
 SurfaceLayer::SurfaceLayer() = default;
 
-SurfaceLayer::SurfaceLayer(const nlohmann::json& poly, int surfaceLayerID)
-    : PolyFeature(poly, surfaceLayerID) {}
+SurfaceLayer::SurfaceLayer(const int outputLayerID)
+    : SurfaceLayer() {
+    _outputLayerID = outputLayerID;
+}
+
+SurfaceLayer::SurfaceLayer(const nlohmann::json& poly, const int outputLayerID)
+    : PolyFeature(poly, outputLayerID) {}
 
 SurfaceLayer::~SurfaceLayer() = default;
 
@@ -47,7 +52,7 @@ std::string SurfaceLayer::get_cityjson_primitive() const {
 }
 
 TopoClass SurfaceLayer::get_class() const {
-    return SEMANTICLAYER;
+    return SURFACELAYER;
 }
 
 std::string SurfaceLayer::get_class_name() const {

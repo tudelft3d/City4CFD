@@ -1,18 +1,8 @@
 #include "Boundary.h"
 
-// TODO: put more thought into this constructor once the time comes
-/*
-Boundary::Boundary()
-    :TopoFeature(), _outerPts() {
-    if (configData.dimOfDomain != -infty) {
-        _dimOfDomain = configData.dimOfDomain;
-    }
+Boundary::Boundary() = default;
 
-    if (configData.topHeight != -infty) {
-        _topHeight = configData.topHeight;
-    }
-}
-*/
+Boundary::~Boundary() = default;
 
 //-- Static member definition
 std::vector<Point_3> Boundary::_outerPts;
@@ -70,8 +60,11 @@ std::vector<double> Boundary::get_domain_bbox() {
     return std::vector<double> {minx, miny, minz, maxx, maxy, maxz};
 }
 
+//-- SIDES CLASS --//
+Sides::Sides() = default;
 
-//-- Sides class
+Sides::~Sides() = default;
+
 void Sides::threeDfy() {
     std::vector<Mesh::vertex_index> mesh_vertex_side;
 
@@ -103,7 +96,11 @@ std::string Sides::get_class_name() const {
     return "Sides";
 }
 
-//-- Top class
+//-- TOP CLASS --//
+Top::Top() = default;
+
+Top::~Top() = default;
+
 void Top::threeDfy() {
     std::vector<Mesh::vertex_index> mesh_vertex_top;
 

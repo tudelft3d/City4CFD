@@ -29,9 +29,6 @@ void Map3d::reconstruct() {
     this->threeDfy();
 
     std::cout << "3dfy done" << std::endl;
-
-    //-- Add semantics
-
 }
 
 void Map3d::set_features() {
@@ -46,14 +43,12 @@ void Map3d::set_features() {
     }
     //- Other polygons
     int count = 0;
-    _surfaceLayers.resize(_polygonsSurfaceLayers.size());
-    for (auto& semanticLayer : _polygonsSurfaceLayers) {
-        for (auto& poly : semanticLayer["features"]) {
+    for (auto& surfaceLayer : _polygonsSurfaceLayers) {
+        for (auto& poly : surfaceLayer["features"]) {
             if (poly["geometry"]["type"] != "Polygon") continue; // Make sure only polygons are added
 
             SurfaceLayer* semanticPoly = new SurfaceLayer(poly, count);
             _lsFeatures.push_back(semanticPoly);
-            _surfaceLayers[count].push_back(semanticPoly);
         }
         ++count;
     }
@@ -62,19 +57,6 @@ void Map3d::set_features() {
     Sides* sides = new Sides(); Top* top = new Top();
     _boundaries.push_back(sides); _boundaries.push_back(top);
 
-    //-- Group all features in one data structure
-    _outputFeatures.push_back(_terrain);
-    for (auto& f : _lsFeatures) {
-        _outputFeatures.push_back(f);
-    }
-    for (auto& b : _boundaries) {
-        _outputFeatures.push_back(b);
-    }
-//    for (auto& layer : _surfaceLayers) {
-//        for (auto& f : layer) {
-//            _outputFeatures.push_back(f);
-//        }
-//    }
 }
 
 void Map3d::set_boundaries() {
@@ -92,7 +74,6 @@ void Map3d::set_boundaries() {
 
     //-- Deactivate features that are out of their scope
     for (auto& f : _lsFeatures) {
-//        if (f->get_class() != BUILDING) continue;
         f->check_feature_scope();
     }
 
@@ -118,8 +99,7 @@ void Map3d::set_footprint_elevation() {
     searchTree.insert(_pointCloud.points().begin(), _pointCloud.points().end());
 
     for (auto& f : _lsFeatures) {
-//        if (!f->is_active() || f->get_class() != BUILDING) continue; // For now only building footprints
-        if (!f->is_active()) continue; // Checking for surface layers
+        if (!f->is_active()) continue;
         try {
             f->calc_footprint_elevation(searchTree);
         } catch (std::exception& e) {
@@ -132,37 +112,9 @@ void Map3d::threeDfy() {
     //-- Measure execution time
     auto startTime = std::chrono::steady_clock::now();
 
-    // TESTING - constrain buildings first
-    int count = 0;
-    for (auto& feature : _lsFeatures) {
-        //debug
-        if (feature->is_active() && feature->get_class() == BUILDING) {
-//        if (feature->is_active()) {
-            std::cout << "Constrained feature " << count++ << " of class" << feature->get_class_name() << std::endl;
-            _terrain->constrain_footprint(feature->get_poly(), feature->get_base_heights());
-        }
-    }
-
-    // TESTING - constrain surface layers
-    count = 0;
-    for (auto& layer : _surfaceLayers) {
-        for (auto& f : layer) {
-            if (!f->is_active()) continue;
-            std::cout << "Constraining feature " << count++ << " of class" << f->get_class_name() << std::endl;
-            _terrain->constrain_footprint(f->get_poly(), f->get_base_heights());
-        }
-    }
-    std::cout << "Done constraining" << std::endl;
-
-    //-- CDT the terrain
+    //-- Construct the terrain with surface layers
     _terrain->threeDfy(_pointCloud, _lsFeatures);
 
-    //-- BIG TOTAL TESTING
-    geomtools::cdt_to_mesh(_terrain->get_cdt(), _surfaceLayers[0][0]->get_mesh(), 1);
-    _outputFeatures.push_back(_surfaceLayers[0][0]);
-
-//    geomtools::cdt_to_mesh(_terrain->get_cdt(), _surfaceLayers[0][1]->get_mesh(), 1);
-//    _outputFeatures.push_back(_surfaceLayers[0][1]);
     //-- Reconstruct buildings
     SearchTree searchTree;
     searchTree.insert(_pointCloudBuildings.points().begin(), _pointCloudBuildings.points().end());
@@ -199,6 +151,9 @@ bool Map3d::read_data() { // This will change with time
 }
 
 void Map3d::output() {
+    //-- Group all features for output
+    this->prep_feature_output();
+
     switch (config::outputFormat) {
         case OBJ:
             IO::output_obj(_outputFeatures);
@@ -209,13 +164,27 @@ void Map3d::output() {
         case CityJSON:
             //-- Remove inactives and add ID's to features - obj and stl don't need id
             // just temp for now
-            this->prep_feature_output();
+            this->prep_cityjson_output();
             IO::output_cityjson(_outputFeatures);
             break;
     }
 }
 
-void Map3d::prep_feature_output() { // Temp impl, might change
+void Map3d::prep_feature_output() {
+    _outputFeatures.push_back(_terrain);
+    for (auto& f : _lsFeatures) {
+        if (!f->is_active() || f->get_class() != BUILDING) continue; // Surface layers are grouped in terrain
+        _outputFeatures.push_back(f);
+    }
+    for (auto& b : _boundaries) {
+        _outputFeatures.push_back(b);
+    }
+    for (auto& l : _terrain->get_surface_layers()) {
+        _outputFeatures.push_back(l);
+    }
+}
+
+void Map3d::prep_cityjson_output() { // Temp impl, might change
     for (unsigned long i = 0; i < _outputFeatures.size();) {
         if (_outputFeatures[i]->is_active()) {
             _outputFeatures[i]->set_id(i++);
@@ -228,22 +197,6 @@ void Map3d::prep_feature_output() { // Temp impl, might change
 };
 
 void Map3d::collect_garbage() { // Just a test for now, could be helpful when other polygons get implemented
-    for (unsigned long i = 0; i < _outputFeatures.size();) {
-        if (_outputFeatures[i]->is_active()) ++i;
-        else {
-            _outputFeatures[i] = nullptr;
-            _outputFeatures.erase(_outputFeatures.begin() + i);
-        }
-    }
-    for (auto& layer : _surfaceLayers) {
-        for (unsigned long i = 0;  i < layer.size();) {
-            if (layer[i]->is_active()) ++i;
-            else {
-                layer[i] = nullptr;
-                layer.erase(layer.begin() + i);
-            }
-        }
-    }
     for (unsigned long i = 0; i < _lsFeatures.size();) {
         if (_lsFeatures[i]->is_active()) ++i;
         else {

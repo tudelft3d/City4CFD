@@ -8,8 +8,8 @@
 
 class Boundary : public TopoFeature {
 public:
-    Boundary() = default;
-    ~Boundary() = default;
+    Boundary();
+    virtual ~Boundary();
 
     virtual void threeDfy() = 0;
 
@@ -27,8 +27,8 @@ protected:
 
 class Sides : public Boundary {
 public:
-    Sides()  = default;
-    ~Sides() = default;
+    Sides();
+    ~Sides();
 
     void threeDfy();
 
@@ -39,8 +39,8 @@ public:
 
 class Top : public Boundary {
 public:
-    Top()  = default;
-    ~Top() = default;
+    Top();
+    ~Top();
 
     void threeDfy();
 

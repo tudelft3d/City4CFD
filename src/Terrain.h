@@ -5,13 +5,14 @@
 #include "geomtools.h"
 #include "io.h"
 #include "TopoFeature.h"
+#include "SurfaceLayer.h"
 
 class Terrain : public TopoFeature {
 public:
     using TopoFeature::TopoFeature;
     Terrain();
     Terrain(int pid);
-    ~Terrain() = default;
+    ~Terrain();
 
     void threeDfy(const Point_set_3& pointCloud, const std::vector<PolyFeature*>& features);
 
@@ -24,11 +25,11 @@ public:
     std::string  get_class_name() const override;
     void         constrain_footprint(const Polygon_with_holes_2& poly, const std::vector<double>& heights); //testing
 
-    const std::vector<std::shared_ptr<Mesh>>& get_surface_layer_meshes() const;
+    const std::vector<SurfaceLayer*>& get_surface_layers() const;
 
 protected:
     CDT  _cdt;
-    std::vector<std::shared_ptr<Mesh>> _surfaceLayerMeshes; // Vector or list for the mesh?
+    std::vector<SurfaceLayer*> _surfaceLayersTerrain; // Vector or list for the mesh?
 
     void set_cdt(const Point_set_3 &pointCloud);
     void smooth(const Point_set_3& pointCloud);

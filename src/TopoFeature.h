@@ -9,7 +9,7 @@ class TopoFeature {
 public:
     TopoFeature();
     TopoFeature(const int pid);
-    ~TopoFeature();
+    virtual ~TopoFeature();
 
     virtual TopoClass    get_class() const = 0;
     virtual std::string  get_class_name() const = 0;
@@ -37,7 +37,7 @@ public:
     PolyFeature();
     PolyFeature(const nlohmann::json& poly);
     PolyFeature(const nlohmann::json& poly, const int outputLayerID);
-    ~PolyFeature();
+    virtual ~PolyFeature();
 
     virtual void        check_feature_scope();
     virtual void        threeDfy(const SearchTree& searchTree);

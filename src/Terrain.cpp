@@ -1,4 +1,5 @@
 #include "Terrain.h"
+#include "SurfaceLayer.h"
 
 Terrain::Terrain()
     : TopoFeature() {}
@@ -6,18 +7,29 @@ Terrain::Terrain()
 Terrain::Terrain(int pid)
     : TopoFeature(pid) {}
 
-void Terrain::threeDfy(const Point_set_3& pointCloud, const std::vector<PolyFeature*>& features) {
-    //-- Add surface layers as constraints to the terrain
-//    int count = 0;
-//    for (auto& feature : features) {
-//        //debug
-////        if (count >= 1161) continue;
-//        if (feature->is_active() && feature->get_class() != BUILDING) {
-//            std::cout << "Constrained feature " << count++ << " of class" << feature->get_class_name() << std::endl;
-//            this->constrain_footprint(feature->get_poly(), feature->get_base_heights());
-//        }
-//    }
+Terrain::~Terrain() {
+    for (auto& layer : _surfaceLayersTerrain) {
+        layer = nullptr; delete layer;
+    }
+}
 
+void Terrain::threeDfy(const Point_set_3& pointCloud, const std::vector<PolyFeature*>& features) {
+    //-- Constrain buildings first
+    int count = 0;
+    for (auto& feature : features) {
+        //debug
+        if (!feature->is_active() || feature->get_class() != BUILDING) continue;
+        std::cout << "Constrained feature " << count++ << " of class" << feature->get_class_name() << std::endl;
+        this->constrain_footprint(feature->get_poly(), feature->get_base_heights());
+    }
+
+    //-- Constrain surface layers
+    for (auto& f : features) {
+        if (!f->is_active() || f->get_class() != SURFACELAYER) continue;
+        std::cout << "Constraining feature " << count++ << " of class" << f->get_class_name() << std::endl;
+        this->constrain_footprint(f->get_poly(), f->get_base_heights());
+    }
+    std::cout << "Done constraining" << std::endl;
 
     //-- Add ground points from the point cloud to terrain
     this->set_cdt(pointCloud); // CDT's got to go first if performing smoothing
@@ -25,23 +37,9 @@ void Terrain::threeDfy(const Point_set_3& pointCloud, const std::vector<PolyFeat
 //    //-- Smoothing
 //    this->smooth(pointCloud);
 
-    //-- Add ground points from the point cloud to terrain
-//    this->set_cdt(pointCloud);
-
-//    geomtools::mark_surface_layers(this->get_cdt(), 0);
     std::cout << "Done constructing CDT" << std::endl;
-    //-- Add buildings as constraints to the terrain
-//    int count = 0;
-//    for (auto& feature : features) {
-//        //debug
-//        if (feature->is_active() && feature->get_class() == BUILDING) {
-////        if (feature->is_active()) {
-//            std::cout << "Constrained feature " << count++ << " of class" << feature->get_class_name() << std::endl;
-//            this->constrain_footprint(feature->get_poly(), feature->get_base_heights());
-//        }
-//    }
 
-    // -- Once it's marke, it needs to make sure which layer it belongs to
+    //-- Mark surface layer
     geomtools::mark_surface_layers(this->get_cdt(), features);
 
     //-- Store the CGAL terrain and surface layers in separate meshses
@@ -120,11 +118,12 @@ void Terrain::smooth(const Point_set_3& pointCloud) {
 void Terrain::create_mesh() {
     geomtools::cdt_to_mesh(_cdt, _mesh);
 
+    // -- Create placeholders for surface layer mesh
     int layerNum = 1; // Config or some other way
     for (int i = 1; i <= layerNum; ++i) {
-        std::shared_ptr<Mesh> mesh;
-        geomtools::cdt_to_mesh(_cdt, *mesh, i);
-        _surfaceLayerMeshes.push_back(mesh);
+        SurfaceLayer* layer = new SurfaceLayer(i);
+        geomtools::cdt_to_mesh(_cdt, layer->get_mesh(), i);
+        _surfaceLayersTerrain.push_back(layer);
     }
 }
 
@@ -153,6 +152,6 @@ std::string Terrain::get_class_name() const {
     return "Terrain";
 }
 
-const std::vector<std::shared_ptr<Mesh>>& Terrain::get_surface_layer_meshes() const {
-    return _surfaceLayerMeshes;
+const std::vector<SurfaceLayer*>& Terrain::get_surface_layers() const {
+    return _surfaceLayersTerrain;
 }

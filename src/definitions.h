@@ -107,7 +107,7 @@ typedef enum {
     FOREST           = 6,
     SIDES            = 7,
     TOP              = 8,
-    SEMANTICLAYER    = 9,
+    SURFACELAYER     = 9,
 } TopoClass;
 
 
@@ -133,7 +133,7 @@ const std::map<int, std::string> topoClassName {
         {6, "Forest"},
         {7, "Sides"},
         {8, "Top"},
-        {9, "SemanticLayer"},
+        {9, "SurfaceLayer"},
 };
 
 

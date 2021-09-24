@@ -9,7 +9,8 @@ class SurfaceLayer : public PolyFeature {
 public:
     using PolyFeature::PolyFeature;
     SurfaceLayer();
-    SurfaceLayer(const nlohmann::json& poly, int semanticLayerID);
+    SurfaceLayer(const int outputLayerID);
+    SurfaceLayer(const nlohmann::json& poly, const int outputLayerID);
     ~SurfaceLayer();
 
     virtual void        check_feature_scope() override;
