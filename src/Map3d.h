@@ -32,6 +32,7 @@ private:
 
     void set_features();
     void set_boundaries();
+    void polygon_processing();
     void set_footprint_elevation();
     void threeDfy();
     void prep_feature_output();

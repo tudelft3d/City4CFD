@@ -17,8 +17,14 @@ void Map3d::reconstruct() {
     this->set_boundaries();
 
     std::cout << "Bnds done" << std::endl;
+    //-- Remove inactive features
     this->collect_garbage();
     std::cout << "Num of features: " << _lsFeatures.size() << std::endl;
+
+
+    //-- Avoid having too long polygons
+    this->polygon_processing();
+    std::cout << "Checking edge length done" << std::endl;
 
     //-- Find polygon footprint elevation from point cloud
     this->set_footprint_elevation();
@@ -214,5 +220,16 @@ void Map3d::clear_features() {
     }
     for (auto& b : _boundaries) {
         delete b; b = nullptr;
+    }
+}
+
+//-- Temp, new implementation:
+void Map3d::polygon_processing() {
+    for (auto& f : _lsFeatures) {
+        if (!f->is_active()) continue;
+        Polygon_2 poly = f->get_poly().outer_boundary();
+        if (!poly.is_counterclockwise_oriented()) {
+            throw std::runtime_error("Reversed polygon!");
+        }
     }
 }

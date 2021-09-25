@@ -61,6 +61,7 @@ void Terrain::constrain_footprint(const Polygon_with_holes_2& poly, const std::v
     for (auto i = 0; i < vh.size() - 1; ++i) {
         _cdt.insert_constraint(vh[i], vh[i + 1]);
     }
+    _cdt.insert_constraint(vh.back(), vh.front());
 
     //-- Add inner ring points - TODO:necessary reminder to rewrite polygons into something more comfortable
     if (poly.has_holes()) {
@@ -73,6 +74,7 @@ void Terrain::constrain_footprint(const Polygon_with_holes_2& poly, const std::v
             for (auto i = 0; i < vh.size() - 1; ++i) {
                 _cdt.insert_constraint(vh[i], vh[i + 1]);
             }
+            _cdt.insert_constraint(vh.back(), vh.front());
         }
     }
 }

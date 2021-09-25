@@ -72,6 +72,8 @@ PolyFeature::PolyFeature(const nlohmann::json& poly)
         for (auto& coords : polyEdges) {
            tempPoly.push_back(Point_2(coords[0], coords[1]));
         }
+        pop_back_if_equal_to_front(tempPoly);
+        if (tempPoly.is_clockwise_oriented()) tempPoly.reverse_orientation();
 
         if (_poly.is_unbounded()) {
             _poly = Polygon_with_holes_2(tempPoly);
@@ -101,7 +103,8 @@ void PolyFeature::calc_footprint_elevation(const SearchTree& searchTree) {
 
         std::vector<double> poly_height;
         for (Neighbor_search::iterator it = search.begin(); it != search.end(); ++it) {
-            poly_height.push_back(it->first.z());
+//            poly_height.push_back(it->first.z());
+            poly_height.push_back(0);
         }
 //        for (auto& pt : result) {
 //            poly_height.push_back(pt.z());

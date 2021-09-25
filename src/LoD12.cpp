@@ -7,8 +7,6 @@ LoD12::LoD12(const Polygon_with_holes_2& poly,
 
 void LoD12::lod12reconstruct(Mesh& mesh, double& height) {
     //-- Reconstruction is just simple average/median/percentile
-//    _height = avg(_buildingPts);
-//    _height = median(_buildingPts);
     _height = geomtools::percentile(_buildingPts, config::buildingPercentile);
     height = _height;
 
@@ -35,10 +33,10 @@ void LoD12::create_mesh(Mesh& mesh) {
 
     int polyCount = 0;
     for (auto& poly : rings) { // Loop over polys
+        ++polyCount;
         std::vector<Vertex_handle> cdt_handle;
         std::vector<Mesh::Vertex_index> mesh_vertex;
         int count = 0;
-        ++polyCount;
         for (auto vert = poly.vertices_begin(); vert != poly.vertices_end(); ++vert) { // Loop over poly vertices
             if (polyCount == 1) {
                 cdt_handle.emplace_back(cdt_buildings.insert(Point_3(vert->x(), vert->y(), _baseHeights[count++])));
@@ -47,7 +45,6 @@ void LoD12::create_mesh(Mesh& mesh) {
             }
             mesh_vertex.emplace_back(mesh.add_vertex(cdt_handle.back()->point()));
             cdtToMesh[cdt_handle.back()] = mesh_vertex.back();
-
             mesh_vertex.emplace_back(mesh.add_vertex(Point_3(vert->x(), vert->y(), _height)));
         }
 
