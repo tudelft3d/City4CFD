@@ -19,6 +19,7 @@ namespace geomtools {
     void   mark_surface_layers(CDT& cdt, std::vector<PolyFeature*> features);
     void   mark_surface_layer(CDT& ct, Face_handle start, int index, std::list<CDT::Edge>& border,
                             std::vector<PolyFeature*>& features);
+    void   shorten_long_poly_edges(Polygon_2& poly, double maxEdgeLength);
 }
 
 #endif //CITYCFD_GEOMTOOLS_H

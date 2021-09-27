@@ -23,7 +23,7 @@ void Map3d::reconstruct() {
 
 
     //-- Avoid having too long polygons
-//    this->polygon_processing();
+    this->polygon_processing();
     std::cout << "Checking edge length done" << std::endl;
 
     //-- Find polygon footprint elevation from point cloud
@@ -225,11 +225,13 @@ void Map3d::clear_features() {
 
 //-- Temp, new implementation:
 void Map3d::polygon_processing() {
-    for (auto& f : _lsFeatures) {
+    for (auto& f : _lsFeatures) { // todo parallel here?
+        std::cout << "New fieature!" << std::endl;
+        double maxLen = 10.; // max length todo config or definition
         if (!f->is_active()) continue;
-        Polygon_2 poly = f->get_poly().outer_boundary();
-        if (!poly.is_counterclockwise_oriented()) {
-            throw std::runtime_error("Reversed polygon!");
-        }
+        geomtools::shorten_long_poly_edges(f->get_poly().outer_boundary(), maxLen);
+//        for (auto& hole : f->get_poly().holes()) {
+//            geomtools::shorten_long_poly_edges(hole, maxLen);
+//        }
     }
 }

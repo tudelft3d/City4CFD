@@ -203,3 +203,21 @@ void geomtools::mark_surface_layers(CDT& cdt, std::vector<PolyFeature*> features
         }
     }
 }
+
+void geomtools::shorten_long_poly_edges(Polygon_2& poly, double maxLen) {
+    auto& polyVec = poly.container();
+    for (auto i = 0; i < polyVec.size() - 1;) {
+        auto edge = polyVec[i + 1] - polyVec[i];
+        double edgeSqLen = edge.squared_length();
+        if (edgeSqLen > maxLen*maxLen) {
+            int    numSeg  = ceil(sqrt(edgeSqLen) / maxLen);
+            auto segVec = edge / numSeg;
+            ++i;
+            for (auto j = 0; j < numSeg - 1; ++j) {
+                Point_2 pt = polyVec[i - 1] + segVec;
+                polyVec.insert(polyVec.begin() + i, pt);
+                ++i;
+            }
+        } else ++i;
+    }
+}

@@ -49,6 +49,7 @@ public:
     virtual std::string get_class_name() const = 0;
 
     void  calc_footprint_elevation(const SearchTree& searchTree);
+    Polygon_with_holes_2&       get_poly();
     const Polygon_with_holes_2& get_poly() const;
     const std::vector<double>&  get_base_heights() const;
     const int                   get_output_layer_id() const;

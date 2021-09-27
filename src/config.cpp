@@ -4,7 +4,7 @@
 namespace config {
     //-- Input info
     const char* points_xyz = "data/input/ground_simplified.ply";
-    const char* gisdata    = "data/input/tudcampus.geojson";
+    const char* gisdata    = "data/input/tudcampus_bgt.geojson";
     const char* buildings_xyz    = "data/input/building_simplified.xyz";
     const char* topoSem = "data/input/Vegetation.geojson";
 

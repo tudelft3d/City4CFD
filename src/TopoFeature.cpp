@@ -143,6 +143,10 @@ void PolyFeature::check_feature_scope() { // todo maybe move it to buildings, ma
     this->deactivate();
 }
 
+Polygon_with_holes_2& PolyFeature::get_poly() {
+    return _poly;
+}
+
 const Polygon_with_holes_2& PolyFeature::get_poly() const {
     return _poly;
 }
