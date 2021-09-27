@@ -6,7 +6,6 @@ LoD12::LoD12(const Polygon_with_holes_2& poly,
     : _height(), _poly(poly), _baseHeights(base_heights), _buildingPts(building_pts) {}
 
 void LoD12::lod12reconstruct(Mesh& mesh, double& height) {
-    //-- Reconstruction is just simple average/median/percentile
     _height = geomtools::percentile(_buildingPts, config::buildingPercentile);
     height = _height;
 
@@ -47,6 +46,9 @@ void LoD12::create_mesh(Mesh& mesh) {
             cdtToMesh[cdt_handle.back()] = mesh_vertex.back();
             mesh_vertex.emplace_back(mesh.add_vertex(Point_3(vert->x(), vert->y(), _height)));
         }
+        cdt_handle.emplace_back(cdt_handle.front());
+        mesh_vertex.emplace_back(mesh_vertex.front());
+        mesh_vertex.emplace_back(mesh_vertex.front() + 1);
 
         //- Add constraints and create mesh faces for sides
         for (auto i = 0; i < cdt_handle.size() - 1; ++i) {
@@ -79,8 +81,8 @@ void LoD12::create_mesh(Mesh& mesh) {
         std::advance(it2, cdtToMesh[it->vertex(1)]);
         std::advance(it3, cdtToMesh[it->vertex(2)]);
 
- //       mesh.add_face(*it1, *it3, *it2); // Bottom face
- //       surfaceType[fIdx] = "GroundSurface";
+//        mesh.add_face(*it1, *it3, *it2); // Bottom face
+//        surfaceType[fIdx] = "GroundSurface";
 
         fIdx = mesh.add_face(*std::next(it1), *std::next(it2), *std::next(it3));
         surfaceType[fIdx] = "RoofSurface";

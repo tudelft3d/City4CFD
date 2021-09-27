@@ -23,7 +23,7 @@ void Map3d::reconstruct() {
 
 
     //-- Avoid having too long polygons
-    this->polygon_processing();
+//    this->polygon_processing();
     std::cout << "Checking edge length done" << std::endl;
 
     //-- Find polygon footprint elevation from point cloud
