@@ -50,7 +50,7 @@ void Building::get_cityjson_info(nlohmann::json& b) const {
 //    float hbase = z_to_float(this->get_height_base());
 //    float h = z_to_float(this->get_height());
 //    b["attributes"]["TerrainHeight"] = _baseHeights.back(); // temp - will calculate avg for every footprint
-    b["attributes"]["measuredHeight"] = _height - _base_heights.back();
+    b["attributes"]["measuredHeight"] = _height - geomtools::avg(_base_heights[0]);
 }
 
 void Building::get_cityjson_semantics(nlohmann::json& g) const { // Temp for checking CGAL mesh properties

@@ -23,7 +23,7 @@ public:
     std::string  get_cityjson_primitive() const override;
     TopoClass    get_class() const override;
     std::string  get_class_name() const override;
-    void         constrain_footprint(const Polygon_with_holes_2& poly, const std::vector<double>& heights); //testing
+    void         constrain_footprint(const Polygon_with_holes_2& poly, const std::vector<std::vector<double>>& heights); //testing
 
     const std::vector<SurfaceLayer*>& get_surface_layers() const;
 

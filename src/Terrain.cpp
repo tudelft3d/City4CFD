@@ -14,15 +14,7 @@ Terrain::~Terrain() {
 }
 
 void Terrain::threeDfy(const Point_set_3& pointCloud, const std::vector<PolyFeature*>& features) {
-    //-- Constrain buildings first
     int count = 0;
-    for (auto& feature : features) {
-        //debug
-        if (!feature->is_active() || feature->get_class() != BUILDING) continue;
-        std::cout << "Constrained feature " << count++ << " of class" << feature->get_class_name() << std::endl;
-        this->constrain_footprint(feature->get_poly(), feature->get_base_heights());
-    }
-
     //-- Constrain surface layers
     for (auto& f : features) {
         if (!f->is_active() || f->get_class() != SURFACELAYER) continue;
@@ -34,8 +26,16 @@ void Terrain::threeDfy(const Point_set_3& pointCloud, const std::vector<PolyFeat
     //-- Add ground points from the point cloud to terrain
     this->set_cdt(pointCloud); // CDT's got to go first if performing smoothing
 
-//    //-- Smoothing
-//    this->smooth(pointCloud);
+    //-- Smoothing
+    this->smooth(pointCloud);
+
+    //-- Constrain buildings
+    for (auto& feature : features) {
+        //debug
+        if (!feature->is_active() || feature->get_class() != BUILDING) continue;
+        std::cout << "Constrained feature " << count++ << " of class" << feature->get_class_name() << std::endl;
+        this->constrain_footprint(feature->get_poly(), feature->get_base_heights());
+    }
 
     std::cout << "Done constructing CDT" << std::endl;
 
@@ -48,34 +48,33 @@ void Terrain::threeDfy(const Point_set_3& pointCloud, const std::vector<PolyFeat
     std::cout << "Done making mesh" << std::endl;
 }
 
-void Terrain::constrain_footprint(const Polygon_with_holes_2& poly, const std::vector<double>& heights) {
-    std::vector<Vertex_handle> vh;
-    //-- Add outer ring points
-    int count = 0;
-
-    for (auto& polyVertex : poly.outer_boundary()) {
-        vh.emplace_back(_cdt.insert(Point_3(polyVertex.x(), polyVertex.y(), heights[count++])));
+void Terrain::constrain_footprint(const Polygon_with_holes_2& poly,
+                                  const std::vector<std::vector<double>>& heights) {
+    // necessary reminder to rewrite polygons to something more comfortable
+    //-- Temporary - will rewrite polygons
+    std::vector<Polygon_2> rings;
+    //- Add outer poly and holes into one data structure
+    rings.push_back(poly.outer_boundary());
+    for (auto& hole: poly.holes()) {
+        rings.push_back(hole);
     }
 
-    //-- Set added points as constraints
-    for (auto i = 0; i < vh.size() - 1; ++i) {
-        _cdt.insert_constraint(vh[i], vh[i + 1]);
-    }
-    _cdt.insert_constraint(vh.back(), vh.front());
-
-    //-- Add inner ring points - TODO:necessary reminder to rewrite polygons into something more comfortable
-    if (poly.has_holes()) {
-        for (auto& polyHoles : poly.holes()) {
-            vh.clear();
-            for (auto& holeVertex : polyHoles) {
-                vh.emplace_back(_cdt.insert(Point_3(holeVertex.x(), holeVertex.y(), heights.back())));
-            }
-            //-- Set added points as constraints
-            for (auto i = 0; i < vh.size() - 1; ++i) {
-                _cdt.insert_constraint(vh[i], vh[i + 1]);
-            }
-            _cdt.insert_constraint(vh.back(), vh.front());
+    int polyCount = 0;
+    for (auto& ring : rings) {
+        std::vector<Vertex_handle> vh;
+        //-- Add ring points
+        int count = 0;
+        for (auto& polyVertex : ring) {
+            vh.emplace_back(_cdt.insert(Point_3(polyVertex.x(), polyVertex.y(), heights[polyCount][count++])));
         }
+
+        //-- Set added points as constraints
+        for (auto i = 0; i < vh.size() - 1; ++i) {
+            _cdt.insert_constraint(vh[i], vh[i + 1]);
+        }
+        _cdt.insert_constraint(vh.back(), vh.front());
+
+        ++polyCount;
     }
 }
 

@@ -49,15 +49,15 @@ public:
     virtual std::string get_class_name() const = 0;
 
     void  calc_footprint_elevation(const SearchTree& searchTree);
-    Polygon_with_holes_2&       get_poly();
-    const Polygon_with_holes_2& get_poly() const;
-    const std::vector<double>&  get_base_heights() const;
-    const int                   get_output_layer_id() const;
+    Polygon_with_holes_2&                    get_poly();
+    const Polygon_with_holes_2&              get_poly() const;
+    const std::vector<std::vector<double>>&  get_base_heights() const;
+    const int                                get_output_layer_id() const;
 
 protected:
-    Polygon_with_holes_2        _poly;
-    std::vector<double>         _base_heights;
-    int                         _outputLayerID; // 1- Building, 2 onwards - surface layers
+    Polygon_with_holes_2              _poly;
+    std::vector<std::vector<double>>  _base_heights;
+    int                               _outputLayerID; // 1- Building, 2 onwards - surface layers
 };
 
 #endif //CITYCFD_TOPOFEATURE_H

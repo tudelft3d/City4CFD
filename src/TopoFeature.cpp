@@ -92,30 +92,38 @@ PolyFeature::PolyFeature(const nlohmann::json& poly, const int outputLayerID)
 PolyFeature::~PolyFeature() = default;
 
 void PolyFeature::calc_footprint_elevation(const SearchTree& searchTree) {
-    //-- Calculate elevation of polygon outer boundary
-    //-- Point elevation is the average of 5 nearest neighbors from the PC
-    for (auto& polypt : _poly.outer_boundary()) {
-        Point_3 query(polypt.x() , polypt.y(), 0);
-        Neighbor_search search(searchTree, query, 5);
-        // TODO: will have to calculate polygon elevation from CDT using somethin like NNI
+    // necessary reminder to rewrite polygons to something more comfortable
+    //-- Temporary - will rewrite polygons
+    std::vector<Polygon_2> rings;
+    //- Add outer poly and holes into one data structure
+    rings.push_back(_poly.outer_boundary());
+    for (auto& hole: _poly.holes()) {
+        rings.push_back(hole);
+    }
+
+    for (auto& ring: rings) {
+        //-- Calculate elevation of polygon outer boundary
+        //-- Point elevation is the average of 5 nearest neighbors from the PC
+        std::vector<double> ringHeights;
+        for (auto& polypt : ring) {
+            Point_3 query(polypt.x(), polypt.y(), 0);
+            Neighbor_search search(searchTree, query, 5);
+            // TODO: will have to calculate polygon elevation from CDT using somethin like NNI
 //        Fuzzy_sphere search_radius(query, 5);
 //        std::list<Point_3> result;
 //        searchTree.search(std::back_inserter(result), search_radius);
 
-        std::vector<double> poly_height;
-        for (Neighbor_search::iterator it = search.begin(); it != search.end(); ++it) {
-            poly_height.push_back(it->first.z());
+            std::vector<double> poly_height;
+            for (Neighbor_search::iterator it = search.begin(); it != search.end(); ++it) {
+                poly_height.push_back(it->first.z());
 //            poly_height.push_back(0);
-        }
+            }
 //        for (auto& pt : result) {
 //            poly_height.push_back(pt.z());
 //        }
-        _base_heights.emplace_back(geomtools::avg(poly_height));
-    }
-
-    //-- In case of inner rings, set inner points as average of outer points, as the last element in _baseHeights
-    if (_poly.has_holes()) {
-        _base_heights.emplace_back(geomtools::avg(_base_heights));
+            ringHeights.emplace_back(geomtools::avg(poly_height));
+        }
+        _base_heights.push_back(ringHeights);
     }
 }
 
@@ -151,7 +159,7 @@ const Polygon_with_holes_2& PolyFeature::get_poly() const {
     return _poly;
 }
 
-const std::vector<double>& PolyFeature::get_base_heights() const {
+const std::vector<std::vector<double>>& PolyFeature::get_base_heights() const {
     return _base_heights;
 }
 

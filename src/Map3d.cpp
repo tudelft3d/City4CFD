@@ -223,12 +223,11 @@ void Map3d::clear_features() {
     }
 }
 
-//-- Temp, new implementation:
 void Map3d::polygon_processing() {
     for (auto& f : _lsFeatures) { // todo parallel here?
-        std::cout << "New fieature!" << std::endl;
         double maxLen = 10.; // max length todo config or definition
         if (!f->is_active()) continue;
+        std::cout << "New fieature!" << std::endl;
         geomtools::shorten_long_poly_edges(f->get_poly().outer_boundary(), maxLen);
 //        for (auto& hole : f->get_poly().holes()) {
 //            geomtools::shorten_long_poly_edges(hole, maxLen);
