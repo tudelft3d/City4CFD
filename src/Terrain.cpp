@@ -61,18 +61,15 @@ void Terrain::constrain_footprint(const Polygon_with_holes_2& poly,
 
     int polyCount = 0;
     for (auto& ring : rings) {
-        std::vector<Vertex_handle> vh;
         //-- Add ring points
         int count = 0;
+        Polygon_3 pts;
         for (auto& polyVertex : ring) {
-            vh.emplace_back(_cdt.insert(Point_3(polyVertex.x(), polyVertex.y(), heights[polyCount][count++])));
+            pts.push_back(Point_3(polyVertex.x(), polyVertex.y(), heights[polyCount][count++]));
         }
 
         //-- Set added points as constraints
-        for (auto i = 0; i < vh.size() - 1; ++i) {
-            _cdt.insert_constraint(vh[i], vh[i + 1]);
-        }
-        _cdt.insert_constraint(vh.back(), vh.front());
+        _cdt.insert_constraint(pts.begin(), pts.end());
 
         ++polyCount;
     }

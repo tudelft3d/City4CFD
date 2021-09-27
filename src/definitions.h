@@ -93,6 +93,7 @@ typedef CGAL::Constrained_Delaunay_triangulation_2<Projection_traits, TDS, Itag>
 typedef CGAL::Constrained_triangulation_plus_2<CDTp>                                CDT;
 typedef CDT::Point                                                                  Point;
 typedef CGAL::Polygon_2<Kernel>                                                     Polygon_2;
+typedef CGAL::Polygon_2<Projection_traits>                                          Polygon_3;
 typedef CGAL::Polygon_with_holes_2<Kernel>                                          Polygon_with_holes_2;
 typedef CDT::Face_handle                                                            Face_handle;
 typedef CDT::Vertex_handle                                                          Vertex_handle;

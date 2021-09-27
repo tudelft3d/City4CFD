@@ -21,7 +21,6 @@ void Map3d::reconstruct() {
     this->collect_garbage();
     std::cout << "Num of features: " << _lsFeatures.size() << std::endl;
 
-
     //-- Avoid having too long polygons
     this->polygon_processing();
     std::cout << "Checking edge length done" << std::endl;
@@ -229,8 +228,8 @@ void Map3d::polygon_processing() {
         if (!f->is_active()) continue;
         std::cout << "New fieature!" << std::endl;
         geomtools::shorten_long_poly_edges(f->get_poly().outer_boundary(), maxLen);
-//        for (auto& hole : f->get_poly().holes()) {
-//            geomtools::shorten_long_poly_edges(hole, maxLen);
-//        }
+        for (auto& hole : f->get_poly().holes()) {
+            geomtools::shorten_long_poly_edges(hole, maxLen);
+        }
     }
 }
