@@ -1,6 +1,10 @@
 #include "Boundary.h"
 
-Boundary::Boundary() = default;
+Boundary::Boundary()
+    : TopoFeature() {}
+
+Boundary::Boundary(const int outputLayerID)
+    : TopoFeature(outputLayerID) {}
 
 Boundary::~Boundary() = default;
 
@@ -61,7 +65,9 @@ std::vector<double> Boundary::get_domain_bbox() {
 }
 
 //-- SIDES CLASS --//
-Sides::Sides() = default;
+Sides::Sides()
+    : Boundary(2) {
+}
 
 Sides::~Sides() = default;
 
@@ -97,7 +103,9 @@ std::string Sides::get_class_name() const {
 }
 
 //-- TOP CLASS --//
-Top::Top() = default;
+Top::Top()
+    : Boundary(3) {
+}
 
 Top::~Top() = default;
 

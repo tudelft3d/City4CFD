@@ -1,9 +1,10 @@
 #include "Building.h"
 
-Building::Building() = default;
+Building::Building()
+    : PolyFeature(), _height(-infty) {}
 
 Building::Building(const nlohmann::json& poly)
-    : PolyFeature(poly, 0), _height(-infty) {}
+    : PolyFeature(poly, 1), _height(-infty) {}
 
 Building::~Building() = default;
 

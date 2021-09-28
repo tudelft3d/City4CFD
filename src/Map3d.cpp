@@ -22,7 +22,7 @@ void Map3d::reconstruct() {
     std::cout << "Num of features: " << _lsFeatures.size() << std::endl;
 
     //-- Avoid having too long polygons
-    this->polygon_processing();
+//    this->polygon_processing();
     std::cout << "Checking edge length done" << std::endl;
 
     //-- Find polygon footprint elevation from point cloud
@@ -45,15 +45,15 @@ void Map3d::set_features() {
         _lsFeatures.push_back(building);
     }
     //- Other polygons
-    int count = 0;
+    int count = 4; //- Surface layer ID is 4 onwards
     for (auto& surfaceLayer : _polygonsSurfaceLayers) {
-        ++count; //- Surface layer ID is 1 onwards
         for (auto& poly : surfaceLayer["features"]) {
             if (poly["geometry"]["type"] != "Polygon") continue; // Make sure only polygons are added
 
             SurfaceLayer* semanticPoly = new SurfaceLayer(poly, count);
             _lsFeatures.push_back(semanticPoly);
         }
+        ++count;
     }
 
     //-- Boundary
@@ -88,7 +88,6 @@ void Map3d::set_boundaries() {
         //- Deactivate point cloud points that are out of bounds - static function of Boundary
         Boundary::set_bounds_to_pc(_pointCloud);
         Boundary::set_bounds_to_pc(_pointCloudBuildings);
-//        _pointCloud.collect_garbage();
 
         //- Add flat buffer zone between the terrain and boundary
         Boundary::add_buffer(_pointCloud);
@@ -148,6 +147,8 @@ bool Map3d::read_data() { // This will change with time
     //-- Read semantic polygons - will add it to a vector later
     _polygonsSurfaceLayers.emplace_back();
     IO::read_polygons(config::topoSem, _polygonsSurfaceLayers.back());
+    _polygonsSurfaceLayers.emplace_back();
+    IO::read_polygons(config::topoSem2, _polygonsSurfaceLayers.back());
 
     return true;
 }

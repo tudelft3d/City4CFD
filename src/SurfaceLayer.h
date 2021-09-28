@@ -7,7 +7,6 @@
 
 class SurfaceLayer : public PolyFeature {
 public:
-    using PolyFeature::PolyFeature;
     SurfaceLayer();
     SurfaceLayer(const int outputLayerID);
     SurfaceLayer(const nlohmann::json& poly, const int outputLayerID);

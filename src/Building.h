@@ -9,7 +9,6 @@
 
 class Building : public PolyFeature {
 public:
-    using PolyFeature::PolyFeature;
     Building();
     Building(const nlohmann::json& poly);
     ~Building();

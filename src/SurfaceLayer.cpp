@@ -1,11 +1,10 @@
 #include "SurfaceLayer.h"
 
-SurfaceLayer::SurfaceLayer() = default;
+SurfaceLayer::SurfaceLayer()
+    : PolyFeature() {}
 
 SurfaceLayer::SurfaceLayer(const int outputLayerID)
-    : SurfaceLayer() {
-    _outputLayerID = outputLayerID;
-}
+    : PolyFeature(outputLayerID) {}
 
 SurfaceLayer::SurfaceLayer(const nlohmann::json& poly, const int outputLayerID)
     : PolyFeature(poly, outputLayerID) {}

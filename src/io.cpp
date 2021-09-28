@@ -22,26 +22,41 @@ bool IO::read_polygons(const char* file, nlohmann::json& j) {
 //-- Output functions
 void IO::output_obj(const std::vector<TopoFeature*>& allFeatures) {
     using namespace config;
-    std::vector<std::ofstream> of;
-    std::vector<std::string>   fs(topoClassName.size()), bs(topoClassName.size());
+    int numOutputLayers = TopoFeature::get_num_output_layers();
 
-    std::vector<std::unordered_map<std::string, unsigned long>> dPts(topoClassName.size());
+    std::vector<std::ofstream> of;
+    std::vector<std::string>   fs(numOutputLayers), bs(numOutputLayers);
+
+    std::vector<std::unordered_map<std::string, unsigned long>> dPts(numOutputLayers);
     //-- Output points
     for (auto& f : allFeatures) {
         if (!f->is_active()) continue;
         if (outputSeparately)
-            IO::get_obj_pts(f->get_mesh(), fs[f->get_class()], bs[f->get_class()], dPts[f->get_class()]);
+            IO::get_obj_pts(f->get_mesh(),
+                            fs[f->get_output_layer_id()],
+                            bs[f->get_output_layer_id()],
+                            dPts[f->get_output_layer_id()]);
         else
-            IO::get_obj_pts(f->get_mesh(), fs[f->get_class()], bs[f->get_class()], dPts[0]);
+            IO::get_obj_pts(f->get_mesh(),
+                            fs[f->get_output_layer_id()],
+                            bs[f->get_output_layer_id()],
+                            dPts[0]);
+    }
+
+    //-- Get output layer names -- TEMP, could add it to config and have user defined names for surf layers
+    std::vector<std::string> outputLayerName = {"Terrain", "Buildings", "Sides", "Top"};
+    int surfLayer = 1;
+    for (auto i = 4; i < numOutputLayers; ++i) {
+        outputLayerName.push_back("SurfaceLayer_" + std::to_string(surfLayer++));
     }
 
     //-- Add class name and output to file
     if (!outputSeparately) of.emplace_back().open(outputFileName + ".obj");
     for (int i = 0; i < fs.size(); ++i) {
         if (bs[i].empty()) continue;
-        if (outputSeparately) of.emplace_back().open(outputFileName + "_" + topoClassName.at(i) + ".obj");
+        if (outputSeparately) of.emplace_back().open(outputFileName + "_" + outputLayerName[i] + ".obj");
 
-        of.back() << fs[i] << "\ng " << topoClassName.at(i) << bs[i];
+        of.back() << fs[i] << "\ng " << outputLayerName[i] << bs[i];
     }
     for (auto& f : of) f.close();
 }

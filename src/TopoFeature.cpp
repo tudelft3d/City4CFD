@@ -2,12 +2,23 @@
 
 //-- TopoFeature class
 TopoFeature::TopoFeature()
-        : _mesh(), _id(), _f_active(true) {}
+    : _mesh(), _id(), _f_active(true), _outputLayerID(-1) {}
 
-TopoFeature::TopoFeature(const int pid)
-    : _mesh(), _id(std::to_string(pid)), _f_active(true) {}
+TopoFeature::TopoFeature(std::string pid)
+    : _mesh(), _id(std::move(pid)), _f_active(true), _outputLayerID(-1) {}
+
+TopoFeature::TopoFeature(int outputLayerID)
+    : _mesh(), _id(), _f_active(true), _outputLayerID(outputLayerID) {
+    if (_outputLayerID + 1 > _numOfOutputLayers) _numOfOutputLayers = _outputLayerID + 1;
+}
 
 TopoFeature::~TopoFeature() = default;
+
+int TopoFeature::_numOfOutputLayers = 0;
+
+int TopoFeature::get_num_output_layers() {
+    return _numOfOutputLayers;
+}
 
 Mesh& TopoFeature::get_mesh() {
     return _mesh;
@@ -23,6 +34,10 @@ void TopoFeature::set_id(unsigned long id) {
 
 std::string TopoFeature::get_id() const {
     return _id;
+}
+
+const int TopoFeature::get_output_layer_id() const {
+    return _outputLayerID;
 }
 
 bool TopoFeature::is_active() const {
@@ -49,10 +64,13 @@ std::string TopoFeature::get_cityjson_primitive() const {
 
 //-- PolyFeature class
 PolyFeature::PolyFeature()
-    : TopoFeature(), _outputLayerID(-1) {}
+    : TopoFeature(), _poly(), _base_heights() {}
+
+PolyFeature::PolyFeature(const int outputLayerID)
+    : TopoFeature(outputLayerID), _poly(), _base_heights() {}
 
 PolyFeature::PolyFeature(const nlohmann::json& poly)
-    : TopoFeature(), _outputLayerID(-1) {
+    : TopoFeature(), _base_heights() {
     //-- Store the polygon
     nlohmann::json polygonStart;
     if (poly["geometry"]["type"] == "Polygon") {
@@ -75,10 +93,10 @@ PolyFeature::PolyFeature(const nlohmann::json& poly)
         pop_back_if_equal_to_front(tempPoly);
 
         if (_poly.is_unbounded()) {
-            if (tempPoly.is_clockwise_oriented()) tempPoly.reverse_orientation(); // weirdly enough, this breaks the whole thing
+            if (tempPoly.is_clockwise_oriented()) tempPoly.reverse_orientation();
             _poly = Polygon_with_holes_2(tempPoly);
         } else {
-            if (tempPoly.is_counterclockwise_oriented()) tempPoly.reverse_orientation(); // weirdly enough, this breaks the whole thing
+            if (tempPoly.is_counterclockwise_oriented()) tempPoly.reverse_orientation();
             _poly.add_hole(tempPoly);
         }
     }
@@ -87,6 +105,7 @@ PolyFeature::PolyFeature(const nlohmann::json& poly)
 PolyFeature::PolyFeature(const nlohmann::json& poly, const int outputLayerID)
     : PolyFeature(poly) {
     _outputLayerID = outputLayerID;
+    if (_outputLayerID + 1 > _numOfOutputLayers) _numOfOutputLayers = _outputLayerID + 1;
 }
 
 PolyFeature::~PolyFeature() = default;
@@ -161,10 +180,6 @@ const Polygon_with_holes_2& PolyFeature::get_poly() const {
 
 const std::vector<std::vector<double>>& PolyFeature::get_base_heights() const {
     return _base_heights;
-}
-
-const int PolyFeature::get_output_layer_id() const {
-    return _outputLayerID;
 }
 
 void PolyFeature::threeDfy(const SearchTree& searchTree) {

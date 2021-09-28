@@ -2,14 +2,14 @@
 #include "SurfaceLayer.h"
 
 Terrain::Terrain()
-    : TopoFeature() {}
+    : TopoFeature(0) {}
 
 Terrain::Terrain(int pid)
     : TopoFeature(pid) {}
 
 Terrain::~Terrain() {
     for (auto& layer : _surfaceLayersTerrain) {
-        layer = nullptr; delete layer;
+        delete layer; layer = nullptr;
     }
 }
 
@@ -69,7 +69,7 @@ void Terrain::constrain_footprint(const Polygon_with_holes_2& poly,
         }
 
         //-- Set added points as constraints
-        _cdt.insert_constraint(pts.begin(), pts.end());
+        _cdt.insert_constraint(pts.begin(), pts.end(), true);
 
         ++polyCount;
     }
@@ -116,8 +116,8 @@ void Terrain::create_mesh() {
     geomtools::cdt_to_mesh(_cdt, _mesh);
 
     // -- Create placeholders for surface layer mesh
-    int layerNum = 1; // Config or some other way
-    for (int i = 1; i <= layerNum; ++i) {
+    int layerNum = 2; // Config or some other way
+    for (int i = 4; i < layerNum + 4; ++i) { // Surface layers start with output ID 4
         SurfaceLayer* layer = new SurfaceLayer(i);
         geomtools::cdt_to_mesh(_cdt, layer->get_mesh(), i);
         _surfaceLayersTerrain.push_back(layer);

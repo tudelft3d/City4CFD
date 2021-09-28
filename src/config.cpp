@@ -4,15 +4,16 @@
 namespace config {
     //-- Input info
     const char* points_xyz = "data/input/ground_simplified.ply";
-    const char* gisdata    = "data/input/tudcampus_bgt.geojson";
+    const char* gisdata    = "data/input/tudcampus.geojson";
     const char* buildings_xyz    = "data/input/building_simplified.xyz";
     const char* topoSem = "data/input/Vegetation.geojson";
+    const char* topoSem2 = "data/input/Water.geojson";
 
     //-- Output info
     std::string outputFileName = "Mesh";
 
     //-- Domain dimensions
-    Point_2 pointOfInterest = Point_2(85420, 446221);
+    Point_2 pointOfInterest = Point_2(85420., 446221.);
     double radiusOfInfluRegion = 350.0;
     double dimOfDomain = 1000.0;
     double topHeight = 300.;
