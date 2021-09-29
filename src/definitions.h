@@ -3,26 +3,29 @@
 
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/Projection_traits_xy_3.h>
-#include <CGAL/Delaunay_triangulation_2.h>
+
+#include <CGAL/Point_set_3.h>
+#include <CGAL/Point_set_3/IO.h>
+#include <CGAL/Point_set_2.h>
+#include <CGAL/Polygon_2.h>
+#include <CGAL/Polygon_with_holes_2.h>
+#include <CGAL/Polygon_2_algorithms.h>
+#include <CGAL/IO/WKT.h>
+
 #include <CGAL/Triangulation_vertex_base_with_info_2.h>
 #include <CGAL/Triangulation_vertex_base_with_id_2.h>
 #include <CGAL/Triangulation_face_base_with_info_2.h>
-#include <CGAL/boost/graph/graph_traits_Delaunay_triangulation_2.h>
-#include <CGAL/boost/graph/copy_face_graph.h>
-#include <CGAL/Point_set_3.h>
-#include <CGAL/Point_set_3/IO.h>
-#include <CGAL/compute_average_spacing.h>
-#include <CGAL/Surface_mesh.h>
-#include <CGAL/Polygon_mesh_processing/locate.h>
-#include <CGAL/Polygon_mesh_processing/triangulate_hole.h>
-#include <CGAL/Polygon_mesh_processing/border.h>
-#include <CGAL/Polygon_mesh_processing/remesh.h>
-#include <boost/graph/adjacency_list.hpp>
-#include <CGAL/boost/graph/split_graph_into_polylines.h>
-#include <CGAL/IO/WKT.h>
+#include <CGAL/Delaunay_triangulation_2.h>
 #include <CGAL/Constrained_Delaunay_triangulation_2.h>
 #include <CGAL/Constrained_triangulation_plus_2.h>
 #include <CGAL/Triangulation_face_base_with_info_2.h>
+
+#include <CGAL/Surface_mesh.h>
+#include <CGAL/Polygon_mesh_processing/remesh.h>
+
+#include <boost/graph/adjacency_list.hpp>
+#include <CGAL/boost/graph/split_graph_into_polylines.h>
+#include <CGAL/compute_average_spacing.h>
 
 #include <CGAL/Kd_tree.h>
 #include <CGAL/algorithm.h>
@@ -31,16 +34,6 @@
 #include <CGAL/Search_traits_2.h>
 #include <CGAL/Search_traits_3.h>
 #include <CGAL/Orthogonal_k_neighbor_search.h>
-
-#include <CGAL/Point_set_2.h>
-#include <CGAL/Polygon_2.h>
-#include <CGAL/Polygon_with_holes_2.h>
-#include <CGAL/Polygon_2_algorithms.h>
-#include <CGAL/Boolean_set_operations_2.h>
-#include <CGAL/draw_polygon_with_holes_2.h> // Test to draw
-#include <CGAL/Qt/Basic_viewer_qt.h> // Test to draw
-
-#include <boost/algorithm/string.hpp>
 
 #include "nlohmann/json.hpp"
 
@@ -55,13 +48,12 @@ typedef Kernel::Segment_3          Segment_3;
 typedef CGAL::Point_set_3<Point_3> Point_set_3;
 
 //-- CGAL Mesh
-//using Mesh = CGAL::Surface_mesh<Point_3>;
-typedef CGAL::Surface_mesh<Point_3> Mesh;
+typedef CGAL::Surface_mesh<Point_3>                 Mesh;
 typedef Mesh::Vertex_index                          vertex_descriptor;
 typedef Mesh::Face_index                            face_descriptor;
 typedef Mesh::Property_map<face_descriptor, std::string> Face_property;
 
-//-- CGAL Normal
+//-- CGAL normal
 namespace PMP = CGAL::Polygon_mesh_processing;
 typedef Kernel::Vector_3 Vector;
 
@@ -73,7 +65,6 @@ typedef Neighbor_search::Tree                         SearchTree;
 typedef CGAL::Fuzzy_iso_box<Traits>                   Fuzzy_iso_box;
 typedef CGAL::Fuzzy_sphere<Traits>                    Fuzzy_sphere;
 
-//-- CGAL CDT
 struct FaceInfo2
 {
     FaceInfo2(){}
@@ -83,7 +74,7 @@ struct FaceInfo2
     }
     int surfaceLayer = -9999; // Face handle to output mesh for specific surface layer
 };
-
+//-- CGAL triangulation
 typedef CGAL::Triangulation_vertex_base_with_id_2<Projection_traits>                Vb;
 typedef CGAL::Triangulation_face_base_with_info_2<FaceInfo2, Projection_traits>     Fbb;
 typedef CGAL::Constrained_triangulation_face_base_2<Projection_traits, Fbb>         Fb;
@@ -94,10 +85,11 @@ typedef CGAL::Constrained_Delaunay_triangulation_2<Projection_traits, TDS, Itag>
 typedef CDT::Point                                                                  Point;
 typedef CGAL::Polygon_2<Kernel>                                                     Polygon_2;
 typedef CGAL::Polygon_2<Projection_traits>                                          Polygon_3;
-typedef CGAL::Polygon_with_holes_2<Kernel>                                          Polygon_with_holes_2;
+//typedef CGAL::Polygon_with_holes_2<Kernel>                                          Polygon_with_holes_2;
 typedef CDT::Face_handle                                                            Face_handle;
 typedef CDT::Vertex_handle                                                          Vertex_handle;
 
+//-- TopoClasses
 typedef enum {
     TERRAIN          = 0,
     BUILDING         = 1,
@@ -124,11 +116,40 @@ const std::map<int, std::string> topoClassName {
         {9, "SurfaceLayer"},
 };
 
+//-- Output formats
 typedef enum {
     OBJ       = 0,
     CityJSON  = 1,
     STL       = 2,
 } OutputFormat;
+
+//-- CGAL's Polygon_with_holes container sucks for not having iterator over all rings
+struct Polygon_with_holes_2 {
+    std::vector<Polygon_2> _rings;
+
+    std::vector<Polygon_2>& rings() {return _rings;}
+    const std::vector<Polygon_2>& rings() const {return _rings;}
+
+    bool has_holes() const {
+        if (_rings.size() > 1) return true;
+        return false;
+    }
+    Polygon_2& outer_boundary() {
+        return _rings.front();
+    }
+    const Polygon_2& outer_boundary() const {
+        return _rings.front();
+    }
+
+    const auto holes_begin() const {
+        if (has_holes()) return _rings.begin() + 1; else return _rings.end();
+    }
+    const auto holes_end() const {
+        return _rings.end();
+    }
+
+    const auto bbox() const {return _rings.front().bbox();}
+};
 
 //-- Global constants
 const double infty     = 1e6;

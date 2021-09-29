@@ -228,9 +228,8 @@ void Map3d::polygon_processing() {
         double maxLen = 10.; // max length todo config or definition
         if (!f->is_active()) continue;
         std::cout << "New fieature!" << std::endl;
-        geomtools::shorten_long_poly_edges(f->get_poly().outer_boundary(), maxLen);
-        for (auto& hole : f->get_poly().holes()) {
-            geomtools::shorten_long_poly_edges(hole, maxLen);
+        for (auto& ring : f->get_poly().rings()) {
+            geomtools::shorten_long_poly_edges(ring, maxLen);
         }
     }
 }

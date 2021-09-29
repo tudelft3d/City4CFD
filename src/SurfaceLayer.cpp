@@ -12,17 +12,8 @@ SurfaceLayer::SurfaceLayer(const nlohmann::json& poly, const int outputLayerID)
 SurfaceLayer::~SurfaceLayer() = default;
 
 void SurfaceLayer::check_feature_scope() {
-    // TODO: really gotta rewrite those polygons, cgal implementation is awful
-    //-- Temporary - will rewrite polygons
-    std::vector<Polygon_2> rings;
-    //- Add outer poly and holes into one data structure
-    rings.push_back(_poly.outer_boundary());
-    for (auto& hole : _poly.holes()) {
-        rings.push_back(hole);
-    }
-
     //-- Exclude all polygons that have at least one vertex outside the domain
-    for (auto& poly : rings) {
+    for (auto& poly : _poly.rings()) {
         for (auto& vert : poly) {
             if (pow(config::pointOfInterest.x() - vert.x(), 2)
                 + pow(config::pointOfInterest.y() - vert.y(), 2)

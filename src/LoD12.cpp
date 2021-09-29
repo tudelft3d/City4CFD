@@ -22,16 +22,8 @@ void LoD12::create_mesh(Mesh& mesh) {
     //-- Map CDT and Mesh vertices
     std::map<CDT::Vertex_handle, Mesh::Vertex_index> cdtToMesh;
 
-    //-- Temporary - will rewrite polygons
-    std::vector<Polygon_2> rings;
-    //- Add outer poly and holes into one data structure
-    rings.push_back(_poly.outer_boundary());
-    for (auto& hole : _poly.holes()) {
-        rings.push_back(hole);
-    }
-
     int polyCount = 0;
-    for (auto& poly : rings) { // Loop over polys
+    for (auto& poly : _poly.rings()) { // Loop over polys
         std::vector<Vertex_handle> cdt_handle;
         std::vector<Mesh::Vertex_index> mesh_vertex;
         int count = 0;

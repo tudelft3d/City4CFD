@@ -3,7 +3,6 @@ A code that reconstructs 3D city models specifically for CFD simulations
 
 # todo
 ## Short-term
-    - Different container for polygon with holes 
     - Adjust code to work with exact constructions
     - Height interpolation from CDT rather than PC
 

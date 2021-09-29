@@ -92,13 +92,12 @@ PolyFeature::PolyFeature(const nlohmann::json& poly)
         }
         pop_back_if_equal_to_front(tempPoly);
 
-        if (_poly.is_unbounded()) {
+        if (_poly._rings.empty()) {
             if (tempPoly.is_clockwise_oriented()) tempPoly.reverse_orientation();
-            _poly = Polygon_with_holes_2(tempPoly);
         } else {
             if (tempPoly.is_counterclockwise_oriented()) tempPoly.reverse_orientation();
-            _poly.add_hole(tempPoly);
         }
+        _poly._rings.push_back(tempPoly);
     }
 }
 
@@ -111,16 +110,7 @@ PolyFeature::PolyFeature(const nlohmann::json& poly, const int outputLayerID)
 PolyFeature::~PolyFeature() = default;
 
 void PolyFeature::calc_footprint_elevation(const SearchTree& searchTree) {
-    // necessary reminder to rewrite polygons to something more comfortable
-    //-- Temporary - will rewrite polygons
-    std::vector<Polygon_2> rings;
-    //- Add outer poly and holes into one data structure
-    rings.push_back(_poly.outer_boundary());
-    for (auto& hole: _poly.holes()) {
-        rings.push_back(hole);
-    }
-
-    for (auto& ring: rings) {
+    for (auto& ring : _poly.rings()) {
         //-- Calculate elevation of polygon outer boundary
         //-- Point elevation is the average of 5 nearest neighbors from the PC
         std::vector<double> ringHeights;
@@ -147,17 +137,8 @@ void PolyFeature::calc_footprint_elevation(const SearchTree& searchTree) {
 }
 
 void PolyFeature::check_feature_scope() { // todo maybe move it to buildings, make it pure virtual
-    // TODO: really gotta rewrite those polygons, cgal implementation is awful
-    //-- Temporary - will rewrite polygons
-    std::vector<Polygon_2> rings;
-    //- Add outer poly and holes into one data structure
-    rings.push_back(_poly.outer_boundary());
-    for (auto& hole : _poly.holes()) {
-        rings.push_back(hole);
-    }
-
     //-- Include all polygons that have at least one vertex in the influence region
-    for (auto& poly : rings) {
+    for (auto& poly : _poly.rings()) {
         for (auto& vert : poly) {
             if (pow(config::pointOfInterest.x() - vert.x(), 2)
               + pow(config::pointOfInterest.y() - vert.y(), 2)

@@ -50,17 +50,8 @@ void Terrain::threeDfy(const Point_set_3& pointCloud, const std::vector<PolyFeat
 
 void Terrain::constrain_footprint(const Polygon_with_holes_2& poly,
                                   const std::vector<std::vector<double>>& heights) {
-    // necessary reminder to rewrite polygons to something more comfortable
-    //-- Temporary - will rewrite polygons
-    std::vector<Polygon_2> rings;
-    //- Add outer poly and holes into one data structure
-    rings.push_back(poly.outer_boundary());
-    for (auto& hole: poly.holes()) {
-        rings.push_back(hole);
-    }
-
     int polyCount = 0;
-    for (auto& ring : rings) {
+    for (auto& ring : poly.rings()) {
         //-- Add ring points
         int count = 0;
         Polygon_3 pts;
