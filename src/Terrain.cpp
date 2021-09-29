@@ -40,7 +40,7 @@ void Terrain::threeDfy(const Point_set_3& pointCloud, const std::vector<PolyFeat
     std::cout << "Done constructing CDT" << std::endl;
 
     //-- Mark surface layer
-    geomtools::mark_surface_layers(this->get_cdt(), features);
+    geomtools::mark_domains(this->get_cdt(), features);
 
     //-- Store the CGAL terrain and surface layers in separate meshes
     this->create_mesh();

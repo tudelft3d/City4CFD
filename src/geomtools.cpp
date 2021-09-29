@@ -9,18 +9,6 @@ double geomtools::avg(const std::vector<double>& values) {
     return (average / (double)values.size());
 }
 
-double geomtools::median(std::vector<double> values) {
-    if (values.empty()) throw std::length_error("Can't calculate median of a zero-sized vector!");
-    std::sort(values.begin(), values.end());
-    if (values.size() % 2 != 0) {
-        unsigned long i = (values.size() + 1) / 2;
-        return values[i];
-    } else {
-        unsigned long i = values.size() / 2;
-        return ((values[i] + values[i+1]) / 2);
-    }
-}
-
 double geomtools::percentile(std::vector<double> values, const double percentile) {
     if (values.empty()) throw std::length_error("Can't calculate percentile of a zero-sized vector!");
     std::sort(values.begin(), values.end());
@@ -77,61 +65,9 @@ void geomtools::cdt_to_mesh(CDT& cdt, Mesh& mesh, const int surfaceLayerID) {
     }
 }
 
-//-- CGAL's default implementation on determining what's inside or outside CDT
+//-- CGAL's constrained domain marker expanded to mark different polygon types
 void geomtools::mark_domains(CDT& ct,
-             Face_handle start,
-             int index,
-             std::list<CDT::Edge>& border )
-{
-    if(start->info().nesting_level != -1){
-        return;
-    }
-    std::list<Face_handle> queue;
-    queue.push_back(start);
-    while(! queue.empty()){
-        Face_handle fh = queue.front();
-        queue.pop_front();
-        if(fh->info().nesting_level == -1){
-            fh->info().nesting_level = index;
-            for(int i = 0; i < 3; i++){
-                CDT::Edge e(fh,i);
-                Face_handle n = fh->neighbor(i);
-                if(n->info().nesting_level == -1){
-                    if(ct.is_constrained(e)) border.push_back(e);
-                    else queue.push_back(n);
-                }
-            }
-        }
-    }
-}
-
-void geomtools::mark_domains(CDT& cdt) {
-    for(CDT::Face_handle f : cdt.all_face_handles()){
-        f->info().nesting_level = -1;
-    }
-    std::list<CDT::Edge> border;
-    mark_domains(cdt, cdt.infinite_face(), 0, border);
-    while(! border.empty()){
-        CDT::Edge e = border.front();
-        border.pop_front();
-        Face_handle n = e.first->neighbor(e.second);
-        if(n->info().nesting_level == -1){
-            mark_domains(cdt, n, e.first->info().nesting_level+1, border);
-        }
-    }
-}
-
-void geomtools::mark_surface_layer(CDT& cdt, const int surfaceLayerIdx) {
-    geomtools::mark_domains(cdt);
-    for (auto& f : cdt.finite_face_handles()) {
-        if (f->info().in_domain() && f->info().surfaceLayer == -9999) {
-            f->info().surfaceLayer = surfaceLayerIdx;
-        }
-    }
-}
-
-void geomtools::mark_surface_layer(CDT& ct,
-                             Face_handle start,
+                             const Face_handle& start,
                              int index,
                              std::list<CDT::Edge>& border,
                              std::vector<PolyFeature*>& features)
@@ -141,20 +77,25 @@ void geomtools::mark_surface_layer(CDT& ct,
     }
 
     //-- Check which polygon contains the constrained (i.e. non-terrain) point
-    // -- I can add parts of this eventually to a new function
-    Point_3 chkPoint = CGAL::centroid(start->vertex(0)->point(),
-                                      start->vertex(1)->point(),
-                                      start->vertex(2)->point());
+    Point_3 chkPoint;
+    if (!features.empty()) {
+        chkPoint = CGAL::centroid(start->vertex(0)->point(),
+                                  start->vertex(1)->point(),
+                                  start->vertex(2)->point());
+    }
     int surfaceLayer = -1; //-- Default value is unmarked triangle, i.e. general terrain
-    // todo until I figure out better way to handle polygons, I have to loop over all polygons to resolve conflicts
-    // todo for now I have the order of importance in the features vector
     if (index != 0) {
-        for (auto & feature : features) {
+        for (auto& feature : features) {
+            if (!feature->is_active()) continue;
+            //- Polygons are already ordered according to importance - find first polygon
             if (geomtools::check_inside(chkPoint, feature->get_poly())){
                 if (feature->get_class() == BUILDING) {
-                    surfaceLayer = -1; // Same as terrain
-                   break;
-                } else surfaceLayer = feature->get_output_layer_id();
+                    surfaceLayer = -1; //- Leave building footprints as part of terrain
+                    break;
+                } else {
+                    surfaceLayer = feature->get_output_layer_id();
+                    break;
+                }
             }
         }
     }
@@ -179,27 +120,18 @@ void geomtools::mark_surface_layer(CDT& ct,
     }
 }
 
-void geomtools::mark_surface_layers(CDT& cdt, std::vector<PolyFeature*> features) {
-    //-- Filter out inactive features // temp remove buildings too
-    for (unsigned long i = 0; i < features.size();) {
-//        if (!features[i]->is_active() || features[i]->get_class() == BUILDING) {
-        if (!features[i]->is_active()) {
-            features.erase(features.begin() + i);
-        }
-        else ++i;
-    }
-
+void geomtools::mark_domains(CDT& cdt, std::vector<PolyFeature*> features) {
     for(CDT::Face_handle f : cdt.all_face_handles()){
         f->info().nesting_level = -1;
     }
     std::list<CDT::Edge> border;
-    mark_surface_layer(cdt, cdt.infinite_face(), 0, border, features);
+    mark_domains(cdt, cdt.infinite_face(), 0, border, features);
     while(! border.empty()){
         CDT::Edge e = border.front();
         border.pop_front();
         Face_handle n = e.first->neighbor(e.second);
         if(n->info().nesting_level == -1){
-            mark_surface_layer(cdt, n, e.first->info().nesting_level+1, border, features);
+            mark_domains(cdt, n, e.first->info().nesting_level + 1, border, features);
         }
     }
 }
@@ -210,7 +142,7 @@ void geomtools::shorten_long_poly_edges(Polygon_2& poly, double maxLen) {
         auto edge = polyVec[i + 1] - polyVec[i];
         double edgeSqLen = edge.squared_length();
         if (edgeSqLen > maxLen*maxLen) {
-            int    numSeg  = ceil(sqrt(edgeSqLen) / maxLen);
+            int  numSeg  = ceil(sqrt(edgeSqLen) / maxLen);
             auto segVec = edge / numSeg;
             ++i;
             for (auto j = 0; j < numSeg - 1; ++j) {

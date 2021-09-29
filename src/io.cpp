@@ -18,7 +18,6 @@ bool IO::read_polygons(const char* file, nlohmann::json& j) {
     return true;
 }
 
-//todo make output vectors depend on outputLayerID's rather than topoClasses - needed for many surfaceLayers
 //-- Output functions
 void IO::output_obj(const std::vector<TopoFeature*>& allFeatures) {
     using namespace config;
@@ -63,24 +62,34 @@ void IO::output_obj(const std::vector<TopoFeature*>& allFeatures) {
 
 void IO::output_stl(const std::vector<TopoFeature*>& allFeatures) {
     using namespace config;
+    int numOutputLayers = TopoFeature::get_num_output_layers();
+
     std::vector<std::ofstream> of;
-    std::vector<std::string>   fs(topoClassName.size());
+    std::vector<std::string>   fs(numOutputLayers);
 
     //-- Get all triangles
     for (auto& f : allFeatures) {
         if (!f->is_active()) continue;
-        IO::get_stl_pts(f->get_mesh(), fs[f->get_class()]);
+        IO::get_stl_pts(f->get_mesh(), fs[f->get_output_layer_id()]);
+    }
+
+
+    //-- Get output layer names -- TEMP, could add it to config and have user defined names for surf layers
+    std::vector<std::string> outputLayerName = {"Terrain", "Buildings", "Sides", "Top"};
+    int surfLayer = 1;
+    for (auto i = 4; i < numOutputLayers; ++i) {
+        outputLayerName.push_back("SurfaceLayer_" + std::to_string(surfLayer++));
     }
 
     //-- Add class name and output to file
     if (!outputSeparately) of.emplace_back().open(outputFileName + ".stl");
     for (int i = 0; i < fs.size(); ++i) {
         if (fs[i].empty()) continue;
-        if (outputSeparately) of.emplace_back().open(outputFileName + "_" + topoClassName.at(i) + ".stl");
+        if (outputSeparately) of.emplace_back().open(outputFileName + "_" + outputLayerName[i] + ".stl");
 
-        of.back() << "\nsolid " << topoClassName.at(i);
+        of.back() << "\nsolid " << outputLayerName[i];
         of.back() << fs[i];
-        of.back() << "\nendsolid " << topoClassName.at(i);
+        of.back() << "\nendsolid " << outputLayerName[i];
     }
     for (auto& f : of) f.close();
 }

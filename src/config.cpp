@@ -3,11 +3,10 @@
 //-- Config values are hardcoded until I add config file reading
 namespace config {
     //-- Input info
-    const char* points_xyz = "data/input/ground_simplified.ply";
-    const char* gisdata    = "data/input/tudcampus.geojson";
-    const char* buildings_xyz    = "data/input/building_simplified.xyz";
-    const char* topoSem = "data/input/Vegetation.geojson";
-    const char* topoSem2 = "data/input/Water.geojson";
+    const char*              points_xyz    = "data/input/ground_simplified.ply";
+    const char*              gisdata       = "data/input/tudcampus.geojson";
+    const char*              buildings_xyz = "data/input/building_simplified.xyz";
+    std::vector<const char*> topoLayers    = {"data/input/Vegetation.geojson", "data/input/Water.geojson"};
 
     //-- Output info
     std::string outputFileName = "Mesh";

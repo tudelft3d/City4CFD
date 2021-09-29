@@ -90,7 +90,7 @@ typedef CGAL::Constrained_triangulation_face_base_2<Projection_traits, Fbb>     
 typedef CGAL::Triangulation_data_structure_2<Vb,Fb>                                 TDS;
 typedef CGAL::Exact_predicates_tag                                                  Itag;
 typedef CGAL::Constrained_Delaunay_triangulation_2<Projection_traits, TDS, Itag>    CDT;
-//typedef CGAL::Constrained_triangulation_plus_2<CDTp>                                CDT;
+//typedef CGAL::Constrained_triangulation_plus_2<CDTp>                                CDT; // temp
 typedef CDT::Point                                                                  Point;
 typedef CGAL::Polygon_2<Kernel>                                                     Polygon_2;
 typedef CGAL::Polygon_2<Projection_traits>                                          Polygon_3;
@@ -111,19 +111,6 @@ typedef enum {
     SURFACELAYER     = 9,
 } TopoClass;
 
-
-/*
-const std::unordered_map<TopoClass, std::string> topoClassName {
-        {TERRAIN,  "Terrain"},
-        {BUILDING, "Building"},
-        {BOUNDARY, "Boundary"},
-        {WATER,    "Terrain"},
-        {BRIDGE,   "Bridge"},
-        {ROAD,     "Road"},
-        {FOREST,   "Forest"}
-};
- */
-
 const std::map<int, std::string> topoClassName {
         {0, "Terrain"},
         {1, "Building"},
@@ -136,7 +123,6 @@ const std::map<int, std::string> topoClassName {
         {8, "Top"},
         {9, "SurfaceLayer"},
 };
-
 
 typedef enum {
     OBJ       = 0,

@@ -144,11 +144,11 @@ bool Map3d::read_data() { // This will change with time
 
     //-- Read building polygons
     IO::read_polygons(config::gisdata, _polygonsBuildings);
-    //-- Read semantic polygons - will add it to a vector later
-    _polygonsSurfaceLayers.emplace_back();
-    IO::read_polygons(config::topoSem, _polygonsSurfaceLayers.back());
-    _polygonsSurfaceLayers.emplace_back();
-    IO::read_polygons(config::topoSem2, _polygonsSurfaceLayers.back());
+    //-- Read surface layer polygons
+    for (auto& topoLayer : config::topoLayers) {
+        _polygonsSurfaceLayers.emplace_back();
+        IO::read_polygons(topoLayer, _polygonsSurfaceLayers.back());
+    }
 
     return true;
 }
@@ -199,7 +199,7 @@ void Map3d::prep_cityjson_output() { // Temp impl, might change
     }
 };
 
-void Map3d::collect_garbage() { // Just a test for now, could be helpful when other polygons get implemented
+void Map3d::collect_garbage() {
     for (unsigned long i = 0; i < _lsFeatures.size();) {
         if (_lsFeatures[i]->is_active()) ++i;
         else {

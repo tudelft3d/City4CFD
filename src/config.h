@@ -8,8 +8,7 @@ namespace config {
     extern const char* points_xyz;
     extern const char* gisdata;
     extern const char* buildings_xyz;
-    extern const char* topoSem; // It'll be a vector of all files
-    extern const char* topoSem2; // It'll be a vector of all files
+    extern std::vector<const char*> topoLayers;
 
     //-- Output info
     extern std::string outputFileName;
