@@ -2,6 +2,7 @@
 #define CITYCFD_DEFINITIONS_H
 
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+#include <CGAL/Exact_predicates_exact_constructions_kernel.h>
 #include <CGAL/Projection_traits_xy_3.h>
 
 #include <CGAL/Point_set_3.h>
@@ -38,27 +39,33 @@
 #include "nlohmann/json.hpp"
 
 //-- CGAL Basics
-typedef CGAL::Exact_predicates_inexact_constructions_kernel  Kernel;
-typedef CGAL::Projection_traits_xy_3<Kernel>                 Projection_traits;
+typedef CGAL::Exact_predicates_inexact_constructions_kernel  EPICK;
+typedef CGAL::Exact_predicates_exact_constructions_kernel    EPECK;
+typedef CGAL::Projection_traits_xy_3<EPECK>                  Projection_traits;
+
+//-- Kernel converter
+typedef CGAL::Cartesian_converter<EPECK, EPICK> EK_TO_IK;
+typedef CGAL::Cartesian_converter<EPICK, EPECK> IK_TO_EK;
 
 //-- CGAL Point
-typedef Kernel::Point_2            Point_2;
-typedef Kernel::Point_3            Point_3;
-typedef Kernel::Segment_3          Segment_3;
+typedef EPICK::Point_2            Point_2;
+typedef EPICK::Point_3            Point_3;
+typedef EPECK::Point_3            ePoint_3;
+typedef EPICK::Segment_3          Segment_3;
 typedef CGAL::Point_set_3<Point_3> Point_set_3;
 
 //-- CGAL Mesh
-typedef CGAL::Surface_mesh<Point_3>                 Mesh;
-typedef Mesh::Vertex_index                          vertex_descriptor;
-typedef Mesh::Face_index                            face_descriptor;
+typedef CGAL::Surface_mesh<Point_3>                      Mesh;
+typedef Mesh::Vertex_index                               vertex_descriptor;
+typedef Mesh::Face_index                                 face_descriptor;
 typedef Mesh::Property_map<face_descriptor, std::string> Face_property;
 
 //-- CGAL normal
 namespace PMP = CGAL::Polygon_mesh_processing;
-typedef Kernel::Vector_3 Vector;
+typedef EPICK::Vector_3 Vector;
 
 //-- CGAL tree search
-typedef CGAL::Search_traits_3<Kernel>                 Traits;
+typedef CGAL::Search_traits_3<EPICK>                 Traits;
 //typedef CGAL::Kd_tree<Traits>                         SearchTree;
 typedef CGAL::Orthogonal_k_neighbor_search<Traits>    Neighbor_search;
 typedef Neighbor_search::Tree                         SearchTree;
@@ -75,19 +82,21 @@ struct FaceInfo2
     int surfaceLayer = -9999; // Face handle to output mesh for specific surface layer
 };
 //-- CGAL triangulation
-typedef CGAL::Triangulation_vertex_base_with_id_2<Projection_traits>                Vb;
-typedef CGAL::Triangulation_face_base_with_info_2<FaceInfo2, Projection_traits>     Fbb;
-typedef CGAL::Constrained_triangulation_face_base_2<Projection_traits, Fbb>         Fb;
-typedef CGAL::Triangulation_data_structure_2<Vb,Fb>                                 TDS;
-typedef CGAL::Exact_predicates_tag                                                  Itag;
-typedef CGAL::Constrained_Delaunay_triangulation_2<Projection_traits, TDS, Itag>    CDT;
-//typedef CGAL::Constrained_triangulation_plus_2<CDTp>                                CDT; // temp
-typedef CDT::Point                                                                  Point;
-typedef CGAL::Polygon_2<Kernel>                                                     Polygon_2;
-typedef CGAL::Polygon_2<Projection_traits>                                          Polygon_3;
-//typedef CGAL::Polygon_with_holes_2<Kernel>                                          Polygon_with_holes_2;
-typedef CDT::Face_handle                                                            Face_handle;
-typedef CDT::Vertex_handle                                                          Vertex_handle;
+typedef CGAL::Triangulation_vertex_base_with_id_2<Projection_traits>               Vb;
+typedef CGAL::Triangulation_face_base_with_info_2<FaceInfo2, Projection_traits>    Fbb;
+typedef CGAL::Constrained_triangulation_face_base_2<Projection_traits, Fbb>        Fb;
+typedef CGAL::Triangulation_data_structure_2<Vb,Fb>                                TDS;
+//typedef CGAL::Exact_predicates_tag                                                  Itag;
+typedef CGAL::Exact_intersections_tag                                              Itag;
+typedef CGAL::Constrained_Delaunay_triangulation_2<Projection_traits, TDS, Itag>   CDTp;
+typedef CGAL::Constrained_triangulation_plus_2<CDTp>                               CDT;
+typedef CDT::Point                                                                 Point;
+typedef CDT::Face_handle                                                           Face_handle;
+typedef CDT::Vertex_handle                                                         Vertex_handle;
+
+typedef CGAL::Polygon_2<EPICK>                                                     Polygon_2;
+typedef CGAL::Polygon_2<Projection_traits>                                         Polygon_3;
+//typedef CGAL::Polygon_with_holes_2<EPICK>                                          Polygon_with_holes_2;
 
 //-- TopoClasses
 typedef enum {

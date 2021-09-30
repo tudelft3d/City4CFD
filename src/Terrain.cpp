@@ -31,7 +31,6 @@ void Terrain::threeDfy(const Point_set_3& pointCloud, const std::vector<PolyFeat
 
     //-- Constrain buildings
     for (auto& feature : features) {
-        //debug
         if (!feature->is_active() || feature->get_class() != BUILDING) continue;
         std::cout << "Constrained feature " << count++ << " of class" << feature->get_class_name() << std::endl;
         this->constrain_footprint(feature->get_poly(), feature->get_base_heights());
@@ -56,7 +55,7 @@ void Terrain::constrain_footprint(const Polygon_with_holes_2& poly,
         int count = 0;
         Polygon_3 pts;
         for (auto& polyVertex : ring) {
-            pts.push_back(Point_3(polyVertex.x(), polyVertex.y(), heights[polyCount][count++]));
+            pts.push_back(ePoint_3(polyVertex.x(), polyVertex.y(), heights[polyCount][count++]));
         }
 
         //-- Set added points as constraints
@@ -67,7 +66,9 @@ void Terrain::constrain_footprint(const Polygon_with_holes_2& poly,
 }
 
 void Terrain::set_cdt(const Point_set_3& pointCloud) {
-    _cdt.insert(pointCloud.points().begin(), pointCloud.points().end());
+    IK_TO_EK to_exact;
+    for (auto& pt : pointCloud.points()) _cdt.insert(to_exact(pt));
+//    _cdt.insert(pointCloud.points().begin(), pointCloud.points().end());
 }
 
 //-- Taken from CGAL's example
@@ -83,7 +84,7 @@ void Terrain::smooth(const Point_set_3& pointCloud) {
     double gaussian_variance = 4 * spacing * spacing;
     for (CDT::Vertex_handle vh : _cdt.finite_vertex_handles())
     {
-        double z = vh->point().z();
+        double z = CGAL::to_double(vh->point().z());
         double total_weight = 1;
         CDT::Vertex_circulator circ = _cdt.incident_vertices (vh),
                 start = circ;
@@ -91,15 +92,15 @@ void Terrain::smooth(const Point_set_3& pointCloud) {
         {
             if (!_cdt.is_infinite(circ))
             {
-                double sq_dist = CGAL::squared_distance (vh->point(), circ->point());
+                double sq_dist = CGAL::squared_distance (EK_TO_IK()(vh->point()), EK_TO_IK()(circ->point()));
                 double weight = std::exp(- sq_dist / gaussian_variance);
-                z += weight * circ->point().z();
+                z += weight * CGAL::to_double(circ->point().z());
                 total_weight += weight;
             }
         }
         while (++ circ != start);
         z /= total_weight;
-        vh->point() = Point_3 (vh->point().x(), vh->point().y(), z);
+        vh->point() = CGAL::Point_3<EPECK> (vh->point().x(), vh->point().y(), z);
     }
 }
 

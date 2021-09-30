@@ -1,9 +1,7 @@
 #ifndef CITYCFD_BUILDING_H
 #define CITYCFD_BUILDING_H
 
-#include "definitions.h"
 #include "geomtools.h"
-#include "io.h"
 #include "TopoFeature.h"
 #include "LoD12.h"
 

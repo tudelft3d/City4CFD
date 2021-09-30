@@ -22,7 +22,7 @@ void Map3d::reconstruct() {
     std::cout << "Num of features: " << _lsFeatures.size() << std::endl;
 
     //-- Avoid having too long polygons
-//    this->polygon_processing();
+    this->polygon_processing();
     std::cout << "Checking edge length done" << std::endl;
 
     //-- Find polygon footprint elevation from point cloud
@@ -225,7 +225,7 @@ void Map3d::clear_features() {
 
 void Map3d::polygon_processing() {
     for (auto& f : _lsFeatures) { // todo parallel here?
-        double maxLen = 10.; // max length todo config or definition
+        double maxLen = 5.; // max length todo config or definition
         if (!f->is_active()) continue;
         std::cout << "New fieature!" << std::endl;
         for (auto& ring : f->get_poly().rings()) {

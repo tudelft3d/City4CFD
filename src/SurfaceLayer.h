@@ -1,7 +1,6 @@
 #ifndef CITYCFD_SURFACELAYER_H
 #define CITYCFD_SURFACELAYER_H
 
-#include "definitions.h"
 #include "config.h"
 #include "TopoFeature.h"
 

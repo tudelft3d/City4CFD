@@ -50,7 +50,7 @@ void geomtools::cdt_to_mesh(CDT& cdt, Mesh& mesh, const int surfaceLayerID) {
 
     int counter = 0;
     for (const auto& it : cdt.finite_vertex_handles()) {
-        mesh_vertex.emplace_back(mesh.add_vertex(it->point()));
+        mesh_vertex.emplace_back(mesh.add_vertex(EK_TO_IK()(it->point())));
         //        outstream << it->point() << std::endl;
         indices.insert(std::pair<CDT::Vertex_handle, int>(it, counter++));
     }
@@ -78,10 +78,11 @@ void geomtools::mark_domains(CDT& ct,
 
     //-- Check which polygon contains the constrained (i.e. non-terrain) point
     Point_3 chkPoint;
+    EK_TO_IK to_inexact;
     if (!features.empty()) {
-        chkPoint = CGAL::centroid(start->vertex(0)->point(),
-                                  start->vertex(1)->point(),
-                                  start->vertex(2)->point());
+        chkPoint = CGAL::centroid(to_inexact(start->vertex(0)->point()),
+                                  to_inexact(start->vertex(1)->point()),
+                                  to_inexact(start->vertex(2)->point()));
     }
     int surfaceLayer = -1; //-- Default value is unmarked triangle, i.e. general terrain
     if (index != 0) {
