@@ -18,9 +18,6 @@ void Terrain::set_cdt(const Point_set_3& pointCloud) {
 }
 
 void Terrain::threeDfy(const Point_set_3& pointCloud, const std::vector<PolyFeature*>& features) {
-//    //-- Add ground points from the point cloud to terrain
-//    this->set_cdt(pointCloud); // CDT's got to go first if performing smoothing
-
     int count = 0;
     //-- Constrain surface layers
     for (auto& f : features) {

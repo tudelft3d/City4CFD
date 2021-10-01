@@ -109,40 +109,9 @@ PolyFeature::PolyFeature(const nlohmann::json& poly, const int outputLayerID)
 
 PolyFeature::~PolyFeature() = default;
 
-void PolyFeature::calc_footprint_elevation(const DT& dt) {
-    typedef CGAL::Barycentric_coordinates::Triangle_coordinates_2<iProjection_traits>   Triangle_coordinates;
-    typedef CGAL::Interpolation_traits_2<iProjection_traits>                            Interpolation_traits;
-    typedef CGAL::Data_access< std::map<DT::Point, double, iProjection_traits::Less_xy_2 >> Value_access;
-    DT::Face_handle fh = 0;
-    for (auto& ring : _poly.rings()) {
-        std::vector<double> ringHeights;
-        for (auto& polypt : ring) {
-            std::map<DT::Point, double, iProjection_traits::Less_xy_2> point_function_value;
-            std::vector< std::pair<DT::Point, double>> point_coordinates(1);
-
-            DT::Point pt(polypt.x(), polypt.y(), 0);
-            fh = dt.locate(pt, fh);
-
-            std::vector<DT::Point> cdtPt;
-            for (int i = 0; i < 3; ++i) {
-                cdtPt.push_back(fh->vertex(i)->point());
-                point_function_value.insert(std::make_pair(cdtPt.back(), cdtPt.back().z()));
-            }
-            Triangle_coordinates triangle_coordinates(cdtPt[0], cdtPt[1], cdtPt[2]);
-            std::vector<double> coords;
-            triangle_coordinates(pt, std::back_inserter(coords));
-            point_coordinates[0] = std::make_pair(pt, coords[0]);
-
-            double h = CGAL::linear_interpolation(point_coordinates.begin(), point_coordinates.end(), double(1), Value_access(point_function_value));
-            ringHeights.push_back(h);
-        }
-        _base_heights.push_back(ringHeights);
-    }
-}
-
 void PolyFeature::calc_footprint_elevation_nni(const DT& dt) {
     typedef std::vector<std::pair<DT::Point, double>> Point_coordinate_vector;
-    DT::Face_handle fh = 0;
+    DT::Face_handle fh = nullptr;
     for (auto& ring: _poly.rings()) {
         std::vector<double> ringHeights;
         for (auto& polypt: ring) {
@@ -165,6 +134,34 @@ void PolyFeature::calc_footprint_elevation_nni(const DT& dt) {
     }
 }
 
+void PolyFeature::calc_footprint_elevation_linear(const DT& dt) {
+    typedef CGAL::Barycentric_coordinates::Triangle_coordinates_2<iProjection_traits>   Triangle_coordinates;
+    DT::Face_handle fh = nullptr;
+    for (auto& ring : _poly.rings()) {
+        std::vector<double> ringHeights;
+        for (auto& polypt : ring) {
+
+            DT::Point pt(polypt.x(), polypt.y(), 0);
+            fh = dt.locate(pt, fh);
+
+            std::vector<DT::Point> cdtPt;
+            for (int i = 0; i < 3; ++i) {
+                cdtPt.push_back(fh->vertex(i)->point());
+            }
+            Triangle_coordinates triangle_coordinates(cdtPt[0], cdtPt[1], cdtPt[2]);
+            std::vector<double> coords;
+            triangle_coordinates(pt, std::back_inserter(coords));
+
+            double h = 0;
+            for (int i = 0; i < 3; ++i) {
+                h += cdtPt[i].z() * coords[i];
+            }
+            ringHeights.push_back(h);
+        }
+        _base_heights.push_back(ringHeights);
+    }
+}
+
 void PolyFeature::calc_footprint_elevation_from_pc(const SearchTree& searchTree) {
     for (auto& ring : _poly.rings()) {
         //-- Calculate elevation of polygon outer boundary
@@ -173,7 +170,6 @@ void PolyFeature::calc_footprint_elevation_from_pc(const SearchTree& searchTree)
         for (auto& polypt : ring) {
             Point_3 query(polypt.x(), polypt.y(), 0);
             Neighbor_search search(searchTree, query, 5);
-            // TODO: will have to calculate polygon elevation from CDT using somethin like NNI
 //        Fuzzy_sphere search_radius(query, 5);
 //        std::list<Point_3> result;
 //        searchTree.search(std::back_inserter(result), search_radius);
@@ -181,7 +177,6 @@ void PolyFeature::calc_footprint_elevation_from_pc(const SearchTree& searchTree)
             std::vector<double> poly_height;
             for (Neighbor_search::iterator it = search.begin(); it != search.end(); ++it) {
                 poly_height.push_back(it->first.z());
-//            poly_height.push_back(0);
             }
 //        for (auto& pt : result) {
 //            poly_height.push_back(pt.z());

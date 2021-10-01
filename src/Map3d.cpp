@@ -9,7 +9,6 @@ Map3d::~Map3d() {
 void Map3d::reconstruct() {
     //-- Prepare features
     this->set_features();
-
     std::cout << "Features done" << std::endl;
     std::cout << "Num of features: " << _lsFeatures.size() << std::endl;
 
@@ -21,11 +20,12 @@ void Map3d::reconstruct() {
     this->collect_garbage();
     std::cout << "Num of features: " << _lsFeatures.size() << std::endl;
 
-    this->cdt_terrain();
+    //-- Add PC points to DT
+    this->triangulate_terrain();
     std::cout << "CDT terrain done" << std::endl;
 
     //-- Avoid having too long polygons
-//    this->polygon_processing(); // commented out for now
+    this->polygon_processing();
     std::cout << "Checking edge length done" << std::endl;
 
     //-- Find polygon footprint elevation from point cloud
@@ -64,10 +64,6 @@ void Map3d::set_features() {
     _boundaries.push_back(sides); _boundaries.push_back(top);
 }
 
-void Map3d::cdt_terrain() {
-    _terrain->set_cdt(_pointCloud);
-}
-
 void Map3d::set_boundaries() {
     //-- Set the influence region --//
     //- Define radius of interest
@@ -102,21 +98,35 @@ void Map3d::set_boundaries() {
     }
 }
 
-void Map3d::set_footprint_elevation() {
-    //-- Construct a searchTree to search for elevation
-    SearchTree searchTree;
-    searchTree.insert(_pointCloud.points().begin(), _pointCloud.points().end());
+void Map3d::triangulate_terrain() {
+    _terrain->set_cdt(_pointCloud);
+}
 
-//    DT dt;
-//    dt.insert(_pointCloud.points().begin(), _pointCloud.points().end());
-
-    int count = 0;
+void Map3d::polygon_processing() {
     for (auto& f : _lsFeatures) {
         if (!f->is_active()) continue;
-        std::cout << "Poly no " << count++ << std::endl;
+        std::cout << "New fieature!" << std::endl;
+        for (auto& ring : f->get_poly().rings()) {
+            geomtools::shorten_long_poly_edges(ring);
+        }
+    }
+}
+
+void Map3d::set_footprint_elevation() {
+    //-- Construct a searchTree to search for elevation
+//    SearchTree searchTree;
+//    searchTree.insert(_pointCloud.points().begin(), _pointCloud.points().end());
+
+    //-- Make a DT with inexact constructions for fast interpolation
+    DT dt;
+    dt.insert(_pointCloud.points().begin(), _pointCloud.points().end());
+
+    for (auto& f : _lsFeatures) {
+        if (!f->is_active()) continue;
         try {
-//            f->calc_footprint_elevation(dt);
-            f->calc_footprint_elevation_from_pc(searchTree);
+            f->calc_footprint_elevation_nni(dt); // NNI is quite slow in debug mode, better to use linear for it
+//            f->calc_footprint_elevation_linear(dt);
+//            f->calc_footprint_elevation_from_pc(searchTree);
         } catch (std::exception& e) {
             std::cerr << std::endl << "Footprint elevation calculation failed for object \'" << f->get_id() << "\' (class " << f->get_class() << ") with error: " << e.what() << std::endl;
         }
@@ -234,16 +244,5 @@ void Map3d::clear_features() {
     }
     for (auto& b : _boundaries) {
         delete b; b = nullptr;
-    }
-}
-
-void Map3d::polygon_processing() {
-    for (auto& f : _lsFeatures) { // todo parallel here?
-        double maxLen = 5.; // max length todo config or definition
-        if (!f->is_active()) continue;
-        std::cout << "New fieature!" << std::endl;
-        for (auto& ring : f->get_poly().rings()) {
-            geomtools::shorten_long_poly_edges(ring, maxLen);
-        }
     }
 }

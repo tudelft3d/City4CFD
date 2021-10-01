@@ -23,6 +23,9 @@ namespace config {
    extern double       lod;
    extern double       buildingPercentile;
 
+   //-- Polygon
+   extern double       edgeMaxLen;
+
    //-- Output flags
    extern OutputFormat outputFormat;
    extern bool         outputSeparately;

@@ -21,6 +21,9 @@ namespace config {
     double lod                = 1.2;
     double buildingPercentile = 0.9;
 
+    //-- Polygon
+    double edgeMaxLen = 3;
+
     //-- Output flags
     OutputFormat outputFormat = OBJ;
     bool outputSeparately = true;

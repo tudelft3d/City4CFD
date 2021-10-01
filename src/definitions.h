@@ -37,8 +37,6 @@
 #include <CGAL/Orthogonal_k_neighbor_search.h>
 #include <CGAL/natural_neighbor_coordinates_2.h>
 #include <CGAL/Barycentric_coordinates_2/Triangle_coordinates_2.h>
-#include <CGAL/Interpolation_traits_2.h>
-#include <CGAL/interpolation_functions.h>
 
 #include "nlohmann/json.hpp"
 
@@ -98,9 +96,7 @@ typedef CGAL::Constrained_triangulation_plus_2<CDTp>                            
 typedef CDT::Point                                                                 Point;
 typedef CDT::Face_handle                                                           Face_handle;
 typedef CDT::Vertex_handle                                                         Vertex_handle;
-
-//testing
-typedef CGAL::Delaunay_triangulation_2<CGAL::Projection_traits_xy_3<EPICK>> DT;
+typedef CGAL::Delaunay_triangulation_2<CGAL::Projection_traits_xy_3<EPICK>>        DT;
 
 typedef CGAL::Polygon_2<EPICK>                                                     Polygon_2;
 typedef CGAL::Polygon_2<Projection_traits>                                         Polygon_3;

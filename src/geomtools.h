@@ -15,7 +15,7 @@ namespace geomtools {
     void   mark_domains(CDT& cdt, std::vector<PolyFeature*> features = {});
     void   mark_domains(CDT& ct, const Face_handle& start, int index,
                         std::list<CDT::Edge>& border, std::vector<PolyFeature*>& features);
-    void   shorten_long_poly_edges(Polygon_2& poly, double maxEdgeLength);
+    void   shorten_long_poly_edges(Polygon_2& poly);
 }
 
 #endif //CITYCFD_GEOMTOOLS_H

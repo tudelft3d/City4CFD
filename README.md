@@ -3,8 +3,9 @@ A code that reconstructs 3D city models specifically for CFD simulations
 
 # todo
 ## Short-term
-    - Adjust code to work with exact constructions
-    - Height interpolation from CDT rather than PC
+    - Try to make Ken's enhanced cdt work
+    - Try some of the remeshing utilities to get a smoother surface
+    - Look into averaging water
 
 ## Longer-term
     - Point cloud processing

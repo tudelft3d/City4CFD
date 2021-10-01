@@ -2,7 +2,6 @@
 #define CITYCFD_IO_H
 
 #include "iostream"
-#include "definitions.h"
 #include "config.h"
 #include "TopoFeature.h"
 #include "Boundary.h"

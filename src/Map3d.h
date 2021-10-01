@@ -30,8 +30,8 @@ private:
      std::vector<TopoFeature*>    _outputFeatures;
 
     void set_features();
-    void cdt_terrain();
     void set_boundaries();
+    void triangulate_terrain();
     void polygon_processing();
     void set_footprint_elevation();
     void threeDfy();

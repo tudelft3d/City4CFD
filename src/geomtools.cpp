@@ -137,7 +137,8 @@ void geomtools::mark_domains(CDT& cdt, std::vector<PolyFeature*> features) {
     }
 }
 
-void geomtools::shorten_long_poly_edges(Polygon_2& poly, double maxLen) {
+void geomtools::shorten_long_poly_edges(Polygon_2& poly) {
+    double maxLen = config::edgeMaxLen;
     auto& polyVec = poly.container();
     for (auto i = 0; i < polyVec.size() - 1;) {
         auto edge = polyVec[i + 1] - polyVec[i];
