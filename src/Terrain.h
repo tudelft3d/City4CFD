@@ -4,8 +4,7 @@
 #include "config.h"
 #include "geomtools.h"
 #include "TopoFeature.h"
-
-class SurfaceLayer;
+#include "SurfaceLayer.h"
 
 class Terrain : public TopoFeature {
 public:
@@ -14,6 +13,7 @@ public:
     Terrain(int pid);
     ~Terrain();
 
+    void set_cdt(const Point_set_3 &pointCloud);
     void threeDfy(const Point_set_3& pointCloud, const std::vector<PolyFeature*>& features);
 
     CDT&         get_cdt();
@@ -31,7 +31,6 @@ protected:
     CDT  _cdt;
     std::vector<SurfaceLayer*> _surfaceLayersTerrain; // Vector or list for the mesh?
 
-    void set_cdt(const Point_set_3 &pointCloud);
     void smooth(const Point_set_3& pointCloud);
     void create_mesh();
 };

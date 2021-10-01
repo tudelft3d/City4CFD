@@ -1,7 +1,6 @@
 #ifndef CITYCFD_MAP3D_H
 #define CITYCFD_MAP3D_H
 
-#include "definitions.h"
 #include "config.h"
 #include "io.h"
 #include "TopoFeature.h"
@@ -31,6 +30,7 @@ private:
      std::vector<TopoFeature*>    _outputFeatures;
 
     void set_features();
+    void cdt_terrain();
     void set_boundaries();
     void polygon_processing();
     void set_footprint_elevation();

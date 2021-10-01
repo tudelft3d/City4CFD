@@ -109,7 +109,63 @@ PolyFeature::PolyFeature(const nlohmann::json& poly, const int outputLayerID)
 
 PolyFeature::~PolyFeature() = default;
 
-void PolyFeature::calc_footprint_elevation(const SearchTree& searchTree) {
+void PolyFeature::calc_footprint_elevation(const DT& dt) {
+    typedef CGAL::Barycentric_coordinates::Triangle_coordinates_2<iProjection_traits>   Triangle_coordinates;
+    typedef CGAL::Interpolation_traits_2<iProjection_traits>                            Interpolation_traits;
+    typedef CGAL::Data_access< std::map<DT::Point, double, iProjection_traits::Less_xy_2 >> Value_access;
+    DT::Face_handle fh = 0;
+    for (auto& ring : _poly.rings()) {
+        std::vector<double> ringHeights;
+        for (auto& polypt : ring) {
+            std::map<DT::Point, double, iProjection_traits::Less_xy_2> point_function_value;
+            std::vector< std::pair<DT::Point, double>> point_coordinates(1);
+
+            DT::Point pt(polypt.x(), polypt.y(), 0);
+            fh = dt.locate(pt, fh);
+
+            std::vector<DT::Point> cdtPt;
+            for (int i = 0; i < 3; ++i) {
+                cdtPt.push_back(fh->vertex(i)->point());
+                point_function_value.insert(std::make_pair(cdtPt.back(), cdtPt.back().z()));
+            }
+            Triangle_coordinates triangle_coordinates(cdtPt[0], cdtPt[1], cdtPt[2]);
+            std::vector<double> coords;
+            triangle_coordinates(pt, std::back_inserter(coords));
+            point_coordinates[0] = std::make_pair(pt, coords[0]);
+
+            double h = CGAL::linear_interpolation(point_coordinates.begin(), point_coordinates.end(), double(1), Value_access(point_function_value));
+            ringHeights.push_back(h);
+        }
+        _base_heights.push_back(ringHeights);
+    }
+}
+
+void PolyFeature::calc_footprint_elevation_nni(const DT& dt) {
+    typedef std::vector<std::pair<DT::Point, double>> Point_coordinate_vector;
+    DT::Face_handle fh = 0;
+    for (auto& ring: _poly.rings()) {
+        std::vector<double> ringHeights;
+        for (auto& polypt: ring) {
+            Point_coordinate_vector coords;
+            DT::Point pt(polypt.x(), polypt.y(), 0);
+            fh = dt.locate(pt, fh);
+            CGAL::Triple<std::back_insert_iterator<Point_coordinate_vector>, double, bool> result =
+                    CGAL::natural_neighbor_coordinates_2(dt, pt, std::back_inserter(coords), fh);
+
+            if (!result.third)
+                throw std::runtime_error("Trying to interpolate the point that lies outside the convex hull!");
+
+            double height = 0;
+            for (auto & coord : coords) {
+                height += coord.first.z() * coord.second / result.second;
+            }
+            ringHeights.push_back(height);
+        }
+        _base_heights.push_back(ringHeights);
+    }
+}
+
+void PolyFeature::calc_footprint_elevation_from_pc(const SearchTree& searchTree) {
     for (auto& ring : _poly.rings()) {
         //-- Calculate elevation of polygon outer boundary
         //-- Point elevation is the average of 5 nearest neighbors from the PC

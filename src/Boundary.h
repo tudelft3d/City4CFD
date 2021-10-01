@@ -1,7 +1,6 @@
 #ifndef CITYCFD_BOUNDARY_H
 #define CITYCFD_BOUNDARY_H
 
-#include "definitions.h"
 #include "config.h"
 #include "geomtools.h"
 #include "TopoFeature.h"

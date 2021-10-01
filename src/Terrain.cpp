@@ -1,5 +1,4 @@
 #include "Terrain.h"
-#include "SurfaceLayer.h"
 
 Terrain::Terrain()
     : TopoFeature(0) {}
@@ -13,7 +12,15 @@ Terrain::~Terrain() {
     }
 }
 
+void Terrain::set_cdt(const Point_set_3& pointCloud) {
+    IKtoEK to_exact;
+    for (auto& pt : pointCloud.points()) _cdt.insert(to_exact(pt));
+}
+
 void Terrain::threeDfy(const Point_set_3& pointCloud, const std::vector<PolyFeature*>& features) {
+//    //-- Add ground points from the point cloud to terrain
+//    this->set_cdt(pointCloud); // CDT's got to go first if performing smoothing
+
     int count = 0;
     //-- Constrain surface layers
     for (auto& f : features) {
@@ -22,9 +29,6 @@ void Terrain::threeDfy(const Point_set_3& pointCloud, const std::vector<PolyFeat
         this->constrain_footprint(f->get_poly(), f->get_base_heights());
     }
     std::cout << "Done constraining" << std::endl;
-
-    //-- Add ground points from the point cloud to terrain
-    this->set_cdt(pointCloud); // CDT's got to go first if performing smoothing
 
     //-- Smoothing
     this->smooth(pointCloud);
@@ -65,12 +69,6 @@ void Terrain::constrain_footprint(const Polygon_with_holes_2& poly,
     }
 }
 
-void Terrain::set_cdt(const Point_set_3& pointCloud) {
-    IK_TO_EK to_exact;
-    for (auto& pt : pointCloud.points()) _cdt.insert(to_exact(pt));
-//    _cdt.insert(pointCloud.points().begin(), pointCloud.points().end());
-}
-
 //-- Taken from CGAL's example
 void Terrain::smooth(const Point_set_3& pointCloud) {
     // Smooth heights with 5 successive Gaussian filters
@@ -92,7 +90,7 @@ void Terrain::smooth(const Point_set_3& pointCloud) {
         {
             if (!_cdt.is_infinite(circ))
             {
-                double sq_dist = CGAL::squared_distance (EK_TO_IK()(vh->point()), EK_TO_IK()(circ->point()));
+                double sq_dist = CGAL::squared_distance (EKtoIK()(vh->point()), EKtoIK()(circ->point()));
                 double weight = std::exp(- sq_dist / gaussian_variance);
                 z += weight * CGAL::to_double(circ->point().z());
                 total_weight += weight;

@@ -15,14 +15,17 @@ void Map3d::reconstruct() {
 
     //-- Define influence region, domain limits and boundaries
     this->set_boundaries();
-
     std::cout << "Bnds done" << std::endl;
+
     //-- Remove inactive features
     this->collect_garbage();
     std::cout << "Num of features: " << _lsFeatures.size() << std::endl;
 
+    this->cdt_terrain();
+    std::cout << "CDT terrain done" << std::endl;
+
     //-- Avoid having too long polygons
-    this->polygon_processing();
+//    this->polygon_processing(); // commented out for now
     std::cout << "Checking edge length done" << std::endl;
 
     //-- Find polygon footprint elevation from point cloud
@@ -61,6 +64,10 @@ void Map3d::set_features() {
     _boundaries.push_back(sides); _boundaries.push_back(top);
 }
 
+void Map3d::cdt_terrain() {
+    _terrain->set_cdt(_pointCloud);
+}
+
 void Map3d::set_boundaries() {
     //-- Set the influence region --//
     //- Define radius of interest
@@ -75,6 +82,7 @@ void Map3d::set_boundaries() {
     }
 
     //-- Deactivate features that are out of their scope
+    //todo write it for CDT and PC respectively and go with the faster one
     for (auto& f : _lsFeatures) {
         f->check_feature_scope();
     }
@@ -99,10 +107,16 @@ void Map3d::set_footprint_elevation() {
     SearchTree searchTree;
     searchTree.insert(_pointCloud.points().begin(), _pointCloud.points().end());
 
+//    DT dt;
+//    dt.insert(_pointCloud.points().begin(), _pointCloud.points().end());
+
+    int count = 0;
     for (auto& f : _lsFeatures) {
         if (!f->is_active()) continue;
+        std::cout << "Poly no " << count++ << std::endl;
         try {
-            f->calc_footprint_elevation(searchTree);
+//            f->calc_footprint_elevation(dt);
+            f->calc_footprint_elevation_from_pc(searchTree);
         } catch (std::exception& e) {
             std::cerr << std::endl << "Footprint elevation calculation failed for object \'" << f->get_id() << "\' (class " << f->get_class() << ") with error: " << e.what() << std::endl;
         }

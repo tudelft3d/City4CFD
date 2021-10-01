@@ -35,17 +35,22 @@
 #include <CGAL/Search_traits_2.h>
 #include <CGAL/Search_traits_3.h>
 #include <CGAL/Orthogonal_k_neighbor_search.h>
+#include <CGAL/natural_neighbor_coordinates_2.h>
+#include <CGAL/Barycentric_coordinates_2/Triangle_coordinates_2.h>
+#include <CGAL/Interpolation_traits_2.h>
+#include <CGAL/interpolation_functions.h>
 
 #include "nlohmann/json.hpp"
 
 //-- CGAL Basics
 typedef CGAL::Exact_predicates_inexact_constructions_kernel  EPICK;
 typedef CGAL::Exact_predicates_exact_constructions_kernel    EPECK;
+typedef CGAL::Projection_traits_xy_3<EPICK>                  iProjection_traits;
 typedef CGAL::Projection_traits_xy_3<EPECK>                  Projection_traits;
 
 //-- Kernel converter
-typedef CGAL::Cartesian_converter<EPECK, EPICK> EK_TO_IK;
-typedef CGAL::Cartesian_converter<EPICK, EPECK> IK_TO_EK;
+typedef CGAL::Cartesian_converter<EPECK, EPICK> EKtoIK;
+typedef CGAL::Cartesian_converter<EPICK, EPECK> IKtoEK;
 
 //-- CGAL Point
 typedef EPICK::Point_2            Point_2;
@@ -93,6 +98,9 @@ typedef CGAL::Constrained_triangulation_plus_2<CDTp>                            
 typedef CDT::Point                                                                 Point;
 typedef CDT::Face_handle                                                           Face_handle;
 typedef CDT::Vertex_handle                                                         Vertex_handle;
+
+//testing
+typedef CGAL::Delaunay_triangulation_2<CGAL::Projection_traits_xy_3<EPICK>> DT;
 
 typedef CGAL::Polygon_2<EPICK>                                                     Polygon_2;
 typedef CGAL::Polygon_2<Projection_traits>                                         Polygon_3;
