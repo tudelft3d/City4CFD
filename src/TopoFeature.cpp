@@ -125,7 +125,7 @@ void PolyFeature::calc_footprint_elevation_nni(const DT& dt) {
                 throw std::runtime_error("Trying to interpolate the point that lies outside the convex hull!");
 
             double height = 0;
-            for (auto & coord : coords) {
+            for (auto& coord : coords) {
                 height += coord.first.z() * coord.second / result.second;
             }
             ringHeights.push_back(height);

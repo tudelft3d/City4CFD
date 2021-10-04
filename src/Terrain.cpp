@@ -28,7 +28,7 @@ void Terrain::threeDfy(const Point_set_3& pointCloud, const std::vector<PolyFeat
     std::cout << "Done constraining" << std::endl;
 
     //-- Smoothing
-    this->smooth(pointCloud);
+//    this->smooth(pointCloud); // For some reason, current smoothing actually makes terrain sharper
 
     //-- Constrain buildings
     for (auto& feature : features) {
@@ -55,12 +55,24 @@ void Terrain::constrain_footprint(const Polygon_with_holes_2& poly,
         //-- Add ring points
         int count = 0;
         Polygon_3 pts;
+        std::vector<Vertex_handle> vertex;
         for (auto& polyVertex : ring) {
+#ifdef USE_ENHANCED_CDT
+            vertex.push_back(_cdt.insert(CDT::Point(polyVertex.x(), polyVertex.y(), heights[polyCount][count++])));
+#else
             pts.push_back(ePoint_3(polyVertex.x(), polyVertex.y(), heights[polyCount][count++]));
+#endif
         }
 
+#ifdef USE_ENHANCED_CDT
+        //-- Ken's odd-even constraint add
+        for (int i = 0; i < vertex.size() - 1; ++i)
+            _cdt.odd_even_insert_constraint(vertex[i], vertex[(i+1)]);
+        _cdt.odd_even_insert_constraint(vertex.back(), vertex.front());
+#else
         //-- Set added points as constraints
         _cdt.insert_constraint(pts.begin(), pts.end(), true);
+#endif
 
         ++polyCount;
     }

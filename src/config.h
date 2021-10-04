@@ -23,8 +23,9 @@ namespace config {
    extern double       lod;
    extern double       buildingPercentile;
 
-   //-- Polygon
-   extern double       edgeMaxLen;
+   //-- Polygons related
+   extern double            edgeMaxLen;
+   extern std::vector<bool> avgHeights;
 
    //-- Output flags
    extern OutputFormat outputFormat;

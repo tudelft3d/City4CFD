@@ -1,6 +1,8 @@
 #ifndef CITYCFD_DEFINITIONS_H
 #define CITYCFD_DEFINITIONS_H
 
+//#define USE_ENHANCED_CDT
+
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/Exact_predicates_exact_constructions_kernel.h>
 #include <CGAL/Projection_traits_xy_3.h>
@@ -38,7 +40,9 @@
 #include <CGAL/natural_neighbor_coordinates_2.h>
 #include <CGAL/Barycentric_coordinates_2/Triangle_coordinates_2.h>
 
+//-- Third-party
 #include "nlohmann/json.hpp"
+#include "cgal-etc/Enhanced_triangulation_2.h"
 
 //-- CGAL Basics
 typedef CGAL::Exact_predicates_inexact_constructions_kernel  EPICK;
@@ -89,10 +93,13 @@ typedef CGAL::Triangulation_vertex_base_with_id_2<Projection_traits>            
 typedef CGAL::Triangulation_face_base_with_info_2<FaceInfo2, Projection_traits>    Fbb;
 typedef CGAL::Constrained_triangulation_face_base_2<Projection_traits, Fbb>        Fb;
 typedef CGAL::Triangulation_data_structure_2<Vb,Fb>                                TDS;
-//typedef CGAL::Exact_predicates_tag                                                  Itag;
 typedef CGAL::Exact_intersections_tag                                              Itag;
-typedef CGAL::Constrained_Delaunay_triangulation_2<Projection_traits, TDS, Itag>   CDTp;
-typedef CGAL::Constrained_triangulation_plus_2<CDTp>                               CDT;
+typedef CGAL::Constrained_Delaunay_triangulation_2<Projection_traits, TDS, Itag>   CDTt;
+#ifdef USE_ENHANCED_CDT
+typedef Enhanced_constrained_triangulation_2<CDTt>                                 CDT;
+#else
+typedef CGAL::Constrained_triangulation_plus_2<CDTt>                               CDT;
+#endif
 typedef CDT::Point                                                                 Point;
 typedef CDT::Face_handle                                                           Face_handle;
 typedef CDT::Vertex_handle                                                         Vertex_handle;
@@ -100,7 +107,6 @@ typedef CGAL::Delaunay_triangulation_2<CGAL::Projection_traits_xy_3<EPICK>>     
 
 typedef CGAL::Polygon_2<EPICK>                                                     Polygon_2;
 typedef CGAL::Polygon_2<Projection_traits>                                         Polygon_3;
-//typedef CGAL::Polygon_with_holes_2<EPICK>                                          Polygon_with_holes_2;
 
 //-- TopoClasses
 typedef enum {

@@ -124,8 +124,11 @@ void Map3d::set_footprint_elevation() {
     for (auto& f : _lsFeatures) {
         if (!f->is_active()) continue;
         try {
-            f->calc_footprint_elevation_nni(dt); // NNI is quite slow in debug mode, better to use linear for it
-//            f->calc_footprint_elevation_linear(dt);
+#ifdef NDEBUG
+            f->calc_footprint_elevation_nni(dt);
+#else
+            f->calc_footprint_elevation_linear(dt);  // NNI is quite slow in debug mode, better to use linear in that case
+#endif
 //            f->calc_footprint_elevation_from_pc(searchTree);
         } catch (std::exception& e) {
             std::cerr << std::endl << "Footprint elevation calculation failed for object \'" << f->get_id() << "\' (class " << f->get_class() << ") with error: " << e.what() << std::endl;
