@@ -14,10 +14,11 @@ namespace config {
     extern std::string outputFileName;
 
     //-- Domain size
-   extern Point_2      pointOfInterest;
-   extern double       radiusOfInfluRegion;
-   extern double       dimOfDomain;
-   extern double       topHeight;
+   extern Point_2             pointOfInterest;
+   extern double              influenceRegionRadius;
+   extern Polygon_2           influenceRegionBnd; // It's either radius or polygon
+   extern double              dimOfDomain;
+   extern double              topHeight;
 
    //-- Reconstruction
    extern double       lod;
@@ -25,7 +26,6 @@ namespace config {
 
    //-- Polygons related
    extern double            edgeMaxLen;
-   extern std::vector<bool> avgHeights;
 
    //-- Output flags
    extern OutputFormat outputFormat;

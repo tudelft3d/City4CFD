@@ -200,10 +200,12 @@ void IO::get_cityjson_geom(const Mesh& mesh, nlohmann::json& g, std::unordered_m
     g["type"] = primitive;
     g["lod"] = config::lod;
     g["boundaries"];
-    for (auto& face : mesh.faces()) {
-        std::vector<unsigned long> faceIdx;  faceIdx.reserve(3);
-        std::vector<unsigned long> tempPoly; tempPoly.reserve(3);
-        for (auto index : CGAL::vertices_around_face(mesh.halfedge(face), mesh)) {
+    for (auto& face: mesh.faces()) {
+        std::vector<unsigned long> faceIdx;
+        faceIdx.reserve(3);
+        std::vector<unsigned long> tempPoly;
+        tempPoly.reserve(3);
+        for (auto index: CGAL::vertices_around_face(mesh.halfedge(face), mesh)) {
             std::string pt = gen_key_bucket(mesh.point(index));
             auto it = dPts.find(pt);
             if (it == dPts.end()) {
@@ -229,3 +231,15 @@ void IO::get_cityjson_geom(const Mesh& mesh, nlohmann::json& g, std::unordered_m
         }
     }
 }
+
+//-- Templated functions
+template<typename T>
+std::string IO::gen_key_bucket(const T& p) {
+    std::stringstream ss;
+    ss << std::fixed << std::setprecision(3) << p.x() << " " << p.y() << " " << p.z();
+    return ss.str();
+}
+
+//- Explicit template instantiation
+template <typename Point_3> std::string IO::gen_key_bucket(const Point_3& p);
+template <typename Vector>  std::string IO::gen_key_bucket(const Vector& p);

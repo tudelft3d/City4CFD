@@ -67,7 +67,7 @@ void Map3d::set_features() {
 void Map3d::set_boundaries() {
     //-- Set the influence region --//
     //- Define radius of interest
-    if (config::radiusOfInfluRegion == -infty) {
+    if (config::influenceRegionRadius == -infty) { // temp, will change the condition
         std::cout << "--> Radius of interest not defined in config, calculating automatically" << std::endl;
         //-- Find building where the point of interest lies in and define radius of interest with BPG
         for (auto& f : _lsFeatures) {

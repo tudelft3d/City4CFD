@@ -15,9 +15,10 @@ namespace config {
 
     //-- Domain dimensions
     Point_2 pointOfInterest = Point_2(85420., 446221.);
-    double radiusOfInfluRegion = 350.0;
-    double dimOfDomain = 1000.0;
-    double topHeight = 300.;
+    double    influenceRegionRadius = 350.0;
+    Polygon_2 influenceRegionBnd = {};
+    double    dimOfDomain = 1000.0;
+    double    topHeight = 300.;
 
     //-- Reconstruction related
     double lod                = 1.2;
@@ -25,7 +26,6 @@ namespace config {
 
     //-- Polygons related
     double edgeMaxLen = 3;
-    std::vector<bool> avgHeights{false, false, false, true};
 
     //-- Output flags
     OutputFormat outputFormat = OBJ;

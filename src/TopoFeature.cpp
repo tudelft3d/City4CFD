@@ -189,12 +189,22 @@ void PolyFeature::calc_footprint_elevation_from_pc(const SearchTree& searchTree)
 
 void PolyFeature::check_feature_scope() { // todo maybe move it to buildings, make it pure virtual
     //-- Include all polygons that have at least one vertex in the influence region
-    for (auto& poly : _poly.rings()) {
-        for (auto& vert : poly) {
-            if (pow(config::pointOfInterest.x() - vert.x(), 2)
-              + pow(config::pointOfInterest.y() - vert.y(), 2)
-              < pow(config::radiusOfInfluRegion,2)) {
-                return;
+    if (config::influenceRegionBnd.is_empty()) { //- If the influence region is radius-based
+        for (auto& poly : _poly.rings()) {
+            for (auto& vert : poly) {
+                if (pow(config::pointOfInterest.x() - vert.x(), 2)
+                    + pow(config::pointOfInterest.y() - vert.y(), 2)
+                    < pow(config::influenceRegionRadius, 2)) {
+                    return;
+                }
+            }
+        }
+    } else { //- If the influence region is defined with a polygon
+        Polygon_2& bndPoly = config::influenceRegionBnd;
+        for (auto& poly: _poly.rings()) {
+            for (auto& vert : poly) {
+                if (CGAL::bounded_side_2(bndPoly.begin(), bndPoly.end(), vert) == CGAL::ON_BOUNDED_SIDE)
+                    return;
             }
         }
     }

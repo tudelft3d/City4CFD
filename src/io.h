@@ -22,13 +22,7 @@ namespace IO {
     void get_cityjson_geom(const Mesh& mesh, nlohmann::json& g, std::unordered_map<std::string, unsigned long>& dPts, std::string primitive);
 
     //-- Templated function
-    template <typename T>
-    std::string gen_key_bucket(const T& p) {
-        std::stringstream ss;
-        ss << std::fixed << std::setprecision(3) << p.x() << " " << p.y() << " " << p.z();
-        return ss.str();
-    }
-
+    template <typename T> std::string gen_key_bucket(const T& p);
 }
 
 #endif //CITYCFD_IO_H

@@ -28,7 +28,7 @@ void Terrain::threeDfy(const Point_set_3& pointCloud, const std::vector<PolyFeat
     std::cout << "Done constraining" << std::endl;
 
     //-- Smoothing
-//    this->smooth(pointCloud); // For some reason, current smoothing actually makes terrain sharper
+//    this->smooth(pointCloud);
 
     //-- Constrain buildings
     for (auto& feature : features) {

@@ -2,7 +2,6 @@
 
 # todo
 ## Short-term
-    - Polygon influence region
     - Look into averaging water
     - Config file reading
 
