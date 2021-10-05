@@ -17,7 +17,8 @@ double geomtools::percentile(std::vector<double> values, const double percentile
 }
 
 //-- Check if the point is inside a polygon on a 2D projection
-bool geomtools::check_inside(const Point_3& pt2, const Polygon_with_holes_2& polygon) {
+template<typename T>
+bool geomtools::check_inside(const T& pt2, const Polygon_with_holes_2& polygon) {
     Point_2 pt(pt2.x(), pt2.y());
 
     //-- Check if the point falls within the outer surface
@@ -32,6 +33,9 @@ bool geomtools::check_inside(const Point_3& pt2, const Polygon_with_holes_2& pol
     }
     return false;
 }
+//- Explicit template instantiation
+template bool geomtools::check_inside<Point_2>(const Point_2& pt2, const Polygon_with_holes_2& polygon);
+template bool geomtools::check_inside<Point_3>(const Point_3& pt2, const Polygon_with_holes_2& polygon);
 
 bool geomtools::point_in_circle(const Point_3& pt, const Point_2& center, const double& radius) {
     if (pow(pt.x() - center.x(), 2)

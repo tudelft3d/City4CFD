@@ -239,7 +239,6 @@ std::string IO::gen_key_bucket(const T& p) {
     ss << std::fixed << std::setprecision(3) << p.x() << " " << p.y() << " " << p.z();
     return ss.str();
 }
-
 //- Explicit template instantiation
-template <typename Point_3> std::string IO::gen_key_bucket(const Point_3& p);
-template <typename Vector>  std::string IO::gen_key_bucket(const Vector& p);
+template std::string IO::gen_key_bucket<Point_3>(const Point_3& p);
+template std::string IO::gen_key_bucket<Vector>(const Vector& p);

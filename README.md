@@ -4,6 +4,7 @@
 ## Short-term
     - Look into averaging water
     - Config file reading
+    - Proper exception handling
 
 ## Longer-term
     - Point cloud processing

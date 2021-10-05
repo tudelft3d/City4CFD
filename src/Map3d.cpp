@@ -46,6 +46,7 @@ void Map3d::set_features() {
     for (auto& poly : _polygonsBuildings["features"]) {
         Building* building = new Building(poly);
         _lsFeatures.push_back(building);
+        _buildings.push_back(building);
     }
     //- Other polygons
     int count = 4; //- Surface layer ID is 4 onwards
@@ -70,15 +71,31 @@ void Map3d::set_boundaries() {
     if (config::influenceRegionRadius == -infty) { // temp, will change the condition
         std::cout << "--> Radius of interest not defined in config, calculating automatically" << std::endl;
         //-- Find building where the point of interest lies in and define radius of interest with BPG
-        for (auto& f : _lsFeatures) {
-            if (f->get_class() != BUILDING) continue;
-            //TODO function that searches for the building where point lies
-            // no building found - throw exception
+        SearchTree searchTree, searchTreeBuildings;
+        searchTree.insert(_pointCloud.points().begin(), _pointCloud.points().end());
+        searchTreeBuildings.insert(_pointCloudBuildings.points().begin(), _pointCloudBuildings.points().end());
+        bool foundBuilding = false;
+        //TODO function that searches for the building where point lies, reconstructs it and checks max dim
+        for (auto& f : _buildings) {
+            if (geomtools::check_inside(config::pointOfInterest, f->get_poly())) {
+                f->calc_footprint_elevation_from_pc(searchTree);
+                try {
+                    f->threeDfy(searchTreeBuildings);
+                } catch (std::exception& e) {
+                    std::cerr << std::endl << "Cannot automatically determine influence radius: " << e.what() << std::endl;
+                    throw;
+                }
+
+//                config::influenceRegionRadius = f->get_max_dim() * 3.;
+
+                foundBuilding = true;
+                break;
+            }
         }
+        if (!foundBuilding) throw std::runtime_error("--> Point of interest does not belong to any building! Impossible to determine domain boundaries.");
     }
 
     //-- Deactivate features that are out of their scope
-    //todo write it for CDT and PC respectively and go with the faster one
     for (auto& f : _lsFeatures) {
         f->check_feature_scope();
     }
@@ -147,9 +164,15 @@ void Map3d::threeDfy() {
     SearchTree searchTree;
     searchTree.insert(_pointCloudBuildings.points().begin(), _pointCloudBuildings.points().end());
 
-    for (auto& f : _lsFeatures) {
-        if (!f->is_active() || f->get_class() != BUILDING) continue;
-        f->threeDfy(searchTree);
+//    double failed = 0;
+    for (auto& f : _buildings) {
+        if (!f->is_active()) continue;
+        try {
+            f->threeDfy(searchTree);
+        } catch (std::exception& e){
+//            std::cout << "Failed so far: " << ++failed << "; " << e.what() << std::endl;
+            // Add to warning log when individual buildings don't reconstruct
+        }
     }
 
     //-- Reconstruct boundaries
@@ -202,14 +225,14 @@ void Map3d::output() {
 
 void Map3d::prep_feature_output() {
     _outputFeatures.push_back(_terrain);
-    for (auto& f : _lsFeatures) {
-        if (!f->is_active() || f->get_class() != BUILDING) continue; // Surface layers are grouped in terrain
+    for (auto& f : _buildings) {
+        if (!f->is_active()) continue;
         _outputFeatures.push_back(f);
     }
     for (auto& b : _boundaries) {
         _outputFeatures.push_back(b);
     }
-    for (auto& l : _terrain->get_surface_layers()) {
+    for (auto& l : _terrain->get_surface_layers()) { // Surface layers are grouped in terrain
         _outputFeatures.push_back(l);
     }
 }
@@ -227,6 +250,13 @@ void Map3d::prep_cityjson_output() { // Temp impl, might change
 };
 
 void Map3d::collect_garbage() {
+    for (unsigned long i = 0; i < _buildings.size();) {
+        if (_buildings[i]->is_active()) ++i;
+        else {
+            _buildings[i] = nullptr;
+            _buildings.erase(_buildings.begin() + i);
+        }
+    }
     for (unsigned long i = 0; i < _lsFeatures.size();) {
         if (_lsFeatures[i]->is_active()) ++i;
         else {
@@ -237,9 +267,8 @@ void Map3d::collect_garbage() {
 }
 
 void Map3d::clear_features() {
-    for (auto f : _outputFeatures) {
-        f = nullptr;
-    }
+    for (auto& f : _outputFeatures) f = nullptr;
+    for (auto& f : _buildings) f = nullptr;
     delete _terrain;
     _terrain = nullptr;
     for (auto& f : _lsFeatures) {

@@ -25,22 +25,20 @@ void Building::threeDfy(const SearchTree& searchTree) {
     }
 
     //-- Don't reconstruct if there are no points belonging to the polygon
-    // TODO: exception/warning handling
+    // TODO: exception/warning handling - add this information to log
     if (building_pts.empty()) {
         this->deactivate();
-        return;
+        throw std::domain_error("Found no points belonging to the building.");
     }
 
     //-- LoD12 reconstruction
     LoD12 lod12(_poly, _base_heights, building_pts);
     lod12.lod12reconstruct(_mesh, _height);
 
-    double lowHeight = 4.0; // Hardcoded low height here
-    // TODO: exception/warning handling
+    double lowHeight = 3.0; // Hardcoded low height here
     if (lod12.get_height() < lowHeight) { // in case of a small height
-//        std::cerr << "Building with a low height, building ID: " << this->get_id() << std::endl;
         this->deactivate();
-        return;
+        throw std::domain_error("Building height lower than minimum prescribed height, building ID: " + std::string(this->get_id()));
     }
 }
 

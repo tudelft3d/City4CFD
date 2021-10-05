@@ -50,7 +50,6 @@ public:
     virtual ~PolyFeature();
 
     virtual void        check_feature_scope();
-    virtual void        threeDfy(const SearchTree& searchTree);
     virtual void        get_cityjson_info(nlohmann::json& b) const = 0;
     virtual void        get_cityjson_semantics(nlohmann::json& g) const = 0;
     virtual std::string get_cityjson_primitive() const = 0;

@@ -12,7 +12,7 @@ public:
     Building(const nlohmann::json& poly);
     ~Building();
 
-    void        threeDfy(const SearchTree& searchTree) override;
+    void        threeDfy(const SearchTree& searchTree);
     void        get_cityjson_info(nlohmann::json& b) const override;
     void        get_cityjson_semantics(nlohmann::json& g) const override;
     std::string get_cityjson_primitive() const override;

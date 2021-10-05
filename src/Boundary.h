@@ -30,7 +30,7 @@ public:
     Sides();
     ~Sides();
 
-    void threeDfy();
+    void threeDfy() override;
 
     TopoClass   get_class() const override;
     std::string get_class_name() const override;
@@ -42,7 +42,7 @@ public:
     Top();
     ~Top();
 
-    void threeDfy();
+    void threeDfy() override;
 
     TopoClass   get_class() const override;
     std::string get_class_name() const override;

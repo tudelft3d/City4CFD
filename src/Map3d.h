@@ -25,6 +25,7 @@ private:
      nlohmann::json               _polygonsBuildings;
      std::vector<nlohmann::json>  _polygonsSurfaceLayers;
      Terrain*                     _terrain;
+     std::vector<Building*>       _buildings;
      std::vector<Boundary*>       _boundaries;
      std::vector<PolyFeature*>    _lsFeatures;
      std::vector<TopoFeature*>    _outputFeatures;

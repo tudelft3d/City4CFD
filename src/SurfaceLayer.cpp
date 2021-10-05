@@ -11,7 +11,7 @@ SurfaceLayer::SurfaceLayer(const nlohmann::json& poly, const int outputLayerID)
 
 SurfaceLayer::~SurfaceLayer() = default;
 
-void SurfaceLayer::check_feature_scope() {
+void SurfaceLayer::check_feature_scope() { //-- Overrides default, as it doesn't depend on influence region
     //-- Exclude all polygons that have at least one vertex outside the domain
     for (auto& poly : _poly.rings()) {
         for (auto& vert : poly) {
@@ -23,10 +23,6 @@ void SurfaceLayer::check_feature_scope() {
             }
         }
     }
-}
-
-void SurfaceLayer::threeDfy(CDT& cdt) {
-//    geomtools::cdt_to_mesh(cdt, _mesh, this->get_layer_id());
 }
 
 void SurfaceLayer::get_cityjson_info(nlohmann::json& b) const {
@@ -46,5 +42,5 @@ TopoClass SurfaceLayer::get_class() const {
 }
 
 std::string SurfaceLayer::get_class_name() const {
-    return "SemanticLayer";
+    return "SurfaceLayer";
 }

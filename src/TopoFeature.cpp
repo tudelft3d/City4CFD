@@ -187,7 +187,7 @@ void PolyFeature::calc_footprint_elevation_from_pc(const SearchTree& searchTree)
     }
 }
 
-void PolyFeature::check_feature_scope() { // todo maybe move it to buildings, make it pure virtual
+void PolyFeature::check_feature_scope() { //-- Default implementation checks the influence region
     //-- Include all polygons that have at least one vertex in the influence region
     if (config::influenceRegionBnd.is_empty()) { //- If the influence region is radius-based
         for (auto& poly : _poly.rings()) {
@@ -222,8 +222,4 @@ const Polygon_with_holes_2& PolyFeature::get_poly() const {
 
 const std::vector<std::vector<double>>& PolyFeature::get_base_heights() const {
     return _base_heights;
-}
-
-void PolyFeature::threeDfy(const SearchTree& searchTree) {
-    //TEMP
 }
