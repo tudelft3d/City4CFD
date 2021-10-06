@@ -36,7 +36,7 @@ void Building::threeDfy(const SearchTree& searchTree) {
     lod12.lod12reconstruct(_mesh, _height);
 
     double lowHeight = 3.0; // Hardcoded low height here
-    if (lod12.get_height() < lowHeight) { // in case of a small height
+    if (lod12.get_height() < lowHeight) { // In case of a small height
         this->deactivate();
         throw std::domain_error("Building height lower than minimum prescribed height, building ID: " + std::string(this->get_id()));
     }

@@ -16,7 +16,7 @@ public:
 
     void reconstruct();
 
-    bool read_data();
+    void read_data();
     void output();
 
 private:

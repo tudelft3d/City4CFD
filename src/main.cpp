@@ -6,33 +6,34 @@
 #include <chrono>
 
 int main() {
-    auto startTime = std::chrono::steady_clock::now();
+    try {
+        auto startTime = std::chrono::steady_clock::now();
 
-    //-- Data input - this needs to be sorted
-    const char* config = "";
+        //-- Data input - this needs to be sorted
+        const char* config = "";
 
-    //-- Read configuration file TODO
-    if(!IO::read_config(config)){
-        return 1;
-    };
+        //-- Read configuration file TODO
+        IO::read_config(config);
 
-    //-- Create the main class
-    Map3d map3d;
+        //-- Create the main class
+        Map3d map3d;
 
-    //-- Read point cloud and polygons, and store them in Map3d
-    if(!map3d.read_data()){
-        return 1;
-    };
+        //-- Read point cloud and polygons, and store them in Map3d
+        map3d.read_data();
 
-    //-- Calculate elevations and triangulate
-    map3d.reconstruct();
+        //-- Calculate elevations and triangulate
+        map3d.reconstruct();
 
-    //-- Output data
-    map3d.output();
+        //-- Output data
+        map3d.output();
 
-    auto endTime = std::chrono::steady_clock::now();
-    auto diffTime = endTime - startTime;
-    std::cout << "-> Program executed in " << std::chrono::duration<double> (diffTime).count() << " s" << std::endl;
+        auto endTime = std::chrono::steady_clock::now();
+        auto diffTime = endTime - startTime;
+        std::cout << "-> Program executed in " << std::chrono::duration<double>(diffTime).count() << " s" << std::endl;
 
-    return 0;
+        return EXIT_SUCCESS;
+    } catch (std::exception& e) {
+        std::cerr << "--> Program failed! Reason: " << e.what() << std::endl;
+        return EXIT_FAILURE;
+    }
 }

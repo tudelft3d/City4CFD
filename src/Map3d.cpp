@@ -1,40 +1,47 @@
 #include "Map3d.h"
 
-Map3d::Map3d() = default;
+Map3d::Map3d()
+    : _pointCloud(), _pointCloudBuildings(), _polygonsBuildings(), _polygonsSurfaceLayers(),
+      _terrain(nullptr), _buildings(), _boundaries(), _lsFeatures(), _outputFeatures() {}
 
 Map3d::~Map3d() {
     this->clear_features();
 }
 
 void Map3d::reconstruct() {
-    //-- Prepare features
-    this->set_features();
-    std::cout << "Features done" << std::endl;
-    std::cout << "Num of features: " << _lsFeatures.size() << std::endl;
+    try {
+        //-- Prepare features
+        this->set_features();
+        std::cout << "Features done" << std::endl;
+        std::cout << "Num of features: " << _lsFeatures.size() << std::endl;
 
-    //-- Define influence region, domain limits and boundaries
-    this->set_boundaries();
-    std::cout << "Bnds done" << std::endl;
+        //-- Define influence region, domain limits and boundaries
+        this->set_boundaries();
+        std::cout << "Bnds done" << std::endl;
 
-    //-- Remove inactive features
-    this->collect_garbage();
-    std::cout << "Num of features: " << _lsFeatures.size() << std::endl;
+        //-- Remove inactive features
+        this->collect_garbage();
+        std::cout << "Num of features: " << _lsFeatures.size() << std::endl;
 
-    //-- Add PC points to DT
-    this->triangulate_terrain();
-    std::cout << "CDT terrain done" << std::endl;
+        //-- Add PC points to DT
+        this->triangulate_terrain();
+        std::cout << "CDT terrain done" << std::endl;
 
-    //-- Avoid having too long polygons
-    this->polygon_processing();
-    std::cout << "Checking edge length done" << std::endl;
+        //-- Avoid having too long polygons
+        this->polygon_processing();
+        std::cout << "Checking edge length done" << std::endl;
 
-    //-- Find polygon footprint elevation from point cloud
-    this->set_footprint_elevation();
-    std::cout << "Elevation done" << std::endl;
+        //-- Find polygon footprint elevation from point cloud
+        this->set_footprint_elevation();
+        std::cout << "Elevation done" << std::endl;
 
-    //-- Reconstruct 3D features with respective algorithms
-    this->threeDfy();
-    std::cout << "3dfy done" << std::endl;
+        //-- Reconstruct 3D features with respective algorithms
+        this->threeDfy();
+        std::cout << "3dfy done" << std::endl;
+
+    } catch (std::exception& e) {
+        throw;
+    }
 }
 
 void Map3d::set_features() {
@@ -82,8 +89,8 @@ void Map3d::set_boundaries() {
                 try {
                     f->threeDfy(searchTreeBuildings);
                 } catch (std::exception& e) {
-                    std::cerr << std::endl << "Cannot automatically determine influence radius: " << e.what() << std::endl;
-                    throw;
+                    std::cerr << std::endl << "Error: " << e.what() << std::endl;
+                    throw std::invalid_argument("Impossible to automatically determine influence region");
                 }
 
 //                config::influenceRegionRadius = f->get_max_dim() * 3.;
@@ -92,7 +99,7 @@ void Map3d::set_boundaries() {
                 break;
             }
         }
-        if (!foundBuilding) throw std::runtime_error("--> Point of interest does not belong to any building! Impossible to determine domain boundaries.");
+        if (!foundBuilding) throw std::runtime_error("Point of interest does not belong to any building! Impossible to determine influence region.");
     }
 
     //-- Deactivate features that are out of their scope
@@ -186,21 +193,26 @@ void Map3d::threeDfy() {
     std::cout << "-> Calculations executed in " << std::chrono::duration<double> (diffTime).count() << " s" << std::endl;
 }
 
-bool Map3d::read_data() { // This will change with time
-    //-- Read ground points
-    IO::read_point_cloud(config::points_xyz, _pointCloud);
-    //-- Read building points
-    IO::read_point_cloud(config::buildings_xyz, _pointCloudBuildings);
+void Map3d::read_data() { // This will change with time
+        //-- Read ground points
+        IO::read_point_cloud(config::points_xyz, _pointCloud);
+        if (_pointCloud.size() == 0) {
+            std::cout << "Didn't find any ground points! Calculating ground as flat surface" << std::endl;
+        }
 
-    //-- Read building polygons
-    IO::read_polygons(config::gisdata, _polygonsBuildings);
-    //-- Read surface layer polygons
-    for (auto& topoLayer : config::topoLayers) {
-        _polygonsSurfaceLayers.emplace_back();
-        IO::read_polygons(topoLayer, _polygonsSurfaceLayers.back());
-    }
+        //-- Read building points
+        IO::read_point_cloud(config::buildings_xyz, _pointCloudBuildings);
+        if (_pointCloudBuildings.empty()) throw std::invalid_argument("Didn't find any building points!");
 
-    return true;
+        //-- Read building polygons
+        IO::read_polygons(config::gisdata, _polygonsBuildings);
+        if (_polygonsBuildings.empty()) throw std::invalid_argument("Didn't find any building polygons!");
+
+        //-- Read surface layer polygons
+        for (auto& topoLayer: config::topoLayers) {
+            _polygonsSurfaceLayers.emplace_back();
+            IO::read_polygons(topoLayer, _polygonsSurfaceLayers.back());
+        }
 }
 
 void Map3d::output() {
@@ -269,8 +281,10 @@ void Map3d::collect_garbage() {
 void Map3d::clear_features() {
     for (auto& f : _outputFeatures) f = nullptr;
     for (auto& f : _buildings) f = nullptr;
-    delete _terrain;
-    _terrain = nullptr;
+    if (_terrain != nullptr) {
+        delete _terrain;
+        _terrain = nullptr;
+    }
     for (auto& f : _lsFeatures) {
         delete f; f = nullptr;
     }
