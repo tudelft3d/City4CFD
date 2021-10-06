@@ -1,12 +1,8 @@
 #include "Map3d.h"
 
-Map3d::Map3d()
-    : _pointCloud(), _pointCloudBuildings(), _polygonsBuildings(), _polygonsSurfaceLayers(),
-      _terrain(nullptr), _buildings(), _boundaries(), _lsFeatures(), _outputFeatures() {}
+Map3d::Map3d() = default;
 
-Map3d::~Map3d() {
-    this->clear_features();
-}
+Map3d::~Map3d() = default;
 
 void Map3d::reconstruct() {
     try {
@@ -46,12 +42,12 @@ void Map3d::reconstruct() {
 
 void Map3d::set_features() {
     //-- First feature is the terrain
-    _terrain = new Terrain();
+    _terrain = std::make_shared<Terrain>();
 
     //-- Add polygons as features
     //- Buildings
     for (auto& poly : _polygonsBuildings["features"]) {
-        Building* building = new Building(poly);
+        auto building = std::make_shared<Building>(poly);
         _lsFeatures.push_back(building);
         _buildings.push_back(building);
     }
@@ -61,14 +57,14 @@ void Map3d::set_features() {
         for (auto& poly : surfaceLayer["features"]) {
             if (poly["geometry"]["type"] != "Polygon") continue; // Make sure only polygons are added
 
-            SurfaceLayer* semanticPoly = new SurfaceLayer(poly, count);
-            _lsFeatures.push_back(semanticPoly);
+            auto surfacePoly = std::make_shared<SurfaceLayer>(poly, count);
+            _lsFeatures.push_back(surfacePoly);
         }
         ++count;
     }
 
     //-- Boundary
-    Sides* sides = new Sides(); Top* top = new Top();
+    auto sides = std::make_shared<Sides>(); auto top = std::make_shared<Top>();
     _boundaries.push_back(sides); _boundaries.push_back(top);
 }
 
@@ -255,7 +251,6 @@ void Map3d::prep_cityjson_output() { // Temp impl, might change
             _outputFeatures[i]->set_id(i++);
         }
         else {
-            _outputFeatures[i] = nullptr;
             _outputFeatures.erase(_outputFeatures.begin() + i);
         }
     }
@@ -265,30 +260,13 @@ void Map3d::collect_garbage() {
     for (unsigned long i = 0; i < _buildings.size();) {
         if (_buildings[i]->is_active()) ++i;
         else {
-            _buildings[i] = nullptr;
             _buildings.erase(_buildings.begin() + i);
         }
     }
     for (unsigned long i = 0; i < _lsFeatures.size();) {
         if (_lsFeatures[i]->is_active()) ++i;
         else {
-            delete _lsFeatures[i]; _lsFeatures[i] = nullptr;
             _lsFeatures.erase(_lsFeatures.begin() + i);
         }
-    }
-}
-
-void Map3d::clear_features() {
-    for (auto& f : _outputFeatures) f = nullptr;
-    for (auto& f : _buildings) f = nullptr;
-    if (_terrain != nullptr) {
-        delete _terrain;
-        _terrain = nullptr;
-    }
-    for (auto& f : _lsFeatures) {
-        delete f; f = nullptr;
-    }
-    for (auto& b : _boundaries) {
-        delete b; b = nullptr;
     }
 }

@@ -14,7 +14,7 @@ public:
     ~Terrain();
 
     void set_cdt(const Point_set_3 &pointCloud);
-    void threeDfy(const Point_set_3& pointCloud, const std::vector<PolyFeature*>& features);
+    void threeDfy(const Point_set_3& pointCloud, const PolyFeatures& features);
 
     CDT&         get_cdt();
     const CDT&   get_cdt() const;
@@ -25,11 +25,11 @@ public:
     std::string  get_class_name() const override;
     void         constrain_footprint(const Polygon_with_holes_2& poly, const std::vector<std::vector<double>>& heights); //testing
 
-    const std::vector<SurfaceLayer*>& get_surface_layers() const;
+    const SurfaceLayers& get_surface_layers() const;
 
 protected:
     CDT  _cdt;
-    std::vector<SurfaceLayer*> _surfaceLayersTerrain; // Vector or list for the mesh?
+    SurfaceLayers _surfaceLayersTerrain;
 
     void smooth(const Point_set_3& pointCloud);
     void create_mesh();

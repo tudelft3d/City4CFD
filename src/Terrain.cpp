@@ -6,18 +6,14 @@ Terrain::Terrain()
 Terrain::Terrain(int pid)
     : TopoFeature(pid) {}
 
-Terrain::~Terrain() {
-    for (auto& layer : _surfaceLayersTerrain) {
-        delete layer; layer = nullptr;
-    }
-}
+Terrain::~Terrain() = default;
 
 void Terrain::set_cdt(const Point_set_3& pointCloud) {
     IKtoEK to_exact;
     for (auto& pt : pointCloud.points()) _cdt.insert(to_exact(pt));
 }
 
-void Terrain::threeDfy(const Point_set_3& pointCloud, const std::vector<PolyFeature*>& features) {
+void Terrain::threeDfy(const Point_set_3& pointCloud, const PolyFeatures& features) {
     int count = 0;
     //-- Constrain surface layers
     for (auto& f : features) {
@@ -117,7 +113,7 @@ void Terrain::create_mesh() {
     // -- Create placeholders for surface layer mesh
     int layerNum = 2; // Config or some other way
     for (int i = 4; i < layerNum + 4; ++i) { // Surface layers start with output ID 4
-        SurfaceLayer* layer = new SurfaceLayer(i);
+        auto layer = std::make_shared<SurfaceLayer>(i);
         geomtools::cdt_to_mesh(_cdt, layer->get_mesh(), i);
         _surfaceLayersTerrain.push_back(layer);
     }
@@ -148,6 +144,6 @@ std::string Terrain::get_class_name() const {
     return "Terrain";
 }
 
-const std::vector<SurfaceLayer*>& Terrain::get_surface_layers() const {
+const SurfaceLayers& Terrain::get_surface_layers() const {
     return _surfaceLayersTerrain;
 }

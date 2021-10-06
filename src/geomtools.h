@@ -11,9 +11,9 @@ namespace geomtools {
     double percentile(std::vector<double> values, const double percentile);
     bool   point_in_circle(const Point_3& pt, const Point_2& center, const double& radius);
     void   cdt_to_mesh(CDT& cdt, Mesh& mesh, const int surfaceLayerID = -9999);
-    void   mark_domains(CDT& cdt, std::vector<PolyFeature*> features = {});
+    void   mark_domains(CDT& cdt, PolyFeatures features = {});
     void   mark_domains(CDT& ct, const Face_handle& start, int index,
-                        std::list<CDT::Edge>& border, std::vector<PolyFeature*>& features);
+                        std::list<CDT::Edge>& border, PolyFeatures& features);
     void   shorten_long_poly_edges(Polygon_2& poly);
 
     //-- Templated functions

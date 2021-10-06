@@ -2,7 +2,6 @@
 ## Short-term
     - Look into averaging water
     - Config file reading
-    - Rewrite with smart pointers
 
 ## Longer-term
     - Point cloud processing

@@ -74,7 +74,7 @@ void geomtools::mark_domains(CDT& ct,
                              const Face_handle& start,
                              int index,
                              std::list<CDT::Edge>& border,
-                             std::vector<PolyFeature*>& features)
+                             PolyFeatures& features)
 {
     if(start->info().nesting_level != -1){
         return;
@@ -125,7 +125,7 @@ void geomtools::mark_domains(CDT& ct,
     }
 }
 
-void geomtools::mark_domains(CDT& cdt, std::vector<PolyFeature*> features) {
+void geomtools::mark_domains(CDT& cdt, PolyFeatures features) {
     for(CDT::Face_handle f : cdt.all_face_handles()){
         f->info().nesting_level = -1;
     }

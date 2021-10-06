@@ -24,11 +24,11 @@ private:
      Point_set_3                  _pointCloudBuildings;
      nlohmann::json               _polygonsBuildings;
      std::vector<nlohmann::json>  _polygonsSurfaceLayers;
-     Terrain*                     _terrain;
-     std::vector<Building*>       _buildings;
-     std::vector<Boundary*>       _boundaries;
-     std::vector<PolyFeature*>    _lsFeatures;
-     std::vector<TopoFeature*>    _outputFeatures;
+     Terrainptr                   _terrain;
+     Buildings                    _buildings;
+     Boundaries                   _boundaries;
+     PolyFeatures                 _lsFeatures;
+     OutputFeatures               _outputFeatures;
 
     void set_features();
     void set_boundaries();

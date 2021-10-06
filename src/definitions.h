@@ -108,6 +108,16 @@ typedef CGAL::Delaunay_triangulation_2<CGAL::Projection_traits_xy_3<EPICK>>     
 typedef CGAL::Polygon_2<EPICK>                                                     Polygon_2;
 typedef CGAL::Polygon_2<Projection_traits>                                         Polygon_3;
 
+//-- Typedefs for smart pointers
+class Building;    class Boundary; class PolyFeature;
+class TopoFeature; class Terrain;  class SurfaceLayer;
+typedef std::shared_ptr<Terrain>                   Terrainptr;
+typedef std::vector<std::shared_ptr<Building>>     Buildings;
+typedef std::vector<std::shared_ptr<Boundary>>     Boundaries;
+typedef std::vector<std::shared_ptr<PolyFeature>>  PolyFeatures;
+typedef std::vector<std::shared_ptr<TopoFeature>>  OutputFeatures;
+typedef std::vector<std::shared_ptr<SurfaceLayer>> SurfaceLayers;
+
 //-- TopoClasses
 typedef enum {
     TERRAIN          = 0,
