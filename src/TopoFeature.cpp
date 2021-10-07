@@ -109,6 +109,31 @@ PolyFeature::PolyFeature(const nlohmann::json& poly, const int outputLayerID)
 
 PolyFeature::~PolyFeature() = default;
 
+void PolyFeature::check_feature_scope() { //-- Default implementation checks the influence region
+    //-- Include all polygons that have at least one vertex in the influence region
+    if (config::influenceRegionBnd.is_empty()) { //- If the influence region is radius-based
+        for (auto& poly : _poly.rings()) {
+            for (auto& vert : poly) {
+                if (pow(config::pointOfInterest.x() - vert.x(), 2)
+                    + pow(config::pointOfInterest.y() - vert.y(), 2)
+                    < pow(config::influenceRegionRadius, 2)) {
+                    return;
+                }
+            }
+        }
+    } else { //- If the influence region is defined with a polygon
+        Polygon_2& bndPoly = config::influenceRegionBnd;
+        for (auto& poly: _poly.rings()) {
+            for (auto& vert : poly) {
+                if (CGAL::bounded_side_2(bndPoly.begin(), bndPoly.end(), vert) == CGAL::ON_BOUNDED_SIDE)
+                    return;
+            }
+        }
+    }
+//    std::cout << "Poly ID " << this->get_id() << " is outside the influ region. Deactivating." << std::endl;
+    this->deactivate();
+}
+
 void PolyFeature::calc_footprint_elevation_nni(const DT& dt) {
     typedef std::vector<std::pair<DT::Point, double>> Point_coordinate_vector;
     DT::Face_handle fh = nullptr;
@@ -187,29 +212,8 @@ void PolyFeature::calc_footprint_elevation_from_pc(const SearchTree& searchTree)
     }
 }
 
-void PolyFeature::check_feature_scope() { //-- Default implementation checks the influence region
-    //-- Include all polygons that have at least one vertex in the influence region
-    if (config::influenceRegionBnd.is_empty()) { //- If the influence region is radius-based
-        for (auto& poly : _poly.rings()) {
-            for (auto& vert : poly) {
-                if (pow(config::pointOfInterest.x() - vert.x(), 2)
-                    + pow(config::pointOfInterest.y() - vert.y(), 2)
-                    < pow(config::influenceRegionRadius, 2)) {
-                    return;
-                }
-            }
-        }
-    } else { //- If the influence region is defined with a polygon
-        Polygon_2& bndPoly = config::influenceRegionBnd;
-        for (auto& poly: _poly.rings()) {
-            for (auto& vert : poly) {
-                if (CGAL::bounded_side_2(bndPoly.begin(), bndPoly.end(), vert) == CGAL::ON_BOUNDED_SIDE)
-                    return;
-            }
-        }
-    }
-//    std::cout << "Poly ID " << this->get_id() << " is outside the influ region. Deactivating." << std::endl;
-    this->deactivate();
+void PolyFeature::clear_base_heights() {
+    _base_heights.clear();
 }
 
 Polygon_with_holes_2& PolyFeature::get_poly() {

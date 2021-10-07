@@ -1,8 +1,8 @@
 project(cityCFD)
 
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.17)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 11)
 
 #set( CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS true )
 
@@ -27,7 +27,7 @@ FILE(GLOB SRC_FILES "src/*.cpp")
 add_executable(cityCFD ${SRC_FILES})
 set_target_properties(
         cityCFD
-        PROPERTIES CXX_STANDARD 17
+        PROPERTIES CXX_STANDARD 11
 )
 
 #target_link_libraries( cityCFD ${CGAL_LIBRARIES} ${CGAL_3RD_PARTY_LIBRARIES} ${GDAL_LIBRARY} ${YAML_CPP_LIBRARIES} Boost::program_options Boost::filesystem Boost::locale Boost::chrono LASlib)

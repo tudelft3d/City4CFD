@@ -76,26 +76,26 @@ void Map3d::set_boundaries() {
         //-- Find building where the point of interest lies in and define radius of interest with BPG
         SearchTree searchTree, searchTreeBuildings;
         searchTree.insert(_pointCloud.points().begin(), _pointCloud.points().end());
-        searchTreeBuildings.insert(_pointCloudBuildings.points().begin(), _pointCloudBuildings.points().end());
+        searchTreeBuildings.insert(_pointCloudBuildings.points().begin(), _pointCloudBuildings.points().end()); //TODO Maybe save as member variable
+
         bool foundBuilding = false;
-        //TODO function that searches for the building where point lies, reconstructs it and checks max dim
         for (auto& f : _buildings) {
             if (geomtools::check_inside(config::pointOfInterest, f->get_poly())) {
-                f->calc_footprint_elevation_from_pc(searchTree);
+                f->calc_footprint_elevation_from_pc(searchTree); //- Quick calculation from point cloud before CDT is constructed
                 try {
                     f->threeDfy(searchTreeBuildings);
                 } catch (std::exception& e) {
                     std::cerr << std::endl << "Error: " << e.what() << std::endl;
-                    throw std::invalid_argument("Impossible to automatically determine influence region");
+                    throw std::runtime_error("Impossible to automatically determine influence region");
                 }
-
-//                config::influenceRegionRadius = f->get_max_dim() * 3.;
+                config::influenceRegionRadius = f->get_max_dim() * 3.; //- BPG by Liu
+                f->clear_base_heights(); //- They will be properly interpolated from DT later
 
                 foundBuilding = true;
                 break;
             }
         }
-        if (!foundBuilding) throw std::runtime_error("Point of interest does not belong to any building! Impossible to determine influence region.");
+        if (!foundBuilding) throw std::invalid_argument("Point of interest does not belong to any building! Impossible to determine influence region.");
     }
 
     //-- Deactivate features that are out of their scope

@@ -20,6 +20,8 @@ public:
     TopoClass   get_class() const override;
     std::string get_class_name() const override;
 
+    double get_max_dim();
+
 private:
     double _height;
 };

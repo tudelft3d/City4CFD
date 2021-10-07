@@ -60,6 +60,7 @@ public:
     void  calc_footprint_elevation_nni(const DT& dt);
     void  calc_footprint_elevation_linear(const DT& dt);
     void  calc_footprint_elevation_from_pc(const SearchTree& searchTree);
+    void  clear_base_heights();
 
     Polygon_with_holes_2&                    get_poly();
     const Polygon_with_holes_2&              get_poly() const;

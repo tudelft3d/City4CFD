@@ -6,5 +6,5 @@
 ## Longer-term
     - Point cloud processing
         -   PC/polygon crs check
-    - Domain/influ region calc according to BPG
+    - Domain region calc according to BPG
     - Look into refining large triangles

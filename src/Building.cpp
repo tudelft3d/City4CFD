@@ -83,3 +83,14 @@ TopoClass Building::get_class() const {
 std::string Building::get_class_name() const {
     return "Building";
 }
+
+double Building::get_max_dim() {
+    std::vector<double> dims;
+    EPICK::Vector_2 diag(_poly.bbox().xmax() - _poly.bbox().xmin(), _poly.bbox().ymax() - _poly.bbox().ymin());
+
+    dims.emplace_back(diag.squared_length() * pow(cos(M_PI_4), 2));
+    dims.emplace_back(diag.squared_length() * pow(sin(M_PI_4), 2));
+    dims.emplace_back(_height * _height);
+
+    return sqrt(*(std::max_element(dims.begin(), dims.end())));
+}

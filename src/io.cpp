@@ -50,10 +50,16 @@ void IO::output_obj(const OutputFeatures& allFeatures) {
     }
 
     //-- Add class name and output to file
-    if (!outputSeparately) of.emplace_back().open(outputFileName + ".obj");
+    if (!outputSeparately) {
+        of.emplace_back();
+        of.back().open(outputFileName + ".obj");
+    }
     for (int i = 0; i < fs.size(); ++i) {
         if (bs[i].empty()) continue;
-        if (outputSeparately) of.emplace_back().open(outputFileName + "_" + outputLayerName[i] + ".obj");
+        if (outputSeparately){
+            of.emplace_back();
+            of.back().open(outputFileName + "_" + outputLayerName[i] + ".obj");
+        }
 
         of.back() << fs[i] << "\ng " << outputLayerName[i] << bs[i];
     }
@@ -82,10 +88,16 @@ void IO::output_stl(const OutputFeatures& allFeatures) {
     }
 
     //-- Add class name and output to file
-    if (!outputSeparately) of.emplace_back().open(outputFileName + ".stl");
+    if (!outputSeparately) {
+        of.emplace_back();
+        of.back().open(outputFileName + ".stl");
+    }
     for (int i = 0; i < fs.size(); ++i) {
         if (fs[i].empty()) continue;
-        if (outputSeparately) of.emplace_back().open(outputFileName + "_" + outputLayerName[i] + ".stl");
+        if (outputSeparately){
+            of.emplace_back();
+            of.back().open(outputFileName + "_" + outputLayerName[i] + ".stl");
+        }
 
         of.back() << "\nsolid " << outputLayerName[i];
         of.back() << fs[i];
