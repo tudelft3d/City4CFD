@@ -144,8 +144,8 @@ void geomtools::mark_domains(CDT& cdt, PolyFeatures features) {
 void geomtools::shorten_long_poly_edges(Polygon_2& poly) {
     double maxLen = config::edgeMaxLen;
     auto& polyVec = poly.container();
-    for (auto i = 0; i < polyVec.size() - 1;) {
-        auto edge = polyVec[i + 1] - polyVec[i];
+    for (auto i = 0; i < polyVec.size();) {
+        auto edge = polyVec[(i + 1) % polyVec.size()] - polyVec[i];
         double edgeSqLen = edge.squared_length();
         if (edgeSqLen > maxLen*maxLen) {
             int  numSeg  = ceil(sqrt(edgeSqLen) / maxLen);
