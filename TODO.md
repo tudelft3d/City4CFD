@@ -7,4 +7,3 @@
     - Point cloud processing
         -   PC/polygon crs check
     - Domain region calc according to BPG
-    - Look into refining large triangles

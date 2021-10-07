@@ -23,5 +23,4 @@ private:
 
 };
 
-
 #endif //CITYCFD_SURFACELAYER_H

@@ -11,6 +11,11 @@ Terrain::~Terrain() = default;
 void Terrain::set_cdt(const Point_set_3& pointCloud) {
     IKtoEK to_exact;
     for (auto& pt : pointCloud.points()) _cdt.insert(to_exact(pt));
+
+    //-- Smoothing
+#ifdef SMOOTH
+    geomtools::smooth_dt<CDT, EPECK>(pointCloud, _cdt);
+#endif
 }
 
 void Terrain::threeDfy(const Point_set_3& pointCloud, const PolyFeatures& features) {
@@ -22,9 +27,6 @@ void Terrain::threeDfy(const Point_set_3& pointCloud, const PolyFeatures& featur
         this->constrain_footprint(f->get_poly(), f->get_base_heights());
     }
     std::cout << "Done constraining" << std::endl;
-
-    //-- Smoothing
-//    this->smooth(pointCloud);
 
     //-- Constrain buildings
     for (auto& feature : features) {
@@ -53,57 +55,12 @@ void Terrain::constrain_footprint(const Polygon_with_holes_2& poly,
         Polygon_3 pts;
         std::vector<Vertex_handle> vertex;
         for (auto& polyVertex : ring) {
-#ifdef USE_ENHANCED_CDT
-            vertex.push_back(_cdt.insert(CDT::Point(polyVertex.x(), polyVertex.y(), heights[polyCount][count++])));
-#else
             pts.push_back(ePoint_3(polyVertex.x(), polyVertex.y(), heights[polyCount][count++]));
-#endif
         }
-
-#ifdef USE_ENHANCED_CDT
-        //-- Ken's odd-even constraint add
-        for (int i = 0; i < vertex.size() - 1; ++i)
-            _cdt.odd_even_insert_constraint(vertex[i], vertex[(i+1)]);
-        _cdt.odd_even_insert_constraint(vertex.back(), vertex.front());
-#else
         //-- Set added points as constraints
         _cdt.insert_constraint(pts.begin(), pts.end(), true);
-#endif
 
         ++polyCount;
-    }
-}
-
-//-- Taken from CGAL's example
-void Terrain::smooth(const Point_set_3& pointCloud) {
-    // Smooth heights with 5 successive Gaussian filters
-#ifdef CGAL_LINKED_WITH_TBB
-    using Concurrency_tag = CGAL::Parallel_tag;
-#else
-    using Concurrency_tag = CGAL::Sequential_tag;
-#endif
-    double spacing = CGAL::compute_average_spacing<Concurrency_tag>(pointCloud, 6);
-    spacing *= 2;
-    double gaussian_variance = 4 * spacing * spacing;
-    for (CDT::Vertex_handle vh : _cdt.finite_vertex_handles())
-    {
-        double z = CGAL::to_double(vh->point().z());
-        double total_weight = 1;
-        CDT::Vertex_circulator circ = _cdt.incident_vertices (vh),
-                start = circ;
-        do
-        {
-            if (!_cdt.is_infinite(circ))
-            {
-                double sq_dist = CGAL::squared_distance (EKtoIK()(vh->point()), EKtoIK()(circ->point()));
-                double weight = std::exp(- sq_dist / gaussian_variance);
-                z += weight * CGAL::to_double(circ->point().z());
-                total_weight += weight;
-            }
-        }
-        while (++ circ != start);
-        z /= total_weight;
-        vh->point() = CGAL::Point_3<EPECK> (vh->point().x(), vh->point().y(), z);
     }
 }
 

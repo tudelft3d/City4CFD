@@ -140,6 +140,9 @@ void Map3d::set_footprint_elevation() {
     //-- Make a DT with inexact constructions for fast interpolation
     DT dt;
     dt.insert(_pointCloud.points().begin(), _pointCloud.points().end());
+#ifdef SMOOTH
+    geomtools::smooth_dt<DT, EPICK>(_pointCloud, dt);
+#endif
 
     for (auto& f : _lsFeatures) {
         if (!f->is_active()) continue;

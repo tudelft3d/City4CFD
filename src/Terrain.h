@@ -31,7 +31,6 @@ protected:
     CDT  _cdt;
     SurfaceLayers _surfaceLayersTerrain;
 
-    void smooth(const Point_set_3& pointCloud);
     void create_mesh();
 };
 

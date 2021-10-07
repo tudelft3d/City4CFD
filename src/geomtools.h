@@ -18,6 +18,7 @@ namespace geomtools {
 
     //-- Templated functions
     template <typename T> bool check_inside(const T& pt2, const Polygon_with_holes_2& polygon);
+    template <typename T, typename U> void smooth_dt (const Point_set_3& pointCloud, T& dt);
 }
 
 #endif //CITYCFD_GEOMTOOLS_H

@@ -8,7 +8,8 @@ namespace config {
     const char*              gisdata       = "data/input/tudcampus.geojson";
     const char*              buildings_xyz = "data/input/building_simplified.xyz";
     std::vector<const char*> topoLayers    = {"data/input/Vegetation.geojson", "data/input/Water.geojson"};
-//    std::vector<const char*> topoLayers    = {};
+//    std::vector<const char*> topoLayers    = {"data/input/Vegetation.geojson"};
+//    std::vector<const char*> topoLayers;
 
     //-- Output info
     std::string outputFileName = "Mesh";
@@ -25,7 +26,7 @@ namespace config {
     double buildingPercentile = 0.9;
 
     //-- Polygons related
-    double edgeMaxLen = 3;
+    double edgeMaxLen = 2;
 
     //-- Output flags
     OutputFormat outputFormat = OBJ;

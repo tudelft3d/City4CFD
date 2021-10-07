@@ -1,7 +1,7 @@
 #ifndef CITYCFD_DEFINITIONS_H
 #define CITYCFD_DEFINITIONS_H
 
-//#define USE_ENHANCED_CDT
+#define SMOOTH // Maybe make it runtime flag
 
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/Exact_predicates_exact_constructions_kernel.h>
@@ -42,7 +42,6 @@
 
 //-- Third-party
 #include "nlohmann/json.hpp"
-#include "cgal-etc/Enhanced_triangulation_2.h"
 
 //-- CGAL Basics
 typedef CGAL::Exact_predicates_inexact_constructions_kernel  EPICK;
@@ -95,11 +94,7 @@ typedef CGAL::Constrained_triangulation_face_base_2<Projection_traits, Fbb>     
 typedef CGAL::Triangulation_data_structure_2<Vb,Fb>                                TDS;
 typedef CGAL::Exact_intersections_tag                                              Itag;
 typedef CGAL::Constrained_Delaunay_triangulation_2<Projection_traits, TDS, Itag>   CDTt;
-#ifdef USE_ENHANCED_CDT
-typedef Enhanced_constrained_triangulation_2<CDTt>                                 CDT;
-#else
 typedef CGAL::Constrained_triangulation_plus_2<CDTt>                               CDT;
-#endif
 typedef CDT::Point                                                                 Point;
 typedef CDT::Face_handle                                                           Face_handle;
 typedef CDT::Vertex_handle                                                         Vertex_handle;

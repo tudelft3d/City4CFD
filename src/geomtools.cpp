@@ -16,27 +16,6 @@ double geomtools::percentile(std::vector<double> values, const double percentile
     return values[i];
 }
 
-//-- Check if the point is inside a polygon on a 2D projection
-template<typename T>
-bool geomtools::check_inside(const T& pt2, const Polygon_with_holes_2& polygon) {
-    Point_2 pt(pt2.x(), pt2.y());
-
-    //-- Check if the point falls within the outer surface
-    if (CGAL::bounded_side_2(polygon.outer_boundary().begin(), polygon.outer_boundary().end(), pt) == CGAL::ON_BOUNDED_SIDE) {
-        // Check if the point falls within one of the holes
-        for (auto it_hole = polygon.holes_begin(); it_hole != polygon.holes_end(); ++it_hole) {
-            if (CGAL::bounded_side_2(it_hole->begin(), it_hole->end(), pt) == CGAL::ON_BOUNDED_SIDE) {
-                return false;
-            }
-        }
-        return true;
-    }
-    return false;
-}
-//- Explicit template instantiation
-template bool geomtools::check_inside<Point_2>(const Point_2& pt2, const Polygon_with_holes_2& polygon);
-template bool geomtools::check_inside<Point_3>(const Point_3& pt2, const Polygon_with_holes_2& polygon);
-
 bool geomtools::point_in_circle(const Point_3& pt, const Point_2& center, const double& radius) {
     if (pow(pt.x() - center.x(), 2)
       + pow(pt.y() - center.y(), 2)
@@ -159,3 +138,61 @@ void geomtools::shorten_long_poly_edges(Polygon_2& poly) {
         } else ++i;
     }
 }
+
+//-- Templated functions
+//-- Check if the point is inside a polygon on a 2D projection
+template<typename T>
+bool geomtools::check_inside(const T& pt2, const Polygon_with_holes_2& polygon) {
+    Point_2 pt(pt2.x(), pt2.y());
+
+    //-- Check if the point falls within the outer surface
+    if (CGAL::bounded_side_2(polygon.outer_boundary().begin(), polygon.outer_boundary().end(), pt) == CGAL::ON_BOUNDED_SIDE) {
+        // Check if the point falls within one of the holes
+        for (auto it_hole = polygon.holes_begin(); it_hole != polygon.holes_end(); ++it_hole) {
+            if (CGAL::bounded_side_2(it_hole->begin(), it_hole->end(), pt) == CGAL::ON_BOUNDED_SIDE) {
+                return false;
+            }
+        }
+        return true;
+    }
+    return false;
+}
+//- Explicit template instantiation
+template bool geomtools::check_inside<Point_2>(const Point_2& pt2, const Polygon_with_holes_2& polygon);
+template bool geomtools::check_inside<Point_3>(const Point_3& pt2, const Polygon_with_holes_2& polygon);
+
+template <typename T, typename U>
+void geomtools::smooth_dt(const Point_set_3& pointCloud, T& dt) {
+    // Smooth heights with 5 successive Gaussian filters
+#ifdef CGAL_LINKED_WITH_TBB
+    using Concurrency_tag = CGAL::Parallel_tag;
+#else
+    using Concurrency_tag = CGAL::Sequential_tag;
+#endif
+    double spacing = CGAL::compute_average_spacing<Concurrency_tag>(pointCloud, 6);
+    spacing *= 2;
+    double gaussian_variance = 4 * spacing * spacing;
+    for (typename T::Vertex_handle vh : dt.finite_vertex_handles())
+    {
+        double z = CGAL::to_double(vh->point().z());
+        double total_weight = 1;
+        typename T::Vertex_circulator circ = dt.incident_vertices (vh),
+                start = circ;
+        do
+        {
+            if (!dt.is_infinite(circ))
+            {
+                double sq_dist = CGAL::to_double(CGAL::squared_distance (vh->point(), circ->point()));
+                double weight = std::exp(- sq_dist / gaussian_variance);
+                z += weight * CGAL::to_double(circ->point().z());
+                total_weight += weight;
+            }
+        }
+        while (++ circ != start);
+        z /= total_weight;
+        vh->point() = CGAL::Point_3<U> (vh->point().x(), vh->point().y(), z);
+    }
+}
+//-- Explicit template instantiation
+template void geomtools::smooth_dt<DT, EPICK>  (const Point_set_3& pointCloud, DT& dt);
+template void geomtools::smooth_dt<CDT, EPECK> (const Point_set_3& pointCloud, CDT& dt);

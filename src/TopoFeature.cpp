@@ -169,17 +169,15 @@ void PolyFeature::calc_footprint_elevation_linear(const DT& dt) {
             DT::Point pt(polypt.x(), polypt.y(), 0);
             fh = dt.locate(pt, fh);
 
-            std::vector<DT::Point> cdtPt;
-            for (int i = 0; i < 3; ++i) {
-                cdtPt.push_back(fh->vertex(i)->point());
-            }
-            Triangle_coordinates triangle_coordinates(cdtPt[0], cdtPt[1], cdtPt[2]);
+            Triangle_coordinates triangle_coordinates(fh->vertex(0)->point(),
+                                                      fh->vertex(1)->point(),
+                                                      fh->vertex(2)->point());
             std::vector<double> coords;
             triangle_coordinates(pt, std::back_inserter(coords));
 
             double h = 0;
             for (int i = 0; i < 3; ++i) {
-                h += cdtPt[i].z() * coords[i];
+                h += fh->vertex(i)->point().z() * coords[i];
             }
             ringHeights.push_back(h);
         }

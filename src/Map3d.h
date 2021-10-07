@@ -39,7 +39,6 @@ private:
     void prep_feature_output();
     void prep_cityjson_output();
     void collect_garbage();
-    void clear_features();
 };
 
 #endif //CITYCFD_MAP3D_H
