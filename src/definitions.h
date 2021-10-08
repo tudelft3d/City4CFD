@@ -9,9 +9,7 @@
 
 #include <CGAL/Point_set_3.h>
 #include <CGAL/Point_set_3/IO.h>
-#include <CGAL/Point_set_2.h>
 #include <CGAL/Polygon_2.h>
-#include <CGAL/Polygon_with_holes_2.h>
 #include <CGAL/Polygon_2_algorithms.h>
 #include <CGAL/IO/WKT.h>
 
@@ -21,7 +19,6 @@
 #include <CGAL/Delaunay_triangulation_2.h>
 #include <CGAL/Constrained_Delaunay_triangulation_2.h>
 #include <CGAL/Constrained_triangulation_plus_2.h>
-#include <CGAL/Triangulation_face_base_with_info_2.h>
 
 #include <CGAL/Surface_mesh.h>
 #include <CGAL/Polygon_mesh_processing/remesh.h>
@@ -49,15 +46,14 @@ typedef CGAL::Exact_predicates_exact_constructions_kernel    EPECK;
 typedef CGAL::Projection_traits_xy_3<EPICK>                  iProjection_traits;
 typedef CGAL::Projection_traits_xy_3<EPECK>                  Projection_traits;
 
-//-- Kernel converter
-typedef CGAL::Cartesian_converter<EPECK, EPICK> EKtoIK;
-typedef CGAL::Cartesian_converter<EPICK, EPECK> IKtoEK;
+//-- Kernel Converter
+template<typename T, typename U>
+using Converter = CGAL::Cartesian_converter<T, U>;
 
 //-- CGAL Point
 typedef EPICK::Point_2            Point_2;
 typedef EPICK::Point_3            Point_3;
 typedef EPECK::Point_3            ePoint_3;
-typedef EPICK::Segment_3          Segment_3;
 typedef CGAL::Point_set_3<Point_3> Point_set_3;
 
 //-- CGAL Mesh
@@ -66,11 +62,11 @@ typedef Mesh::Vertex_index                               vertex_descriptor;
 typedef Mesh::Face_index                                 face_descriptor;
 typedef Mesh::Property_map<face_descriptor, std::string> Face_property;
 
-//-- CGAL normal
+//-- CGAL Normal
 namespace PMP = CGAL::Polygon_mesh_processing;
-typedef EPICK::Vector_3 Vector;
+typedef   EPICK::Vector_3 Vector;
 
-//-- CGAL tree search
+//-- CGAL Tree Search
 typedef CGAL::Search_traits_3<EPICK>                 Traits;
 //typedef CGAL::Kd_tree<Traits>                         SearchTree;
 typedef CGAL::Orthogonal_k_neighbor_search<Traits>    Neighbor_search;
@@ -87,7 +83,7 @@ struct FaceInfo2
     }
     int surfaceLayer = -9999; // Face handle to output mesh for specific surface layer
 };
-//-- CGAL triangulation
+//-- CGAL Triangulation
 typedef CGAL::Triangulation_vertex_base_with_id_2<Projection_traits>               Vb;
 typedef CGAL::Triangulation_face_base_with_info_2<FaceInfo2, Projection_traits>    Fbb;
 typedef CGAL::Constrained_triangulation_face_base_2<Projection_traits, Fbb>        Fb;
@@ -100,6 +96,7 @@ typedef CDT::Face_handle                                                        
 typedef CDT::Vertex_handle                                                         Vertex_handle;
 typedef CGAL::Delaunay_triangulation_2<CGAL::Projection_traits_xy_3<EPICK>>        DT;
 
+//-- CGAL Polygon
 typedef CGAL::Polygon_2<EPICK>                                                     Polygon_2;
 typedef CGAL::Polygon_2<Projection_traits>                                         Polygon_3;
 
@@ -114,7 +111,7 @@ typedef std::vector<std::shared_ptr<TopoFeature>>  OutputFeatures;
 typedef std::vector<std::shared_ptr<SurfaceLayer>> SurfaceLayers;
 
 //-- TopoClasses
-typedef enum {
+typedef enum { // temp
     TERRAIN          = 0,
     BUILDING         = 1,
     BOUNDARY         = 2,
@@ -127,7 +124,7 @@ typedef enum {
     SURFACELAYER     = 9,
 } TopoClass;
 
-const std::map<int, std::string> topoClassName {
+const std::map<int, std::string> topoClassName { // temp
         {0, "Terrain"},
         {1, "Building"},
         {2, "Boundary"},
@@ -140,7 +137,7 @@ const std::map<int, std::string> topoClassName {
         {9, "SurfaceLayer"},
 };
 
-//-- Output formats
+//-- Output Formats
 typedef enum {
     OBJ       = 0,
     CityJSON  = 1,
@@ -175,7 +172,7 @@ struct Polygon_with_holes_2 {
     const auto bbox() const {return _rings.front().bbox();}
 };
 
-//-- Global constants
+//-- Global Constants
 const double infty     = 1e6;
 const double smallnum  = 1e-6;
 

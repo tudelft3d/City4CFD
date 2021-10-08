@@ -9,7 +9,7 @@ Terrain::Terrain(int pid)
 Terrain::~Terrain() = default;
 
 void Terrain::set_cdt(const Point_set_3& pointCloud) {
-    IKtoEK to_exact;
+    Converter<EPICK, EPECK> to_exact;
     for (auto& pt : pointCloud.points()) _cdt.insert(to_exact(pt));
 
     //-- Smoothing

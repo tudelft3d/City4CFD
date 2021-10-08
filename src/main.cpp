@@ -1,9 +1,4 @@
-#include <iostream>
-#include "nlohmann/json.hpp"
-#include "definitions.h"
-#include "io.h"
 #include "Map3d.h"
-#include <chrono>
 
 int main() {
     try {

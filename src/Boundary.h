@@ -34,7 +34,6 @@ public:
 
     TopoClass   get_class() const override;
     std::string get_class_name() const override;
-
 };
 
 class Top : public Boundary {
