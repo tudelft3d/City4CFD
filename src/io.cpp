@@ -1,18 +1,36 @@
 #include "io.h"
 
 //-- Input functions
-bool IO::read_config(const char* file){ //todo
-    return true;
+void IO::read_config(std::string& config_path){
+    std::ifstream json_file(config_path);
+    if (!json_file)
+        throw std::invalid_argument(std::string("Configuration file " + config_path + " not found."));
+
+    //-- Filepaths in the json file are relative to the location of the json file
+    fs::path working_directory = fs::path(config_path).parent_path();
+    fs::current_path(working_directory);
+    std::cout << "--> INFO: Active working directory: " << working_directory << std::endl;
+
+    nlohmann::json j;
+    j = nlohmann::json::parse(json_file, nullptr, true, true);
+
+    try {
+        config::set_config(j);
+    } catch (std::exception& e) {
+        std::cerr << "--> ERROR: Error reading configuration file arguments. "
+                  << "Please check if your configuration file is valid." << std::endl;
+        throw;
+    }
 }
 
-bool IO::read_point_cloud(const char* file, Point_set_3& pc) {
+bool IO::read_point_cloud(std::string& file, Point_set_3& pc) {
     std::ifstream ifile(file, std::ios_base::binary);
     ifile >> pc;
     std::cerr << "POINT CLOUD: "<< pc.size() << " point read" << std::endl;
     return true;
 }
 
-bool IO::read_polygons(const char* file, nlohmann::json& j) {
+bool IO::read_polygons(std::string& file, nlohmann::json& j) { // For now specifically GeoJSON, but can potentially change
     std::ifstream ifs(file);
     j = nlohmann::json::parse(ifs);
     return true;

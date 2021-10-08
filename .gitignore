@@ -1,8 +1,8 @@
 input/
 cmake-*
 .idea/
+Mesh*.json
 *.obj
 *.stl
-*.json
 *.ply
 *.swp

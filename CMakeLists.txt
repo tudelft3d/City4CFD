@@ -2,17 +2,20 @@ project(cityCFD)
 
 cmake_minimum_required(VERSION 3.17)
 
-set(CMAKE_CXX_STANDARD 11)
-
+#set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/Modules/" ${CMAKE_MODULE_PATH})
 #set( CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS true )
 
 set( CMAKE_CXX_FLAGS "-O3" )
-set( CMAKE_BUILD_TYPE "Release" )
-#set( CMAKE_BUILD_TYPE "Debug" )
+#set( CMAKE_BUILD_TYPE "Release" )
+set( CMAKE_BUILD_TYPE "Debug" )
 
 #if ( COMMAND cmake_policy )
 #    cmake_policy( SET CMP0003 NEW )
 #endif()
+
+# BOOST
+find_package( Boost REQUIRED COMPONENTS filesystem )
+#find_package ( Boost REQUIRED )
 
 # LASLIB
 find_package( LASlib REQUIRED )
@@ -20,6 +23,7 @@ find_package( LASlib REQUIRED )
 # CGAL
 find_package( CGAL REQUIRED QUIET COMPONENTS )
 
+# Third-party
 include_directories( ${CMAKE_SOURCE_DIR}/thirdparty )
 
 # Creating entries for target: cityCFD
@@ -31,6 +35,6 @@ set_target_properties(
 )
 
 #target_link_libraries( cityCFD ${CGAL_LIBRARIES} ${CGAL_3RD_PARTY_LIBRARIES} ${GDAL_LIBRARY} ${YAML_CPP_LIBRARIES} Boost::program_options Boost::filesystem Boost::locale Boost::chrono LASlib)
-target_link_libraries( cityCFD ${CGAL_LIBRARIES} ${CGAL_3RD_PARTY_LIBRARIES})
+target_link_libraries( cityCFD ${CGAL_LIBRARIES} ${CGAL_3RD_PARTY_LIBRARIES} Boost::filesystem)
 
 install(TARGETS cityCFD DESTINATION bin)

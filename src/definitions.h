@@ -3,6 +3,9 @@
 
 #define SMOOTH // Maybe make it runtime flag
 
+#include <iostream>
+#include <boost/filesystem.hpp>
+
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/Exact_predicates_exact_constructions_kernel.h>
 #include <CGAL/Projection_traits_xy_3.h>
@@ -39,6 +42,9 @@
 
 //-- Third-party
 #include "nlohmann/json.hpp"
+
+//-- General definitions
+namespace fs = boost::filesystem;
 
 //-- CGAL Basics
 typedef CGAL::Exact_predicates_inexact_constructions_kernel  EPICK;

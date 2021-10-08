@@ -5,34 +5,39 @@
 
 namespace config {
     //-- Input info
-    extern const char* points_xyz;
-    extern const char* gisdata;
-    extern const char* buildings_xyz;
-    extern std::vector<const char*> topoLayers;
+    extern std::string points_xyz;
+    extern std::string gisdata;
+    extern std::string buildings_xyz;
+    extern std::vector<std::string> topoLayers;
 
     //-- Output info
     extern std::string outputFileName;
 
     //-- Domain size
-   extern Point_2             pointOfInterest;
-   extern double              influenceRegionRadius;
-   extern Polygon_2           influenceRegionBnd; // It's either radius or polygon
-   extern double              dimOfDomain;
-   extern double              topHeight;
+    extern Point_2             pointOfInterest;
+    //- Influence region
+    extern double              influenceRegionRadius;
+    extern Polygon_2           influenceRegionBnd;
+    extern std::string         influenceRegionPoly;
+    extern bool                influenceRegionBPG;
 
-   //-- Reconstruction
-   extern double       lod;
-   extern double       buildingPercentile;
+    extern double              dimOfDomain;
+    extern double              topHeight;
 
-   //-- Polygons related
-   extern double            edgeMaxLen;
+    //-- Reconstruction
+    extern double       lod;
+    extern double       buildingPercentile;
 
-   //-- Output flags
-   extern OutputFormat outputFormat;
-   extern bool         outputSeparately;
+    //-- Polygons related
+    extern double            edgeMaxLen;
+
+    //-- Output flags
+    extern fs::path     outputDir;
+    extern OutputFormat outputFormat;
+    extern bool         outputSeparately;
     // note: handle when radiusOfInterst is larger than dimOfDomain
 
-    bool read_config_file();
+    void set_config(nlohmann::json& j);
 };
 
 #endif //CITYCFD_CONFIG_H

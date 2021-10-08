@@ -70,8 +70,8 @@ void Map3d::set_features() {
 void Map3d::set_boundaries() {
     //-- Set the influence region --//
     //- Define radius of interest
-    if (config::influenceRegionRadius == -infty) { // temp, will change the condition
-        std::cout << "--> Radius of interest not defined in config, calculating automatically" << std::endl;
+    if (config::influenceRegionBPG) { // temp, will change the condition
+        std::cout << "--> Region of interest not defined explicitly, calculating according to BPG" << std::endl;
         //-- Find building where the point of interest lies in and define radius of interest with BPG
         SearchTree searchTree, searchTreeBuildings;
         searchTree.insert(_pointCloud.points().begin(), _pointCloud.points().end());
@@ -214,6 +214,8 @@ void Map3d::read_data() { // This will change with time
 }
 
 void Map3d::output() {
+    fs::current_path(config::outputDir);
+
     //-- Group all features for output
     this->prep_feature_output();
 

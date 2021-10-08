@@ -1,14 +1,45 @@
 #include "Map3d.h"
 
-int main() {
+void printWelcome() {
+    std::cout << "cityCFD wooho" << std::endl;
+}
+
+void printHelp() {
+    std::cout << "Help goes here" << std::endl;
+}
+
+int main(int argc, char** argv) {
     try {
+        printWelcome();
+
         auto startTime = std::chrono::steady_clock::now();
 
-        //-- Data input - this needs to be sorted
-        const char* config = "";
+        //-- TEMP
+        const char* CONFIG_PATH = "data/input/config.json";
+        std::string config_path = CONFIG_PATH;
 
-        //-- Read configuration file TODO
-        IO::read_config(config);
+        //-- Path to config.json file
+        if (argc >= 2) {
+            config_path = fs::current_path().append(argv[1]).string();
+            std::cout << config_path << std::endl;
+        } else {
+//            throw std::invalid_argument("Missing path to config file!");
+        }
+
+        //-- TODO optional arguments like output dir and log file name, I don't know yet
+        for (auto i = 1; i < argc; ++i) {
+            if (boost::iequals(argv[i], "--help")) {
+                printHelp();
+                return EXIT_SUCCESS;
+            } else if (boost::iequals(argv[i], "--output_dir") && (i + 1) != argc) {
+                config::outputDir = fs::absolute(fs::current_path().append(argv[i+1]));
+            } else if (boost::iequals(argv[i], "--output_file") && (i + 1) != argc) {
+                config::outputFileName = argv[i+1];
+            }
+        }
+
+        //-- Read configuration file
+        IO::read_config(config_path);
 
         //-- Create the main class
         Map3d map3d;
