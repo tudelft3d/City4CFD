@@ -10,14 +10,9 @@ namespace config {
 
     //-- Domain dimensions
     Point_2     pointOfInterest;
-    //- Influence region
-    double      influenceRegionRadius = -infty;
-    Polygon_2   influenceRegionBnd = {};
-    std::string influenceRegionPoly;
-    bool        influenceRegionBPG = false;
-
     double      dimOfDomain;
     double      topHeight;
+    boost::variant<bool, double, std::string, Polygon_2> influenceRegion;
 
     //-- Reconstruction related
     double lod;
@@ -54,16 +49,18 @@ void config::set_config(nlohmann::json& j) {
     //-- Domain dimensions
     pointOfInterest = Point_2(j["point_of_interest"][0], j["point_of_interest"][1]);
 
-    //- Influence region
-    if (j["influence_region"].is_string()) {
-        influenceRegionPoly = j["influence_region"];
-    } else if (j["influence_region"].size() > 2) {
-        for (auto& pt : j["influence_region"]) influenceRegionBnd.push_back(Point_2(pt[0], pt[1]));
+    //- Influence region which can be defined differently
+    if (j["influence_region"].is_string()) { //- Search for GeoJSON polygon
+        influenceRegion = (std::string)j["influence_region"];
+    } else if (j["influence_region"].size() > 2) { // Explicitly defined influ region polygon
+        Polygon_2 tempPoly;
+        for (auto& pt : j["influence_region"]) tempPoly.push_back(Point_2(pt[0], pt[1]));
+        influenceRegion = tempPoly;
     } else if (j["influence_region"].size() == 2) {
         throw std::invalid_argument("Unknown setup of the influence region!");
-    } else if (j["influence_region"].is_number() || j["influence_region"][0].is_number()) {
-        influenceRegionRadius = j["influence_region"].front();
-    } else influenceRegionBPG = true;
+    } else if (j["influence_region"].is_number() || j["influence_region"].is_array() && j["influence_region"][0].is_number()) { // Influ region radius
+        influenceRegion = (double)j["influence_region"].front();
+    } else influenceRegion = true; // Leave it to BPG
 
     //todo different ways of modelling domain, including height
     dimOfDomain = j["dim_of_domain"].front();

@@ -12,15 +12,15 @@ public:
     Building(const nlohmann::json& poly);
     ~Building();
 
-    void        threeDfy(const SearchTree& searchTree);
-    void        get_cityjson_info(nlohmann::json& b) const override;
-    void        get_cityjson_semantics(nlohmann::json& g) const override;
-    std::string get_cityjson_primitive() const override;
+    void   check_feature_scope(const Polygon_2& influRegion);
+    double max_dim();
+    void   threeDfy(const SearchTree& searchTree);
 
-    TopoClass   get_class() const override;
-    std::string get_class_name() const override;
-
-    double get_max_dim();
+    virtual void        get_cityjson_info(nlohmann::json& b) const override;
+    virtual void        get_cityjson_semantics(nlohmann::json& g) const override;
+    virtual std::string get_cityjson_primitive() const override;
+    virtual TopoClass   get_class() const override;
+    virtual std::string get_class_name() const override;
 
 private:
     double _height;

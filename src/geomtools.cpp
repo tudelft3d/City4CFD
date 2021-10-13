@@ -72,7 +72,7 @@ void geomtools::mark_domains(CDT& ct,
         for (auto& feature : features) {
             if (!feature->is_active()) continue;
             //- Polygons are already ordered according to importance - find first polygon
-            if (geomtools::check_inside(chkPoint, feature->get_poly())){
+            if (geomtools::point_in_poly(chkPoint, feature->get_poly())){
                 if (feature->get_class() == BUILDING) {
                     surfaceLayer = -1; //- Leave building footprints as part of terrain
                     break;
@@ -142,7 +142,7 @@ void geomtools::shorten_long_poly_edges(Polygon_2& poly) {
 //-- Templated functions
 //-- Check if the point is inside a polygon on a 2D projection
 template<typename T>
-bool geomtools::check_inside(const T& pt2, const Polygon_with_holes_2& polygon) {
+bool geomtools::point_in_poly(const T& pt2, const Polygon_with_holes_2& polygon) {
     Point_2 pt(pt2.x(), pt2.y());
 
     //-- Check if the point falls within the outer surface
@@ -158,8 +158,24 @@ bool geomtools::check_inside(const T& pt2, const Polygon_with_holes_2& polygon) 
     return false;
 }
 //- Explicit template instantiation
-template bool geomtools::check_inside<Point_2>(const Point_2& pt2, const Polygon_with_holes_2& polygon);
-template bool geomtools::check_inside<Point_3>(const Point_3& pt2, const Polygon_with_holes_2& polygon);
+template bool geomtools::point_in_poly<Point_2>(const Point_2& pt2, const Polygon_with_holes_2& polygon);
+template bool geomtools::point_in_poly<Point_3>(const Point_3& pt2, const Polygon_with_holes_2& polygon);
+
+template<typename T>
+void geomtools::make_round_poly(Point_2& centre, double radius, T& poly) {
+    const int nPts      = 360; // Hardcoded
+    const double angInt = 2 * M_PI / (double)nPts;
+    double ang = 0;
+    for (auto i = 0; i < nPts; ++i) {
+        double xPt = centre.x() + radius * cos(ang + angInt);
+        double yPt = centre.y() + radius * sin(ang + angInt);
+        ang = ang + angInt;
+        poly.push_back(Point_2(xPt, yPt));
+    }
+}
+//- Explicit template instantiation
+template void geomtools::make_round_poly<Polygon_2>(Point_2& centre, double radius, Polygon_2& poly);
+template void geomtools::make_round_poly<Polygon_with_holes_2>(Point_2& centre, double radius, Polygon_with_holes_2& poly);
 
 template <typename T, typename U>
 void geomtools::smooth_dt(const Point_set_3& pointCloud, T& dt) {

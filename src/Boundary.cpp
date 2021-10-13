@@ -1,15 +1,17 @@
 #include "Boundary.h"
 
 Boundary::Boundary()
-    : TopoFeature() {}
+    : PolyFeature() {}
 
 Boundary::Boundary(const int outputLayerID)
-    : TopoFeature(outputLayerID) {}
+    : PolyFeature(outputLayerID) {}
 
 Boundary::~Boundary() = default;
 
 //-- Static member definition
 std::vector<Point_3> Boundary::_outerPts;
+double               Boundary::_outerBndHeight;
+Polygon_2            Boundary::_bndPoly;
 
 //-- Deactivate point cloud points that are out of bounds
 void Boundary::set_bounds_to_pc(Point_set_3& pointCloud) { // Will try to template it to include CDT
@@ -64,6 +66,19 @@ std::vector<double> Boundary::get_domain_bbox() {
     return std::vector<double> {minx, miny, minz, maxx, maxy, maxz};
 }
 
+//-- TEMP
+void Boundary::get_cityjson_info(nlohmann::json& b) const {
+    //temp
+}
+
+void Boundary::get_cityjson_semantics(nlohmann::json& g) const {
+    //temp
+}
+
+std::string Boundary::get_cityjson_primitive() const {
+    return "";
+};
+
 //-- SIDES CLASS --//
 Sides::Sides()
     : Boundary(2) {
@@ -92,6 +107,16 @@ void Sides::threeDfy() {
         _mesh.add_face(mesh_vertex_side[v2], mesh_vertex_side[v1], mesh_vertex_side[v1 + 1]);
         _mesh.add_face(mesh_vertex_side[v2 + 1], mesh_vertex_side[v2], mesh_vertex_side[v1 + 1]);
     }
+}
+
+// TBD
+void Sides::set_bnd_poly(double radius, SearchTree& searchTree) {
+    // todo either gonna make buffer the extrusion of domain, or shrink the domain to fit buffer
+    geomtools::make_round_poly(config::pointOfInterest, radius, _poly);
+
+    //-- Height for buffer - average of outer pts
+    this->calc_footprint_elevation_from_pc(searchTree);
+    _outerBndHeight = geomtools::avg(_base_heights.front());
 }
 
 TopoClass Sides::get_class() const {
@@ -128,4 +153,71 @@ TopoClass Top::get_class() const {
 
 std::string Top::get_class_name() const {
     return "Top";
+}
+
+//-- INFLU REGION CLASS--//
+InfluRegion::InfluRegion() = default;
+InfluRegion::~InfluRegion() = default;
+
+void InfluRegion::operator()(double radius) {
+    geomtools::make_round_poly(config::pointOfInterest, radius, _influRegion);
+}
+
+void InfluRegion::operator()(Polygon_2& poly) {
+    _influRegion = poly;
+}
+
+void InfluRegion::operator()(std::string& polyPath) {
+    JsonPolygons influJsonPoly;
+    IO::read_geojson_polygons(polyPath, influJsonPoly);
+
+    for (auto& coords : influJsonPoly.front()->front()) { // I know it should be only 1 polygon with 1 ring
+            _influRegion.push_back(Point_2(coords[0], coords[1]));
+    }
+    CGAL::internal::pop_back_if_equal_to_front(_influRegion);
+    if (_influRegion.is_clockwise_oriented()) _influRegion.reverse_orientation();
+}
+
+void InfluRegion::operator()(Point_set_3& pointCloud, Point_set_3& pointCloudBuildings, Buildings& buildings) {
+#ifndef NDEBUG
+    assert(boost::get<bool>(config::influenceRegion));
+#endif
+    double influRegionRadius = this->calc_influ_region_radius_bpg(pointCloud,
+                                                                  pointCloudBuildings,
+                                                                  buildings);
+    geomtools::make_round_poly(config::pointOfInterest, influRegionRadius, _influRegion);
+}
+
+const Polygon_2& InfluRegion::get_influ_region() const {
+    return _influRegion;
+}
+
+double
+InfluRegion::calc_influ_region_radius_bpg(Point_set_3& pointCloud, Point_set_3& pointCloudBuildings, Buildings& buildings) {
+    double influRegionRadius;
+    //-- Find building where the point of interest lies in and define radius of interest with BPG
+    SearchTree searchTree, searchTreeBuildings;
+    searchTree.insert(pointCloud.points().begin(), pointCloud.points().end());
+    searchTreeBuildings.insert(pointCloudBuildings.points().begin(), pointCloudBuildings.points().end()); //TODO Maybe save as member variable
+
+    bool foundBuilding = false;
+    for (auto& f : buildings) {
+        if (geomtools::point_in_poly(config::pointOfInterest, f->get_poly())) {
+            f->calc_footprint_elevation_from_pc(searchTree); //- Quick calculation from point cloud before CDT is constructed
+            try {
+                f->threeDfy(searchTreeBuildings);
+            } catch (std::exception& e) {
+                std::cerr << std::endl << "Error: " << e.what() << std::endl;
+                throw std::runtime_error("Impossible to automatically determine influence region");
+            }
+            influRegionRadius = f->max_dim() * 3.; //- BPG by Liu
+            f->clear_feature(); //- They will be properly interpolated from DT later
+
+            foundBuilding = true;
+            break;
+        }
+    }
+    if (!foundBuilding) throw std::invalid_argument("Point of interest does not belong to any building! Impossible to determine influence region.");
+
+    return influRegionRadius;
 }

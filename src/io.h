@@ -10,7 +10,7 @@ namespace IO {
     //-- Input functions
     void read_config(std::string& config_path);
     bool read_point_cloud(std::string& file, Point_set_3& pc);
-    bool read_polygons(std::string& file, nlohmann::json& j);
+    void read_geojson_polygons(std::string& file, JsonPolygons& jsonPolygons);
 
     //-- Output functions
     void output_obj(const OutputFeatures& allFeatures);

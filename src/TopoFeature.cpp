@@ -71,26 +71,12 @@ PolyFeature::PolyFeature(const int outputLayerID)
 
 PolyFeature::PolyFeature(const nlohmann::json& poly)
     : TopoFeature(), _base_heights() {
-    //-- Store the polygon
-    nlohmann::json polygonStart;
-    if (poly["geometry"]["type"] == "Polygon") {
-        polygonStart = poly["geometry"]["coordinates"];
-    } else if (poly["geometry"]["type"] == "MultiPolygon") { // Quick dirty add of multipolygons from bgt
-        polygonStart = poly["geometry"]["coordinates"];
-//        if (polygonStart.size() > 1) throw std::runtime_error(poly["geometry"]["type"]);
-
-        //--todo GOTTA SEE WHAT TO DO HERE
-        polygonStart = polygonStart[0];
-    } else {
-        throw std::runtime_error(poly["geometry"]["type"]);
-    }
-//    for (auto& polyEdges : poly["geometry"]["coordinates"]) {
-    for (auto& polyEdges : polygonStart) {
+    for (auto& polyEdges : poly) {
         Polygon_2 tempPoly;
         for (auto& coords : polyEdges) {
            tempPoly.push_back(Point_2(coords[0], coords[1]));
         }
-        pop_back_if_equal_to_front(tempPoly);
+        CGAL::internal::pop_back_if_equal_to_front(tempPoly);
 
         if (_poly._rings.empty()) {
             if (tempPoly.is_clockwise_oriented()) tempPoly.reverse_orientation();
@@ -108,31 +94,6 @@ PolyFeature::PolyFeature(const nlohmann::json& poly, const int outputLayerID)
 }
 
 PolyFeature::~PolyFeature() = default;
-
-void PolyFeature::check_feature_scope() { //-- Default implementation checks the influence region
-    //-- Include all polygons that have at least one vertex in the influence region
-    if (config::influenceRegionBnd.is_empty()) { //- If the influence region is radius-based
-        for (auto& poly : _poly.rings()) {
-            for (auto& vert : poly) {
-                if (pow(config::pointOfInterest.x() - vert.x(), 2)
-                    + pow(config::pointOfInterest.y() - vert.y(), 2)
-                    < pow(config::influenceRegionRadius, 2)) {
-                    return;
-                }
-            }
-        }
-    } else { //- If the influence region is defined with a polygon
-        Polygon_2& bndPoly = config::influenceRegionBnd;
-        for (auto& poly: _poly.rings()) {
-            for (auto& vert : poly) {
-                if (CGAL::bounded_side_2(bndPoly.begin(), bndPoly.end(), vert) == CGAL::ON_BOUNDED_SIDE)
-                    return;
-            }
-        }
-    }
-//    std::cout << "Poly ID " << this->get_id() << " is outside the influ region. Deactivating." << std::endl;
-    this->deactivate();
-}
 
 void PolyFeature::calc_footprint_elevation_nni(const DT& dt) {
     typedef std::vector<std::pair<DT::Point, double>> Point_coordinate_vector;
@@ -210,8 +171,9 @@ void PolyFeature::calc_footprint_elevation_from_pc(const SearchTree& searchTree)
     }
 }
 
-void PolyFeature::clear_base_heights() {
+void PolyFeature::clear_feature() {
     _base_heights.clear();
+    _mesh.clear();
 }
 
 Polygon_with_holes_2& PolyFeature::get_poly() {

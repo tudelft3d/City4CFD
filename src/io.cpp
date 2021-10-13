@@ -30,10 +30,30 @@ bool IO::read_point_cloud(std::string& file, Point_set_3& pc) {
     return true;
 }
 
-bool IO::read_polygons(std::string& file, nlohmann::json& j) { // For now specifically GeoJSON, but can potentially change
-    std::ifstream ifs(file);
-    j = nlohmann::json::parse(ifs);
-    return true;
+void IO::read_geojson_polygons(std::string& file, JsonPolygons& jsonPolygons) { // For now specifically GeoJSON, but can potentially change
+    try {
+        std::ifstream ifs(file);
+        nlohmann::json j = nlohmann::json::parse(ifs);
+
+        int count;
+        for (auto& feature : j["features"]) {
+            if (feature["geometry"]["type"] == "Polygon") {
+                auto poly = feature["geometry"]["coordinates"];
+                jsonPolygons.emplace_back(std::make_unique<nlohmann::json>(poly));
+            } else if (feature["geometry"]["type"] == "MultiPolygon") {
+                for (auto& poly : feature["geometry"]["coordinates"]) {
+                    jsonPolygons.emplace_back(std::make_unique<nlohmann::json>(poly));
+                }
+            } else {
+                // Exception handling - maybe write to log file
+                std::cout << "In file '" << file << "' cannot parse geometry type "
+                          << feature["geometry"]["type"] << ". Object ID: " << count << std::endl;
+            }
+            ++count;
+        }
+    } catch (std::exception& e) {
+        throw std::runtime_error(std::string("Error parsing JSON file '" + file + "'. Details: " + e.what()));
+    }
 }
 
 //-- Output functions

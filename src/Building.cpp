@@ -8,6 +8,28 @@ Building::Building(const nlohmann::json& poly)
 
 Building::~Building() = default;
 
+void Building::check_feature_scope(const Polygon_2& influRegion) {
+        for (auto& poly: _poly.rings()) {
+            for (auto& vert : poly) {
+                if (CGAL::bounded_side_2(influRegion.begin(), influRegion.end(), vert) == CGAL::ON_BOUNDED_SIDE)
+                    return;
+            }
+        }
+//    std::cout << "Poly ID " << this->get_id() << " is outside the influ region. Deactivating." << std::endl;
+    this->deactivate();
+}
+
+double Building::max_dim() {
+    std::vector<double> dims;
+    EPICK::Vector_2 diag(_poly.bbox().xmax() - _poly.bbox().xmin(), _poly.bbox().ymax() - _poly.bbox().ymin());
+
+    dims.emplace_back(diag.squared_length() * pow(cos(M_PI_4), 2));
+    dims.emplace_back(diag.squared_length() * pow(sin(M_PI_4), 2));
+    dims.emplace_back(_height * _height);
+
+    return sqrt(*(std::max_element(dims.begin(), dims.end())));
+}
+
 void Building::threeDfy(const SearchTree& searchTree) {
     //-- Take tree subset bounded by the polygon
     std::vector<Point_3> subsetPts;
@@ -19,7 +41,7 @@ void Building::threeDfy(const SearchTree& searchTree) {
     //-- Check if subset point lies inside the polygon
     std::vector<double> building_pts;
     for (auto& pt : subsetPts) {
-        if (geomtools::check_inside(pt, _poly)) {
+        if (geomtools::point_in_poly(pt, _poly)) {
             building_pts.push_back(pt.z());
         }
     }
@@ -82,15 +104,4 @@ TopoClass Building::get_class() const {
 
 std::string Building::get_class_name() const {
     return "Building";
-}
-
-double Building::get_max_dim() {
-    std::vector<double> dims;
-    EPICK::Vector_2 diag(_poly.bbox().xmax() - _poly.bbox().xmin(), _poly.bbox().ymax() - _poly.bbox().ymin());
-
-    dims.emplace_back(diag.squared_length() * pow(cos(M_PI_4), 2));
-    dims.emplace_back(diag.squared_length() * pow(sin(M_PI_4), 2));
-    dims.emplace_back(_height * _height);
-
-    return sqrt(*(std::max_element(dims.begin(), dims.end())));
 }

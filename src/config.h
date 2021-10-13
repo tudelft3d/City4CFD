@@ -15,14 +15,9 @@ namespace config {
 
     //-- Domain size
     extern Point_2             pointOfInterest;
-    //- Influence region
-    extern double              influenceRegionRadius;
-    extern Polygon_2           influenceRegionBnd;
-    extern std::string         influenceRegionPoly;
-    extern bool                influenceRegionBPG;
-
     extern double              dimOfDomain;
     extern double              topHeight;
+    extern boost::variant<bool, double, std::string, Polygon_2> influenceRegion;
 
     //-- Reconstruction
     extern double       lod;

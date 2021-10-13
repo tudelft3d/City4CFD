@@ -20,15 +20,16 @@ public:
     void output();
 
 private:
-     Point_set_3                  _pointCloud;
-     Point_set_3                  _pointCloudBuildings;
-     nlohmann::json               _polygonsBuildings;
-     std::vector<nlohmann::json>  _polygonsSurfaceLayers;
-     Terrainptr                   _terrain;
-     Buildings                    _buildings;
-     Boundaries                   _boundaries;
-     PolyFeatures                 _lsFeatures;
-     OutputFeatures               _outputFeatures;
+     Point_set_3                _pointCloud;
+     Point_set_3                _pointCloudBuildings;
+     JsonPolygons               _polygonsBuildings;
+     std::vector<JsonPolygons>  _polygonsSurfaceLayers;
+     Terrainptr                 _terrain;
+     Buildings                  _buildings;
+     SurfaceLayers              _surfaceLayers;
+     Boundaries                 _boundaries;
+     PolyFeatures               _lsFeatures;
+     OutputFeatures             _outputFeatures;
 
     void set_features();
     void set_boundaries();

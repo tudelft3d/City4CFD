@@ -11,8 +11,9 @@ SurfaceLayer::SurfaceLayer(const nlohmann::json& poly, const int outputLayerID)
 
 SurfaceLayer::~SurfaceLayer() = default;
 
-void SurfaceLayer::check_feature_scope() { //-- Overrides default, as it doesn't depend on influence region
-    //-- Exclude all polygons that have at least one vertex outside the domain
+void SurfaceLayer::check_feature_scope() {
+    //-- Depends on the boundary: exclude all polygons that have at least one
+    //-- vertex outside the domain
     for (auto& poly : _poly.rings()) {
         for (auto& vert : poly) {
             if (pow(config::pointOfInterest.x() - vert.x(), 2)

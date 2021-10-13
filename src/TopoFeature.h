@@ -11,13 +11,13 @@ public:
     TopoFeature(int outputLayerID);
     virtual ~TopoFeature();
 
-    virtual TopoClass    get_class() const = 0;
-    virtual std::string  get_class_name() const = 0;
+    static int           get_num_output_layers();
+
     virtual void         get_cityjson_info(nlohmann::json& b) const;
     virtual void         get_cityjson_semantics(nlohmann::json& g) const;
     virtual std::string  get_cityjson_primitive() const;
-
-    static int           get_num_output_layers();
+    virtual TopoClass    get_class() const = 0;
+    virtual std::string  get_class_name() const = 0;
 
     Mesh&       get_mesh();
     const Mesh& get_mesh() const;
@@ -34,10 +34,10 @@ protected:
     std::string    _id;
     bool           _f_active;
     int            _outputLayerID; // 0- Terrain
-    // 1- Buildings
-    // 2- Sides
-    // 3- Top
-    // 4 Onwards - surface layers
+                                   // 1- Buildings
+                                   // 2- Sides
+                                   // 3- Top
+                                   // 4 Onwards - surface layers
 };
 
 //-- TopoFeature derived from polygons
@@ -49,18 +49,16 @@ public:
     PolyFeature(const nlohmann::json& poly, const int outputLayerID);
     virtual ~PolyFeature();
 
-    virtual void        check_feature_scope();
-    virtual void        get_cityjson_info(nlohmann::json& b) const = 0;
-    virtual void        get_cityjson_semantics(nlohmann::json& g) const = 0;
-    virtual std::string get_cityjson_primitive() const = 0;
-
-    virtual TopoClass   get_class() const = 0;
-    virtual std::string get_class_name() const = 0;
-
     void  calc_footprint_elevation_nni(const DT& dt);
     void  calc_footprint_elevation_linear(const DT& dt);
     void  calc_footprint_elevation_from_pc(const SearchTree& searchTree);
-    void  clear_base_heights();
+    void  clear_feature();
+
+    virtual void        get_cityjson_info(nlohmann::json& b) const = 0;
+    virtual void        get_cityjson_semantics(nlohmann::json& g) const = 0;
+    virtual std::string get_cityjson_primitive() const = 0;
+    virtual TopoClass   get_class() const = 0;
+    virtual std::string get_class_name() const = 0;
 
     Polygon_with_holes_2&                    get_poly();
     const Polygon_with_holes_2&              get_poly() const;

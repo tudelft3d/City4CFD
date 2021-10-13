@@ -14,7 +14,7 @@ set( CMAKE_BUILD_TYPE "Debug" )
 #endif()
 
 # BOOST
-find_package( Boost REQUIRED COMPONENTS filesystem )
+find_package( Boost REQUIRED COMPONENTS filesystem)
 #find_package ( Boost REQUIRED )
 
 # LASLIB

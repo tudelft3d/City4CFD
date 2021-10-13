@@ -4,7 +4,6 @@ Map3d::Map3d() = default;
 Map3d::~Map3d() = default;
 
 void Map3d::reconstruct() {
-    try {
         //-- Prepare features
         this->set_features();
         std::cout << "Features done" << std::endl;
@@ -33,10 +32,6 @@ void Map3d::reconstruct() {
         //-- Reconstruct 3D features with respective algorithms
         this->threeDfy();
         std::cout << "3dfy done" << std::endl;
-
-    } catch (std::exception& e) {
-        throw;
-    }
 }
 
 void Map3d::set_features() {
@@ -45,19 +40,18 @@ void Map3d::set_features() {
 
     //-- Add polygons as features
     //- Buildings
-    for (auto& poly : _polygonsBuildings["features"]) {
-        auto building = std::make_shared<Building>(poly);
+    for (auto& poly : _polygonsBuildings) {
+        auto building = std::make_shared<Building>(*poly);
         _lsFeatures.push_back(building);
         _buildings.push_back(building);
     }
     //- Other polygons
     int count = 4; //- Surface layer ID is 4 onwards
     for (auto& surfaceLayer : _polygonsSurfaceLayers) {
-        for (auto& poly : surfaceLayer["features"]) {
-            if (poly["geometry"]["type"] != "Polygon") continue; // Make sure only polygons are added
-
-            auto surfacePoly = std::make_shared<SurfaceLayer>(poly, count);
+        for (auto& poly : surfaceLayer) {
+            auto surfacePoly = std::make_shared<SurfaceLayer>(*poly, count);
             _lsFeatures.push_back(surfacePoly);
+            _surfaceLayers.push_back(surfacePoly);
         }
         ++count;
     }
@@ -69,36 +63,20 @@ void Map3d::set_features() {
 
 void Map3d::set_boundaries() {
     //-- Set the influence region --//
-    //- Define radius of interest
-    if (config::influenceRegionBPG) { // temp, will change the condition
-        std::cout << "--> Region of interest not defined explicitly, calculating according to BPG" << std::endl;
-        //-- Find building where the point of interest lies in and define radius of interest with BPG
-        SearchTree searchTree, searchTreeBuildings;
-        searchTree.insert(_pointCloud.points().begin(), _pointCloud.points().end());
-        searchTreeBuildings.insert(_pointCloudBuildings.points().begin(), _pointCloudBuildings.points().end()); //TODO Maybe save as member variable
-
-        bool foundBuilding = false;
-        for (auto& f : _buildings) {
-            if (geomtools::check_inside(config::pointOfInterest, f->get_poly())) {
-                f->calc_footprint_elevation_from_pc(searchTree); //- Quick calculation from point cloud before CDT is constructed
-                try {
-                    f->threeDfy(searchTreeBuildings);
-                } catch (std::exception& e) {
-                    std::cerr << std::endl << "Error: " << e.what() << std::endl;
-                    throw std::runtime_error("Impossible to automatically determine influence region");
-                }
-                config::influenceRegionRadius = f->get_max_dim() * 3.; //- BPG by Liu
-                f->clear_base_heights(); //- They will be properly interpolated from DT later
-
-                foundBuilding = true;
-                break;
-            }
-        }
-        if (!foundBuilding) throw std::invalid_argument("Point of interest does not belong to any building! Impossible to determine influence region.");
+    InfluRegion influRegion;
+    if (config::influenceRegion.type() == typeid(bool)) { // Automatically calculate influ region with BPG
+        std::cout << "--> INFO: Influence region not defined in config. "
+                  << "Calculating with BPG." << std::endl;
+        influRegion(_pointCloud, _pointCloudBuildings, _buildings);
+    } else { // Define influ region either with radius or predefined polygon
+        boost::apply_visitor(influRegion, config::influenceRegion);
     }
 
     //-- Deactivate features that are out of their scope
-    for (auto& f : _lsFeatures) {
+    for (auto& f : _buildings) {
+        f->check_feature_scope(influRegion.get_influ_region());
+    }
+    for (auto& f : _surfaceLayers) {
         f->check_feature_scope();
     }
 
@@ -124,7 +102,6 @@ void Map3d::triangulate_terrain() {
 void Map3d::polygon_processing() {
     for (auto& f : _lsFeatures) {
         if (!f->is_active()) continue;
-        std::cout << "New fieature!" << std::endl;
         for (auto& ring : f->get_poly().rings()) {
             geomtools::shorten_long_poly_edges(ring);
         }
@@ -132,10 +109,6 @@ void Map3d::polygon_processing() {
 }
 
 void Map3d::set_footprint_elevation() {
-    //-- Construct a searchTree to search for elevation
-//    SearchTree searchTree;
-//    searchTree.insert(_pointCloud.points().begin(), _pointCloud.points().end());
-
     //-- Make a DT with inexact constructions for fast interpolation
     DT dt;
     dt.insert(_pointCloud.points().begin(), _pointCloud.points().end());
@@ -145,16 +118,11 @@ void Map3d::set_footprint_elevation() {
 
     for (auto& f : _lsFeatures) {
         if (!f->is_active()) continue;
-        try {
 #ifdef NDEBUG
-            f->calc_footprint_elevation_nni(dt);
+        f->calc_footprint_elevation_nni(dt);
 #else
-            f->calc_footprint_elevation_linear(dt);  // NNI is quite slow in debug mode, better to use linear in that case
+        f->calc_footprint_elevation_linear(dt);  // NNI is quite slow in debug mode, better to use linear in that case
 #endif
-//            f->calc_footprint_elevation_from_pc(searchTree);
-        } catch (std::exception& e) {
-            std::cerr << std::endl << "Footprint elevation calculation failed for object \'" << f->get_id() << "\' (class " << f->get_class() << ") with error: " << e.what() << std::endl;
-        }
     }
 }
 
@@ -192,25 +160,25 @@ void Map3d::threeDfy() {
 }
 
 void Map3d::read_data() { // This will change with time
-        //-- Read ground points
-        IO::read_point_cloud(config::points_xyz, _pointCloud);
-        if (_pointCloud.size() == 0) {
-            std::cout << "Didn't find any ground points! Calculating ground as flat surface" << std::endl;
-        }
+    //-- Read ground points
+    IO::read_point_cloud(config::points_xyz, _pointCloud);
+    if (_pointCloud.size() == 0) {
+        std::cout << "Didn't find any ground points! Calculating ground as flat surface" << std::endl;
+    }
 
-        //-- Read building points
-        IO::read_point_cloud(config::buildings_xyz, _pointCloudBuildings);
-        if (_pointCloudBuildings.empty()) throw std::invalid_argument("Didn't find any building points!");
+    //-- Read building points
+    IO::read_point_cloud(config::buildings_xyz, _pointCloudBuildings);
+    if (_pointCloudBuildings.empty()) throw std::invalid_argument("Didn't find any building points!");
 
-        //-- Read building polygons
-        IO::read_polygons(config::gisdata, _polygonsBuildings);
-        if (_polygonsBuildings.empty()) throw std::invalid_argument("Didn't find any building polygons!");
+    //-- Read building polygons
+    IO::read_geojson_polygons(config::gisdata, _polygonsBuildings);
+    if (_polygonsBuildings.empty()) throw std::invalid_argument("Didn't find any building polygons!");
 
-        //-- Read surface layer polygons
-        for (auto& topoLayer: config::topoLayers) {
-            _polygonsSurfaceLayers.emplace_back();
-            IO::read_polygons(topoLayer, _polygonsSurfaceLayers.back());
-        }
+    //-- Read surface layer polygons
+    for (auto& topoLayer: config::topoLayers) {
+        _polygonsSurfaceLayers.emplace_back();
+        IO::read_geojson_polygons(topoLayer, _polygonsSurfaceLayers.back());
+    }
 }
 
 void Map3d::output() {
@@ -265,6 +233,12 @@ void Map3d::collect_garbage() {
         if (_buildings[i]->is_active()) ++i;
         else {
             _buildings.erase(_buildings.begin() + i);
+        }
+    }
+    for (unsigned long i = 0; i < _surfaceLayers.size();) {
+        if (_surfaceLayers[i]->is_active()) ++i;
+        else {
+            _surfaceLayers.erase(_surfaceLayers.begin() + i);
         }
     }
     for (unsigned long i = 0; i < _lsFeatures.size();) {

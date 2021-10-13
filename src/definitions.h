@@ -109,12 +109,13 @@ typedef CGAL::Polygon_2<Projection_traits>                                      
 //-- Typedefs for smart pointers
 class Building;    class Boundary; class PolyFeature;
 class TopoFeature; class Terrain;  class SurfaceLayer;
-typedef std::shared_ptr<Terrain>                   Terrainptr;
-typedef std::vector<std::shared_ptr<Building>>     Buildings;
-typedef std::vector<std::shared_ptr<Boundary>>     Boundaries;
-typedef std::vector<std::shared_ptr<PolyFeature>>  PolyFeatures;
-typedef std::vector<std::shared_ptr<TopoFeature>>  OutputFeatures;
-typedef std::vector<std::shared_ptr<SurfaceLayer>> SurfaceLayers;
+typedef std::shared_ptr<Terrain>                     Terrainptr;
+typedef std::vector<std::shared_ptr<Building>>       Buildings;
+typedef std::vector<std::shared_ptr<Boundary>>       Boundaries;
+typedef std::vector<std::shared_ptr<PolyFeature>>    PolyFeatures;
+typedef std::vector<std::shared_ptr<TopoFeature>>    OutputFeatures;
+typedef std::vector<std::shared_ptr<SurfaceLayer>>   SurfaceLayers;
+typedef std::vector<std::unique_ptr<nlohmann::json>> JsonPolygons;
 
 //-- TopoClasses
 typedef enum { // temp
@@ -157,6 +158,12 @@ struct Polygon_with_holes_2 {
     std::vector<Polygon_2>& rings() {return _rings;}
     const std::vector<Polygon_2>& rings() const {return _rings;}
 
+    void push_back(Point_2 point) {
+        _rings.front().push_back(point);
+    }
+    void push_back(Point_2& point) {
+        _rings.front().push_back(point);
+    }
     bool has_holes() const {
         if (_rings.size() > 1) return true;
         return false;
