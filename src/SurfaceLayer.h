@@ -11,7 +11,7 @@ public:
     SurfaceLayer(const nlohmann::json& poly, const int outputLayerID);
     ~SurfaceLayer();
 
-    void check_feature_scope();
+    void check_feature_scope(const Polygon_2& bndPoly);
 
     virtual void        get_cityjson_info(nlohmann::json& b) const override;
     virtual void        get_cityjson_semantics(nlohmann::json& g) const override;

@@ -10,16 +10,14 @@ Boundary::~Boundary() = default;
 
 //-- Static member definition
 std::vector<Point_3> Boundary::_outerPts;
-double               Boundary::_outerBndHeight;
-Polygon_2            Boundary::_bndPoly;
+double               Boundary::_outerBndHeight; // depends on the usage, maybe move it from here
 
 //-- Deactivate point cloud points that are out of bounds
-void Boundary::set_bounds_to_pc(Point_set_3& pointCloud) { // Will try to template it to include CDT
-    //- 80% of the total domain size. The rest is left for the buffer zone
+void Boundary::set_bounds_to_pc(Point_set_3& pointCloud, const Polygon_2& bndPoly) {
     auto it = pointCloud.points().begin();
     int count = 0;
     while (it != pointCloud.points().end()) {
-        if (!geomtools::point_in_circle(*it, config::pointOfInterest, 0.8 * config::dimOfDomain)) {
+        if (!geomtools::point_in_poly(*it, bndPoly)) {
             pointCloud.remove(pointCloud.begin() + count);
         } else {
             ++it;
@@ -29,20 +27,32 @@ void Boundary::set_bounds_to_pc(Point_set_3& pointCloud) { // Will try to templa
     pointCloud.collect_garbage(); // Free removed points from the memory
 }
 
-//-- Add buffer between the terrain and domain edge
-void Boundary::add_buffer(Point_set_3& pointCloud) {
-    const int nPts      = 360; // Hardcoded
-    const double angInt = 2 * M_PI / (double)nPts;
-    double ang = 0;
-    for (auto i = 0; i < nPts; ++i) {
-        double xPt = config::pointOfInterest.x() + config::dimOfDomain * cos(ang + angInt);
-        double yPt = config::pointOfInterest.y() + config::dimOfDomain * sin(ang + angInt);
-        ang = ang + angInt;
-        Point_3 pt(xPt, yPt, 0.0); // Height set at 0 for now. Could be average of the edge or average of the whole terrain
-        _outerPts.push_back(pt); // for top and sides
-        pointCloud.insert(pt);
+void Boundary::set_bnd_poly(const Polygon_2& bndPoly, Point_set_3& pointCloud) {
+     SearchTree searchTree(pointCloud.points().begin(),pointCloud.points().end());
+
+    _poly.rings().push_back(bndPoly);
+    this->calc_footprint_elevation_from_pc(searchTree);
+    _outerBndHeight = geomtools::avg(_base_heights.front()); // Height for buffer (for now) - average of outer pts
+
+    //-- Buffer region setup
+    double bufferLen;
+    if (config::domainBuffer > -infty) // todo domain buffer angle determination
+        bufferLen = config::domainBuffer / 100.;
+    else
+        bufferLen = 0.;
+
+    Point_2 center = CGAL::centroid(_poly.outer_boundary().begin(), _poly.outer_boundary().end(), CGAL::Dimension_tag<0>());
+    for (auto& pt : _poly.outer_boundary()) {
+        pt += (pt - center) * bufferLen;
     }
-    _outerPts.push_back(_outerPts[0]); // Put first point at the end to close the loop
+
+    //-- Add final outer points to a static member variable used by sides and top,
+    //   and to the point cloud
+    for (auto& pt : _poly.outer_boundary()) {
+        _outerPts.emplace_back(pt.x(), pt.y(), _outerBndHeight);
+        pointCloud.insert(_outerPts.back());
+    }
+    _outerPts.push_back(_outerPts.front());
 }
 
 std::vector<double> Boundary::get_domain_bbox() {
@@ -86,7 +96,7 @@ Sides::Sides()
 
 Sides::~Sides() = default;
 
-void Sides::threeDfy() {
+void Sides::reconstruct() {
     std::vector<Mesh::vertex_index> mesh_vertex_side;
 
     //-- Add mesh vertices and store them in a vector
@@ -109,16 +119,6 @@ void Sides::threeDfy() {
     }
 }
 
-// TBD
-void Sides::set_bnd_poly(double radius, SearchTree& searchTree) {
-    // todo either gonna make buffer the extrusion of domain, or shrink the domain to fit buffer
-    geomtools::make_round_poly(config::pointOfInterest, radius, _poly);
-
-    //-- Height for buffer - average of outer pts
-    this->calc_footprint_elevation_from_pc(searchTree);
-    _outerBndHeight = geomtools::avg(_base_heights.front());
-}
-
 TopoClass Sides::get_class() const {
     return SIDES;
 }
@@ -134,7 +134,7 @@ Top::Top()
 
 Top::~Top() = default;
 
-void Top::threeDfy() {
+void Top::reconstruct() {
     std::vector<Mesh::vertex_index> mesh_vertex_top;
 
     //-- Top is done by making a CDT of outerPts
@@ -156,44 +156,44 @@ std::string Top::get_class_name() const {
 }
 
 //-- INFLU REGION CLASS--//
-InfluRegion::InfluRegion() = default;
-InfluRegion::~InfluRegion() = default;
+BoundedRegion::BoundedRegion() = default;
+BoundedRegion::~BoundedRegion() = default;
 
-void InfluRegion::operator()(double radius) {
-    geomtools::make_round_poly(config::pointOfInterest, radius, _influRegion);
+void BoundedRegion::operator()(double radius) {
+    geomtools::make_round_poly(config::pointOfInterest, radius, _boundedRegion);
 }
 
-void InfluRegion::operator()(Polygon_2& poly) {
-    _influRegion = poly;
+void BoundedRegion::operator()(Polygon_2& poly) {
+    _boundedRegion = poly;
 }
 
-void InfluRegion::operator()(std::string& polyPath) {
+void BoundedRegion::operator()(std::string& polyPath) {
     JsonPolygons influJsonPoly;
     IO::read_geojson_polygons(polyPath, influJsonPoly);
 
     for (auto& coords : influJsonPoly.front()->front()) { // I know it should be only 1 polygon with 1 ring
-            _influRegion.push_back(Point_2(coords[0], coords[1]));
+            _boundedRegion.push_back(Point_2(coords[0], coords[1]));
     }
-    CGAL::internal::pop_back_if_equal_to_front(_influRegion);
-    if (_influRegion.is_clockwise_oriented()) _influRegion.reverse_orientation();
+    CGAL::internal::pop_back_if_equal_to_front(_boundedRegion);
+    if (_boundedRegion.is_clockwise_oriented()) _boundedRegion.reverse_orientation();
 }
 
-void InfluRegion::operator()(Point_set_3& pointCloud, Point_set_3& pointCloudBuildings, Buildings& buildings) {
+void BoundedRegion::operator()(Point_set_3& pointCloud, Point_set_3& pointCloudBuildings, Buildings& buildings) {
 #ifndef NDEBUG
-    assert(boost::get<bool>(config::influenceRegion));
+    assert(boost::get<bool>(config::influRegionConfig));
 #endif
     double influRegionRadius = this->calc_influ_region_radius_bpg(pointCloud,
                                                                   pointCloudBuildings,
                                                                   buildings);
-    geomtools::make_round_poly(config::pointOfInterest, influRegionRadius, _influRegion);
+    geomtools::make_round_poly(config::pointOfInterest, influRegionRadius, _boundedRegion);
 }
 
-const Polygon_2& InfluRegion::get_influ_region() const {
-    return _influRegion;
+const Polygon_2& BoundedRegion::get_bounded_region() const {
+    return _boundedRegion;
 }
 
 double
-InfluRegion::calc_influ_region_radius_bpg(Point_set_3& pointCloud, Point_set_3& pointCloudBuildings, Buildings& buildings) {
+BoundedRegion::calc_influ_region_radius_bpg(Point_set_3& pointCloud, Point_set_3& pointCloudBuildings, Buildings& buildings) {
     double influRegionRadius;
     //-- Find building where the point of interest lies in and define radius of interest with BPG
     SearchTree searchTree, searchTreeBuildings;
@@ -205,7 +205,7 @@ InfluRegion::calc_influ_region_radius_bpg(Point_set_3& pointCloud, Point_set_3& 
         if (geomtools::point_in_poly(config::pointOfInterest, f->get_poly())) {
             f->calc_footprint_elevation_from_pc(searchTree); //- Quick calculation from point cloud before CDT is constructed
             try {
-                f->threeDfy(searchTreeBuildings);
+                f->reconstruct(searchTreeBuildings);
             } catch (std::exception& e) {
                 std::cerr << std::endl << "Error: " << e.what() << std::endl;
                 throw std::runtime_error("Impossible to automatically determine influence region");

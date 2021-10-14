@@ -13,6 +13,8 @@ namespace IO {
     void read_geojson_polygons(std::string& file, JsonPolygons& jsonPolygons);
 
     //-- Output functions
+    void print_progress_bar(int percent);
+
     void output_obj(const OutputFeatures& allFeatures);
     void output_stl(const OutputFeatures& allFeatures);
     void output_cityjson(const OutputFeatures& allFeatures);

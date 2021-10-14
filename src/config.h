@@ -13,11 +13,15 @@ namespace config {
     //-- Output info
     extern std::string outputFileName;
 
-    //-- Domain size
+    //-- Domain setup
     extern Point_2             pointOfInterest;
-    extern double              dimOfDomain;
     extern double              topHeight;
-    extern boost::variant<bool, double, std::string, Polygon_2> influenceRegion;
+    extern boost::variant<bool, double, std::string, Polygon_2> influRegionConfig;
+    extern boost::variant<bool, double, std::string, Polygon_2> domainBndConfig;
+    extern DomainType          bpgDomainType;
+    extern Vector              flowDirection;
+    extern std::vector<double> bpgDomainSize;
+    extern double              domainBuffer;
 
     //-- Reconstruction
     extern double       lod;
@@ -30,9 +34,11 @@ namespace config {
     extern fs::path     outputDir;
     extern OutputFormat outputFormat;
     extern bool         outputSeparately;
-    // note: handle when radiusOfInterst is larger than dimOfDomain
 
     void set_config(nlohmann::json& j);
+    void set_region(boost::variant<bool, double, std::string, Polygon_2>& regionType,
+                    std::string& regionName,
+                    nlohmann::json& j);
 };
 
 #endif //CITYCFD_CONFIG_H

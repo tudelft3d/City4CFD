@@ -11,14 +11,12 @@ SurfaceLayer::SurfaceLayer(const nlohmann::json& poly, const int outputLayerID)
 
 SurfaceLayer::~SurfaceLayer() = default;
 
-void SurfaceLayer::check_feature_scope() {
+void SurfaceLayer::check_feature_scope(const Polygon_2& bndPoly) {
     //-- Depends on the boundary: exclude all polygons that have at least one
     //-- vertex outside the domain
     for (auto& poly : _poly.rings()) {
         for (auto& vert : poly) {
-            if (pow(config::pointOfInterest.x() - vert.x(), 2)
-                + pow(config::pointOfInterest.y() - vert.y(), 2)
-                > pow(0.8 * config::dimOfDomain,2)) {
+            if (!geomtools::point_in_poly(vert, bndPoly)) {
                 this->deactivate();
                 return;
             }

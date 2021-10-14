@@ -14,6 +14,7 @@
 #include <CGAL/Point_set_3/IO.h>
 #include <CGAL/Polygon_2.h>
 #include <CGAL/Polygon_2_algorithms.h>
+#include <CGAL/centroid.h>
 #include <CGAL/IO/WKT.h>
 
 #include <CGAL/Triangulation_vertex_base_with_info_2.h>
@@ -57,9 +58,9 @@ template<typename T, typename U>
 using Converter = CGAL::Cartesian_converter<T, U>;
 
 //-- CGAL Point
-typedef EPICK::Point_2            Point_2;
-typedef EPICK::Point_3            Point_3;
-typedef EPECK::Point_3            ePoint_3;
+typedef EPICK::Point_2             Point_2;
+typedef EPICK::Point_3             Point_3;
+typedef EPECK::Point_3             ePoint_3;
 typedef CGAL::Point_set_3<Point_3> Point_set_3;
 
 //-- CGAL Mesh
@@ -82,9 +83,9 @@ typedef CGAL::Fuzzy_sphere<Traits>                    Fuzzy_sphere;
 
 struct FaceInfo2
 {
-    FaceInfo2(){}
+    FaceInfo2() {}
     int nesting_level;
-    bool in_domain(){
+    bool in_domain() {
         return nesting_level%2 == 1;
     }
     int surfaceLayer = -9999; // Face handle to output mesh for specific surface layer
@@ -109,13 +110,13 @@ typedef CGAL::Polygon_2<Projection_traits>                                      
 //-- Typedefs for smart pointers
 class Building;    class Boundary; class PolyFeature;
 class TopoFeature; class Terrain;  class SurfaceLayer;
-typedef std::shared_ptr<Terrain>                     Terrainptr;
-typedef std::vector<std::shared_ptr<Building>>       Buildings;
-typedef std::vector<std::shared_ptr<Boundary>>       Boundaries;
-typedef std::vector<std::shared_ptr<PolyFeature>>    PolyFeatures;
-typedef std::vector<std::shared_ptr<TopoFeature>>    OutputFeatures;
-typedef std::vector<std::shared_ptr<SurfaceLayer>>   SurfaceLayers;
-typedef std::vector<std::unique_ptr<nlohmann::json>> JsonPolygons;
+typedef std::shared_ptr<Terrain>                               Terrainptr;
+typedef std::vector<std::shared_ptr<Building>>                 Buildings;
+typedef std::vector<std::shared_ptr<Boundary>>                 Boundaries;
+typedef std::vector<std::shared_ptr<PolyFeature>>              PolyFeatures;
+typedef std::vector<std::shared_ptr<TopoFeature>>              OutputFeatures;
+typedef std::vector<std::shared_ptr<SurfaceLayer>>             SurfaceLayers;
+typedef std::vector<std::unique_ptr<nlohmann::json>>           JsonPolygons;
 
 //-- TopoClasses
 typedef enum { // temp
@@ -143,6 +144,13 @@ const std::map<int, std::string> topoClassName { // temp
         {8, "Top"},
         {9, "SurfaceLayer"},
 };
+
+//-- Domain types
+typedef enum {
+    Round     = 0,
+    Rectangle = 1,
+    Ellipse   = 2
+} DomainType;
 
 //-- Output Formats
 typedef enum {

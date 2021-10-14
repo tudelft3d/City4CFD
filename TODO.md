@@ -6,6 +6,7 @@
     - Changes to the buffer zone
         - Angled and option with flag
     - Option to translate the terrain up top
+    - Switch building CDT to EPICK
 
 ## Longer-term
     - Point cloud processing

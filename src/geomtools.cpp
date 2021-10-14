@@ -55,7 +55,7 @@ void geomtools::mark_domains(CDT& ct,
                              std::list<CDT::Edge>& border,
                              PolyFeatures& features)
 {
-    if(start->info().nesting_level != -1){
+    if (start->info().nesting_level != -1) {
         return;
     }
 
@@ -72,7 +72,7 @@ void geomtools::mark_domains(CDT& ct,
         for (auto& feature : features) {
             if (!feature->is_active()) continue;
             //- Polygons are already ordered according to importance - find first polygon
-            if (geomtools::point_in_poly(chkPoint, feature->get_poly())){
+            if (geomtools::point_in_poly(chkPoint, feature->get_poly())) {
                 if (feature->get_class() == BUILDING) {
                     surfaceLayer = -1; //- Leave building footprints as part of terrain
                     break;
@@ -86,17 +86,17 @@ void geomtools::mark_domains(CDT& ct,
 
     std::list<Face_handle> queue;
     queue.push_back(start);
-    while(! queue.empty()){
+    while (! queue.empty()) {
         Face_handle fh = queue.front();
         queue.pop_front();
-        if(fh->info().nesting_level == -1){
+        if (fh->info().nesting_level == -1) {
             fh->info().nesting_level = index;
             if (surfaceLayer != -1) fh->info().surfaceLayer = surfaceLayer;
-            for(int i = 0; i < 3; i++){
+            for (int i = 0; i < 3; i++) {
                 CDT::Edge e(fh,i);
                 Face_handle n = fh->neighbor(i);
-                if(n->info().nesting_level == -1){
-                    if(ct.is_constrained(e)) border.push_back(e);
+                if (n->info().nesting_level == -1) {
+                    if (ct.is_constrained(e)) border.push_back(e);
                     else queue.push_back(n);
                 }
             }
@@ -105,16 +105,16 @@ void geomtools::mark_domains(CDT& ct,
 }
 
 void geomtools::mark_domains(CDT& cdt, PolyFeatures features) {
-    for(CDT::Face_handle f : cdt.all_face_handles()){
+    for (CDT::Face_handle f : cdt.all_face_handles()) {
         f->info().nesting_level = -1;
     }
     std::list<CDT::Edge> border;
     mark_domains(cdt, cdt.infinite_face(), 0, border, features);
-    while(! border.empty()){
+    while (! border.empty()) {
         CDT::Edge e = border.front();
         border.pop_front();
         Face_handle n = e.first->neighbor(e.second);
-        if(n->info().nesting_level == -1){
+        if (n->info().nesting_level == -1) {
             mark_domains(cdt, n, e.first->info().nesting_level + 1, border, features);
         }
     }
@@ -142,14 +142,26 @@ void geomtools::shorten_long_poly_edges(Polygon_2& poly) {
 //-- Templated functions
 //-- Check if the point is inside a polygon on a 2D projection
 template<typename T>
+bool geomtools::point_in_poly(const T& pt2, const Polygon_2& polygon) {
+    Point_2 pt(pt2.x(), pt2.y());
+    if (CGAL::bounded_side_2(polygon.begin(), polygon.end(), pt) == CGAL::ON_BOUNDED_SIDE) {
+        return true;
+    }
+    return false;
+}
+//- Explicit template instantiation
+template bool geomtools::point_in_poly<Point_2>(const Point_2& pt2, const Polygon_2& polygon);
+template bool geomtools::point_in_poly<Point_3>(const Point_3& pt2, const Polygon_2& polygon);
+
+template<typename T>
 bool geomtools::point_in_poly(const T& pt2, const Polygon_with_holes_2& polygon) {
     Point_2 pt(pt2.x(), pt2.y());
 
     //-- Check if the point falls within the outer surface
-    if (CGAL::bounded_side_2(polygon.outer_boundary().begin(), polygon.outer_boundary().end(), pt) == CGAL::ON_BOUNDED_SIDE) {
+    if (point_in_poly(pt, polygon.outer_boundary())) {
         // Check if the point falls within one of the holes
         for (auto it_hole = polygon.holes_begin(); it_hole != polygon.holes_end(); ++it_hole) {
-            if (CGAL::bounded_side_2(it_hole->begin(), it_hole->end(), pt) == CGAL::ON_BOUNDED_SIDE) {
+            if (point_in_poly(pt, *it_hole)) {
                 return false;
             }
         }

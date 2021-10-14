@@ -1,7 +1,7 @@
 #include "io.h"
 
 //-- Input functions
-void IO::read_config(std::string& config_path){
+void IO::read_config(std::string& config_path) {
     std::ifstream json_file(config_path);
     if (!json_file)
         throw std::invalid_argument(std::string("Configuration file " + config_path + " not found."));
@@ -12,13 +12,19 @@ void IO::read_config(std::string& config_path){
     std::cout << "--> INFO: Active working directory: " << working_directory << std::endl;
 
     nlohmann::json j;
-    j = nlohmann::json::parse(json_file, nullptr, true, true);
+    try {
+        j = nlohmann::json::parse(json_file, nullptr, true, true);
+    } catch (std::exception& e) {
+        std::cerr << "--- ERROR: Configuration file is not a valid JSON file. "
+                  << "Check if you're missing a comma or a brace. ---" << std::endl;
+        throw;
+    }
 
     try {
         config::set_config(j);
     } catch (std::exception& e) {
-        std::cerr << "--> ERROR: Error reading configuration file arguments. "
-                  << "Please check if your configuration file is valid." << std::endl;
+        std::cerr << "--- ERROR: Error reading configuration file arguments. "
+                  << "Some arguments are wrong or missing ---" << std::endl;
         throw;
     }
 }
@@ -26,6 +32,8 @@ void IO::read_config(std::string& config_path){
 bool IO::read_point_cloud(std::string& file, Point_set_3& pc) {
     std::ifstream ifile(file, std::ios_base::binary);
     ifile >> pc;
+
+    pc.add_property_map<bool>("active", true);
     std::cerr << "POINT CLOUD: "<< pc.size() << " point read" << std::endl;
     return true;
 }
@@ -46,8 +54,8 @@ void IO::read_geojson_polygons(std::string& file, JsonPolygons& jsonPolygons) { 
                 }
             } else {
                 // Exception handling - maybe write to log file
-                std::cout << "In file '" << file << "' cannot parse geometry type "
-                          << feature["geometry"]["type"] << ". Object ID: " << count << std::endl;
+//                std::cout << "In file '" << file << "' cannot parse geometry type "
+//                          << feature["geometry"]["type"] << ". Object ID: " << count << std::endl;
             }
             ++count;
         }
@@ -57,6 +65,24 @@ void IO::read_geojson_polygons(std::string& file, JsonPolygons& jsonPolygons) { 
 }
 
 //-- Output functions
+void IO::print_progress_bar(int percent) {
+    std::string bar;
+    for (int i = 0; i < 50; i++) {
+        if (i < (percent / 2)) {
+            bar.replace(i, 1, "=");
+        }
+        else if (i == (percent / 2)) {
+            bar.replace(i, 1, ">");
+        }
+        else {
+            bar.replace(i, 1, " ");
+        }
+    }
+    std::clog << "\r" "[" << bar << "] ";
+    std::clog.width(3);
+    std::clog << percent << "%     " << std::flush;
+}
+
 void IO::output_obj(const OutputFeatures& allFeatures) {
     using namespace config;
     int numOutputLayers = TopoFeature::get_num_output_layers();
@@ -94,7 +120,7 @@ void IO::output_obj(const OutputFeatures& allFeatures) {
     }
     for (int i = 0; i < fs.size(); ++i) {
         if (bs[i].empty()) continue;
-        if (outputSeparately){
+        if (outputSeparately) {
             of.emplace_back();
             of.back().open(outputFileName + "_" + outputLayerName[i] + ".obj");
         }
@@ -132,7 +158,7 @@ void IO::output_stl(const OutputFeatures& allFeatures) {
     }
     for (int i = 0; i < fs.size(); ++i) {
         if (fs[i].empty()) continue;
-        if (outputSeparately){
+        if (outputSeparately) {
             of.emplace_back();
             of.back().open(outputFileName + "_" + outputLayerName[i] + ".stl");
         }

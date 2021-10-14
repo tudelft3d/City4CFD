@@ -11,7 +11,7 @@ Building::~Building() = default;
 void Building::check_feature_scope(const Polygon_2& influRegion) {
         for (auto& poly: _poly.rings()) {
             for (auto& vert : poly) {
-                if (CGAL::bounded_side_2(influRegion.begin(), influRegion.end(), vert) == CGAL::ON_BOUNDED_SIDE)
+                if (geomtools::point_in_poly(vert, influRegion))
                     return;
             }
         }
@@ -30,7 +30,7 @@ double Building::max_dim() {
     return sqrt(*(std::max_element(dims.begin(), dims.end())));
 }
 
-void Building::threeDfy(const SearchTree& searchTree) {
+void Building::reconstruct(const SearchTree& searchTree) {
     //-- Take tree subset bounded by the polygon
     std::vector<Point_3> subsetPts;
     Point_3 bbox1(_poly.bbox().xmin(), _poly.bbox().ymin(), -infty);

@@ -3,6 +3,7 @@
 
 #include "config.h"
 #include "geomtools.h"
+#include "io.h"
 #include "TopoFeature.h"
 #include "SurfaceLayer.h"
 
@@ -14,7 +15,7 @@ public:
     ~Terrain();
 
     void set_cdt(const Point_set_3 &pointCloud);
-    void threeDfy(const Point_set_3& pointCloud, const PolyFeatures& features);
+    void create_mesh(const PolyFeatures& features);
 
     CDT&         get_cdt();
     const CDT&   get_cdt() const;
@@ -23,15 +24,15 @@ public:
     std::string  get_cityjson_primitive() const override;
     TopoClass    get_class() const override;
     std::string  get_class_name() const override;
-    void         constrain_footprint(const Polygon_with_holes_2& poly, const std::vector<std::vector<double>>& heights); //testing
 
     const SurfaceLayers& get_surface_layers() const;
+
+    //-- Templated functions
+    template<typename T> void constrain_features(const T& features);
 
 protected:
     CDT  _cdt;
     SurfaceLayers _surfaceLayersTerrain;
-
-    void create_mesh();
 };
 
 #endif //CITYCFD_TERRAIN_H

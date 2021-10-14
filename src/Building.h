@@ -14,7 +14,7 @@ public:
 
     void   check_feature_scope(const Polygon_2& influRegion);
     double max_dim();
-    void   threeDfy(const SearchTree& searchTree);
+    void   reconstruct(const SearchTree& searchTree);
 
     virtual void        get_cityjson_info(nlohmann::json& b) const override;
     virtual void        get_cityjson_semantics(nlohmann::json& g) const override;

@@ -30,16 +30,29 @@ private:
      Boundaries                 _boundaries;
      PolyFeatures               _lsFeatures;
      OutputFeatures             _outputFeatures;
+     BoundedRegion              _influRegion;
+     BoundedRegion              _domainBnd;
+     DT                         _dt;
+     bool                       _bndBPG = false;
 
     void set_features();
-    void set_boundaries();
+    void set_influ_region();
+    void set_bnd_calc();
+    void set_outer_bnd_bpg();
+    void bnd_sanity_check();
     void triangulate_terrain();
-    void polygon_processing();
-    void set_footprint_elevation();
-    void threeDfy();
+    void generate_terrain_mesh();
+    void reconstruct_buildings();
+    void reconstruct_boundaries();
+
     void prep_feature_output();
     void prep_cityjson_output();
     void collect_garbage();
+
+    //-- Templated functions
+    template<typename T> void shorten_polygons(T& features);
+    template<typename T> void set_footprint_elevation(T& features);
+    template<typename T> void constrain_features(const T& features);
 };
 
 #endif //CITYCFD_MAP3D_H
