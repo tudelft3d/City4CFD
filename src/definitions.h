@@ -71,7 +71,8 @@ typedef Mesh::Property_map<face_descriptor, std::string> Face_property;
 
 //-- CGAL Normal
 namespace PMP = CGAL::Polygon_mesh_processing;
-typedef   EPICK::Vector_3 Vector;
+typedef   EPICK::Vector_3 Vector_3;
+typedef   EPICK::Vector_2 Vector_2;
 
 //-- CGAL Tree Search
 typedef CGAL::Search_traits_3<EPICK>                 Traits;
@@ -194,7 +195,7 @@ struct Polygon_with_holes_2 {
 };
 
 //-- Global Constants
-const double infty     = 1e6;
-const double smallnum  = 1e-6;
+const double infty     = 1e7;
+const double smallnum  = 1e-7;
 
 #endif //CITYCFD_DEFINITIONS_H

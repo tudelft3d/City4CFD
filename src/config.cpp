@@ -14,8 +14,9 @@ namespace config {
     boost::variant<bool, double, std::string, Polygon_2> influRegionConfig;
     boost::variant<bool, double, std::string, Polygon_2> domainBndConfig;
     DomainType            bpgDomainType;
-    Vector                flowDirection;
+    Vector_2              flowDirection;
     std::vector<double>   bpgDomainSize;
+    std::vector<Vector_2> enlargeDomainVec;
     double                domainBuffer = -infty;
 
     //-- Reconstruction related
@@ -80,8 +81,8 @@ void config::set_config(nlohmann::json& j) {
     // Sort out few specifics for domain types
     if (bpgDomainType == Rectangle || bpgDomainType == Ellipse) {
         if (!j.contains("flow_direction")) throw std::invalid_argument("Missing information on flow direction!");
-        if (j["flow_direction"].size() != 3) throw std::invalid_argument("Flow direction array size is not of size 3!");
-        flowDirection = Vector(j["flow_direction"][0], j["flow_direction"][1], j["flow_direction"][2]);
+        if (j["flow_direction"].size() != 2) throw std::invalid_argument("Flow direction array size is not of size 3!");
+        flowDirection = Vector_2(j["flow_direction"][0], j["flow_direction"][1]);
 
         if (j.contains("bpg_domain_size")) {
             if (j["bpg_domain_size"].size() == 4)
@@ -89,6 +90,10 @@ void config::set_config(nlohmann::json& j) {
             else
                 throw std::invalid_argument("Wrong input for overriding BPG domain size");
         } else bpgDomainSize = {5, 5, 15, 5};
+        enlargeDomainVec.emplace_back(Vector_2(-bpgDomainSize[0], 0));
+        enlargeDomainVec.emplace_back(Vector_2(0, -bpgDomainSize[1]));
+        enlargeDomainVec.emplace_back(Vector_2(bpgDomainSize[2], 0));
+        enlargeDomainVec.emplace_back(Vector_2(0, bpgDomainSize[1]));
     }
 
     // Buffer region

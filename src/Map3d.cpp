@@ -13,7 +13,7 @@ void Map3d::reconstruct() {
     this->set_influ_region();
 
     //-- Store boundary polygon or prepare for BPG calculation
-    this->set_bnd_calc();
+    this->set_bnd(); // todo move one down
     std::cout << "Bnds done" << std::endl;
 
     //-- Different flow if explicitly defining domain boundary or leaving it to BPG
@@ -29,7 +29,7 @@ void Map3d::reconstruct() {
         //-- Constrain features, generate terrain mesh from it
         //-- todo combine terrain handling in one function
         this->triangulate_terrain();
-        this->constrain_features(_lsFeatures);
+        this->constrain_features();
         this->generate_terrain_mesh();
         std::cout << "Terrain mesh done" << std::endl;
 
@@ -38,11 +38,7 @@ void Map3d::reconstruct() {
         this->reconstruct_boundaries();
         std::cout << "3dfy done" << std::endl;
     } else {
-        // todo tbd
-        //-- Add PC points to DT
-        this->triangulate_terrain();
-
-        //-- Avoid having too long polygons
+        //-- First the buildings are reconstructed
         this->shorten_polygons(_buildings);
         std::cout << "Checking edge length done" << std::endl;
 
@@ -50,7 +46,21 @@ void Map3d::reconstruct() {
         this->set_footprint_elevation(_buildings);
         std::cout << "Elevation done" << std::endl;
 
+        this->reconstruct_buildings();
+
+        //-- Second, define the highest building and set domain according to BPG
+        this->set_bnd_bpg();
+
+        this->shorten_polygons(_surfaceLayers);
+        this->set_footprint_elevation(_surfaceLayers);
+
         //-- Reconstruct 3D features with respective algorithms
+        this->triangulate_terrain();
+        this->constrain_features();
+        this->generate_terrain_mesh();
+        std::cout << "Terrain mesh done" << std::endl;
+
+        this->reconstruct_boundaries();
         std::cout << "3dfy done" << std::endl;
     }
 }
@@ -100,49 +110,71 @@ void Map3d::set_influ_region() {
     if (config::influRegionConfig.type() == typeid(bool)) { // Automatically calculate influ region with BPG
         std::cout << "--- INFO: Influence region not defined in config. "
                   << "Calculating with BPG. ---" << std::endl;
-        _influRegion(_pointCloud, _pointCloudBuildings, _buildings);
+        _influRegion.calc_influ_region_bpg(_pointCloud, _pointCloudBuildings, _buildings);
     } else { // Define influ region either with radius or predefined polygon
         boost::apply_visitor(_influRegion, config::influRegionConfig);
     }
 
     //-- Deactivate buildings that are out of influ region
     for (auto& f : _buildings) {
-        f->check_feature_scope(_influRegion.get_bounded_region());
+        f->check_feature_scope(_influRegion.get_bounding_region());
     }
-    this->collect_garbage();
+    this->clear_inactives();
 }
 
-void Map3d::set_bnd_calc() {
+void Map3d::set_bnd() { // todo maybe move bpg here also
     if (_bndBPG) { // Automatically calculate boundary with BPG
         //-- BND calc deferred until buildings are reconstructed
         std::cout << "--- INFO: Domain boundaries not defined in config. "
                   << "Calculating with BPG. ---" << std::endl;
-    } else { // Define boundary region either with radius or predefined polygon
+    } else { // Define boundary region with values set in config
 
         boost::apply_visitor(_domainBnd, config::domainBndConfig);
         this->bnd_sanity_check();
 
         //- Deactivate point cloud points that are out of bounds - static function of Boundary
-        Boundary::set_bounds_to_pc(_pointCloud, _domainBnd.get_bounded_region());
-        Boundary::set_bounds_to_pc(_pointCloudBuildings, _domainBnd.get_bounded_region());;
+        Boundary::set_bounds_to_pc(_pointCloud, _domainBnd.get_bounding_region());
+        Boundary::set_bounds_to_pc(_pointCloudBuildings, _domainBnd.get_bounding_region());;
 
-        _boundaries[0]->set_bnd_poly(_domainBnd.get_bounded_region(), _pointCloud);
+        _boundaries[0]->set_bnd_poly(_domainBnd.get_bounding_region(), _pointCloud);
 
         //-- Check feature scope for surface layers now that the full domain is known
         for (auto& f: _surfaceLayers) {
-            f->check_feature_scope(_domainBnd.get_bounded_region());
+            f->check_feature_scope(_domainBnd.get_bounding_region());
         }
-        this->collect_garbage();
+        this->clear_inactives();
     }
 }
 
-void Map3d::set_outer_bnd_bpg() {
-    //todo
+void Map3d::set_bnd_bpg() {
+    // todo add it to the fucn above
+    //-- Find the highest building in the influ region
+    double hMax = 0;
+    for (auto& b : _buildings) {
+        if (b->get_height() > hMax) hMax = b->get_height();
+    }
+
+    //-- Calculate the boundary polygon according to BPG and defined boundary type
+    _domainBnd.calc_bnd_bpg(hMax, _influRegion.get_bounding_region(), _buildings);
+    this->bnd_sanity_check();
+
+    //- Deactivate point cloud points that are out of bounds - static function of Boundary
+    Boundary::set_bounds_to_pc(_pointCloud, _domainBnd.get_bounding_region());
+    Boundary::set_bounds_to_pc(_pointCloudBuildings, _domainBnd.get_bounding_region());;
+
+    //-- Check feature scope for surface layers now that the full domain is known
+    for (auto& f: _surfaceLayers) {
+        f->check_feature_scope(_domainBnd.get_bounding_region());
+    }
+    this->clear_inactives();
+
+    if (config::bpgDomainType == Rectangle) geomtools::shorten_long_poly_edges(_domainBnd.get_bounding_region());
+    _boundaries[0]->set_bnd_poly(_domainBnd.get_bounding_region(), _pointCloud);
 }
 
 void Map3d::bnd_sanity_check() {
-    auto& domainBndPoly = _domainBnd.get_bounded_region();
-    for (auto& pt : _influRegion.get_bounded_region()) {
+    auto& domainBndPoly = _domainBnd.get_bounding_region();
+    for (auto& pt : _influRegion.get_bounding_region()) {
         if (!geomtools::point_in_poly(pt, domainBndPoly))
             throw std::domain_error("The influence region is larger than the domain boundary!");
     }
@@ -150,6 +182,10 @@ void Map3d::bnd_sanity_check() {
 
 void Map3d::generate_terrain_mesh() {
     _terrain->create_mesh(_lsFeatures);
+}
+
+void Map3d::constrain_features() {
+    _terrain->constrain_features(_lsFeatures);
 }
 
 void Map3d::reconstruct_buildings() {
@@ -243,7 +279,7 @@ void Map3d::prep_cityjson_output() { // Temp impl, might change
     }
 };
 
-void Map3d::collect_garbage() {
+void Map3d::clear_inactives() {
     for (unsigned long i = 0; i < _buildings.size();) {
         if (_buildings[i]->is_active()) ++i;
         else {
@@ -294,12 +330,3 @@ void Map3d::set_footprint_elevation(T& features) {
 template void Map3d::set_footprint_elevation<Buildings>    (Buildings& feature);
 template void Map3d::set_footprint_elevation<SurfaceLayers>(SurfaceLayers& feature);
 template void Map3d::set_footprint_elevation<PolyFeatures> (PolyFeatures& feature);
-
-template<typename T>
-void Map3d::constrain_features(const T& features) {
-    _terrain->constrain_features(features);
-}
-//-- Explicit template instantiation
-template void Map3d::constrain_features<Buildings>    (const Buildings& feature);
-template void Map3d::constrain_features<SurfaceLayers>(const SurfaceLayers& feature);
-template void Map3d::constrain_features<PolyFeatures> (const PolyFeatures& feature);

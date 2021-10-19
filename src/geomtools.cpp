@@ -141,7 +141,7 @@ void geomtools::shorten_long_poly_edges(Polygon_2& poly) {
 
 //-- Templated functions
 //-- Check if the point is inside a polygon on a 2D projection
-template<typename T>
+template <typename T>
 bool geomtools::point_in_poly(const T& pt2, const Polygon_2& polygon) {
     Point_2 pt(pt2.x(), pt2.y());
     if (CGAL::bounded_side_2(polygon.begin(), polygon.end(), pt) == CGAL::ON_BOUNDED_SIDE) {
@@ -153,7 +153,7 @@ bool geomtools::point_in_poly(const T& pt2, const Polygon_2& polygon) {
 template bool geomtools::point_in_poly<Point_2>(const Point_2& pt2, const Polygon_2& polygon);
 template bool geomtools::point_in_poly<Point_3>(const Point_3& pt2, const Polygon_2& polygon);
 
-template<typename T>
+template <typename T>
 bool geomtools::point_in_poly(const T& pt2, const Polygon_with_holes_2& polygon) {
     Point_2 pt(pt2.x(), pt2.y());
 
@@ -173,7 +173,7 @@ bool geomtools::point_in_poly(const T& pt2, const Polygon_with_holes_2& polygon)
 template bool geomtools::point_in_poly<Point_2>(const Point_2& pt2, const Polygon_with_holes_2& polygon);
 template bool geomtools::point_in_poly<Point_3>(const Point_3& pt2, const Polygon_with_holes_2& polygon);
 
-template<typename T>
+template <typename T>
 void geomtools::make_round_poly(Point_2& centre, double radius, T& poly) {
     const int nPts      = 360; // Hardcoded
     const double angInt = 2 * M_PI / (double)nPts;
@@ -224,3 +224,24 @@ void geomtools::smooth_dt(const Point_set_3& pointCloud, T& dt) {
 //-- Explicit template instantiation
 template void geomtools::smooth_dt<DT, EPICK>  (const Point_set_3& pointCloud, DT& dt);
 template void geomtools::smooth_dt<CDT, EPECK> (const Point_set_3& pointCloud, CDT& dt);
+
+template <typename T>
+Polygon_2 geomtools::calc_bbox_poly(T& inputPts) {
+    double bxmin, bymin, bxmax, bymax;
+    bxmin = infty; bymin = infty; bxmax = -infty; bymax = -infty;
+    for (auto& pt : inputPts) {
+        if (pt.x() > bxmax) bxmax = pt.x();
+        if (pt.x() < bxmin) bxmin = pt.x();
+        if (pt.y() > bymax) bymax = pt.y();
+        if (pt.y() < bymin) bymin = pt.y();
+    }
+    Polygon_2 bboxPoly;
+    bboxPoly.push_back(Point_2(bxmin, bymin));
+    bboxPoly.push_back(Point_2(bxmax, bymin));
+    bboxPoly.push_back(Point_2(bxmax, bymax));
+    bboxPoly.push_back(Point_2(bxmin, bymax));
+
+    return bboxPoly;
+}
+//- Explicit template instantiation
+template Polygon_2 geomtools::calc_bbox_poly<std::vector<Point_2>>(std::vector<Point_2>& inputPts);

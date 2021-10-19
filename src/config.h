@@ -18,10 +18,11 @@ namespace config {
     extern double              topHeight;
     extern boost::variant<bool, double, std::string, Polygon_2> influRegionConfig;
     extern boost::variant<bool, double, std::string, Polygon_2> domainBndConfig;
-    extern DomainType          bpgDomainType;
-    extern Vector              flowDirection;
-    extern std::vector<double> bpgDomainSize;
-    extern double              domainBuffer;
+    extern DomainType            bpgDomainType;
+    extern Vector_2              flowDirection;
+    extern std::vector<double>   bpgDomainSize;
+    extern std::vector<Vector_2> enlargeDomainVec;
+    extern double                domainBuffer;
 
     //-- Reconstruction
     extern double       lod;

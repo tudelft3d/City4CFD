@@ -21,6 +21,7 @@ namespace geomtools {
     template <typename T> bool point_in_poly(const T& pt2, const Polygon_2& polygon);
     template <typename T> void make_round_poly(Point_2& centre, double radius, T& poly);
     template <typename T, typename U> void smooth_dt (const Point_set_3& pointCloud, T& dt);
+    template <typename T> Polygon_2 calc_bbox_poly(T& inputPts);
 }
 
 #endif //CITYCFD_GEOMTOOLS_H

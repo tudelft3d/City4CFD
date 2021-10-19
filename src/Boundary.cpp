@@ -1,3 +1,4 @@
+#include <CGAL/Point_set_2.h>
 #include "Boundary.h"
 
 Boundary::Boundary()
@@ -155,45 +156,35 @@ std::string Top::get_class_name() const {
     return "Top";
 }
 
-//-- INFLU REGION CLASS--//
-BoundedRegion::BoundedRegion() = default;
-BoundedRegion::~BoundedRegion() = default;
+//-- BOUNDED REGION CLASS--//
+BoundingRegion::BoundingRegion() = default;
+BoundingRegion::~BoundingRegion() = default;
 
-void BoundedRegion::operator()(double radius) {
-    geomtools::make_round_poly(config::pointOfInterest, radius, _boundedRegion);
+//-- Operators to read bounded region if explicitly defined in config
+void BoundingRegion::operator()(double radius) {
+    geomtools::make_round_poly(config::pointOfInterest, radius, _boundingRegion);
 }
 
-void BoundedRegion::operator()(Polygon_2& poly) {
-    _boundedRegion = poly;
+void BoundingRegion::operator()(Polygon_2& poly) {
+    _boundingRegion = poly;
 }
 
-void BoundedRegion::operator()(std::string& polyPath) {
+void BoundingRegion::operator()(std::string& polyPath) {
     JsonPolygons influJsonPoly;
     IO::read_geojson_polygons(polyPath, influJsonPoly);
 
     for (auto& coords : influJsonPoly.front()->front()) { // I know it should be only 1 polygon with 1 ring
-            _boundedRegion.push_back(Point_2(coords[0], coords[1]));
+            _boundingRegion.push_back(Point_2(coords[0], coords[1]));
     }
-    CGAL::internal::pop_back_if_equal_to_front(_boundedRegion);
-    if (_boundedRegion.is_clockwise_oriented()) _boundedRegion.reverse_orientation();
+    CGAL::internal::pop_back_if_equal_to_front(_boundingRegion);
+    if (_boundingRegion.is_clockwise_oriented()) _boundingRegion.reverse_orientation();
 }
 
-void BoundedRegion::operator()(Point_set_3& pointCloud, Point_set_3& pointCloudBuildings, Buildings& buildings) {
+void
+BoundingRegion::calc_influ_region_bpg(Point_set_3& pointCloud, Point_set_3& pointCloudBuildings, Buildings& buildings) {
 #ifndef NDEBUG
     assert(boost::get<bool>(config::influRegionConfig));
 #endif
-    double influRegionRadius = this->calc_influ_region_radius_bpg(pointCloud,
-                                                                  pointCloudBuildings,
-                                                                  buildings);
-    geomtools::make_round_poly(config::pointOfInterest, influRegionRadius, _boundedRegion);
-}
-
-const Polygon_2& BoundedRegion::get_bounded_region() const {
-    return _boundedRegion;
-}
-
-double
-BoundedRegion::calc_influ_region_radius_bpg(Point_set_3& pointCloud, Point_set_3& pointCloudBuildings, Buildings& buildings) {
     double influRegionRadius;
     //-- Find building where the point of interest lies in and define radius of interest with BPG
     SearchTree searchTree, searchTreeBuildings;
@@ -219,5 +210,74 @@ BoundedRegion::calc_influ_region_radius_bpg(Point_set_3& pointCloud, Point_set_3
     }
     if (!foundBuilding) throw std::invalid_argument("Point of interest does not belong to any building! Impossible to determine influence region.");
 
-    return influRegionRadius;
+    geomtools::make_round_poly(config::pointOfInterest, influRegionRadius, _boundingRegion);
+}
+
+void BoundingRegion::calc_bnd_bpg(double hMax,
+                                  const Polygon_2& influRegionPoly,
+                                  const Buildings& buildings) {
+    //-- Set relations for coordinate transformation
+    double sinPhi = config::flowDirection.y() / sqrt(config::flowDirection.squared_length());
+    double cosPhi = config::flowDirection.x() / sqrt(config::flowDirection.squared_length());
+    CGAL::Aff_transformation_2<EPICK> rotate(CGAL::ROTATION, -sinPhi, cosPhi);
+    CGAL::Aff_transformation_2<EPICK> rotate_back(CGAL::ROTATION, sinPhi, cosPhi);
+
+    //-- Find candidate points for the axis-aligned bounding box (AABB)
+    std::vector<Point_2> candidatePts;
+    for (auto& pt : influRegionPoly) {
+        candidatePts.push_back(pt);
+    }
+    //- Add buildings points that may end up outside the influ
+    //  region poly due to the way influ region is calculated
+    for (auto& b : buildings) {
+        if (!b->is_active()) continue;
+        for (auto& pt : b->get_poly().outer_boundary()) {
+            if (!geomtools::point_in_poly(pt, influRegionPoly)) {
+                candidatePts.push_back(pt);
+            }
+        }
+    }
+
+    //-- Axes aligning transformation
+    for (auto& pt : candidatePts) {
+        pt = rotate(pt);
+    }
+
+    //-- Get bbox and translation vector
+    Polygon_2 bbox = geomtools::calc_bbox_poly(candidatePts);
+    auto& translateBoundary = config::enlargeDomainVec;
+
+    //-- Apply domain expansion vectors
+    int i = 0;
+    switch (config::bpgDomainType) {
+        case Round:
+            break;
+
+        case Rectangle:
+            for (auto& pt : bbox) {
+                pt += hMax * (translateBoundary[i] + translateBoundary[(i + 1) % 4]);
+                ++i;
+            }
+            break;
+
+        case Ellipse:
+            std::cout << std::endl;
+            break;
+    }
+
+    //-- Depending on the type of domain, turn the bbox into bounding polygon
+    // todo probably will move
+    for (auto& pt : bbox) {
+        _boundingRegion.push_back(rotate_back(pt));
+    }
+
+    //-- Set the top
+    config::topHeight = hMax * config::bpgDomainSize.back();
+}
+
+Polygon_2& BoundingRegion::get_bounding_region() {
+    return _boundingRegion;
+}
+const Polygon_2& BoundingRegion::get_bounding_region() const {
+    return _boundingRegion;
 }

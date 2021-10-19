@@ -52,22 +52,24 @@ public:
     virtual std::string get_class_name() const override;
 };
 
-class BoundedRegion {
+class BoundingRegion {
 public:
-    BoundedRegion();
-    ~BoundedRegion();
+    BoundingRegion();
+    ~BoundingRegion();
 
     void operator()(double radius);
     void operator()(Polygon_2& poly);
     void operator()(std::string& polyPath);
-    void operator()(Point_set_3& pointCloud, Point_set_3& pointCloudBuildings, Buildings& buildings);
 
-    const Polygon_2& get_bounded_region() const;
+    void calc_influ_region_bpg(Point_set_3& pointCloud, Point_set_3& pointCloudBuildings, Buildings& buildings);
+    void calc_bnd_bpg(double hMax, const Polygon_2& influRegionPoly, const Buildings& buildings);
+
+    Polygon_2& get_bounding_region();
+    const Polygon_2& get_bounding_region() const;
 
 protected:
-    Polygon_2 _boundedRegion;
+    Polygon_2    _boundingRegion;
 
-    double calc_influ_region_radius_bpg(Point_set_3& pointCloud, Point_set_3& pointCloudBuildings, Buildings& buildings);
 };
 
 #endif //CITYCFD_BOUNDARY_H

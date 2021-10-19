@@ -257,8 +257,8 @@ void IO::get_obj_pts(const Mesh& mesh,
 }
 
 void IO::get_stl_pts(Mesh& mesh, std::string& fs) {
-    auto vnormals = mesh.add_property_map<vertex_descriptor, Vector>("v:normals", CGAL::NULL_VECTOR).first;
-    auto fnormals = mesh.add_property_map<face_descriptor, Vector>("f:normals", CGAL::NULL_VECTOR).first;
+    auto vnormals = mesh.add_property_map<vertex_descriptor, Vector_3>("v:normals", CGAL::NULL_VECTOR).first;
+    auto fnormals = mesh.add_property_map<face_descriptor, Vector_3>("f:normals", CGAL::NULL_VECTOR).first;
     PMP::compute_normals(mesh, vnormals, fnormals);
     for (auto& face : mesh.faces()) {
         fs += "\nfacet normal " + gen_key_bucket(fnormals[face]);
@@ -317,4 +317,4 @@ std::string IO::gen_key_bucket(const T& p) {
 }
 //- Explicit template instantiation
 template std::string IO::gen_key_bucket<Point_3>(const Point_3& p);
-template std::string IO::gen_key_bucket<Vector>(const Vector& p);
+template std::string IO::gen_key_bucket<Vector_3>(const Vector_3& p);

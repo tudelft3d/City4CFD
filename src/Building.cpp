@@ -64,6 +64,10 @@ void Building::reconstruct(const SearchTree& searchTree) {
     }
 }
 
+double Building::get_height() const {
+    return _height;
+}
+
 void Building::get_cityjson_info(nlohmann::json& b) const {
     b["type"] = "Building";
 //  b["attributes"];
