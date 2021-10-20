@@ -1,10 +1,10 @@
 #include "Building.h"
 
 Building::Building()
-    : PolyFeature(), _height(-infty) {}
+    : PolyFeature(), _height(-g_largnum) {}
 
 Building::Building(const nlohmann::json& poly)
-    : PolyFeature(poly, 1), _height(-infty) {}
+    : PolyFeature(poly, 1), _height(-g_largnum) {}
 
 Building::~Building() = default;
 
@@ -33,8 +33,8 @@ double Building::max_dim() {
 void Building::reconstruct(const SearchTree& searchTree) {
     //-- Take tree subset bounded by the polygon
     std::vector<Point_3> subsetPts;
-    Point_3 bbox1(_poly.bbox().xmin(), _poly.bbox().ymin(), -infty);
-    Point_3 bbox2(_poly.bbox().xmax(), _poly.bbox().ymax(), infty);
+    Point_3 bbox1(_poly.bbox().xmin(), _poly.bbox().ymin(), -g_largnum);
+    Point_3 bbox2(_poly.bbox().xmax(), _poly.bbox().ymax(), g_largnum);
     Fuzzy_iso_box pts_range(bbox1, bbox2);
     searchTree.search(std::back_inserter(subsetPts), pts_range);
 

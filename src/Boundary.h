@@ -32,7 +32,7 @@ protected:
 
 class Sides : public Boundary {
 public:
-    Sides();
+    Sides(const int outputLayerID);
     ~Sides();
 
     virtual void reconstruct() override;
@@ -43,7 +43,7 @@ public:
 
 class Top : public Boundary {
 public:
-    Top();
+    Top(const int outputLayerID);
     ~Top();
 
     virtual void reconstruct() override;

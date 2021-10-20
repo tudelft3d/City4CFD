@@ -84,17 +84,15 @@ void IO::print_progress_bar(int percent) {
 }
 
 void IO::output_obj(const OutputFeatures& allFeatures) {
-    using namespace config;
-    int numOutputLayers = TopoFeature::get_num_output_layers();
-
+    int numOutputSurfaces = TopoFeature::get_num_output_layers();
     std::vector<std::ofstream> of;
-    std::vector<std::string>   fs(numOutputLayers), bs(numOutputLayers);
+    std::vector<std::string>   fs(numOutputSurfaces), bs(numOutputSurfaces);
 
-    std::vector<std::unordered_map<std::string, unsigned long>> dPts(numOutputLayers);
+    std::vector<std::unordered_map<std::string, int>> dPts(numOutputSurfaces);
     //-- Output points
     for (auto& f : allFeatures) {
         if (!f->is_active()) continue;
-        if (outputSeparately)
+        if (config::outputSeparately)
             IO::get_obj_pts(f->get_mesh(),
                             fs[f->get_output_layer_id()],
                             bs[f->get_output_layer_id()],
@@ -106,34 +104,25 @@ void IO::output_obj(const OutputFeatures& allFeatures) {
                             dPts[0]);
     }
 
-    //-- Get output layer names -- TEMP, could add it to config and have user defined names for surf layers
-    std::vector<std::string> outputLayerName = {"Terrain", "Buildings", "Sides", "Top"};
-    int surfLayer = 1;
-    for (auto i = 4; i < numOutputLayers; ++i) {
-        outputLayerName.push_back("SurfaceLayer_" + std::to_string(surfLayer++));
-    }
-
     //-- Add class name and output to file
-    if (!outputSeparately) {
+    if (!config::outputSeparately) {
         of.emplace_back();
-        of.back().open(outputFileName + ".obj");
+        of.back().open(config::outputFileName + ".obj");
     }
     for (int i = 0; i < fs.size(); ++i) {
         if (bs[i].empty()) continue;
-        if (outputSeparately) {
+        if (config::outputSeparately) {
             of.emplace_back();
-            of.back().open(outputFileName + "_" + outputLayerName[i] + ".obj");
+            of.back().open(config::outputFileName + "_" + config::outputSurfaces[i] + ".obj");
         }
 
-        of.back() << fs[i] << "\ng " << outputLayerName[i] << bs[i];
+        of.back() << fs[i] << "\ng " << config::outputSurfaces[i] << bs[i];
     }
     for (auto& f : of) f.close();
 }
 
 void IO::output_stl(const OutputFeatures& allFeatures) {
-    using namespace config;
     int numOutputLayers = TopoFeature::get_num_output_layers();
-
     std::vector<std::ofstream> of;
     std::vector<std::string>   fs(numOutputLayers);
 
@@ -143,29 +132,21 @@ void IO::output_stl(const OutputFeatures& allFeatures) {
         IO::get_stl_pts(f->get_mesh(), fs[f->get_output_layer_id()]);
     }
 
-
-    //-- Get output layer names -- TEMP, could add it to config and have user defined names for surf layers
-    std::vector<std::string> outputLayerName = {"Terrain", "Buildings", "Sides", "Top"};
-    int surfLayer = 1;
-    for (auto i = 4; i < numOutputLayers; ++i) {
-        outputLayerName.push_back("SurfaceLayer_" + std::to_string(surfLayer++));
-    }
-
     //-- Add class name and output to file
-    if (!outputSeparately) {
+    if (!config::outputSeparately) {
         of.emplace_back();
-        of.back().open(outputFileName + ".stl");
+        of.back().open(config::outputFileName + ".stl");
     }
     for (int i = 0; i < fs.size(); ++i) {
         if (fs[i].empty()) continue;
-        if (outputSeparately) {
+        if (config::outputSeparately) {
             of.emplace_back();
-            of.back().open(outputFileName + "_" + outputLayerName[i] + ".stl");
+            of.back().open(config::outputFileName + "_" + config::outputSurfaces[i] + ".stl");
         }
 
-        of.back() << "\nsolid " << outputLayerName[i];
+        of.back() << "\nsolid " << config::outputSurfaces[i];
         of.back() << fs[i];
-        of.back() << "\nendsolid " << outputLayerName[i];
+        of.back() << "\nendsolid " << config::outputSurfaces[i];
     }
     for (auto& f : of) f.close();
 }
@@ -181,7 +162,7 @@ void IO::output_cityjson(const OutputFeatures& allFeatures) {
     std::vector<double> bbox = Boundary::get_domain_bbox();
     j["metadata"]["geographicalExtent"] = Boundary::get_domain_bbox();
     j["metadata"]["referenceSystem"] = "urn:ogc:def:crs:EPSG::7415";
-    std::unordered_map<std::string, unsigned long> dPts;
+    std::unordered_map<std::string, int> dPts;
     for (auto& f : allFeatures) {
         // Only Buildings and Terrain for now
         if (f->get_class() != BUILDING && f->get_class() != TERRAIN) continue;
@@ -220,10 +201,10 @@ void IO::output_cityjson(const OutputFeatures& allFeatures) {
 void IO::get_obj_pts(const Mesh& mesh,
                      std::string& fs,
                      std::string& bs,
-                     std::unordered_map<std::string, unsigned long>& dPts)
+                     std::unordered_map<std::string, int>& dPts)
 {
     for (auto& face : mesh.faces()) {
-        std::vector<unsigned long> faceIdx; faceIdx.reserve(3);
+        std::vector<int> faceIdx; faceIdx.reserve(3);
         std::string fsTemp;
         std::string bsTemp;
         for (auto index : CGAL::vertices_around_face(mesh.halfedge(face), mesh)) {
@@ -271,15 +252,15 @@ void IO::get_stl_pts(Mesh& mesh, std::string& fs) {
     }
 }
 
-void IO::get_cityjson_geom(const Mesh& mesh, nlohmann::json& g, std::unordered_map<std::string, unsigned long>& dPts,
+void IO::get_cityjson_geom(const Mesh& mesh, nlohmann::json& g, std::unordered_map<std::string, int>& dPts,
                            std::string primitive) {
     g["type"] = primitive;
     g["lod"] = config::lod;
     g["boundaries"];
     for (auto& face: mesh.faces()) {
-        std::vector<unsigned long> faceIdx;
+        std::vector<int> faceIdx;
         faceIdx.reserve(3);
-        std::vector<unsigned long> tempPoly;
+        std::vector<int> tempPoly;
         tempPoly.reserve(3);
         for (auto index: CGAL::vertices_around_face(mesh.halfedge(face), mesh)) {
             std::string pt = gen_key_bucket(mesh.point(index));

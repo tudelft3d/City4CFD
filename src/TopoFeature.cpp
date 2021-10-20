@@ -9,7 +9,7 @@ TopoFeature::TopoFeature(std::string pid)
 
 TopoFeature::TopoFeature(int outputLayerID)
     : _mesh(), _id(), _f_active(true), _outputLayerID(outputLayerID) {
-    if (_outputLayerID + 1 > _numOfOutputLayers) _numOfOutputLayers = _outputLayerID + 1;
+    if (_outputLayerID  >= _numOfOutputLayers) _numOfOutputLayers = _outputLayerID + 1;
 }
 
 TopoFeature::~TopoFeature() = default;
@@ -90,7 +90,7 @@ PolyFeature::PolyFeature(const nlohmann::json& poly)
 PolyFeature::PolyFeature(const nlohmann::json& poly, const int outputLayerID)
     : PolyFeature(poly) {
     _outputLayerID = outputLayerID;
-    if (_outputLayerID + 1 > _numOfOutputLayers) _numOfOutputLayers = _outputLayerID + 1;
+    if (_outputLayerID  >= _numOfOutputLayers) _numOfOutputLayers = _outputLayerID + 1;
 }
 
 PolyFeature::~PolyFeature() = default;

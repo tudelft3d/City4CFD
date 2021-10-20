@@ -36,8 +36,7 @@ void Terrain::create_mesh(const PolyFeatures& features) {
     geomtools::cdt_to_mesh(_cdt, _mesh);
 
     // -- Surface layer meshes are stored here
-    int layerNum = 2; // todo Config or some other way
-    for (int i = 4; i < layerNum + 4; ++i) { // Surface layers start with output ID 4
+    for (int i : config::surfaceLayerIDs) {
         auto layer = std::make_shared<SurfaceLayer>(i);
         geomtools::cdt_to_mesh(_cdt, layer->get_mesh(), i); // Create mesh for surface layers
         _surfaceLayersTerrain.push_back(layer);
@@ -74,6 +73,7 @@ const SurfaceLayers& Terrain::get_surface_layers() const {
 }
 
 //-- Templated functions
+//todo no need for template anymore
 template<typename T>
 void Terrain::constrain_features(const T& features) {
     int count = 0;

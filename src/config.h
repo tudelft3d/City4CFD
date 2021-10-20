@@ -31,10 +31,12 @@ namespace config {
     //-- Polygons related
     extern double            edgeMaxLen;
 
-    //-- Output flags
-    extern fs::path     outputDir;
-    extern OutputFormat outputFormat;
-    extern bool         outputSeparately;
+    //-- Output setup
+    extern fs::path                  outputDir;
+    extern OutputFormat              outputFormat;
+    extern bool                      outputSeparately;
+    extern std::vector<std::string>  outputSurfaces;
+    extern std::vector<int>          surfaceLayerIDs;
 
     void set_config(nlohmann::json& j);
     void set_region(boost::variant<bool, double, std::string, Polygon_2>& regionType,

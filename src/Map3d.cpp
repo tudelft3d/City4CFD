@@ -76,20 +76,24 @@ void Map3d::set_features() {
         _lsFeatures.push_back(building);
         _buildings.push_back(building);
     }
+
+    //-- Boundary
+    _boundaries.push_back(std::make_shared<Sides>(TopoFeature::get_num_output_layers()));
+    if (config::bpgDomainType == Rectangle) // Front, sides, and top
+        for (int i = 0; i < 2; ++i) _boundaries.push_back(std::make_shared<Sides>(TopoFeature::get_num_output_layers()));
+
+    _boundaries.push_back(std::make_shared<Top>(TopoFeature::get_num_output_layers()));
+
     //- Other polygons
-    int count = 4; //- Surface layer ID is 4 onwards
     for (auto& surfaceLayer : _polygonsSurfaceLayers) {
+        int outputLayerID = TopoFeature::get_num_output_layers();
+        config::surfaceLayerIDs.push_back(outputLayerID); // Need it for later
         for (auto& poly : surfaceLayer) {
-            auto surfacePoly = std::make_shared<SurfaceLayer>(*poly, count);
+            auto surfacePoly = std::make_shared<SurfaceLayer>(*poly, outputLayerID);
             _lsFeatures.push_back(surfacePoly);
             _surfaceLayers.push_back(surfacePoly);
         }
-        ++count;
     }
-
-    //-- Boundary
-    auto sides = std::make_shared<Sides>(); auto top = std::make_shared<Top>();
-    _boundaries.push_back(sides); _boundaries.push_back(top);
 
     //-- Boundary calculation with BPG flag
     if (config::domainBndConfig.type() == typeid(bool)) _bndBPG = true;
@@ -168,7 +172,8 @@ void Map3d::set_bnd_bpg() {
     }
     this->clear_inactives();
 
-    if (config::bpgDomainType == Rectangle) geomtools::shorten_long_poly_edges(_domainBnd.get_bounding_region());
+    //todo handle this for buffer region or not
+    if (config::bpgDomainType == Rectangle) geomtools::shorten_long_poly_edges(_domainBnd.get_bounding_region(), hMax);
     _boundaries[0]->set_bnd_poly(_domainBnd.get_bounding_region(), _pointCloud);
 }
 
@@ -233,6 +238,9 @@ void Map3d::read_data() { // This will change with time
 }
 
 void Map3d::output() {
+#ifndef NDEBUG
+    assert(config::outputSurfaces.size() == TopoFeature::get_num_output_layers());
+#endif
     fs::current_path(config::outputDir);
 
     //-- Group all features for output
@@ -269,7 +277,7 @@ void Map3d::prep_feature_output() {
 }
 
 void Map3d::prep_cityjson_output() { // Temp impl, might change
-    for (unsigned long i = 0; i < _outputFeatures.size();) {
+    for (unsigned long i = 0; i < _outputFeatures.size(); ++i) {
         if (_outputFeatures[i]->is_active()) {
             _outputFeatures[i]->set_id(i++);
         }

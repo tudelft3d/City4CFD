@@ -6,6 +6,9 @@ SurfaceLayer::SurfaceLayer()
 SurfaceLayer::SurfaceLayer(const int outputLayerID)
     : PolyFeature(outputLayerID) {}
 
+SurfaceLayer::SurfaceLayer(const nlohmann::json& poly)
+        : PolyFeature(poly) {}
+
 SurfaceLayer::SurfaceLayer(const nlohmann::json& poly, const int outputLayerID)
     : PolyFeature(poly, outputLayerID) {}
 

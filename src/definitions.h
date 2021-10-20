@@ -195,7 +195,7 @@ struct Polygon_with_holes_2 {
 };
 
 //-- Global Constants
-const double infty     = 1e7;
-const double smallnum  = 1e-7;
+const double g_largnum  = 1e7;
+const double g_smallnum = 1e-7;
 
 #endif //CITYCFD_DEFINITIONS_H

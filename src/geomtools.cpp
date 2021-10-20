@@ -120,8 +120,7 @@ void geomtools::mark_domains(CDT& cdt, PolyFeatures features) {
     }
 }
 
-void geomtools::shorten_long_poly_edges(Polygon_2& poly) {
-    double maxLen = config::edgeMaxLen;
+void geomtools::shorten_long_poly_edges(Polygon_2& poly, double maxLen) {
     auto& polyVec = poly.container();
     for (auto i = 0; i < polyVec.size();) {
         auto edge = polyVec[(i + 1) % polyVec.size()] - polyVec[i];
@@ -228,7 +227,7 @@ template void geomtools::smooth_dt<CDT, EPECK> (const Point_set_3& pointCloud, C
 template <typename T>
 Polygon_2 geomtools::calc_bbox_poly(T& inputPts) {
     double bxmin, bymin, bxmax, bymax;
-    bxmin = infty; bymin = infty; bxmax = -infty; bymax = -infty;
+    bxmin = g_largnum; bymin = g_largnum; bxmax = -g_largnum; bymax = -g_largnum;
     for (auto& pt : inputPts) {
         if (pt.x() > bxmax) bxmax = pt.x();
         if (pt.x() < bxmin) bxmin = pt.x();

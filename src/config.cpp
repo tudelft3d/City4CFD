@@ -1,6 +1,5 @@
 #include "config.h"
 
-//-- Config values are hardcoded until I add config file reading
 namespace config {
     //-- Input info
     std::string              points_xyz;      // Ground
@@ -10,14 +9,14 @@ namespace config {
 
     //-- Domain dimensions
     Point_2     pointOfInterest;
-    double      topHeight;
+    double      topHeight = 0;
     boost::variant<bool, double, std::string, Polygon_2> influRegionConfig;
     boost::variant<bool, double, std::string, Polygon_2> domainBndConfig;
     DomainType            bpgDomainType;
     Vector_2              flowDirection;
     std::vector<double>   bpgDomainSize;
     std::vector<Vector_2> enlargeDomainVec;
-    double                domainBuffer = -infty;
+    double                domainBuffer = -g_largnum;
 
     //-- Reconstruction related
     double lod;
@@ -27,10 +26,12 @@ namespace config {
     double edgeMaxLen;
 
     //-- Output
-    fs::path    outputDir = fs::current_path();
-    std::string outputFileName;
-    OutputFormat outputFormat;
-    bool outputSeparately = false;
+    fs::path                  outputDir = fs::current_path();
+    std::string               outputFileName;
+    OutputFormat              outputFormat;
+    bool                      outputSeparately = false;
+    std::vector<std::string>  outputSurfaces = {"Terrain", "Buildings", "Sides", "Top"};
+    std::vector<int>          surfaceLayerIDs;
 }
 
 void config::set_config(nlohmann::json& j) {
@@ -40,6 +41,7 @@ void config::set_config(nlohmann::json& j) {
 
     //-- Path to polygons
     bool foundBuildingPoly = false;
+    int i = 0;
     for (auto& poly : j["polygons"]) {
         if (poly["type"] == "Building") {
             gisdata = poly["path"];
@@ -47,6 +49,10 @@ void config::set_config(nlohmann::json& j) {
         }
         if (poly["type"] == "SurfaceLayer") {
             topoLayers.push_back(poly["path"]);
+            if (poly.contains("layer_name"))
+                outputSurfaces.push_back(poly["layer_name"]);
+            else
+                outputSurfaces.push_back("SurfaceLayer" + std::to_string(++i));
         }
     }
     if (!foundBuildingPoly) throw std::invalid_argument("Didn't find a path to building polygons in configuration file!");
@@ -94,23 +100,32 @@ void config::set_config(nlohmann::json& j) {
         enlargeDomainVec.emplace_back(Vector_2(0, -bpgDomainSize[1]));
         enlargeDomainVec.emplace_back(Vector_2(bpgDomainSize[2], 0));
         enlargeDomainVec.emplace_back(Vector_2(0, bpgDomainSize[1]));
+
+        if (bpgDomainType == Rectangle) { // Expand output surfaces with front and back
+            outputSurfaces.insert(outputSurfaces.begin() + 3, "Back");
+            outputSurfaces.insert(outputSurfaces.begin() + 2, "Front");
+        }
     }
 
     // Buffer region
-    if (j.contains("buffer_region")) {
-        if (j["buffer_region"].is_number() && j["buffer_region"] > 0)
+    if (j.contains("buffer_region"))
+        if (j["buffer_region"].is_number() && j["buffer_region"] > g_smallnum)
             domainBuffer = j["buffer_region"];
-    }
 
-
-    topHeight = j["top_height"].front();
+    // Top height
+    if (j.contains("top_height") && j["top_height"].is_number())
+        topHeight = j["top_height"].front();
+    else if (domainBndConfig.type() != typeid(bool))
+        throw std::invalid_argument("Invalid 'top_height' argument!");
 
     //-- Reconstruction related
     lod = j["lod"].front();
     buildingPercentile = (double)j["building_percentile"].front() / 100.;
 
     //-- Polygons related
-    edgeMaxLen = j["edge_max_len"].front();
+    if (j.contains("edge_max_len"))
+        edgeMaxLen = j["edge_max_len"].front();
+    else throw std::invalid_argument("Missing 'edge_max_len' argument!");
 
     //-- Output
     //- File name
@@ -129,7 +144,8 @@ void config::set_config(nlohmann::json& j) {
         outputFormat = CityJSON;
     } else throw std::invalid_argument(std::string("'" + outputFormatConfig + "'" + " is unsupported file format!"));
 
-    outputSeparately = j["output_separately"];
+    if (j.contains("output_separately") && j["output_separately"].is_boolean())
+        outputSeparately = j["output_separately"];
 }
 
 //-- influRegion and domainBndConfig flow control

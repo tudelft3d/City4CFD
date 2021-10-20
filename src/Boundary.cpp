@@ -1,4 +1,3 @@
-#include <CGAL/Point_set_2.h>
 #include "Boundary.h"
 
 Boundary::Boundary()
@@ -35,31 +34,34 @@ void Boundary::set_bnd_poly(const Polygon_2& bndPoly, Point_set_3& pointCloud) {
     this->calc_footprint_elevation_from_pc(searchTree);
     _outerBndHeight = geomtools::avg(_base_heights.front()); // Height for buffer (for now) - average of outer pts
 
-    //-- Buffer region setup
-    double bufferLen;
-    if (config::domainBuffer > -infty) // todo domain buffer angle determination
-        bufferLen = config::domainBuffer / 100.;
-    else
-        bufferLen = 0.;
-
-    Point_2 center = CGAL::centroid(_poly.outer_boundary().begin(), _poly.outer_boundary().end(), CGAL::Dimension_tag<0>());
-    for (auto& pt : _poly.outer_boundary()) {
-        pt += (pt - center) * bufferLen;
-    }
-
     //-- Add final outer points to a static member variable used by sides and top,
-    //   and to the point cloud
-    for (auto& pt : _poly.outer_boundary()) {
-        _outerPts.emplace_back(pt.x(), pt.y(), _outerBndHeight);
-        pointCloud.insert(_outerPts.back());
+    //   and to the point cloud, depends if there's a buffer region or not
+    if (config::domainBuffer > g_smallnum) {
+        double bufferLen = config::domainBuffer / 100.;
+        Point_2 center = CGAL::centroid(_poly.outer_boundary().begin(), _poly.outer_boundary().end(),
+                                        CGAL::Dimension_tag<0>());
+        for (auto& pt: _poly.outer_boundary()) {
+            Point_2 outPt = pt + (pt - center) * 0.1 * bufferLen;
+            pointCloud.insert(Point_3(outPt.x(), outPt.y(), _outerBndHeight));
+
+            outPt = pt + (pt - center) * bufferLen;
+            _outerPts.emplace_back(outPt.x(), outPt.y(), _outerBndHeight);
+            pointCloud.insert(_outerPts.back());
+        }
+    } else {
+        int i = 0;
+        for (auto& pt: _poly.outer_boundary()) {
+            _outerPts.emplace_back(pt.x(), pt.y(), _base_heights.front()[i++]);
+            pointCloud.insert(_outerPts.back());
+        }
     }
     _outerPts.push_back(_outerPts.front());
 }
 
 std::vector<double> Boundary::get_domain_bbox() {
     //todo: proper bbox calculation
-    double maxx(-infty), maxy(-infty), maxz(-infty);
-    double minx(infty),  miny(infty),  minz(infty);
+    double maxx(-g_largnum), maxy(-g_largnum), maxz(-g_largnum);
+    double minx(g_largnum),  miny(g_largnum),  minz(g_largnum);
 
     for (auto& pt : _outerPts) {
         if (pt.x() > maxx) maxx = pt.x();
@@ -91,8 +93,8 @@ std::string Boundary::get_cityjson_primitive() const {
 };
 
 //-- SIDES CLASS --//
-Sides::Sides()
-    : Boundary(2) {
+Sides::Sides(const int outputLayerID)
+    : Boundary(outputLayerID) {
 }
 
 Sides::~Sides() = default;
@@ -129,8 +131,8 @@ std::string Sides::get_class_name() const {
 }
 
 //-- TOP CLASS --//
-Top::Top()
-    : Boundary(3) {
+Top::Top(const int outputLayerID)
+    : Boundary(outputLayerID) {
 }
 
 Top::~Top() = default;
