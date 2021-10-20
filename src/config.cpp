@@ -30,7 +30,8 @@ namespace config {
     std::string               outputFileName;
     OutputFormat              outputFormat;
     bool                      outputSeparately = false;
-    std::vector<std::string>  outputSurfaces = {"Terrain", "Buildings", "Sides", "Top"};
+    std::vector<std::string>  outputSurfaces = {"Terrain", "Buildings", "Top"};
+    int                       numSides = 1;
     std::vector<int>          surfaceLayerIDs;
 }
 
@@ -71,7 +72,7 @@ void config::set_config(nlohmann::json& j) {
     if (domainBndConfig.type() == typeid(bool)) {
         std::string bpgDomainConfig = j["bnd_type_bpg"];
         if (boost::iequals(bpgDomainConfig, "round")) {
-            bpgDomainType = Round;
+            bpgDomainType = ROUND;
             if (j.contains("bpg_domain_size")) {
                 if (j["bpg_domain_size"].size() == 2)
                     bpgDomainSize = {j["bpg_domain_size"][0], j["bpg_domain_size"][1]};
@@ -79,13 +80,13 @@ void config::set_config(nlohmann::json& j) {
                     throw std::invalid_argument("Wrong input for overriding BPG domain size");
             } else bpgDomainSize = {15, 5};
         } else if (boost::iequals(bpgDomainConfig, "rectangle")) {
-            bpgDomainType = Rectangle;
+            bpgDomainType = RECTANGLE;
         } else if (boost::iequals(bpgDomainConfig, "ellipse")) {
-            bpgDomainType = Ellipse;
+            bpgDomainType = ELLIPSE;
         } else throw std::invalid_argument(std::string("'" + bpgDomainConfig+ "'" + " is unknown domain type!"));
     }
     // Sort out few specifics for domain types
-    if (bpgDomainType == Rectangle || bpgDomainType == Ellipse) {
+    if (bpgDomainType == RECTANGLE || bpgDomainType == ELLIPSE) {
         if (!j.contains("flow_direction")) throw std::invalid_argument("Missing information on flow direction!");
         if (j["flow_direction"].size() != 2) throw std::invalid_argument("Flow direction array size is not of size 3!");
         flowDirection = Vector_2(j["flow_direction"][0], j["flow_direction"][1]);
@@ -100,12 +101,25 @@ void config::set_config(nlohmann::json& j) {
         enlargeDomainVec.emplace_back(Vector_2(0, -bpgDomainSize[1]));
         enlargeDomainVec.emplace_back(Vector_2(bpgDomainSize[2], 0));
         enlargeDomainVec.emplace_back(Vector_2(0, bpgDomainSize[1]));
-
-        if (bpgDomainType == Rectangle) { // Expand output surfaces with front and back
-            outputSurfaces.insert(outputSurfaces.begin() + 3, "Back");
-            outputSurfaces.insert(outputSurfaces.begin() + 2, "Front");
-        }
     }
+
+    // Set domain side
+        if (domainBndConfig.type() == typeid(double) || bpgDomainType != RECTANGLE) {
+            outputSurfaces.insert(outputSurfaces.begin() + 2, "Sides");
+        } else if (bpgDomainType == RECTANGLE) { // Expand output surfaces with front and back
+            numSides = 4;
+            outputSurfaces.insert(outputSurfaces.begin() + 2, "Front");
+            outputSurfaces.insert(outputSurfaces.begin() + 2, "Side_2");
+            outputSurfaces.insert(outputSurfaces.begin() + 2, "Back");
+            outputSurfaces.insert(outputSurfaces.begin() + 2, "Side_1");
+        } else if (domainBndConfig.type() == typeid(Polygon_2)) {
+            Polygon_2 poly = boost::get<Polygon_2>(domainBndConfig);
+            numSides = poly.size();
+            for (int i = 0; i < poly.size(); ++i) {
+                outputSurfaces.insert(outputSurfaces.begin() + 2,
+                                      std::string("Side_" + std::to_string(i % poly.size())));
+            }
+        } // If it is a JSON poly it has to be deferred until the polygon is parsed
 
     // Buffer region
     if (j.contains("buffer_region"))

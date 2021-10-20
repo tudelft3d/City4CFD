@@ -15,6 +15,7 @@ public:
     ~Terrain();
 
     void set_cdt(const Point_set_3 &pointCloud);
+    void constrain_features(const PolyFeatures& features);
     void create_mesh(const PolyFeatures& features);
 
     CDT&         get_cdt();
@@ -26,9 +27,6 @@ public:
     std::string  get_class_name() const override;
 
     const SurfaceLayers& get_surface_layers() const;
-
-    //-- Templated functions
-    template<typename T> void constrain_features(const T& features);
 
 protected:
     CDT  _cdt;

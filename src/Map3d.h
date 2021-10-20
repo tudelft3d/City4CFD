@@ -38,16 +38,14 @@ private:
     void set_features();
     void set_influ_region();
     void set_bnd();
-    void set_bnd_bpg();
     void bnd_sanity_check();
-    void triangulate_terrain();
-    void constrain_features();
-    void generate_terrain_mesh();
+    void reconstruct_terrain();
     void reconstruct_buildings();
     void reconstruct_boundaries();
 
     void prep_feature_output();
     void prep_cityjson_output();
+
     void clear_inactives();
 
     //-- Templated functions

@@ -1,10 +1,12 @@
 #include "Boundary.h"
 
+//todo try to merge sides and top in one class
+// needs some refactoring
 Boundary::Boundary()
-    : PolyFeature() {}
+    : PolyFeature(), _sideOutputPts() {}
 
 Boundary::Boundary(const int outputLayerID)
-    : PolyFeature(outputLayerID) {}
+    : PolyFeature(outputLayerID), _sideOutputPts() {}
 
 Boundary::~Boundary() = default;
 
@@ -58,6 +60,47 @@ void Boundary::set_bnd_poly(const Polygon_2& bndPoly, Point_set_3& pointCloud) {
     _outerPts.push_back(_outerPts.front());
 }
 
+void Boundary::prep_output() {
+    _sideOutputPts = _outerPts;
+}
+
+void Boundary::prep_output(const Polygon_2& outerBndOrig, const int edgeID) {
+    //-- Get the outward facing vector of edge in question
+    Vector_2 edge = outerBndOrig.edge(edgeID).to_vector();
+    edge /= sqrt(edge.squared_length());
+
+    //-- Search the outerPts for the same vector
+    for (int i = 0; i < _outerPts.size() - 1; ++i) {
+        Vector_2 checkEdge = Vector_2(_outerPts[i + 1].x() - _outerPts[i].x(),
+                                      _outerPts[i + 1].y() - _outerPts[i].y());
+        checkEdge /= sqrt(checkEdge.squared_length());
+
+        if (edge * checkEdge > 1 - g_smallnum && edge * checkEdge < 1 + g_smallnum) {
+            _sideOutputPts.push_back(_outerPts[i]);
+            _sideOutputPts.push_back(_outerPts[i + 1]);
+
+            bool collinear = true;
+            while (collinear) {
+                int j = i + 2;
+                if (_outerPts.begin() + j == _outerPts.end()) break;
+
+                Vector_2 nextEdge = Vector_2(_outerPts[j].x() - _outerPts[i + 1].x(),
+                                             _outerPts[j].y() - _outerPts[i + 1].y());
+                nextEdge /= sqrt(nextEdge.squared_length());
+
+                if (nextEdge * edge > 1 - g_smallnum && nextEdge * edge < 1 + g_smallnum) {
+                    _sideOutputPts.push_back(_outerPts[j]);
+                } else {
+                    collinear = false;
+                }
+                ++i;
+            }
+            return;
+        }
+    }
+    throw std::runtime_error("Cannot find side for output!");
+}
+
 std::vector<double> Boundary::get_domain_bbox() {
     //todo: proper bbox calculation
     double maxx(-g_largnum), maxy(-g_largnum), maxz(-g_largnum);
@@ -103,7 +146,7 @@ void Sides::reconstruct() {
     std::vector<Mesh::vertex_index> mesh_vertex_side;
 
     //-- Add mesh vertices and store them in a vector
-    for (auto it = _outerPts.begin(); it != _outerPts.end(); ++it) {
+    for (auto it = _sideOutputPts.begin(); it != _sideOutputPts.end(); ++it) {
         mesh_vertex_side.emplace_back(_mesh.add_vertex(*it));
         mesh_vertex_side.emplace_back(_mesh.add_vertex(Point_3(it->x(), it->y(), config::topHeight)));
     }
@@ -252,17 +295,17 @@ void BoundingRegion::calc_bnd_bpg(double hMax,
     //-- Apply domain expansion vectors
     int i = 0;
     switch (config::bpgDomainType) {
-        case Round:
+        case ROUND:
             break;
 
-        case Rectangle:
+        case RECTANGLE:
             for (auto& pt : bbox) {
                 pt += hMax * (translateBoundary[i] + translateBoundary[(i + 1) % 4]);
                 ++i;
             }
             break;
 
-        case Ellipse:
+        case ELLIPSE:
             std::cout << std::endl;
             break;
     }

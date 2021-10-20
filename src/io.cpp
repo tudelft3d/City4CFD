@@ -33,7 +33,6 @@ bool IO::read_point_cloud(std::string& file, Point_set_3& pc) {
     std::ifstream ifile(file, std::ios_base::binary);
     ifile >> pc;
 
-    pc.add_property_map<bool>("active", true);
     std::cerr << "POINT CLOUD: "<< pc.size() << " point read" << std::endl;
     return true;
 }
@@ -88,7 +87,7 @@ void IO::output_obj(const OutputFeatures& allFeatures) {
     std::vector<std::ofstream> of;
     std::vector<std::string>   fs(numOutputSurfaces), bs(numOutputSurfaces);
 
-    std::vector<std::unordered_map<std::string, int>> dPts(numOutputSurfaces);
+    std::vector<std::unordered_map<std::string, unsigned int>> dPts(numOutputSurfaces);
     //-- Output points
     for (auto& f : allFeatures) {
         if (!f->is_active()) continue;
@@ -162,7 +161,7 @@ void IO::output_cityjson(const OutputFeatures& allFeatures) {
     std::vector<double> bbox = Boundary::get_domain_bbox();
     j["metadata"]["geographicalExtent"] = Boundary::get_domain_bbox();
     j["metadata"]["referenceSystem"] = "urn:ogc:def:crs:EPSG::7415";
-    std::unordered_map<std::string, int> dPts;
+    std::unordered_map<std::string, unsigned int> dPts;
     for (auto& f : allFeatures) {
         // Only Buildings and Terrain for now
         if (f->get_class() != BUILDING && f->get_class() != TERRAIN) continue;
@@ -201,7 +200,7 @@ void IO::output_cityjson(const OutputFeatures& allFeatures) {
 void IO::get_obj_pts(const Mesh& mesh,
                      std::string& fs,
                      std::string& bs,
-                     std::unordered_map<std::string, int>& dPts)
+                     std::unordered_map<std::string, unsigned int>& dPts)
 {
     for (auto& face : mesh.faces()) {
         std::vector<int> faceIdx; faceIdx.reserve(3);
@@ -252,7 +251,7 @@ void IO::get_stl_pts(Mesh& mesh, std::string& fs) {
     }
 }
 
-void IO::get_cityjson_geom(const Mesh& mesh, nlohmann::json& g, std::unordered_map<std::string, int>& dPts,
+void IO::get_cityjson_geom(const Mesh& mesh, nlohmann::json& g, std::unordered_map<std::string, unsigned int>& dPts,
                            std::string primitive) {
     g["type"] = primitive;
     g["lod"] = config::lod;

@@ -123,34 +123,16 @@ typedef std::vector<std::unique_ptr<nlohmann::json>>           JsonPolygons;
 typedef enum { // temp
     TERRAIN          = 0,
     BUILDING         = 1,
-    BOUNDARY         = 2,
-    WATER            = 3,
-    BRIDGE           = 4,
-    ROAD             = 5,
-    FOREST           = 6,
-    SIDES            = 7,
-    TOP              = 8,
-    SURFACELAYER     = 9,
+    SIDES            = 2,
+    TOP              = 3,
+    SURFACELAYER     = 4,
 } TopoClass;
-
-const std::map<int, std::string> topoClassName { // temp
-        {0, "Terrain"},
-        {1, "Building"},
-        {2, "Boundary"},
-        {3, "Terrain"},
-        {4, "Bridge"},
-        {5, "Road"},
-        {6, "Forest"},
-        {7, "Sides"},
-        {8, "Top"},
-        {9, "SurfaceLayer"},
-};
 
 //-- Domain types
 typedef enum {
-    Round     = 0,
-    Rectangle = 1,
-    Ellipse   = 2
+    ROUND     = 0,
+    RECTANGLE = 1,
+    ELLIPSE   = 2
 } DomainType;
 
 //-- Output Formats
@@ -184,14 +166,14 @@ struct Polygon_with_holes_2 {
         return _rings.front();
     }
 
-    const auto holes_begin() const {
+    std::vector<Polygon_2>::const_iterator holes_begin() const {
         if (has_holes()) return _rings.begin() + 1; else return _rings.end();
     }
-    const auto holes_end() const {
+    std::vector<Polygon_2>::const_iterator holes_end() const {
         return _rings.end();
     }
 
-    const auto bbox() const {return _rings.front().bbox();}
+    CGAL::Bbox_2 bbox() const {return _rings.front().bbox();}
 };
 
 //-- Global Constants

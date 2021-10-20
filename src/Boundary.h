@@ -18,6 +18,8 @@ public:
     virtual void reconstruct() = 0;
 
     void set_bnd_poly(const Polygon_2& bndPoly, Point_set_3& pointCloud);
+    void prep_output();
+    void prep_output(const Polygon_2& outerBndOrig, const int edgeID);
 
     virtual TopoClass   get_class() const = 0;
     virtual std::string get_class_name() const = 0;
@@ -28,6 +30,7 @@ public:
 protected:
     static std::vector<Point_3> _outerPts;
     static double               _outerBndHeight;
+    std::vector<Point_3>        _sideOutputPts;
 };
 
 class Sides : public Boundary {

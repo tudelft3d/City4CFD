@@ -36,6 +36,7 @@ namespace config {
     extern OutputFormat              outputFormat;
     extern bool                      outputSeparately;
     extern std::vector<std::string>  outputSurfaces;
+    extern int                       numSides;
     extern std::vector<int>          surfaceLayerIDs;
 
     void set_config(nlohmann::json& j);
