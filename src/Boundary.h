@@ -19,7 +19,7 @@ public:
 
     void set_bnd_poly(const Polygon_2& bndPoly, Point_set_3& pointCloud);
     void prep_output();
-    void prep_output(const Polygon_2& outerBndOrig, const int edgeID);
+    void prep_output(Vector_2 edge);
 
     virtual TopoClass   get_class() const = 0;
     virtual std::string get_class_name() const = 0;
@@ -64,7 +64,7 @@ public:
     void operator()(Polygon_2& poly);
     void operator()(std::string& polyPath);
 
-    void calc_influ_region_bpg(Point_set_3& pointCloud, Point_set_3& pointCloudBuildings, Buildings& buildings);
+    void calc_influ_region_bpg(const DT& dt, const Point_set_3& pointCloudBuildings, Buildings& buildings);
     void calc_bnd_bpg(double hMax, const Polygon_2& influRegionPoly, const Buildings& buildings);
 
     Polygon_2& get_bounding_region();

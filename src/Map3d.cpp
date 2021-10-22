@@ -82,8 +82,9 @@ void Map3d::set_features() {
         }
     }
 
-    //-- Boundary calculation with BPG flag
-    if (config::domainBndConfig.type() == typeid(bool)) _bndBPG = true;
+    //-- BPG flags for influ region and domain boundary
+    if (config::influRegionConfig.type() == typeid(bool)) _influRegionBPG = true;
+    if (config::domainBndConfig.type() == typeid(bool))   _bndBPG = true;
 
     //-- Make a DT with inexact constructions for fast interpolation
     _dt.insert(_pointCloud.points().begin(), _pointCloud.points().end());
@@ -94,10 +95,10 @@ void Map3d::set_features() {
 
 void Map3d::set_influ_region() {
     //-- Set the influence region --//
-    if (config::influRegionConfig.type() == typeid(bool)) { // Automatically calculate influ region with BPG
+    if (_influRegionBPG) { // Automatically calculate influ region with BPG
         std::cout << "--- INFO: Influence region not defined in config. "
                   << "Calculating with BPG. ---" << std::endl;
-        _influRegion.calc_influ_region_bpg(_pointCloud, _pointCloudBuildings, _buildings);
+        _influRegion.calc_influ_region_bpg(_dt, _pointCloudBuildings, _buildings);
     } else { // Define influ region either with radius or predefined polygon
         boost::apply_visitor(_influRegion, config::influRegionConfig);
     }
@@ -112,7 +113,6 @@ void Map3d::set_influ_region() {
 void Map3d::set_bnd() {
     double hMax = 0;
     if (_bndBPG) { // Automatically calculate boundary with BPG
-        //-- BND calc deferred until buildings are reconstructed
         std::cout << "--- INFO: Domain boundaries not defined in config. "
                   << "Calculating with BPG. ---" << std::endl;
 
@@ -126,10 +126,9 @@ void Map3d::set_bnd() {
         //-- Define boundary region with values set in config
         boost::apply_visitor(_domainBnd, config::domainBndConfig);
     }
-
     this->bnd_sanity_check(); // Check if outer bnd is larger than the influ region
 
-    //- Deactivate point cloud points that are out of bounds - static function of Boundary
+    //-- Deactivate point cloud points that are out of bounds - static function of Boundary
     Boundary::set_bounds_to_pc(_pointCloud, _domainBnd.get_bounding_region());
     Boundary::set_bounds_to_pc(_pointCloudBuildings, _domainBnd.get_bounding_region());;
 
@@ -181,7 +180,8 @@ void Map3d::reconstruct_buildings() {
 void Map3d::reconstruct_boundaries() {
     if (_boundaries.size() > 2) { // Means more than one side
         for (auto i = 0; i < _boundaries.size() - 1; ++i) {
-            _boundaries[i]->prep_output(_domainBnd.get_bounding_region(), i);
+            //-- Each boundary object is one side of the boundary
+            _boundaries[i]->prep_output(_domainBnd.get_bounding_region().edge(i).to_vector());
         }
     } else {
         _boundaries.front()->prep_output();

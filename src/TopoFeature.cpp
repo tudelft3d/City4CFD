@@ -107,8 +107,11 @@ void PolyFeature::calc_footprint_elevation_nni(const DT& dt) {
             CGAL::Triple<std::back_insert_iterator<Point_coordinate_vector>, double, bool> result =
                     CGAL::natural_neighbor_coordinates_2(dt, pt, std::back_inserter(coords), fh);
 
-            if (!result.third)
-                throw std::runtime_error("Trying to interpolate the point that lies outside the convex hull!");
+            if (!result.third) {
+//                throw std::runtime_error("Trying to interpolate the point that lies outside the convex hull!");
+                this->deactivate();
+                return;
+            }
 
             double height = 0;
             for (auto& coord : coords) {

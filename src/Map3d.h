@@ -33,6 +33,7 @@ private:
     BoundingRegion             _influRegion;
     BoundingRegion             _domainBnd;
     DT                         _dt;
+    bool                       _influRegionBPG = false;
     bool                       _bndBPG = false;
 
     void set_features();

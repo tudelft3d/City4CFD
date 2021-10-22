@@ -30,6 +30,7 @@ void Boundary::set_bounds_to_pc(Point_set_3& pointCloud, const Polygon_2& bndPol
 }
 
 void Boundary::set_bnd_poly(const Polygon_2& bndPoly, Point_set_3& pointCloud) {
+    //todo try to create buffer region inwards rather than outwards
      SearchTree searchTree(pointCloud.points().begin(),pointCloud.points().end());
 
     _poly.rings().push_back(bndPoly);
@@ -43,6 +44,7 @@ void Boundary::set_bnd_poly(const Polygon_2& bndPoly, Point_set_3& pointCloud) {
         Point_2 center = CGAL::centroid(_poly.outer_boundary().begin(), _poly.outer_boundary().end(),
                                         CGAL::Dimension_tag<0>());
         for (auto& pt: _poly.outer_boundary()) {
+            //-- Inner rim to ensure buffer region is flat
             Point_2 outPt = pt + (pt - center) * 0.1 * bufferLen;
             pointCloud.insert(Point_3(outPt.x(), outPt.y(), _outerBndHeight));
 
@@ -64,15 +66,14 @@ void Boundary::prep_output() {
     _sideOutputPts = _outerPts;
 }
 
-void Boundary::prep_output(const Polygon_2& outerBndOrig, const int edgeID) {
-    //-- Get the outward facing vector of edge in question
-    Vector_2 edge = outerBndOrig.edge(edgeID).to_vector();
+//-- Find all outerPts along the defined edge
+void Boundary::prep_output(Vector_2 edge) {
     edge /= sqrt(edge.squared_length());
 
     //-- Search the outerPts for the same vector
     for (int i = 0; i < _outerPts.size() - 1; ++i) {
-        Vector_2 checkEdge = Vector_2(_outerPts[i + 1].x() - _outerPts[i].x(),
-                                      _outerPts[i + 1].y() - _outerPts[i].y());
+        Vector_2 checkEdge(_outerPts[i + 1].x() - _outerPts[i].x(),
+                           _outerPts[i + 1].y() - _outerPts[i].y());
         checkEdge /= sqrt(checkEdge.squared_length());
 
         if (edge * checkEdge > 1 - g_smallnum && edge * checkEdge < 1 + g_smallnum) {
@@ -84,8 +85,8 @@ void Boundary::prep_output(const Polygon_2& outerBndOrig, const int edgeID) {
                 int j = i + 2;
                 if (_outerPts.begin() + j == _outerPts.end()) break;
 
-                Vector_2 nextEdge = Vector_2(_outerPts[j].x() - _outerPts[i + 1].x(),
-                                             _outerPts[j].y() - _outerPts[i + 1].y());
+                Vector_2 nextEdge(_outerPts[j].x() - _outerPts[i + 1].x(),
+                                  _outerPts[j].y() - _outerPts[i + 1].y());
                 nextEdge /= sqrt(nextEdge.squared_length());
 
                 if (nextEdge * edge > 1 - g_smallnum && nextEdge * edge < 1 + g_smallnum) {
@@ -226,20 +227,19 @@ void BoundingRegion::operator()(std::string& polyPath) {
 }
 
 void
-BoundingRegion::calc_influ_region_bpg(Point_set_3& pointCloud, Point_set_3& pointCloudBuildings, Buildings& buildings) {
+BoundingRegion::calc_influ_region_bpg(const DT& dt, const Point_set_3& pointCloudBuildings, Buildings& buildings) {
 #ifndef NDEBUG
     assert(boost::get<bool>(config::influRegionConfig));
 #endif
     double influRegionRadius;
     //-- Find building where the point of interest lies in and define radius of interest with BPG
-    SearchTree searchTree, searchTreeBuildings;
-    searchTree.insert(pointCloud.points().begin(), pointCloud.points().end());
+    SearchTree searchTreeBuildings;
     searchTreeBuildings.insert(pointCloudBuildings.points().begin(), pointCloudBuildings.points().end()); //TODO Maybe save as member variable
 
     bool foundBuilding = false;
     for (auto& f : buildings) {
         if (geomtools::point_in_poly(config::pointOfInterest, f->get_poly())) {
-            f->calc_footprint_elevation_from_pc(searchTree); //- Quick calculation from point cloud before CDT is constructed
+            f->calc_footprint_elevation_nni(dt);
             try {
                 f->reconstruct(searchTreeBuildings);
             } catch (std::exception& e) {
@@ -247,13 +247,15 @@ BoundingRegion::calc_influ_region_bpg(Point_set_3& pointCloud, Point_set_3& poin
                 throw std::runtime_error("Impossible to automatically determine influence region");
             }
             influRegionRadius = f->max_dim() * 3.; //- BPG by Liu
-            f->clear_feature(); //- They will be properly interpolated from DT later
 
+            f->clear_feature();
             foundBuilding = true;
             break;
         }
     }
-    if (!foundBuilding) throw std::invalid_argument("Point of interest does not belong to any building! Impossible to determine influence region.");
+    if (!foundBuilding)
+        throw std::invalid_argument("Point of interest does not belong to any building! "
+                                    "Impossible to determine influence region.");
 
     geomtools::make_round_poly(config::pointOfInterest, influRegionRadius, _boundingRegion);
 }
@@ -267,7 +269,7 @@ void BoundingRegion::calc_bnd_bpg(double hMax,
     CGAL::Aff_transformation_2<EPICK> rotate(CGAL::ROTATION, -sinPhi, cosPhi);
     CGAL::Aff_transformation_2<EPICK> rotate_back(CGAL::ROTATION, sinPhi, cosPhi);
 
-    //-- Find candidate points for the axis-aligned bounding box (AABB)
+    //-- Find candidate points for the AABB
     std::vector<Point_2> candidatePts;
     for (auto& pt : influRegionPoly) {
         candidatePts.push_back(pt);
@@ -283,41 +285,49 @@ void BoundingRegion::calc_bnd_bpg(double hMax,
         }
     }
 
-    //-- Axes aligning transformation
-    for (auto& pt : candidatePts) {
-        pt = rotate(pt);
-    }
-
-    //-- Get bbox and translation vector
-    Polygon_2 bbox = geomtools::calc_bbox_poly(candidatePts);
-    auto& translateBoundary = config::enlargeDomainVec;
-
     //-- Apply domain expansion vectors
-    int i = 0;
-    switch (config::bpgDomainType) {
-        case ROUND:
-            break;
+    Polygon_2 localPoly;
+    if (config::bpgDomainType == ROUND) {
+        double bndRadius = 0;
+        for (auto& pt: candidatePts) {
+            double sqdist = CGAL::squared_distance(config::pointOfInterest, pt);
+            if (sqdist > bndRadius * bndRadius) bndRadius = sqrt(sqdist);
+        }
+        bndRadius += hMax * config::bpgDomainSize.front();
+        geomtools::make_round_poly(config::pointOfInterest, bndRadius, localPoly);
 
-        case RECTANGLE:
-            for (auto& pt : bbox) {
+        std::cout << "--- INFO: Defined boundary radius is: "
+                  << bndRadius << " ---" << std::endl;
+
+    } else {
+        //-- Axes aligning transformation
+        for (auto& pt : candidatePts) {
+            pt = rotate(pt);
+        }
+
+        //-- Get bbox and translation vector
+        Polygon_2 bbox = geomtools::calc_bbox_poly(candidatePts);
+        auto& translateBoundary = config::enlargeDomainVec;
+
+        if (config::bpgDomainType == RECTANGLE) {
+
+            int i = 0;
+            for (auto& pt: bbox) {
                 pt += hMax * (translateBoundary[i] + translateBoundary[(i + 1) % 4]);
+                localPoly.push_back(rotate_back(pt));
                 ++i;
             }
-            break;
+        } else if (config::bpgDomainType == RECTANGLE) {
+            // well it's todo eh
+        }
 
-        case ELLIPSE:
-            std::cout << std::endl;
-            break;
     }
-
-    //-- Depending on the type of domain, turn the bbox into bounding polygon
-    // todo probably will move
-    for (auto& pt : bbox) {
-        _boundingRegion.push_back(rotate_back(pt));
-    }
-
     //-- Set the top
     config::topHeight = hMax * config::bpgDomainSize.back();
+
+    //todo blockage ratio calc here
+
+    _boundingRegion = localPoly;
 }
 
 Polygon_2& BoundingRegion::get_bounding_region() {
