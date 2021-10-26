@@ -1,7 +1,6 @@
 #include "Boundary.h"
 
-//todo try to merge sides and top in one class
-// needs some refactoring
+//todo maybe merge top and sides into one
 Boundary::Boundary()
     : PolyFeature(), _sideOutputPts() {}
 
@@ -12,14 +11,39 @@ Boundary::~Boundary() = default;
 
 //-- Static member definition
 std::vector<Point_3> Boundary::_outerPts;
-double               Boundary::_outerBndHeight; // depends on the usage, maybe move it from here
+double               Boundary::_outerBndHeight;
 
-//-- Deactivate point cloud points that are out of bounds
-void Boundary::set_bounds_to_pc(Point_set_3& pointCloud, const Polygon_2& bndPoly) {
+void Boundary::set_bnd_poly(Polygon_2& bndPoly, Polygon_2& pcBndPoly, Polygon_2& startBufferPoly) {
+    Polygon_2 bufferPoly;
+    //-- Set bndPoly and pcBndPoly depending on the buffer setup
+    if (config::domainBuffer > -g_largnum) {
+        double bufferLen = config::domainBuffer / 100.;
+        Point_2 center = CGAL::centroid(bndPoly.begin(), bndPoly.end(),
+                                        CGAL::Dimension_tag<0>());
+        for (auto& pt: bndPoly)
+            bufferPoly.push_back(pt + (pt - center) * bufferLen);
+
+        if (config::domainBuffer < 0) {
+            startBufferPoly = bufferPoly;
+        } else {
+            startBufferPoly = bndPoly;
+            bndPoly = bufferPoly;
+        }
+
+        for (auto& pt : startBufferPoly)
+            pcBndPoly.push_back(pt - (pt - center) * 0.05 * std::abs(bufferLen));
+    } else {
+        startBufferPoly = bndPoly;
+        pcBndPoly = startBufferPoly;
+    }
+}
+
+void Boundary::set_bounds_to_pc(Point_set_3& pointCloud, const Polygon_2& pcBndPoly) {
+    //-- Remove points out of the boundary region
     auto it = pointCloud.points().begin();
     int count = 0;
     while (it != pointCloud.points().end()) {
-        if (!geomtools::point_in_poly(*it, bndPoly)) {
+        if (!geomtools::point_in_poly(*it, pcBndPoly)) {
             pointCloud.remove(pointCloud.begin() + count);
         } else {
             ++it;
@@ -29,33 +53,31 @@ void Boundary::set_bounds_to_pc(Point_set_3& pointCloud, const Polygon_2& bndPol
     pointCloud.collect_garbage(); // Free removed points from the memory
 }
 
-void Boundary::set_bnd_poly(const Polygon_2& bndPoly, Point_set_3& pointCloud) {
-    //todo try to create buffer region inwards rather than outwards
-     SearchTree searchTree(pointCloud.points().begin(),pointCloud.points().end());
+//-- Deactivate point cloud points that are out of bounds
+void Boundary::set_bounds_to_terrain(Point_set_3& pointCloud, const Polygon_2& bndPoly,
+                                     const Polygon_2& pcBndPoly, const Polygon_2& startBufferPoly) {
+    //-- Remove points out of the boundary region
+    Boundary::set_bounds_to_pc(pointCloud, pcBndPoly);
 
-    _poly.rings().push_back(bndPoly);
-    this->calc_footprint_elevation_from_pc(searchTree);
-    _outerBndHeight = geomtools::avg(_base_heights.front()); // Height for buffer (for now) - average of outer pts
+    //-- Add points to match the domain size to prescribed one
+    SearchTree searchTree(pointCloud.points().begin(),pointCloud.points().end());
 
-    //-- Add final outer points to a static member variable used by sides and top,
-    //   and to the point cloud, depends if there's a buffer region or not
-    if (config::domainBuffer > g_smallnum) {
-        double bufferLen = config::domainBuffer / 100.;
-        Point_2 center = CGAL::centroid(_poly.outer_boundary().begin(), _poly.outer_boundary().end(),
-                                        CGAL::Dimension_tag<0>());
-        for (auto& pt: _poly.outer_boundary()) {
-            //-- Inner rim to ensure buffer region is flat
-            Point_2 outPt = pt + (pt - center) * 0.1 * bufferLen;
-            pointCloud.insert(Point_3(outPt.x(), outPt.y(), _outerBndHeight));
+    std::vector<double> bndHeights;
+    geomtools::interpolate_poly_from_pc(bndPoly, bndHeights, pointCloud);
+    _outerBndHeight = geomtools::avg(bndHeights); // Height for buffer (for now) - average of outer pts
 
-            outPt = pt + (pt - center) * bufferLen;
-            _outerPts.emplace_back(outPt.x(), outPt.y(), _outerBndHeight);
+    if (config::domainBuffer > -g_largnum + g_smallnum) {
+        for (auto& pt : startBufferPoly) {
+            pointCloud.insert(Point_3(pt.x(), pt.y(), _outerBndHeight));
+        }
+        for (auto& pt : bndPoly) {
+            _outerPts.emplace_back(Point_3(pt.x(), pt.y(), _outerBndHeight));
             pointCloud.insert(_outerPts.back());
         }
     } else {
         int i = 0;
-        for (auto& pt: _poly.outer_boundary()) {
-            _outerPts.emplace_back(pt.x(), pt.y(), _base_heights.front()[i++]);
+        for (auto& pt : bndPoly) {
+            _outerPts.emplace_back(Point_3(pt.x(), pt.y(), bndHeights[i++]));
             pointCloud.insert(_outerPts.back());
         }
     }
@@ -285,13 +307,13 @@ void BoundingRegion::calc_bnd_bpg(double hMax,
         }
     }
 
-    //-- Apply domain expansion vectors
+    //-- Create domain polygons
     Polygon_2 localPoly;
     if (config::bpgDomainType == ROUND) {
         double bndRadius = 0;
         for (auto& pt: candidatePts) {
-            double sqdist = CGAL::squared_distance(config::pointOfInterest, pt);
-            if (sqdist > bndRadius * bndRadius) bndRadius = sqrt(sqdist);
+            double sqDist = CGAL::squared_distance(config::pointOfInterest, pt);
+            if (sqDist > bndRadius * bndRadius) bndRadius = sqrt(sqDist);
         }
         bndRadius += hMax * config::bpgDomainSize.front();
         geomtools::make_round_poly(config::pointOfInterest, bndRadius, localPoly);
@@ -317,16 +339,14 @@ void BoundingRegion::calc_bnd_bpg(double hMax,
                 localPoly.push_back(rotate_back(pt));
                 ++i;
             }
-        } else if (config::bpgDomainType == RECTANGLE) {
+        } else if (config::bpgDomainType == ELLIPSE) {
             // well it's todo eh
         }
-
     }
     //-- Set the top
     config::topHeight = hMax * config::bpgDomainSize.back();
 
     //todo blockage ratio calc here
-
     _boundingRegion = localPoly;
 }
 

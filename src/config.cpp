@@ -123,7 +123,7 @@ void config::set_config(nlohmann::json& j) {
 
     // Buffer region
     if (j.contains("buffer_region"))
-        if (j["buffer_region"].is_number() && j["buffer_region"] > g_smallnum)
+        if (j["buffer_region"].is_number() && j["buffer_region"] > -99)
             domainBuffer = j["buffer_region"];
 
     // Top height

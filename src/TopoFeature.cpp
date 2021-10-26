@@ -149,31 +149,6 @@ void PolyFeature::calc_footprint_elevation_linear(const DT& dt) {
     }
 }
 
-void PolyFeature::calc_footprint_elevation_from_pc(const SearchTree& searchTree) {
-    for (auto& ring : _poly.rings()) {
-        //-- Calculate elevation of polygon outer boundary
-        //-- Point elevation is the average of 5 nearest neighbors from the PC
-        std::vector<double> ringHeights;
-        for (auto& polypt : ring) {
-            Point_3 query(polypt.x(), polypt.y(), 0);
-            Neighbor_search search(searchTree, query, 5);
-//        Fuzzy_sphere search_radius(query, 5);
-//        std::list<Point_3> result;
-//        searchTree.search(std::back_inserter(result), search_radius);
-
-            std::vector<double> poly_height;
-            for (Neighbor_search::iterator it = search.begin(); it != search.end(); ++it) {
-                poly_height.push_back(it->first.z());
-            }
-//        for (auto& pt : result) {
-//            poly_height.push_back(pt.z());
-//        }
-            ringHeights.emplace_back(geomtools::avg(poly_height));
-        }
-        _base_heights.push_back(ringHeights);
-    }
-}
-
 void PolyFeature::clear_feature() {
     _base_heights.clear();
     _mesh.clear();

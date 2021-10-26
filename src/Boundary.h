@@ -12,12 +12,14 @@ public:
     Boundary(const int outputLayerID);
     virtual ~Boundary();
 
-    static void set_bounds_to_pc(Point_set_3& pointCloud, const Polygon_2& bndPoly);
+    static void set_bnd_poly(Polygon_2& bndPoly, Polygon_2& pcBndPoly, Polygon_2& startBufferPoly);
+    static void set_bounds_to_pc(Point_set_3& pointCloud, const Polygon_2& pcBndPoly);
+    static void set_bounds_to_terrain(Point_set_3& pointCloud, const Polygon_2& bndPoly,
+                                      const Polygon_2& pcBndPoly, const Polygon_2& startBufferPoly);
     static std::vector<double> get_domain_bbox();
 
     virtual void reconstruct() = 0;
 
-    void set_bnd_poly(const Polygon_2& bndPoly, Point_set_3& pointCloud);
     void prep_output();
     void prep_output(Vector_2 edge);
 

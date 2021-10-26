@@ -15,6 +15,7 @@ namespace geomtools {
     void   mark_domains(CDT& ct, const Face_handle& start, int index,
                         std::list<CDT::Edge>& border, PolyFeatures& features);
     void   shorten_long_poly_edges(Polygon_2& poly, double maxLen = config::edgeMaxLen);
+    void   interpolate_poly_from_pc(const Polygon_2& poly, std::vector<double>& heights, const Point_set_3& pointCloud);
 
     //-- Templated functions
     template <typename T> bool point_in_poly(const T& pt2, const Polygon_with_holes_2& polygon);

@@ -138,6 +138,30 @@ void geomtools::shorten_long_poly_edges(Polygon_2& poly, double maxLen) {
     }
 }
 
+void geomtools::interpolate_poly_from_pc(const Polygon_2& poly, std::vector<double>& heights,
+                                         const Point_set_3& pointCloud) {
+    SearchTree searchTree(pointCloud.points().begin(), pointCloud.points().end());
+    //-- Calculate elevation of polygon outer boundary
+    //-- Point elevation is the average of 5 nearest neighbors from the PC
+    std::vector<double> ringHeights;
+    for (auto& polypt : poly) {
+        Point_3 query(polypt.x(), polypt.y(), 0);
+        Neighbor_search search(searchTree, query, 5);
+//        Fuzzy_sphere search_radius(query, 5);
+//        std::list<Point_3> result;
+//        searchTree.search(std::back_inserter(result), search_radius);
+
+        std::vector<double> poly_height;
+        for (Neighbor_search::iterator it = search.begin(); it != search.end(); ++it) {
+            poly_height.push_back(it->first.z());
+        }
+//        for (auto& pt : result) {
+//            poly_height.push_back(pt.z());
+//        }
+        heights.emplace_back(geomtools::avg(poly_height));
+    }
+}
+
 //-- Templated functions
 //-- Check if the point is inside a polygon on a 2D projection
 template <typename T>

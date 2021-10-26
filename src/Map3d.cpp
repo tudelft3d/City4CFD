@@ -128,23 +128,25 @@ void Map3d::set_bnd() {
     }
     this->bnd_sanity_check(); // Check if outer bnd is larger than the influ region
 
-    //-- Deactivate point cloud points that are out of bounds - static function of Boundary
-    Boundary::set_bounds_to_pc(_pointCloud, _domainBnd.get_bounding_region());
-    Boundary::set_bounds_to_pc(_pointCloudBuildings, _domainBnd.get_bounding_region());;
+    //-- Prepare the outer boundary polygon for sides and top, and polygon for feature scope
+    Polygon_2 pcBndPoly, startBufferPoly; // Depends on the buffer region
+    if (_boundaries.size() > 2) {
+        geomtools::shorten_long_poly_edges(_domainBnd.get_bounding_region(), hMax); // Outer poly edge size is hMax ATM
+        Boundary::set_bnd_poly(_domainBnd.get_bounding_region(), pcBndPoly, startBufferPoly);
+    } else
+        Boundary::set_bnd_poly(_domainBnd.get_bounding_region(), pcBndPoly, startBufferPoly);
+
+    //-- Deactivate point cloud points that are out of bounds
+    Boundary::set_bounds_to_terrain(_pointCloud, _domainBnd.get_bounding_region(),
+                                    pcBndPoly, startBufferPoly);
+    Boundary::set_bounds_to_pc(_pointCloudBuildings, startBufferPoly);
 
     //-- Check feature scope for surface layers now that the full domain is known
     for (auto& f: _surfaceLayers) {
-        f->check_feature_scope(_domainBnd.get_bounding_region());
+        f->check_feature_scope(pcBndPoly);
     }
     this->clear_inactives();
 
-    //-- Prepare the outer boundary polygon for sides and top
-    if (_boundaries.size() > 2) {
-        Polygon_2 refinedBndPoly =_domainBnd.get_bounding_region();
-        geomtools::shorten_long_poly_edges(refinedBndPoly, hMax); // Outer poly edge size is hMax ATM
-        _boundaries.back()->set_bnd_poly(refinedBndPoly, _pointCloud);
-    } else
-        _boundaries.back()->set_bnd_poly(_domainBnd.get_bounding_region(), _pointCloud);
 }
 
 void Map3d::bnd_sanity_check() {

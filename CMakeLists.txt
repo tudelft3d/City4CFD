@@ -18,7 +18,7 @@ find_package( Boost REQUIRED COMPONENTS filesystem)
 #find_package ( Boost REQUIRED )
 
 # LASLIB
-find_package( LASlib REQUIRED )
+#find_package( LASlib REQUIRED )
 
 # CGAL
 find_package( CGAL REQUIRED QUIET COMPONENTS )
