@@ -132,7 +132,7 @@ typedef enum { // temp
 typedef enum {
     ROUND     = 0,
     RECTANGLE = 1,
-    ELLIPSE   = 2
+    OVAL      = 2
 } DomainType;
 
 //-- Output Formats

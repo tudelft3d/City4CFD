@@ -81,12 +81,12 @@ void config::set_config(nlohmann::json& j) {
             } else bpgDomainSize = {15, 5};
         } else if (boost::iequals(bpgDomainConfig, "rectangle")) {
             bpgDomainType = RECTANGLE;
-        } else if (boost::iequals(bpgDomainConfig, "ellipse")) {
-            bpgDomainType = ELLIPSE;
+        } else if (boost::iequals(bpgDomainConfig, "oval")) {
+            bpgDomainType = OVAL;
         } else throw std::invalid_argument(std::string("'" + bpgDomainConfig+ "'" + " is unknown domain type!"));
     }
     // Sort out few specifics for domain types
-    if (bpgDomainType == RECTANGLE || bpgDomainType == ELLIPSE) {
+    if (bpgDomainType == RECTANGLE || bpgDomainType == OVAL) {
         if (!j.contains("flow_direction")) throw std::invalid_argument("Missing information on flow direction!");
         if (j["flow_direction"].size() != 2) throw std::invalid_argument("Flow direction array size is not of size 3!");
         flowDirection = Vector_2(j["flow_direction"][0], j["flow_direction"][1]);

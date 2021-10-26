@@ -129,15 +129,16 @@ void Map3d::set_bnd() {
     this->bnd_sanity_check(); // Check if outer bnd is larger than the influ region
 
     //-- Prepare the outer boundary polygon for sides and top, and polygon for feature scope
-    Polygon_2 pcBndPoly, startBufferPoly; // Depends on the buffer region
+    Polygon_2 bndPoly, pcBndPoly, startBufferPoly; // Depends on the buffer region
+    bndPoly = _domainBnd.get_bounding_region();
     if (_boundaries.size() > 2) {
-        geomtools::shorten_long_poly_edges(_domainBnd.get_bounding_region(), hMax); // Outer poly edge size is hMax ATM
-        Boundary::set_bnd_poly(_domainBnd.get_bounding_region(), pcBndPoly, startBufferPoly);
+        geomtools::shorten_long_poly_edges(bndPoly, hMax); // Outer poly edge size is hMax ATM
+        Boundary::set_bnd_poly(bndPoly, pcBndPoly, startBufferPoly);
     } else
-        Boundary::set_bnd_poly(_domainBnd.get_bounding_region(), pcBndPoly, startBufferPoly);
+        Boundary::set_bnd_poly(bndPoly, pcBndPoly, startBufferPoly);
 
     //-- Deactivate point cloud points that are out of bounds
-    Boundary::set_bounds_to_terrain(_pointCloud, _domainBnd.get_bounding_region(),
+    Boundary::set_bounds_to_terrain(_pointCloud, bndPoly,
                                     pcBndPoly, startBufferPoly);
     Boundary::set_bounds_to_pc(_pointCloudBuildings, startBufferPoly);
 

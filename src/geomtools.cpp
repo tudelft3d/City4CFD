@@ -198,8 +198,8 @@ template bool geomtools::point_in_poly<Point_3>(const Point_3& pt2, const Polygo
 
 template <typename T>
 void geomtools::make_round_poly(Point_2& centre, double radius, T& poly) {
-    const int nPts      = 360; // Hardcoded
-    const double angInt = 2 * M_PI / (double)nPts;
+    const int nPts = 360; // Hardcoded
+    const double angInt = 2 * M_PI / (double) nPts;
     double ang = 0;
     for (auto i = 0; i < nPts; ++i) {
         double xPt = centre.x() + radius * cos(ang + angInt);
@@ -211,6 +211,20 @@ void geomtools::make_round_poly(Point_2& centre, double radius, T& poly) {
 //- Explicit template instantiation
 template void geomtools::make_round_poly<Polygon_2>(Point_2& centre, double radius, Polygon_2& poly);
 template void geomtools::make_round_poly<Polygon_with_holes_2>(Point_2& centre, double radius, Polygon_with_holes_2& poly);
+
+template <typename T>
+void geomtools::make_round_poly(Point_2& centre, double radius1, double radius2,
+                                int nPts, double angInt, double ang, T& poly) {
+    for (auto i = 0; i < nPts; ++i) {
+        double xPt = centre.x() + radius1 * cos(ang + angInt);
+        double yPt = centre.y() + radius2 * sin(ang + angInt);
+        ang = ang + angInt;
+        poly.push_back(Point_2(xPt, yPt));
+    }
+}
+//- Explicit template instantiation
+template void geomtools::make_round_poly<Polygon_2>(Point_2& centre, double radius1, double radius2, int nPts, double angInt, double ang, Polygon_2& poly);
+template void geomtools::make_round_poly<Polygon_with_holes_2>(Point_2& centre, double radius1, double radius2, int nPts, double angInt, double ang, Polygon_with_holes_2& poly);
 
 template <typename T, typename U>
 void geomtools::smooth_dt(const Point_set_3& pointCloud, T& dt) {

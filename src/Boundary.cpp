@@ -38,6 +38,7 @@ void Boundary::set_bnd_poly(Polygon_2& bndPoly, Polygon_2& pcBndPoly, Polygon_2&
     }
 }
 
+//-- Deactivate point cloud points that are out of bounds
 void Boundary::set_bounds_to_pc(Point_set_3& pointCloud, const Polygon_2& pcBndPoly) {
     //-- Remove points out of the boundary region
     auto it = pointCloud.points().begin();
@@ -53,13 +54,12 @@ void Boundary::set_bounds_to_pc(Point_set_3& pointCloud, const Polygon_2& pcBndP
     pointCloud.collect_garbage(); // Free removed points from the memory
 }
 
-//-- Deactivate point cloud points that are out of bounds
 void Boundary::set_bounds_to_terrain(Point_set_3& pointCloud, const Polygon_2& bndPoly,
                                      const Polygon_2& pcBndPoly, const Polygon_2& startBufferPoly) {
     //-- Remove points out of the boundary region
     Boundary::set_bounds_to_pc(pointCloud, pcBndPoly);
 
-    //-- Add points to match the domain size to prescribed one
+    //-- Add outer points to match the domain size to prescribed one
     SearchTree searchTree(pointCloud.points().begin(),pointCloud.points().end());
 
     std::vector<double> bndHeights;
@@ -332,15 +332,40 @@ void BoundingRegion::calc_bnd_bpg(double hMax,
         auto& translateBoundary = config::enlargeDomainVec;
 
         if (config::bpgDomainType == RECTANGLE) {
-
             int i = 0;
             for (auto& pt: bbox) {
                 pt += hMax * (translateBoundary[i] + translateBoundary[(i + 1) % 4]);
                 localPoly.push_back(rotate_back(pt));
                 ++i;
             }
-        } else if (config::bpgDomainType == ELLIPSE) {
-            // well it's todo eh
+        } else if (config::bpgDomainType == OVAL) {
+            std::vector<double> bpgDomainDist;
+            bpgDomainDist.push_back(config::bpgDomainSize[1]); // Down
+            bpgDomainDist.push_back(config::bpgDomainSize[2]); // Right (Back)
+            bpgDomainDist.push_back(config::bpgDomainSize[1]); // Up
+            bpgDomainDist.push_back(config::bpgDomainSize[0]); // Left (Front)
+
+            Point_2 centerPt = CGAL::centroid(bbox.begin(), bbox.end());
+            std::vector<double> distances;
+            for (int i = 0; i < 4; ++i) {
+                Point_2 pt = CGAL::midpoint(bbox[i], bbox[(i + 1) % 4]);
+                distances.emplace_back(sqrt(CGAL::squared_distance(pt, centerPt)) + bpgDomainDist[i] * hMax);
+            }
+            std::vector<double> radiuses;
+            if (distances[0] > distances[2])
+                radiuses.push_back(distances[0]); // Sides
+            else
+                radiuses.push_back(distances[2]);
+            radiuses.push_back(distances[3]);    // Front
+            radiuses.push_back(distances[1]);    // Back
+
+            //-- Make front half of the oval domain
+            geomtools::make_round_poly(centerPt, radiuses[1], radiuses[0],
+                                       180, M_PI/180, M_PI_2, localPoly);
+            //-- Make the back half of the oval domain
+            geomtools::make_round_poly(centerPt, radiuses[2], radiuses[0],
+                                       180, M_PI/180, 3*M_PI_2, localPoly);
+            for (auto& pt : localPoly) pt = rotate_back(pt);
         }
     }
     //-- Set the top
