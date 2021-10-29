@@ -47,7 +47,6 @@ void geomtools::cdt_to_mesh(CDT& cdt, Mesh& mesh, const int surfaceLayerID) {
         mesh.add_face(mesh_vertex[v1], mesh_vertex[v2], mesh_vertex[v3]);
     }
 }
-
 //-- CGAL's constrained domain marker expanded to mark different polygon types
 void geomtools::mark_domains(CDT& ct,
                              const Face_handle& start,
@@ -136,6 +135,11 @@ void geomtools::shorten_long_poly_edges(Polygon_2& poly, double maxLen) {
             }
         } else ++i;
     }
+}
+
+Point_2 geomtools::rotate_pt(Point_2& pt, const double angle, Point_2 centerPt) {
+    return {cos(angle) * (pt.x() - centerPt.x()) - sin(angle) * (pt.y() - centerPt.y()) + centerPt.x(),
+                   sin(angle) * (pt.x() - centerPt.x()) + cos(angle) * (pt.y() - centerPt.y()) + centerPt.y()};
 }
 
 void geomtools::interpolate_poly_from_pc(const Polygon_2& poly, std::vector<double>& heights,
@@ -263,7 +267,7 @@ template void geomtools::smooth_dt<DT, EPICK>  (const Point_set_3& pointCloud, D
 template void geomtools::smooth_dt<CDT, EPECK> (const Point_set_3& pointCloud, CDT& dt);
 
 template <typename T>
-Polygon_2 geomtools::calc_bbox_poly(T& inputPts) {
+Polygon_2 geomtools::calc_bbox_poly(const T& inputPts) {
     double bxmin, bymin, bxmax, bymax;
     bxmin = g_largnum; bymin = g_largnum; bxmax = -g_largnum; bymax = -g_largnum;
     for (auto& pt : inputPts) {
@@ -281,4 +285,5 @@ Polygon_2 geomtools::calc_bbox_poly(T& inputPts) {
     return bboxPoly;
 }
 //- Explicit template instantiation
-template Polygon_2 geomtools::calc_bbox_poly<std::vector<Point_2>>(std::vector<Point_2>& inputPts);
+template Polygon_2 geomtools::calc_bbox_poly<std::vector<Point_2>>(const std::vector<Point_2>& inputPts);
+template Polygon_2 geomtools::calc_bbox_poly<Polygon_2>(const Polygon_2& inputPts);

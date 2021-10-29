@@ -90,7 +90,6 @@ void IO::output_obj(const OutputFeatures& allFeatures) {
     std::vector<std::unordered_map<std::string, unsigned int>> dPts(numOutputSurfaces);
     //-- Output points
     for (auto& f : allFeatures) {
-        if (!f->is_active()) continue;
         if (config::outputSeparately)
             IO::get_obj_pts(f->get_mesh(),
                             fs[f->get_output_layer_id()],

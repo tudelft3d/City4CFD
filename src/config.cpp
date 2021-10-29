@@ -15,7 +15,6 @@ namespace config {
     DomainType            bpgDomainType;
     Vector_2              flowDirection;
     std::vector<double>   bpgDomainSize;
-    std::vector<Vector_2> enlargeDomainVec;
     double                domainBuffer = -g_largnum;
 
     //-- Reconstruction related
@@ -36,6 +35,7 @@ namespace config {
 }
 
 void config::set_config(nlohmann::json& j) {
+    //todo make it with JSON schema validator
     //-- Path to point cloud(s)
     points_xyz    = j["point_clouds"]["ground"];
     buildings_xyz = j["point_clouds"]["buildings"];
@@ -70,6 +70,10 @@ void config::set_config(nlohmann::json& j) {
     config::set_region(domainBndConfig, domainBndCursor, j);
     // Define domain type if using BPG
     if (domainBndConfig.type() == typeid(bool)) {
+        if (!j.contains("flow_direction")) throw std::invalid_argument("Missing information on flow direction!");
+        if (j["flow_direction"].size() != 2) throw std::invalid_argument("Flow direction array size is not of size 3!");
+        flowDirection = Vector_2(j["flow_direction"][0], j["flow_direction"][1]);
+
         std::string bpgDomainConfig = j["bnd_type_bpg"];
         if (boost::iequals(bpgDomainConfig, "round")) {
             bpgDomainType = ROUND;
@@ -87,20 +91,12 @@ void config::set_config(nlohmann::json& j) {
     }
     // Sort out few specifics for domain types
     if (bpgDomainType == RECTANGLE || bpgDomainType == OVAL) {
-        if (!j.contains("flow_direction")) throw std::invalid_argument("Missing information on flow direction!");
-        if (j["flow_direction"].size() != 2) throw std::invalid_argument("Flow direction array size is not of size 3!");
-        flowDirection = Vector_2(j["flow_direction"][0], j["flow_direction"][1]);
-
         if (j.contains("bpg_domain_size")) {
             if (j["bpg_domain_size"].size() == 4)
                 bpgDomainSize = {j["bpg_domain_size"][0], j["bpg_domain_size"][1], j["bpg_domain_size"][2], j["bpg_domain_size"][3]};
             else
                 throw std::invalid_argument("Wrong input for overriding BPG domain size");
         } else bpgDomainSize = {5, 5, 15, 5};
-        enlargeDomainVec.emplace_back(Vector_2(-bpgDomainSize[0], 0));
-        enlargeDomainVec.emplace_back(Vector_2(0, -bpgDomainSize[1]));
-        enlargeDomainVec.emplace_back(Vector_2(bpgDomainSize[2], 0));
-        enlargeDomainVec.emplace_back(Vector_2(0, bpgDomainSize[1]));
     }
 
     // Set domain side

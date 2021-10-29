@@ -21,7 +21,6 @@ namespace config {
     extern DomainType            bpgDomainType;
     extern Vector_2              flowDirection;
     extern std::vector<double>   bpgDomainSize;
-    extern std::vector<Vector_2> enlargeDomainVec;
     extern double                domainBuffer;
 
     //-- Reconstruction

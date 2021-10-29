@@ -41,6 +41,8 @@
 #include <CGAL/natural_neighbor_coordinates_2.h>
 #include <CGAL/Barycentric_coordinates_2/Triangle_coordinates_2.h>
 
+#include <CGAL/convex_hull_2.h>
+
 //-- Third-party
 #include "nlohmann/json.hpp"
 
@@ -89,6 +91,9 @@ struct FaceInfo2
     bool in_domain() {
         return nesting_level%2 == 1;
     }
+    bool in_domain_noholes() {
+        return nesting_level > 0;
+    }
     int surfaceLayer = -9999; // Face handle to output mesh for specific surface layer
 };
 //-- CGAL Triangulation
@@ -102,6 +107,7 @@ typedef CGAL::Constrained_triangulation_plus_2<CDTt>                            
 typedef CDT::Point                                                                 Point;
 typedef CDT::Face_handle                                                           Face_handle;
 typedef CDT::Vertex_handle                                                         Vertex_handle;
+//- Different versions of DT
 typedef CGAL::Delaunay_triangulation_2<CGAL::Projection_traits_xy_3<EPICK>>        DT;
 
 //-- CGAL Polygon

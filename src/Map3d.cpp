@@ -111,17 +111,12 @@ void Map3d::set_influ_region() {
 }
 
 void Map3d::set_bnd() {
-    double hMax = 0;
     if (_bndBPG) { // Automatically calculate boundary with BPG
         std::cout << "--- INFO: Domain boundaries not defined in config. "
                   << "Calculating with BPG. ---" << std::endl;
 
-        //-- Find the highest building in the influ region
-        for (auto& b: _buildings) {
-            if (b->get_height() > hMax) hMax = b->get_height();
-        }
         //-- Calculate the boundary polygon according to BPG and defined boundary type
-        _domainBnd.calc_bnd_bpg(hMax, _influRegion.get_bounding_region(), _buildings);
+        _domainBnd.calc_bnd_bpg(_influRegion.get_bounding_region(), _buildings);
     } else {
         //-- Define boundary region with values set in config
         boost::apply_visitor(_domainBnd, config::domainBndConfig);
@@ -132,7 +127,7 @@ void Map3d::set_bnd() {
     Polygon_2 bndPoly, pcBndPoly, startBufferPoly; // Depends on the buffer region
     bndPoly = _domainBnd.get_bounding_region();
     if (_boundaries.size() > 2) {
-        geomtools::shorten_long_poly_edges(bndPoly, hMax); // Outer poly edge size is hMax ATM
+        geomtools::shorten_long_poly_edges(bndPoly, 20 * config::edgeMaxLen); // Outer poly edge size is hardcoded atm
         Boundary::set_bnd_poly(bndPoly, pcBndPoly, startBufferPoly);
     } else
         Boundary::set_bnd_poly(bndPoly, pcBndPoly, startBufferPoly);
@@ -178,6 +173,7 @@ void Map3d::reconstruct_buildings() {
             // Add to warning log when individual buildings don't reconstruct
         }
     }
+    this->clear_inactives();
 }
 
 void Map3d::reconstruct_boundaries() {
