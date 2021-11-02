@@ -46,7 +46,7 @@ void Map3d::reconstruct() {
     }
 
     //-- Constrain features, generate terrain mesh from CDT
-    std::cout << "---Reconstructing terrain ---" << std::endl;
+    std::cout << "--- Reconstructing terrain ---" << std::endl;
     this->reconstruct_terrain();
 
     //-- Generate side and top boundaries
@@ -126,10 +126,11 @@ void Map3d::set_bnd() {
     //-- Prepare the outer boundary polygon for sides and top, and polygon for feature scope
     Polygon_2 bndPoly, pcBndPoly, startBufferPoly; // Depends on the buffer region
     bndPoly = _domainBnd.get_bounding_region();
-    if (_boundaries.size() > 2) {
+    if (_boundaries.size() > 2) { 
         geomtools::shorten_long_poly_edges(bndPoly, 20 * config::edgeMaxLen); // Outer poly edge size is hardcoded atm
         Boundary::set_bnd_poly(bndPoly, pcBndPoly, startBufferPoly);
     } else
+        // If it's only one side bnd, edge length is already okay
         Boundary::set_bnd_poly(bndPoly, pcBndPoly, startBufferPoly);
 
     //-- Deactivate point cloud points that are out of bounds
@@ -142,7 +143,6 @@ void Map3d::set_bnd() {
         f->check_feature_scope(pcBndPoly);
     }
     this->clear_inactives();
-
 }
 
 void Map3d::bnd_sanity_check() {

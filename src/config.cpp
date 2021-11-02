@@ -153,7 +153,7 @@ void config::set_config(nlohmann::json& j) {
             bpgBlockageRatioFlag = j["bpg_blockage_ratio"];
         } else if (j["bpg_blockage_ratio"].is_number()) {
             bpgBlockageRatioFlag = true;
-            bpgBlockageRatio = j["bpg_blockage_ratio"];
+            bpgBlockageRatio = (double)j["bpg_blockage_ratio"] / 100;
         }
     }
 

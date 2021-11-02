@@ -6,8 +6,9 @@
 #include "TopoFeature.h"
 #include "Terrain.h"
 #include "Building.h"
-#include "Boundary.h"
 #include "SurfaceLayer.h"
+#include "BoundingRegion.h"
+#include "Boundary.h"
 
 class Map3d {
 public:

@@ -129,9 +129,15 @@ void PolyFeature::calc_footprint_elevation_linear(const DT& dt) {
     for (auto& ring : _poly.rings()) {
         std::vector<double> ringHeights;
         for (auto& polypt : ring) {
-
             DT::Point pt(polypt.x(), polypt.y(), 0);
-            fh = dt.locate(pt, fh);
+
+            DT::Locate_type lt;
+            int li;
+            fh = dt.locate(pt, lt, li, fh);
+            if (lt == DT::OUTSIDE_CONVEX_HULL) {
+                this->deactivate();
+                return;
+            }
 
             Triangle_coordinates triangle_coordinates(fh->vertex(0)->point(),
                                                       fh->vertex(1)->point(),

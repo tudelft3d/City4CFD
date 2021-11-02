@@ -24,7 +24,6 @@ void IO::read_config(std::string& config_path) {
     config::validate(j);
     std::cout <<"--- JSON configuration file is valid!" << std::endl;
 
-    std::cout << "--- Setting up configuration ---" <<std::endl;
     config::set_config(j);
 }
 

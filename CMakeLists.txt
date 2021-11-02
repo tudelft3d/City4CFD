@@ -15,7 +15,6 @@ set( CMAKE_BUILD_TYPE "Debug" )
 
 # BOOST
 find_package( Boost REQUIRED COMPONENTS filesystem)
-#find_package ( Boost REQUIRED )
 
 # LASLIB
 #find_package( LASlib REQUIRED )
