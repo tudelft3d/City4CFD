@@ -25,6 +25,7 @@ find_package( CGAL REQUIRED QUIET COMPONENTS )
 
 # Third-party
 include_directories( ${CMAKE_SOURCE_DIR}/thirdparty )
+include_directories( ${CMAKE_SOURCE_DIR}/thirdparty/valijson )
 
 # Creating entries for target: cityCFD
 FILE(GLOB SRC_FILES "src/*.cpp")

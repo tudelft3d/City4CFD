@@ -20,13 +20,12 @@ void IO::read_config(std::string& config_path) {
         throw;
     }
 
-    try {
-        config::set_config(j);
-    } catch (std::exception& e) {
-        std::cerr << "--- ERROR: Error reading configuration file arguments. "
-                  << "Some arguments are wrong or missing ---" << std::endl;
-        throw;
-    }
+    std::cout << "--- Validating JSON configuration file ---" << std::endl;
+    config::validate(j);
+    std::cout <<"--- JSON configuration file is valid!" << std::endl;
+
+    std::cout << "--- Setting up configuration ---" <<std::endl;
+    config::set_config(j);
 }
 
 bool IO::read_point_cloud(std::string& file, Point_set_3& pc) {

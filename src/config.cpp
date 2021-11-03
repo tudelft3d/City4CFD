@@ -1,4 +1,5 @@
 #include "config.h"
+#include "configSchema.inc"
 
 namespace config {
     //-- Input info
@@ -13,13 +14,15 @@ namespace config {
     boost::variant<bool, double, std::string, Polygon_2> influRegionConfig;
     boost::variant<bool, double, std::string, Polygon_2> domainBndConfig;
     DomainType            bpgDomainType;
+    bool                  bpgBlockageRatioFlag = false;
+    double                bpgBlockageRatio = 0.03;
     Vector_2              flowDirection;
     std::vector<double>   bpgDomainSize;
     double                domainBuffer = -g_largnum;
 
     //-- Reconstruction related
-    double lod;
-    double buildingPercentile;
+    std::string lod;
+    double      buildingPercentile;
 
     //-- Polygons related
     double edgeMaxLen;
@@ -34,19 +37,55 @@ namespace config {
     std::vector<int>          surfaceLayerIDs;
 }
 
+void config::validate(nlohmann::json& j) {
+    using valijson::Schema;
+    using valijson::SchemaParser;
+    using valijson::Validator;
+    using valijson::adapters::NlohmannJsonAdapter;
+    using valijson::ValidationResults;
+
+    //- Load schema
+    Schema configSchema;
+    SchemaParser parser;
+    NlohmannJsonAdapter configSchemaAdapter(jsonschema::schema);
+    parser.populateSchema(configSchemaAdapter, configSchema);
+
+    //- Validate with schema
+    Validator validator;
+    NlohmannJsonAdapter configAdapter(j);
+    ValidationResults results;
+    if (!validator.validate(configSchema, configAdapter, &results)) {
+        std::stringstream err_oss;
+        err_oss << "Validation failed." << std::endl;
+        ValidationResults::Error error;
+        int error_num = 1;
+        while (results.popError(error))
+        {
+            std::string context;
+            std::vector<std::string>::iterator itr = error.context.begin();
+            for (; itr != error.context.end(); itr++)
+                context += *itr;
+
+            err_oss << "Error #" << error_num << std::endl
+                    << "  context: " << context << std::endl
+                    << "  desc:    " << error.description << std::endl;
+            ++error_num;
+        }
+        throw std::runtime_error(err_oss.str());
+    }
+}
+
 void config::set_config(nlohmann::json& j) {
-    //todo make it with JSON schema validator
+    //-- Schema validation
     //-- Path to point cloud(s)
     points_xyz    = j["point_clouds"]["ground"];
     buildings_xyz = j["point_clouds"]["buildings"];
 
     //-- Path to polygons
-    bool foundBuildingPoly = false;
     int i = 0;
     for (auto& poly : j["polygons"]) {
         if (poly["type"] == "Building") {
             gisdata = poly["path"];
-            foundBuildingPoly = true;
         }
         if (poly["type"] == "SurfaceLayer") {
             topoLayers.push_back(poly["path"]);
@@ -56,7 +95,6 @@ void config::set_config(nlohmann::json& j) {
                 outputSurfaces.push_back("SurfaceLayer" + std::to_string(++i));
         }
     }
-    if (!foundBuildingPoly) throw std::invalid_argument("Didn't find a path to building polygons in configuration file!");
 
     //-- Domain setup
     pointOfInterest = Point_2(j["point_of_interest"][0], j["point_of_interest"][1]);
@@ -70,33 +108,25 @@ void config::set_config(nlohmann::json& j) {
     config::set_region(domainBndConfig, domainBndCursor, j);
     // Define domain type if using BPG
     if (domainBndConfig.type() == typeid(bool)) {
-        if (!j.contains("flow_direction")) throw std::invalid_argument("Missing information on flow direction!");
-        if (j["flow_direction"].size() != 2) throw std::invalid_argument("Flow direction array size is not of size 3!");
         flowDirection = Vector_2(j["flow_direction"][0], j["flow_direction"][1]);
 
         std::string bpgDomainConfig = j["bnd_type_bpg"];
         if (boost::iequals(bpgDomainConfig, "round")) {
             bpgDomainType = ROUND;
             if (j.contains("bpg_domain_size")) {
-                if (j["bpg_domain_size"].size() == 2)
-                    bpgDomainSize = {j["bpg_domain_size"][0], j["bpg_domain_size"][1]};
-                else
-                    throw std::invalid_argument("Wrong input for overriding BPG domain size");
-            } else bpgDomainSize = {15, 5};
+                bpgDomainSize = {j["bpg_domain_size"][0], j["bpg_domain_size"][1]};
+            } else bpgDomainSize = {15, 5}; // BPG
         } else if (boost::iequals(bpgDomainConfig, "rectangle")) {
             bpgDomainType = RECTANGLE;
         } else if (boost::iequals(bpgDomainConfig, "oval")) {
             bpgDomainType = OVAL;
-        } else throw std::invalid_argument(std::string("'" + bpgDomainConfig+ "'" + " is unknown domain type!"));
+        }
     }
     // Sort out few specifics for domain types
     if (bpgDomainType == RECTANGLE || bpgDomainType == OVAL) {
         if (j.contains("bpg_domain_size")) {
-            if (j["bpg_domain_size"].size() == 4)
-                bpgDomainSize = {j["bpg_domain_size"][0], j["bpg_domain_size"][1], j["bpg_domain_size"][2], j["bpg_domain_size"][3]};
-            else
-                throw std::invalid_argument("Wrong input for overriding BPG domain size");
-        } else bpgDomainSize = {5, 5, 15, 5};
+            bpgDomainSize = {j["bpg_domain_size"][0], j["bpg_domain_size"][1], j["bpg_domain_size"][2], j["bpg_domain_size"][3]};
+        } else bpgDomainSize = {5, 5, 15, 5}; // BPG
     }
 
     // Set domain side
@@ -117,32 +147,34 @@ void config::set_config(nlohmann::json& j) {
             }
         } // If it is a JSON poly it has to be deferred until the polygon is parsed
 
+    // Blockage ratio
+    if (j.contains("bpg_blockage_ratio")) {
+        if (j["bpg_blockage_ratio"].is_boolean()) {
+            bpgBlockageRatioFlag = j["bpg_blockage_ratio"];
+        } else if (j["bpg_blockage_ratio"].is_number()) {
+            bpgBlockageRatioFlag = true;
+            bpgBlockageRatio = j["bpg_blockage_ratio"];
+        }
+    }
+
     // Buffer region
     if (j.contains("buffer_region"))
-        if (j["buffer_region"].is_number() && j["buffer_region"] > -99)
-            domainBuffer = j["buffer_region"];
+        domainBuffer = j["buffer_region"];
 
     // Top height
-    if (j.contains("top_height") && j["top_height"].is_number())
-        topHeight = j["top_height"].front();
-    else if (domainBndConfig.type() != typeid(bool))
-        throw std::invalid_argument("Invalid 'top_height' argument!");
+    if (j.contains("top_height"))
+        topHeight = j["top_height"];
 
     //-- Reconstruction related
     lod = j["lod"].front();
     buildingPercentile = (double)j["building_percentile"].front() / 100.;
 
     //-- Polygons related
-    if (j.contains("edge_max_len"))
-        edgeMaxLen = j["edge_max_len"].front();
-    else throw std::invalid_argument("Missing 'edge_max_len' argument!");
+    edgeMaxLen = j["edge_max_len"];
 
     //-- Output
     //- File name
-    if (outputFileName.empty() && j["output_file_name"].is_string())
-        outputFileName = j["output_file_name"];
-    else
-        throw std::invalid_argument("Invalid output file name!");
+    outputFileName = j["output_file_name"];
 
     //- Output format
     std::string outputFormatConfig = j["output_format"];
@@ -154,8 +186,7 @@ void config::set_config(nlohmann::json& j) {
         outputFormat = CityJSON;
     } else throw std::invalid_argument(std::string("'" + outputFormatConfig + "'" + " is unsupported file format!"));
 
-    if (j.contains("output_separately") && j["output_separately"].is_boolean())
-        outputSeparately = j["output_separately"];
+    outputSeparately = j["output_separately"];
 }
 
 //-- influRegion and domainBndConfig flow control
@@ -168,8 +199,6 @@ void config::set_region(boost::variant<bool, double, std::string, Polygon_2>& re
         Polygon_2 tempPoly;
         for (auto& pt : j[regionName]) tempPoly.push_back(Point_2(pt[0], pt[1]));
         regionType = tempPoly;
-    } else if (j[regionName].size() == 2) {
-        throw std::invalid_argument("Unknown setup of the region: " + regionName + "!");
     } else if (j[regionName].is_number() || j[regionName].is_array() && j[regionName][0].is_number()) { // Influ region radius
         regionType = (double)j[regionName].front();
     } else regionType = true; // Leave it to BPG

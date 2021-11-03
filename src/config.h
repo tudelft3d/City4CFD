@@ -19,12 +19,14 @@ namespace config {
     extern boost::variant<bool, double, std::string, Polygon_2> influRegionConfig;
     extern boost::variant<bool, double, std::string, Polygon_2> domainBndConfig;
     extern DomainType            bpgDomainType;
+    extern bool                  bpgBlockageRatioFlag;
+    extern double                bpgBlockageRatio;
     extern Vector_2              flowDirection;
     extern std::vector<double>   bpgDomainSize;
     extern double                domainBuffer;
 
     //-- Reconstruction
-    extern double       lod;
+    extern std::string  lod;
     extern double       buildingPercentile;
 
     //-- Polygons related
@@ -38,6 +40,7 @@ namespace config {
     extern int                       numSides;
     extern std::vector<int>          surfaceLayerIDs;
 
+    void validate(nlohmann::json& j);
     void set_config(nlohmann::json& j);
     void set_region(boost::variant<bool, double, std::string, Polygon_2>& regionType,
                     std::string& regionName,

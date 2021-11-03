@@ -45,6 +45,11 @@
 
 //-- Third-party
 #include "nlohmann/json.hpp"
+#include "valijson/adapters/nlohmann_json_adapter.hpp"
+#include "valijson/utils/nlohmann_json_utils.hpp"
+#include "valijson/schema.hpp"
+#include "valijson/schema_parser.hpp"
+#include "valijson/validator.hpp"
 
 //-- General definitions
 namespace fs = boost::filesystem;
