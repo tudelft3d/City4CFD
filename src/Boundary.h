@@ -1,7 +1,6 @@
 #ifndef CITYCFD_BOUNDARY_H
 #define CITYCFD_BOUNDARY_H
 
-#include "geomtools.h"
 #include "TopoFeature.h"
 
 class Boundary : public TopoFeature {
@@ -32,27 +31,4 @@ protected:
     static double               _outerBndHeight;
     std::vector<Point_3>        _sideOutputPts;
 };
-
-class Sides : public Boundary {
-public:
-    Sides(const int outputLayerID);
-    ~Sides();
-
-    virtual void reconstruct() override;
-
-    virtual TopoClass   get_class() const override;
-    virtual std::string get_class_name() const override;
-};
-
-class Top : public Boundary {
-public:
-    Top(const int outputLayerID);
-    ~Top();
-
-    virtual void reconstruct() override;
-
-    virtual TopoClass   get_class() const override;
-    virtual std::string get_class_name() const override;
-};
-
 #endif //CITYCFD_BOUNDARY_H

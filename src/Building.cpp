@@ -1,5 +1,8 @@
 #include "Building.h"
 
+#include "geomutils.h"
+#include "LoD12.h"
+
 Building::Building()
     : PolyFeature(), _height(-g_largnum) {}
 
@@ -11,7 +14,7 @@ Building::~Building() = default;
 void Building::check_feature_scope(const Polygon_2& influRegion) {
         for (auto& poly: _poly.rings()) {
             for (auto& vert : poly) {
-                if (geomtools::point_in_poly(vert, influRegion))
+                if (geomutils::point_in_poly(vert, influRegion))
                     return;
             }
         }
@@ -41,7 +44,7 @@ void Building::reconstruct(const SearchTree& searchTree) {
     //-- Check if subset point lies inside the polygon
     std::vector<double> building_pts;
     for (auto& pt : subsetPts) {
-        if (geomtools::point_in_poly(pt, _poly)) {
+        if (geomutils::point_in_poly(pt, _poly)) {
             building_pts.push_back(pt.z());
         }
     }
@@ -75,7 +78,7 @@ void Building::get_cityjson_info(nlohmann::json& b) const {
 //    float hbase = z_to_float(this->get_height_base());
 //    float h = z_to_float(this->get_height());
 //    b["attributes"]["TerrainHeight"] = _baseHeights.back(); // temp - will calculate avg for every footprint
-    b["attributes"]["measuredHeight"] = _height - geomtools::avg(_base_heights[0]);
+    b["attributes"]["measuredHeight"] = _height - geomutils::avg(_base_heights[0]);
 }
 
 void Building::get_cityjson_semantics(nlohmann::json& g) const { // Temp for checking CGAL mesh properties

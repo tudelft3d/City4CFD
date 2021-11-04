@@ -1,5 +1,9 @@
 #include "Terrain.h"
 
+#include "geomutils.h"
+#include "io.h"
+#include "SurfaceLayer.h"
+
 Terrain::Terrain()
     : TopoFeature(0) {}
 
@@ -24,7 +28,7 @@ void Terrain::set_cdt(const Point_set_3& pointCloud) {
 
     //-- Smoothing
 #ifdef SMOOTH
-    geomtools::smooth_dt<CDT, EPECK>(pointCloud, _cdt);
+    geomutils::smooth_dt<CDT, EPECK>(pointCloud, _cdt);
 #endif
 }
 
@@ -62,15 +66,15 @@ void Terrain::constrain_features(const PolyFeatures& features) {
 
 void Terrain::create_mesh(const PolyFeatures& features) {
     //-- Mark surface layer
-    geomtools::mark_domains(this->get_cdt(), features);
+    geomutils::mark_domains(this->get_cdt(), features);
 
     //-- Create the mesh for the terrain
-    geomtools::cdt_to_mesh(_cdt, _mesh);
+    geomutils::cdt_to_mesh(_cdt, _mesh);
 
     // -- Surface layer meshes are stored here
     for (int i : config::surfaceLayerIDs) {
         auto layer = std::make_shared<SurfaceLayer>(i);
-        geomtools::cdt_to_mesh(_cdt, layer->get_mesh(), i); // Create mesh for surface layers
+        geomutils::cdt_to_mesh(_cdt, layer->get_mesh(), i); // Create mesh for surface layers
         _surfaceLayersTerrain.push_back(layer);
     }
 }

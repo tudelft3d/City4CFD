@@ -1,10 +1,7 @@
 #ifndef CITYCFD_BUILDING_H
 #define CITYCFD_BUILDING_H
 
-#include "config.h"
-#include "geomtools.h"
-#include "TopoFeature.h"
-#include "LoD12.h"
+#include "PolyFeature.h"
 
 class Building : public PolyFeature {
 public:

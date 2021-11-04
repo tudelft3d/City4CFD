@@ -1,9 +1,8 @@
 #ifndef CITYCFD_BOUNDINGREGION_H
 #define CITYCFD_BOUNDINGREGION_H
 
-#include "geomtools.h"
-#include "io.h"
-#include "Building.h"
+#include "types.h"
+#include "CGALTypes.h"
 
 class BoundingRegion {
 public:

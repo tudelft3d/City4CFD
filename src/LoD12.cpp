@@ -1,12 +1,14 @@
 #include "LoD12.h"
 
+#include "geomutils.h"
+
 LoD12::LoD12(const Polygon_with_holes_2& poly,
              const std::vector<std::vector<double>>& base_heights,
              const std::vector<double>& building_pts)
     : _height(), _poly(poly), _baseHeights(base_heights), _buildingPts(building_pts) {}
 
 void LoD12::lod12reconstruct(Mesh& mesh, double& height) {
-    _height = geomtools::percentile(_buildingPts, config::buildingPercentile);
+    _height = geomutils::percentile(_buildingPts, config::buildingPercentile);
     height = _height;
 
     this->create_mesh(mesh);
@@ -57,7 +59,7 @@ void LoD12::create_mesh(Mesh& mesh) {
     }
 
     //- Handle top
-    geomtools::mark_domains(cdt_buildings);
+    geomutils::mark_domains(cdt_buildings);
     for (auto& it : cdt_buildings.finite_face_handles()) {
         if (!it->info().in_domain()) continue;
 

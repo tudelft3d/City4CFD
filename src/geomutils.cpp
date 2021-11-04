@@ -1,6 +1,8 @@
-#include "geomtools.h"
+#include "geomutils.h"
 
-double geomtools::avg(const std::vector<double>& values) {
+#include "PolyFeature.h"
+
+double geomutils::avg(const std::vector<double>& values) {
     if (values.empty()) throw std::length_error("Can't calculate average of a zero-sized vector!");
     double average = 0;
     for (auto& value : values) {
@@ -9,14 +11,14 @@ double geomtools::avg(const std::vector<double>& values) {
     return (average / (double)values.size());
 }
 
-double geomtools::percentile(std::vector<double> values, const double percentile) {
+double geomutils::percentile(std::vector<double> values, const double percentile) {
     if (values.empty()) throw std::length_error("Can't calculate percentile of a zero-sized vector!");
     std::sort(values.begin(), values.end());
     unsigned long i = values.size() * percentile;
     return values[i];
 }
 
-bool geomtools::point_in_circle(const Point_3& pt, const Point_2& center, const double& radius) {
+bool geomutils::point_in_circle(const Point_3& pt, const Point_2& center, const double& radius) {
     if (pow(pt.x() - center.x(), 2)
       + pow(pt.y() - center.y(), 2)
       < pow(radius, 2)) {
@@ -25,7 +27,7 @@ bool geomtools::point_in_circle(const Point_3& pt, const Point_2& center, const 
     return false;
 }
 
-void geomtools::cdt_to_mesh(CDT& cdt, Mesh& mesh, const int surfaceLayerID) {
+void geomutils::cdt_to_mesh(CDT& cdt, Mesh& mesh, const int surfaceLayerID) {
     std::map<CDT::Vertex_handle, int> indices;
     std::vector<Mesh::vertex_index> mesh_vertex;
     std::vector<Mesh::face_index> face_index;
@@ -48,7 +50,7 @@ void geomtools::cdt_to_mesh(CDT& cdt, Mesh& mesh, const int surfaceLayerID) {
     }
 }
 //-- CGAL's constrained domain marker expanded to mark different polygon types
-void geomtools::mark_domains(CDT& ct,
+void geomutils::mark_domains(CDT& ct,
                              const Face_handle& start,
                              int index,
                              std::list<CDT::Edge>& border,
@@ -71,7 +73,7 @@ void geomtools::mark_domains(CDT& ct,
         for (auto& feature : features) {
             if (!feature->is_active()) continue;
             //- Polygons are already ordered according to importance - find first polygon
-            if (geomtools::point_in_poly(chkPoint, feature->get_poly())) {
+            if (geomutils::point_in_poly(chkPoint, feature->get_poly())) {
                 if (feature->get_class() == BUILDING) {
                     surfaceLayer = -1; //- Leave building footprints as part of terrain
                     break;
@@ -103,7 +105,7 @@ void geomtools::mark_domains(CDT& ct,
     }
 }
 
-void geomtools::mark_domains(CDT& cdt, PolyFeatures features) {
+void geomutils::mark_domains(CDT& cdt, PolyFeatures features) {
     for (CDT::Face_handle f : cdt.all_face_handles()) {
         f->info().nesting_level = -1;
     }
@@ -119,7 +121,7 @@ void geomtools::mark_domains(CDT& cdt, PolyFeatures features) {
     }
 }
 
-void geomtools::shorten_long_poly_edges(Polygon_2& poly, double maxLen) {
+void geomutils::shorten_long_poly_edges(Polygon_2& poly, double maxLen) {
     auto& polyVec = poly.container();
     for (auto i = 0; i < polyVec.size();) {
         auto edge = polyVec[(i + 1) % polyVec.size()] - polyVec[i];
@@ -137,12 +139,12 @@ void geomtools::shorten_long_poly_edges(Polygon_2& poly, double maxLen) {
     }
 }
 
-Point_2 geomtools::rotate_pt(Point_2& pt, const double angle, Point_2 centerPt) {
+Point_2 geomutils::rotate_pt(Point_2& pt, const double angle, Point_2 centerPt) {
     return {cos(angle) * (pt.x() - centerPt.x()) - sin(angle) * (pt.y() - centerPt.y()) + centerPt.x(),
                    sin(angle) * (pt.x() - centerPt.x()) + cos(angle) * (pt.y() - centerPt.y()) + centerPt.y()};
 }
 
-void geomtools::interpolate_poly_from_pc(const Polygon_2& poly, std::vector<double>& heights,
+void geomutils::interpolate_poly_from_pc(const Polygon_2& poly, std::vector<double>& heights,
                                          const Point_set_3& pointCloud) {
     SearchTree searchTree(pointCloud.points().begin(), pointCloud.points().end());
     //-- Calculate elevation of polygon outer boundary
@@ -162,14 +164,14 @@ void geomtools::interpolate_poly_from_pc(const Polygon_2& poly, std::vector<doub
 //        for (auto& pt : result) {
 //            poly_height.push_back(pt.z());
 //        }
-        heights.emplace_back(geomtools::avg(poly_height));
+        heights.emplace_back(geomutils::avg(poly_height));
     }
 }
 
 //-- Templated functions
 //-- Check if the point is inside a polygon on a 2D projection
 template <typename T>
-bool geomtools::point_in_poly(const T& pt2, const Polygon_2& polygon) {
+bool geomutils::point_in_poly(const T& pt2, const Polygon_2& polygon) {
     Point_2 pt(pt2.x(), pt2.y());
     if (CGAL::bounded_side_2(polygon.begin(), polygon.end(), pt) == CGAL::ON_BOUNDED_SIDE) {
         return true;
@@ -177,11 +179,11 @@ bool geomtools::point_in_poly(const T& pt2, const Polygon_2& polygon) {
     return false;
 }
 //- Explicit template instantiation
-template bool geomtools::point_in_poly<Point_2>(const Point_2& pt2, const Polygon_2& polygon);
-template bool geomtools::point_in_poly<Point_3>(const Point_3& pt2, const Polygon_2& polygon);
+template bool geomutils::point_in_poly<Point_2>(const Point_2& pt2, const Polygon_2& polygon);
+template bool geomutils::point_in_poly<Point_3>(const Point_3& pt2, const Polygon_2& polygon);
 
 template <typename T>
-bool geomtools::point_in_poly(const T& pt2, const Polygon_with_holes_2& polygon) {
+bool geomutils::point_in_poly(const T& pt2, const Polygon_with_holes_2& polygon) {
     Point_2 pt(pt2.x(), pt2.y());
 
     //-- Check if the point falls within the outer surface
@@ -197,11 +199,11 @@ bool geomtools::point_in_poly(const T& pt2, const Polygon_with_holes_2& polygon)
     return false;
 }
 //- Explicit template instantiation
-template bool geomtools::point_in_poly<Point_2>(const Point_2& pt2, const Polygon_with_holes_2& polygon);
-template bool geomtools::point_in_poly<Point_3>(const Point_3& pt2, const Polygon_with_holes_2& polygon);
+template bool geomutils::point_in_poly<Point_2>(const Point_2& pt2, const Polygon_with_holes_2& polygon);
+template bool geomutils::point_in_poly<Point_3>(const Point_3& pt2, const Polygon_with_holes_2& polygon);
 
 template <typename T>
-void geomtools::make_round_poly(Point_2& centre, double radius, T& poly) {
+void geomutils::make_round_poly(Point_2& centre, double radius, T& poly) {
     const int nPts = 360; // Hardcoded
     const double angInt = 2 * M_PI / (double) nPts;
     double ang = 0;
@@ -213,11 +215,11 @@ void geomtools::make_round_poly(Point_2& centre, double radius, T& poly) {
     }
 }
 //- Explicit template instantiation
-template void geomtools::make_round_poly<Polygon_2>(Point_2& centre, double radius, Polygon_2& poly);
-template void geomtools::make_round_poly<Polygon_with_holes_2>(Point_2& centre, double radius, Polygon_with_holes_2& poly);
+template void geomutils::make_round_poly<Polygon_2>(Point_2& centre, double radius, Polygon_2& poly);
+template void geomutils::make_round_poly<Polygon_with_holes_2>(Point_2& centre, double radius, Polygon_with_holes_2& poly);
 
 template <typename T>
-void geomtools::make_round_poly(Point_2& centre, double radius1, double radius2,
+void geomutils::make_round_poly(Point_2& centre, double radius1, double radius2,
                                 int nPts, double angInt, double ang, T& poly) {
     for (auto i = 0; i < nPts; ++i) {
         double xPt = centre.x() + radius1 * cos(ang + angInt);
@@ -227,11 +229,11 @@ void geomtools::make_round_poly(Point_2& centre, double radius1, double radius2,
     }
 }
 //- Explicit template instantiation
-template void geomtools::make_round_poly<Polygon_2>(Point_2& centre, double radius1, double radius2, int nPts, double angInt, double ang, Polygon_2& poly);
-template void geomtools::make_round_poly<Polygon_with_holes_2>(Point_2& centre, double radius1, double radius2, int nPts, double angInt, double ang, Polygon_with_holes_2& poly);
+template void geomutils::make_round_poly<Polygon_2>(Point_2& centre, double radius1, double radius2, int nPts, double angInt, double ang, Polygon_2& poly);
+template void geomutils::make_round_poly<Polygon_with_holes_2>(Point_2& centre, double radius1, double radius2, int nPts, double angInt, double ang, Polygon_with_holes_2& poly);
 
 template <typename T, typename U>
-void geomtools::smooth_dt(const Point_set_3& pointCloud, T& dt) {
+void geomutils::smooth_dt(const Point_set_3& pointCloud, T& dt) {
     // Smooth heights with 5 successive Gaussian filters
 #ifdef CGAL_LINKED_WITH_TBB
     using Concurrency_tag = CGAL::Parallel_tag;
@@ -263,11 +265,11 @@ void geomtools::smooth_dt(const Point_set_3& pointCloud, T& dt) {
     }
 }
 //-- Explicit template instantiation
-template void geomtools::smooth_dt<DT, EPICK>  (const Point_set_3& pointCloud, DT& dt);
-template void geomtools::smooth_dt<CDT, EPECK> (const Point_set_3& pointCloud, CDT& dt);
+template void geomutils::smooth_dt<DT, EPICK>  (const Point_set_3& pointCloud, DT& dt);
+template void geomutils::smooth_dt<CDT, EPECK> (const Point_set_3& pointCloud, CDT& dt);
 
 template <typename T>
-Polygon_2 geomtools::calc_bbox_poly(const T& inputPts) {
+Polygon_2 geomutils::calc_bbox_poly(const T& inputPts) {
     double bxmin, bymin, bxmax, bymax;
     bxmin = g_largnum; bymin = g_largnum; bxmax = -g_largnum; bymax = -g_largnum;
     for (auto& pt : inputPts) {
@@ -285,5 +287,5 @@ Polygon_2 geomtools::calc_bbox_poly(const T& inputPts) {
     return bboxPoly;
 }
 //- Explicit template instantiation
-template Polygon_2 geomtools::calc_bbox_poly<std::vector<Point_2>>(const std::vector<Point_2>& inputPts);
-template Polygon_2 geomtools::calc_bbox_poly<Polygon_2>(const Polygon_2& inputPts);
+template Polygon_2 geomutils::calc_bbox_poly<std::vector<Point_2>>(const std::vector<Point_2>& inputPts);
+template Polygon_2 geomutils::calc_bbox_poly<Polygon_2>(const Polygon_2& inputPts);

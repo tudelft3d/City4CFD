@@ -1,5 +1,13 @@
 #include "Map3d.h"
 
+#include "geomutils.h"
+#include "io.h"
+#include "Terrain.h"
+#include "Building.h"
+#include "SurfaceLayer.h"
+#include "Sides.h"
+#include "Top.h"
+
 Map3d::Map3d() = default;
 Map3d::~Map3d() = default;
 
@@ -89,7 +97,7 @@ void Map3d::set_features() {
     //-- Make a DT with inexact constructions for fast interpolation
     _dt.insert(_pointCloud.points().begin(), _pointCloud.points().end());
 #ifdef SMOOTH
-    geomtools::smooth_dt<DT, EPICK>(_pointCloud, _dt);
+    geomutils::smooth_dt<DT, EPICK>(_pointCloud, _dt);
 #endif
 }
 
@@ -127,7 +135,7 @@ void Map3d::set_bnd() {
     Polygon_2 bndPoly, pcBndPoly, startBufferPoly; // Depends on the buffer region
     bndPoly = _domainBnd.get_bounding_region();
     if (_boundaries.size() > 2) { 
-        geomtools::shorten_long_poly_edges(bndPoly, 20 * config::edgeMaxLen); // Outer poly edge size is hardcoded atm
+        geomutils::shorten_long_poly_edges(bndPoly, 20 * config::edgeMaxLen); // Outer poly edge size is hardcoded atm
         Boundary::set_bnd_poly(bndPoly, pcBndPoly, startBufferPoly);
     } else
         // If it's only one side bnd, edge length is already okay
@@ -148,7 +156,7 @@ void Map3d::set_bnd() {
 void Map3d::bnd_sanity_check() {
     auto& domainBndPoly = _domainBnd.get_bounding_region();
     for (auto& pt : _influRegion.get_bounding_region()) {
-        if (!geomtools::point_in_poly(pt, domainBndPoly))
+        if (!geomutils::point_in_poly(pt, domainBndPoly))
             throw std::domain_error("The influence region is larger than the domain boundary!");
     }
 }
@@ -290,7 +298,7 @@ void Map3d::shorten_polygons(T& feature) {
     for (auto& f : feature) {
         if (!f->is_active()) continue;
         for (auto& ring : f->get_poly().rings()) {
-            geomtools::shorten_long_poly_edges(ring);
+            geomutils::shorten_long_poly_edges(ring);
         }
     }
 }

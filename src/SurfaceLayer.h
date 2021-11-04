@@ -1,8 +1,7 @@
 #ifndef CITYCFD_SURFACELAYER_H
 #define CITYCFD_SURFACELAYER_H
 
-#include "config.h"
-#include "TopoFeature.h"
+#include "PolyFeature.h"
 
 class SurfaceLayer : public PolyFeature {
 public:

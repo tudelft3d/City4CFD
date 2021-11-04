@@ -1,3 +1,5 @@
+#include "config.h"
+#include "io.h"
 #include "Map3d.h"
 
 void printWelcome() {

@@ -1,10 +1,8 @@
 #ifndef CITYCFD_IO_H
 #define CITYCFD_IO_H
 
-#include "iostream"
-#include "config.h"
-#include "TopoFeature.h"
-#include "Boundary.h"
+#include "types.h"
+#include "CGALTypes.h"
 
 namespace IO {
     //-- Input functions

@@ -1,12 +1,9 @@
-#ifndef CITYCFD_GEOMTOOLS_H
-#define CITYCFD_GEOMTOOLS_H
+#ifndef CITYCFD_GEOMUTILS_H
+#define CITYCFD_GEOMUTILS_H
 
-#include "definitions.h"
-#include "TopoFeature.h"
+#include "config.h"
 
-class PolyFeature;
-
-namespace geomtools {
+namespace geomutils {
     double  avg(const std::vector<double>& values);
     double  percentile(std::vector<double> values, const double percentile);
     bool    point_in_circle(const Point_3& pt, const Point_2& center, const double& radius);
@@ -28,4 +25,4 @@ namespace geomtools {
     template <typename T> Polygon_2 calc_bbox_poly(const T& inputPts);
 }
 
-#endif //CITYCFD_GEOMTOOLS_H
+#endif //CITYCFD_GEOMUTILS_H

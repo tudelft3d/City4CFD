@@ -1,7 +1,11 @@
 #ifndef CITYCFD_CONFIG_H
 #define CITYCFD_CONFIG_H
 
-#include "definitions.h"
+#include "types.h"
+#include "CGALTypes.h"
+#include "boost/filesystem.hpp"
+
+namespace fs = boost::filesystem;
 
 namespace config {
     //-- Input info

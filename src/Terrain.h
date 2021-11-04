@@ -1,11 +1,7 @@
 #ifndef CITYCFD_TERRAIN_H
 #define CITYCFD_TERRAIN_H
 
-#include "config.h"
-#include "geomtools.h"
-#include "io.h"
 #include "TopoFeature.h"
-#include "SurfaceLayer.h"
 
 class Terrain : public TopoFeature {
 public:

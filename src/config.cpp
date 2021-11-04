@@ -1,4 +1,11 @@
 #include "config.h"
+
+#include "valijson/adapters/nlohmann_json_adapter.hpp"
+#include "valijson/utils/nlohmann_json_utils.hpp"
+#include "valijson/schema.hpp"
+#include "valijson/schema_parser.hpp"
+#include "valijson/validator.hpp"
+
 #include "configSchema.inc"
 
 namespace config {

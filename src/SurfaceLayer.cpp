@@ -1,5 +1,7 @@
 #include "SurfaceLayer.h"
 
+#include "geomutils.h"
+
 SurfaceLayer::SurfaceLayer()
     : PolyFeature() {}
 
@@ -18,7 +20,7 @@ void SurfaceLayer::check_feature_scope(const Polygon_2& bndPoly) {
     //-- Exclude all polygons that have at least one
     //-- vertex outside the domain
         for (auto& vert : _poly.outer_boundary()) {
-            if (!geomtools::point_in_poly(vert, bndPoly)) {
+            if (!geomutils::point_in_poly(vert, bndPoly)) {
                 this->deactivate();
                 return;
             }

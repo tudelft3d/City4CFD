@@ -1,6 +1,7 @@
 #include "Boundary.h"
 
-//todo maybe merge top and sides into one
+#include "geomutils.h"
+
 Boundary::Boundary()
     : TopoFeature(), _sideOutputPts() {}
 
@@ -44,7 +45,7 @@ void Boundary::set_bounds_to_pc(Point_set_3& pointCloud, const Polygon_2& pcBndP
     auto it = pointCloud.points().begin();
     int count = 0;
     while (it != pointCloud.points().end()) {
-        if (!geomtools::point_in_poly(*it, pcBndPoly)) {
+        if (!geomutils::point_in_poly(*it, pcBndPoly)) {
             pointCloud.remove(pointCloud.begin() + count);
         } else {
             ++it;
@@ -63,8 +64,8 @@ void Boundary::set_bounds_to_terrain(Point_set_3& pointCloud, const Polygon_2& b
     SearchTree searchTree(pointCloud.points().begin(),pointCloud.points().end());
 
     std::vector<double> bndHeights;
-    geomtools::interpolate_poly_from_pc(bndPoly, bndHeights, pointCloud);
-    _outerBndHeight = geomtools::avg(bndHeights); // Height for buffer (for now) - average of outer pts
+    geomutils::interpolate_poly_from_pc(bndPoly, bndHeights, pointCloud);
+    _outerBndHeight = geomutils::avg(bndHeights); // Height for buffer (for now) - average of outer pts
 
     if (config::domainBuffer > -g_largnum + g_smallnum) {
         for (auto& pt : startBufferPoly) {
@@ -157,69 +158,3 @@ void Boundary::get_cityjson_semantics(nlohmann::json& g) const {
 std::string Boundary::get_cityjson_primitive() const {
     return "";
 };
-
-//-- SIDES CLASS --//
-Sides::Sides(const int outputLayerID)
-    : Boundary(outputLayerID) {
-}
-
-Sides::~Sides() = default;
-
-void Sides::reconstruct() {
-    std::vector<Mesh::vertex_index> mesh_vertex_side;
-
-    //-- Add mesh vertices and store them in a vector
-    for (auto it = _sideOutputPts.begin(); it != _sideOutputPts.end(); ++it) {
-        mesh_vertex_side.emplace_back(_mesh.add_vertex(*it));
-        mesh_vertex_side.emplace_back(_mesh.add_vertex(Point_3(it->x(), it->y(), config::topHeight)));
-    }
-
-    //-- Add middle top point to mesh
-//    Mesh::vertex_index topMiddlePoint = _meshTop.add_vertex(Point_3(bndInfo.xcent, bndInfo.ycent, bndInfo.height));
-
-    //-- Add mesh faces for side
-    for (auto i = 0; i < mesh_vertex_side.size() - 3; i= i + 2) {
-        // -- i + 1 is i lifted up
-        int v1 = i;
-        int v2 = i + 2;
-
-        _mesh.add_face(mesh_vertex_side[v2], mesh_vertex_side[v1], mesh_vertex_side[v1 + 1]);
-        _mesh.add_face(mesh_vertex_side[v2 + 1], mesh_vertex_side[v2], mesh_vertex_side[v1 + 1]);
-    }
-}
-
-TopoClass Sides::get_class() const {
-    return SIDES;
-}
-
-std::string Sides::get_class_name() const {
-    return "Sides";
-}
-
-//-- TOP CLASS --//
-Top::Top(const int outputLayerID)
-    : Boundary(outputLayerID) {
-}
-
-Top::~Top() = default;
-
-void Top::reconstruct() {
-    std::vector<Mesh::vertex_index> mesh_vertex_top;
-
-    //-- Top is done by making a CDT of outerPts
-    CDT cdt_top;
-    for (auto& pt : _outerPts) {
-       cdt_top.insert(ePoint_3(pt.x(), pt.y(), config::topHeight));
-    }
-
-    //-- Add mesh faces for top
-    geomtools::cdt_to_mesh(cdt_top, _mesh);
-}
-
-TopoClass Top::get_class() const {
-    return TOP;
-}
-
-std::string Top::get_class_name() const {
-    return "Top";
-}

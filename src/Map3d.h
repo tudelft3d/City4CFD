@@ -1,14 +1,9 @@
 #ifndef CITYCFD_MAP3D_H
 #define CITYCFD_MAP3D_H
 
-#include "config.h"
-#include "io.h"
-#include "TopoFeature.h"
-#include "Terrain.h"
-#include "Building.h"
-#include "SurfaceLayer.h"
+#include "types.h"
+#include "CGALTypes.h"
 #include "BoundingRegion.h"
-#include "Boundary.h"
 
 class Map3d {
 public:

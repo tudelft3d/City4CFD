@@ -1,8 +1,7 @@
 #ifndef CITYCFD_LOD12_H
 #define CITYCFD_LOD12_H
 
-#include "definitions.h"
-#include "geomtools.h"
+#include "CGALTypes.h"
 
 class LoD12 {
 public:

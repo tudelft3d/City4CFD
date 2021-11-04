@@ -1,7 +1,7 @@
 #ifndef CITYCFD_CONFIGSCHEMA_INC
 #define CITYCFD_CONFIGSCHEMA_INC
 
-#include "definitions.h"
+#include "types.h"
 
 namespace jsonschema {
     //-- Define schema

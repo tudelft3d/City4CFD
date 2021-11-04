@@ -1,5 +1,9 @@
 #include "io.h"
 
+#include "config.h"
+#include "TopoFeature.h"
+#include "Boundary.h"
+
 //-- Input functions
 void IO::read_config(std::string& config_path) {
     std::ifstream json_file(config_path);
