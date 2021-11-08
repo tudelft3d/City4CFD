@@ -5,5 +5,4 @@ cmake-*
 Mesh*.json
 *.obj
 *.stl
-*.ply
 *.swp
