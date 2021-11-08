@@ -13,7 +13,7 @@ void IO::read_config(std::string& config_path) {
     //-- Filepaths in the json file are relative to the location of the json file
     fs::path working_directory = fs::path(config_path).parent_path();
     fs::current_path(working_directory);
-    std::cout << "--> INFO: Active working directory: " << working_directory << std::endl;
+    std::cout << "--> INFO: Active working directory: " << fs::canonical(working_directory) << std::endl;
 
     nlohmann::json j;
     try {
@@ -26,7 +26,7 @@ void IO::read_config(std::string& config_path) {
 
     std::cout << "--- Validating JSON configuration file ---" << std::endl;
     config::validate(j);
-    std::cout <<"--- JSON configuration file is valid!" << std::endl;
+    std::cout <<"--- JSON configuration file is valid! ---\n" << std::endl;
 
     config::set_config(j);
 }

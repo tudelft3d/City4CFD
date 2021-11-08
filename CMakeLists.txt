@@ -1,4 +1,4 @@
-project(cityCFD)
+project(CityCFD)
 
 cmake_minimum_required(VERSION 3.10)
 
@@ -28,13 +28,12 @@ include_directories( ${CMAKE_SOURCE_DIR}/thirdparty/valijson )
 
 # Creating entries for target: cityCFD
 FILE(GLOB SRC_FILES "src/*.cpp")
-add_executable(cityCFD ${SRC_FILES})
+add_executable(CityCFD ${SRC_FILES})
 set_target_properties(
-        cityCFD
+        CityCFD
         PROPERTIES CXX_STANDARD 11
 )
 
-#target_link_libraries( cityCFD ${CGAL_LIBRARIES} ${CGAL_3RD_PARTY_LIBRARIES} ${GDAL_LIBRARY} ${YAML_CPP_LIBRARIES} Boost::program_options Boost::filesystem Boost::locale Boost::chrono LASlib)
-target_link_libraries( cityCFD ${CGAL_LIBRARIES} ${CGAL_3RD_PARTY_LIBRARIES} Boost::filesystem)
+target_link_libraries( CityCFD ${CGAL_LIBRARIES} ${CGAL_3RD_PARTY_LIBRARIES} Boost::filesystem)
 
-install(TARGETS cityCFD DESTINATION bin)
+install(TARGETS CityCFD DESTINATION bin)

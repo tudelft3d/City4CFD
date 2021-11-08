@@ -1,0 +1,41 @@
+{
+  "point_clouds" :
+  {
+    "ground": "point_cloud/sampled_ground_200k.ply",
+    "buildings" : "point_cloud/sampled_buildings_500k.ply"
+  },
+  "polygons" : [
+    {
+      "type": "Building",
+      "path": "polygons/tudcampus.geojson"
+    },
+    {
+      "type": "SurfaceLayer",
+      "path": "polygons/Vegetation.geojson",
+       "layer_name" : "Vegetation"
+    },
+    {
+      "type":       "SurfaceLayer",
+      "path":       "polygons/Water.geojson",
+      "layer_name": "Water"
+    }
+  ],
+
+  "point_of_interest": [85420, 446221],
+  "influence_region": 50,
+  "domain_bnd":       "polygons/domainBnd.geojson",  
+  "top_height":       300,         
+
+  "flow_direction":  [1, 1],       
+
+  "buffer_region":    -20,         
+
+  "lod": "1.2",
+  "building_percentile": 90,
+
+  "edge_max_len": 2,
+
+  "output_file_name":  "Mesh",
+  "output_format":     "obj",
+  "output_separately": true
+}

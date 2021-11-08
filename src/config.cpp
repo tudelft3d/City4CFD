@@ -1,7 +1,6 @@
 #include "config.h"
 
 #include "valijson/adapters/nlohmann_json_adapter.hpp"
-#include "valijson/utils/nlohmann_json_utils.hpp"
 #include "valijson/schema.hpp"
 #include "valijson/schema_parser.hpp"
 #include "valijson/validator.hpp"
@@ -23,7 +22,7 @@ namespace config {
     DomainType            bpgDomainType;
     bool                  bpgBlockageRatioFlag = false;
     double                bpgBlockageRatio = 0.03;
-    Vector_2              flowDirection;
+    Vector_2              flowDirection(1, 0);
     std::vector<double>   bpgDomainSize;
     double                domainBuffer = -g_largnum;
 
@@ -55,6 +54,10 @@ void config::validate(nlohmann::json& j) {
     Schema configSchema;
     SchemaParser parser;
     NlohmannJsonAdapter configSchemaAdapter(jsonschema::schema);
+    // debug
+//    nlohmann::json schema = nlohmann::json::parse(std::ifstream("schema.json"), nullptr, true, true);
+//    NlohmannJsonAdapter configSchemaAdapter(schema);
+
     parser.populateSchema(configSchemaAdapter, configSchema);
 
     //- Validate with schema
@@ -115,7 +118,8 @@ void config::set_config(nlohmann::json& j) {
     config::set_region(domainBndConfig, domainBndCursor, j);
     // Define domain type if using BPG
     if (domainBndConfig.type() == typeid(bool)) {
-        flowDirection = Vector_2(j["flow_direction"][0], j["flow_direction"][1]);
+        if (j.contains("flow_direction"))
+            flowDirection = Vector_2(j["flow_direction"][0], j["flow_direction"][1]);
 
         std::string bpgDomainConfig = j["bnd_type_bpg"];
         if (boost::iequals(bpgDomainConfig, "round")) {
@@ -202,6 +206,10 @@ void config::set_region(boost::variant<bool, double, std::string, Polygon_2>& re
                         nlohmann::json& j) {
     if (j[regionName].is_string()) { //- Search for GeoJSON polygon
         regionType = (std::string)j[regionName];
+        if(!fs::exists(boost::get<std::string>(regionType))) {
+            throw std::invalid_argument(std::string("Cannot find polygon file '" +
+                                        boost::get<std::string>(regionType) + "' for " + regionName));
+        }
     } else if (j[regionName].size() > 2) { // Explicitly defined region polygon with points
         Polygon_2 tempPoly;
         for (auto& pt : j[regionName]) tempPoly.push_back(Point_2(pt[0], pt[1]));

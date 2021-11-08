@@ -4,9 +4,6 @@
 #include "types.h"
 
 namespace jsonschema {
-    //-- Define schema
-//    nlohmann::json schema = nlohmann::json::parse(std::ifstream("schema.json"), nullptr, true, true);
-
     //- JSON config schema defined here as a string literal
     const nlohmann::json schema = R"(
     {
@@ -88,7 +85,7 @@ namespace jsonschema {
           ]
         },
         "flow_direction": {
-          "description": "Required only when using bpg_blockage_ratio",
+          "description": "Required for rectangular and oval domain, and only for round when using bpg_blockage_ratio",
           "$ref": "#/$defs/point"
         },
         "bpg_domain_size": {
@@ -161,7 +158,15 @@ namespace jsonschema {
             "properties": {"domain_bnd": {"type": "null"}}
           },
           "then": {
-            "required": ["bnd_type_bpg"]
+            "required": ["bnd_type_bpg"],
+            "oneOf": [
+              {
+                "properties": {"bnd_type_bpg": {"const": "Round"}}
+              },
+              {
+                "required": ["flow_direction"]
+              }
+            ]
           },
           "else": {
             "required": ["top_height"]
@@ -202,8 +207,7 @@ namespace jsonschema {
                       "building_percentile", "edge_max_len", "output_file_name", "output_format",
                       "output_separately" ]
     }
-
-    )"_json;
+        )"_json;
 }
 
 #endif //CITYCFD_CONFIGSCHEMA_INC

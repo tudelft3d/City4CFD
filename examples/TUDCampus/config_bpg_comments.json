@@ -1,0 +1,51 @@
+//-- CITYCFD CONFIGURATION FILE --//
+{
+  "point_clouds" :
+  {
+    "ground": "point_cloud/sampled_ground_200k.ply",
+    "buildings" : "point_cloud/sampled_buildings_500k.ply"
+  },
+  "polygons" : [
+    {
+      "type": "Building",
+      "path": "polygons/tudcampus.geojson"
+    },
+    {
+      "type": "SurfaceLayer",
+      "path": "polygons/Vegetation.geojson",
+       "layer_name" : "Vegetation"
+    },
+    {
+      "type":       "SurfaceLayer",
+      "path":       "polygons/Water.geojson",
+      "layer_name": "Water"
+    }
+  ],
+
+  //-- Domain dimensions
+  "point_of_interest": [85420, 446221],
+  "influence_region": 300,            // Radius, Polygon points, GeoJSON polygon, or null for BPG
+  "domain_bnd":       null,           // Same as above
+  "top_height":       300,            // Doesn't matter if BPG are used for domain size
+  //- Arguments required only if using BPG
+  "bnd_type_bpg":    "Rectangle",     // Round, Rectangle, Oval. Matters only if using BPG
+  "bpg_blockage_ratio": false,        // Optional argument, blockage ratio BPG. Can be set as 'true' for default, or as a number defining max allowed blockage ratio
+  "flow_direction":  [1, 1],          // Required for Rectangular and Oval domain, and Round with the blockage ratio
+//  "bpg_domain_size": [5, 5, 15, 5], // Optional argument, overwrites bpg distances from tallest building
+                                      // [front, sides, back, top] Rectangle/Ellipse, [sides, top] for round
+//  "bpg_domain_size": [100, 5],
+
+  "buffer_region":    -20,            // Optional - buffer region size in percentage of distance to bndpoly centroid
+
+  //-- Reconstruction related
+  "lod": "1.2",
+  "building_percentile": 90,
+
+  //-- Polygons related
+  "edge_max_len": 2,
+
+  //-- Output
+  "output_file_name":  "Mesh",
+  "output_format":     "obj",
+  "output_separately": true
+}

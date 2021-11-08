@@ -24,7 +24,7 @@ void Terrain::set_cdt(const Point_set_3& pointCloud) {
 
         IO::print_progress_bar(100 * count++ / pcSize);
     }
-    IO::print_progress_bar(100); std::clog << std::endl;
+    IO::print_progress_bar(100); std::clog << "\n" << std::endl;
 
     //-- Smoothing
 #ifdef SMOOTH
@@ -59,7 +59,7 @@ void Terrain::constrain_features(const PolyFeatures& features) {
 
         IO::print_progress_bar(100 * count++ / numFeatures);
     }
-    IO::print_progress_bar(100); std::clog << std::endl;
+    IO::print_progress_bar(100); std::clog << "\n "<< std::endl;
     std::clog << "--> Num of constrained polygons: " << count << " <--" << std::endl;
     std::cout << "--- Done constraining ---" << std::endl;
 }

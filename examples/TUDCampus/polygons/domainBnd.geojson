@@ -1,0 +1,8 @@
+{
+"type": "FeatureCollection",
+"name": "domainBnd",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "id": null }, "geometry": { "type": "MultiPolygon", "coordinates": [ [ [ [ 4.377235053906315, 52.010944460102159 ], [ 4.361234604092545, 52.00602824685113 ], [ 4.372801239385725, 51.989567511070142 ], [ 4.389915921829506, 51.993555444075398 ], [ 4.377235053906315, 52.010944460102159 ] ] ] ] } }
+]
+}

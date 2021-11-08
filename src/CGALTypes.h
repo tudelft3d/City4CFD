@@ -1,13 +1,13 @@
 #ifndef CITYCFD_CGALTYPES_H
 #define CITYCFD_CGALTYPES_H
 
+/*! CGAL Basics !*/
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/Exact_predicates_exact_constructions_kernel.h>
 #include <CGAL/Projection_traits_xy_3.h>
 #include <CGAL/IO/WKT.h>
 #include <CGAL/centroid.h>
 
-//-- CGAL Basics
 typedef CGAL::Exact_predicates_inexact_constructions_kernel  EPICK;
 typedef CGAL::Exact_predicates_exact_constructions_kernel    EPECK;
 typedef CGAL::Projection_traits_xy_3<EPICK>                  iProjection_traits;
@@ -17,7 +17,7 @@ typedef CGAL::Projection_traits_xy_3<EPECK>                  Projection_traits;
 template<typename T, typename U>
 using Converter = CGAL::Cartesian_converter<T, U>;
 
-//-- CGAL Primitives
+/*! CGAL Primitives !*/
 #include <CGAL/Point_set_3.h>
 #include <CGAL/Point_set_3/IO.h>
 #include <CGAL/Polygon_2.h>
@@ -73,7 +73,7 @@ struct Polygon_with_holes_2 {
     CGAL::Bbox_2 bbox() const {return _rings.front().bbox();}
 };
 
-//-- CGAL Mesh
+/*! CGAL Mesh !*/
 #include <CGAL/Surface_mesh.h>
 #include <CGAL/Polygon_mesh_processing/remesh.h>
 
@@ -84,7 +84,7 @@ typedef Mesh::Property_map<face_descriptor, std::string> Face_property;
 
 namespace PMP = CGAL::Polygon_mesh_processing;
 
-//-- CGAL Triangulation
+/*! CGAL Triangulation !*/
 #include <CGAL/Triangulation_vertex_base_with_info_2.h>
 #include <CGAL/Triangulation_vertex_base_with_id_2.h>
 #include <CGAL/Triangulation_face_base_with_info_2.h>
@@ -117,7 +117,7 @@ typedef CDT::Vertex_handle                                                      
 //- Different versions of DT
 typedef CGAL::Delaunay_triangulation_2<CGAL::Projection_traits_xy_3<EPICK>>        DT;
 
-//-- CGAL Search
+/*! CGAL Search !*/
 #include <boost/graph/adjacency_list.hpp>
 #include <CGAL/boost/graph/split_graph_into_polylines.h>
 #include <CGAL/compute_average_spacing.h>
