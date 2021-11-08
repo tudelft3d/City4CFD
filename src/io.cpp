@@ -11,31 +11,30 @@ void IO::read_config(std::string& config_path) {
         throw std::invalid_argument(std::string("Configuration file " + config_path + " not found."));
 
     //-- Filepaths in the json file are relative to the location of the json file
-    fs::path working_directory = fs::path(config_path).parent_path();
-    fs::current_path(working_directory);
-    std::cout << "--> INFO: Active working directory: " << fs::canonical(working_directory) << std::endl;
+    config::workDir = fs::path(config_path).parent_path();
+    fs::current_path(config::workDir);
+    std::cout << "Work directory path: " << fs::canonical(config::workDir) << std::endl;
 
     nlohmann::json j;
     try {
         j = nlohmann::json::parse(json_file, nullptr, true, true);
     } catch (std::exception& e) {
-        std::cerr << "--- ERROR: Configuration file is not a valid JSON file. "
-                  << "Check if you're missing a comma or a brace. ---" << std::endl;
+        std::cerr << "ERROR: Configuration file is not a valid JSON file. "
+                  << "Check if you're missing a comma or a brace." << std::endl;
         throw;
     }
 
-    std::cout << "--- Validating JSON configuration file ---" << std::endl;
+    std::cout << "\nValidating JSON configuration file...";
     config::validate(j);
-    std::cout <<"--- JSON configuration file is valid! ---\n" << std::endl;
+    std::cout <<"Configuration file is valid! \n" << std::endl;
 
     config::set_config(j);
 }
 
 bool IO::read_point_cloud(std::string& file, Point_set_3& pc) {
+    //todo test CGAL 5.3 if it can read .las without external reader
     std::ifstream ifile(file, std::ios_base::binary);
     ifile >> pc;
-
-    std::cerr << "POINT CLOUD: "<< pc.size() << " point read" << std::endl;
     return true;
 }
 
@@ -79,7 +78,7 @@ void IO::print_progress_bar(int percent) {
             bar.replace(i, 1, " ");
         }
     }
-    std::clog << "\r" "[" << bar << "] ";
+    std::clog << "\r" "    [" << bar << "] ";
     std::clog.width(3);
     std::clog << percent << "%     " << std::flush;
 }
@@ -286,6 +285,38 @@ void IO::get_cityjson_geom(const Mesh& mesh, nlohmann::json& g, std::unordered_m
         } else {
 //            std::cerr << "Found duplicates!" << std::endl;
         }
+    }
+}
+
+void IO::output_log() {
+    if (!config::outputLog) return;
+
+    //-- Output log file
+    std::cout << "\nCreating log file '" << config::logName << "'" << std::endl;
+    std::ofstream of;
+    of.open(config::logName);
+    of << config::log.str() << config::logSummary.str();
+    of.close();
+
+    //-- Output failed reconstructions
+    if (!config::failedBuildings.empty()) {
+        std::cout << "Outputting failed building reconstructions to 'failedReconstructions.geojson'"
+                  << std::endl;
+        //- Parse again the buildings polygon
+        std::ifstream ifs(config::workDir.append(config::gisdata).string());
+        nlohmann::json j = nlohmann::json::parse(ifs);
+        //- Extract failed reconstructions
+        nlohmann::json b;
+        for (int i: config::failedBuildings) {
+            b["features"].push_back(j["features"][i]);
+        }
+        b["crs"] = j["crs"];
+        b["name"] = "failedBuildings";
+        b["type"] = j["type"];
+        //- Write to file
+        of.open("failedReconstructions.geojson");
+        of << b.dump();
+        of.close();
     }
 }
 

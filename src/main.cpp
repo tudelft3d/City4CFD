@@ -60,6 +60,7 @@ int main(int argc, char** argv) {
             return EXIT_SUCCESS;
         }
 
+        //-- Input arguments
         for (auto i = 1; i < argc; ++i) {
             if (boost::iequals(argv[i], "--help")) {
                 printHelp();
@@ -93,13 +94,21 @@ int main(int argc, char** argv) {
         //-- Output data
         map3d.output();
 
+        //-- Output log
+        IO::output_log();
+
         auto endTime = std::chrono::steady_clock::now();
         auto diffTime = endTime - startTime;
-        std::cout << "-> Program executed in " << std::chrono::duration<double>(diffTime).count() << " s" << std::endl;
+        std::cout << "\nProgram executed in " << std::chrono::duration<double>(diffTime).count() << " s" << std::endl;
+        std:: cout << "End" << std::endl;
 
         return EXIT_SUCCESS;
     } catch (std::exception& e) {
-        std::cerr << "\n--> Program failed! Reason: " << e.what() << std::endl;
+        //-- Output log
+        IO::output_log();
+
+        std::cerr << "\nProgram failed! Reason: " << e.what() << std::endl;
+        std::cout << "End" << std::endl;
         return EXIT_FAILURE;
     }
 }

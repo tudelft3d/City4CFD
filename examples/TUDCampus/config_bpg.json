@@ -1,7 +1,7 @@
 {
   "point_clouds" :
   {
-    "ground": "point_cloud/sampled_ground_200k.ply",
+    "ground": "point_cloud/sampled_ground_150k.ply",
     "buildings" : "point_cloud/sampled_buildings_500k.ply"
   },
   "polygons" : [
@@ -21,14 +21,14 @@
     }
   ],
 
-  "point_of_interest": [85420, 446221],
-  "influence_region": 300,            
-  "domain_bnd":       null,           
-  "top_height":       300,            
+  "point_of_interest": [85376, 446125],
+  "influence_region":   300,
+  "domain_bnd":         null,
+  "top_height":         300,
 
-  "bnd_type_bpg":    "Rectangle",     
+  "bnd_type_bpg":      "Rectangle",
   "bpg_blockage_ratio": false,        
-  "flow_direction":  [1, 1],          
+  "flow_direction":     [1, 1],
 
   "buffer_region":    -20,            
 
@@ -39,5 +39,8 @@
 
   "output_file_name":  "Mesh",
   "output_format":     "obj",
-  "output_separately": true
+  "output_separately":  true,
+
+  "output_log": true,
+  "log_file": "logFile.log"
 }

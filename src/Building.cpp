@@ -9,6 +9,9 @@ Building::Building()
 Building::Building(const nlohmann::json& poly)
     : PolyFeature(poly, 1), _height(-g_largnum) {}
 
+Building::Building(const nlohmann::json& poly, const int internalID)
+        : PolyFeature(poly, 1, internalID), _height(-g_largnum) {}
+
 Building::~Building() = default;
 
 void Building::check_feature_scope(const Polygon_2& influRegion) {
@@ -50,20 +53,19 @@ void Building::reconstruct(const SearchTree& searchTree) {
     }
 
     //-- Don't reconstruct if there are no points belonging to the polygon
-    // TODO: exception/warning handling - add this information to log
     if (building_pts.empty()) {
         this->deactivate();
-        throw std::domain_error("Found no points belonging to the building.");
+        throw std::domain_error("Found no points belonging to the building");
     }
 
     //-- LoD12 reconstruction
     LoD12 lod12(_poly, _base_heights, building_pts);
     lod12.lod12reconstruct(_mesh, _height);
 
-    double lowHeight = 3.0; // Hardcoded low height here
+    double lowHeight = 2.; // Hardcoded low height here
     if (lod12.get_height() < lowHeight) { // In case of a small height
         this->deactivate();
-        throw std::domain_error("Building height lower than minimum prescribed height, building ID: " + std::string(this->get_id()));
+        throw std::domain_error("Building height lower than minimum prescribed height");
     }
 }
 

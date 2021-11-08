@@ -1,8 +1,10 @@
 build/
 input/
+results/
 cmake-*
 .idea/
 Mesh*.json
 *.obj
 *.stl
 *.swp
+*.log

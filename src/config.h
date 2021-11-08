@@ -37,12 +37,20 @@ namespace config {
     extern double            edgeMaxLen;
 
     //-- Output setup
+    extern fs::path                  workDir;
     extern fs::path                  outputDir;
     extern OutputFormat              outputFormat;
     extern bool                      outputSeparately;
     extern std::vector<std::string>  outputSurfaces;
     extern int                       numSides;
     extern std::vector<int>          surfaceLayerIDs;
+
+    //-- Data log
+    extern bool               outputLog;
+    extern std::string        logName;
+    extern std::ostringstream log;
+    extern std::ostringstream logSummary;
+    extern std::vector<int>   failedBuildings;
 
     void validate(nlohmann::json& j);
     void set_config(nlohmann::json& j);

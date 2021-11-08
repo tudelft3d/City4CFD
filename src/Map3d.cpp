@@ -14,8 +14,6 @@ Map3d::~Map3d() = default;
 void Map3d::reconstruct() {
     //-- Prepare features
     this->set_features();
-    std::cout << "Features done" << std::endl;
-    std::cout << "Num of features: " << _lsFeatures.size() << std::endl;
 
     //-- Define influence region
     this->set_influ_region();
@@ -24,7 +22,6 @@ void Map3d::reconstruct() {
     if (!_bndBPG) {
         //-- Set outer boundary
         this->set_bnd();
-        std::cout << "Bnds done" << std::endl;
 
         //-- Avoid having too long polygons
         this->shorten_polygons(_lsFeatures);
@@ -54,12 +51,10 @@ void Map3d::reconstruct() {
     }
 
     //-- Constrain features, generate terrain mesh from CDT
-    std::cout << "--- Reconstructing terrain ---" << std::endl;
     this->reconstruct_terrain();
 
     //-- Generate side and top boundaries
     this->reconstruct_boundaries();
-    std::cout << "--- Reconstruction done ---" << std::endl;
 }
 
 void Map3d::set_features() {
@@ -68,8 +63,9 @@ void Map3d::set_features() {
 
     //-- Add polygons as features
     //- Buildings
+    int internalID = 0;
     for (auto& poly : _polygonsBuildings) {
-        auto building = std::make_shared<Building>(*poly);
+        auto building = std::make_shared<Building>(*poly, internalID++);
         _lsFeatures.push_back(building);
         _buildings.push_back(building);
     }
@@ -90,6 +86,8 @@ void Map3d::set_features() {
         }
     }
 
+    std::cout << "    Polygons read: " << _lsFeatures.size() << std::endl;
+
     //-- BPG flags for influ region and domain boundary
     if (config::influRegionConfig.type() == typeid(bool)) _influRegionBPG = true;
     if (config::domainBndConfig.type() == typeid(bool))   _bndBPG = true;
@@ -104,8 +102,8 @@ void Map3d::set_features() {
 void Map3d::set_influ_region() {
     //-- Set the influence region --//
     if (_influRegionBPG) { // Automatically calculate influ region with BPG
-        std::cout << "--- INFO: Influence region not defined in config. "
-                  << "Calculating with BPG. ---" << std::endl;
+        std::cout << "\nINFO: Influence region not defined in config. "
+                  << "Calculating with BPG." << std::endl;
         _influRegion.calc_influ_region_bpg(_dt, _pointCloudBuildings, _buildings);
     } else { // Define influ region either with radius or predefined polygon
         boost::apply_visitor(_influRegion, config::influRegionConfig);
@@ -120,8 +118,8 @@ void Map3d::set_influ_region() {
 
 void Map3d::set_bnd() {
     if (_bndBPG) { // Automatically calculate boundary with BPG
-        std::cout << "--- INFO: Domain boundaries not defined in config. "
-                  << "Calculating with BPG. ---" << std::endl;
+        std::cout << "\nINFO: Domain boundaries not defined in config. "
+                  << "Calculating with BPG." << std::endl;
 
         //-- Calculate the boundary polygon according to BPG and defined boundary type
         _domainBnd.calc_bnd_bpg(_influRegion.get_bounding_region(), _buildings);
@@ -162,29 +160,41 @@ void Map3d::bnd_sanity_check() {
 }
 
 void Map3d::reconstruct_terrain() {
+    std::cout << "\nReconstructing terrain" << std::endl;
     _terrain->set_cdt(_pointCloud);
     _terrain->constrain_features(_lsFeatures);
+
+    std::cout << "\n    Creating terrain mesh" << std::endl;
     _terrain->create_mesh(_lsFeatures);
 }
 
 void Map3d::reconstruct_buildings() {
+    std::cout << "\nReconstructing buildings" << std::endl;
     SearchTree searchTree;
     searchTree.insert(_pointCloudBuildings.points().begin(), _pointCloudBuildings.points().end());
 
-//    double failed = 0;
+    int failed = 0;
     for (auto& f : _buildings) {
         if (!f->is_active()) continue;
         try {
             f->reconstruct(searchTree);
         } catch (std::exception& e) {
-//            std::cout << "Failed so far: " << ++failed << "; " << e.what() << std::endl;
-            // Add to warning log when individual buildings don't reconstruct
+            ++failed;
+            //-- Add information to log file
+            config::log << "Failed to reconstruct building ID: " << f->get_id()
+                        << " Reason: " << e.what() << std::endl;
+            //-- Get JSON file ID for failed reconstructions output
+            config::failedBuildings.push_back(f->get_internal_id());
         }
     }
+    config::logSummary << "BUILDING RECONSTRUCTION SUMMARY: TOTAL FAILED RECONSTRUCTIONS: "
+                       << failed << std::endl;
+
     this->clear_inactives();
 }
 
 void Map3d::reconstruct_boundaries() {
+    std::cout << "\nReconstructing boundaries" << std::endl;
     if (_boundaries.size() > 2) { // Means more than one side
         for (auto i = 0; i < _boundaries.size() - 1; ++i) {
             //-- Each boundary object is one side of the boundary
@@ -201,16 +211,22 @@ void Map3d::reconstruct_boundaries() {
 
 void Map3d::read_data() { // This will change with time
     //-- Read ground points
+    std::cout << "Reading ground points" << std::endl;
     IO::read_point_cloud(config::points_xyz, _pointCloud);
     if (_pointCloud.size() == 0) {
         std::cout << "Didn't find any ground points! Calculating ground as flat surface" << std::endl;
+        //todo check this case out
     }
+    std::cout << "    Points read: " << _pointCloud.size() << std::endl;
 
     //-- Read building points
+    std::cout << "Reading building points" << std::endl;
     IO::read_point_cloud(config::buildings_xyz, _pointCloudBuildings);
     if (_pointCloudBuildings.empty()) throw std::invalid_argument("Didn't find any building points!");
+    std::cout << "    Points read: " << _pointCloudBuildings.size() << std::endl;
 
     //-- Read building polygons
+    std::cout << "Reading polygons" << std::endl;
     IO::read_geojson_polygons(config::gisdata, _polygonsBuildings);
     if (_polygonsBuildings.empty()) throw std::invalid_argument("Didn't find any building polygons!");
 
@@ -226,6 +242,9 @@ void Map3d::output() {
     assert(config::outputSurfaces.size() == TopoFeature::get_num_output_layers());
 #endif
     fs::current_path(config::outputDir);
+
+    std::cout << "\nOutputting surface meshes to folder: "      << std::endl;
+    std::cout << "    " << fs::canonical(fs::current_path()) << std::endl;
 
     //-- Group all features for output
     this->prep_feature_output();

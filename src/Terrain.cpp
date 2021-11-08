@@ -15,7 +15,7 @@ Terrain::~Terrain() = default;
 void Terrain::set_cdt(const Point_set_3& pointCloud) {
     Converter<EPICK, EPECK> to_exact;
 
-    std::cout << "--- Triangulating terrain ---" << std::endl;
+    std::cout << "    Triangulating terrain" << std::endl;
     int count = 0;
     int pcSize = pointCloud.size();
     IO::print_progress_bar(0);
@@ -37,7 +37,7 @@ void Terrain::constrain_features(const PolyFeatures& features) {
     int numFeatures = features.size();
     //-- Constrain polygon features;
 
-    std::cout << "--- Constraining polygons ---" << std::endl;
+    std::cout << "    Constraining polygons" << std::endl;
     IO::print_progress_bar(0);
     for (auto& f : features) {
         int polyCount = 0;
@@ -59,9 +59,8 @@ void Terrain::constrain_features(const PolyFeatures& features) {
 
         IO::print_progress_bar(100 * count++ / numFeatures);
     }
-    IO::print_progress_bar(100); std::clog << "\n "<< std::endl;
-    std::clog << "--> Num of constrained polygons: " << count << " <--" << std::endl;
-    std::cout << "--- Done constraining ---" << std::endl;
+    IO::print_progress_bar(100); std::clog << std::endl;
+    std::clog << "    Num of constrained polygons: " << count << std::endl;
 }
 
 void Terrain::create_mesh(const PolyFeatures& features) {

@@ -36,6 +36,7 @@ namespace config {
     double edgeMaxLen;
 
     //-- Output
+    fs::path                  workDir;
     fs::path                  outputDir = fs::current_path();
     std::string               outputFileName;
     OutputFormat              outputFormat;
@@ -43,6 +44,13 @@ namespace config {
     std::vector<std::string>  outputSurfaces = {"Terrain", "Buildings", "Top"};
     int                       numSides = 1;
     std::vector<int>          surfaceLayerIDs;
+
+    //-- Data log
+    bool               outputLog = false;
+    std::string        logName("log");
+    std::ostringstream log;
+    std::ostringstream logSummary;
+    std::vector<int>   failedBuildings;
 }
 
 void config::validate(nlohmann::json& j) {
@@ -57,7 +65,7 @@ void config::validate(nlohmann::json& j) {
     SchemaParser parser;
     NlohmannJsonAdapter configSchemaAdapter(jsonschema::schema);
     // debug
-//    nlohmann::json schema = nlohmann::json::parse(std::ifstream("schema.json"), nullptr, true, true);
+//    nlohmann::json schema = nlohmann::json::parse(std::ifstream("../../data/input/schema.json"), nullptr, true, true);
 //    NlohmannJsonAdapter configSchemaAdapter(schema);
 
     parser.populateSchema(configSchemaAdapter, configSchema);
@@ -200,6 +208,14 @@ void config::set_config(nlohmann::json& j) {
     } else throw std::invalid_argument(std::string("'" + outputFormatConfig + "'" + " is unsupported file format!"));
 
     outputSeparately = j["output_separately"];
+
+    //-- Data log
+    if (j.contains("output_log")) {
+        outputLog = true;
+        if (j.contains("log_file")) logName = j["log_file"];
+    }
+    log << "!========================================= CITYCFD LOG =========================================!" << std::endl;
+    logSummary <<"\n!=========================================== SUMMARY ===========================================!" << std::endl;
 }
 
 //-- influRegion and domainBndConfig flow control

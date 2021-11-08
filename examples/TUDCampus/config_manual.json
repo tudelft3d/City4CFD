@@ -1,7 +1,7 @@
 {
   "point_clouds" :
   {
-    "ground": "point_cloud/sampled_ground_200k.ply",
+    "ground": "point_cloud/sampled_ground_150k.ply",
     "buildings" : "point_cloud/sampled_buildings_500k.ply"
   },
   "polygons" : [
@@ -21,7 +21,7 @@
     }
   ],
 
-  "point_of_interest": [85420, 446221],
+  "point_of_interest": [85376, 446125],
   "influence_region": "polygons/influRegion.geojson",
   "domain_bnd":       "polygons/domainBnd.geojson",  
   "top_height":       150,         
@@ -37,5 +37,8 @@
 
   "output_file_name":  "Mesh",
   "output_format":     "obj",
-  "output_separately": true
+  "output_separately": true,
+
+  "output_log": true,
+  "log_file": "logFile.log"
 }

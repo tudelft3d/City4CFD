@@ -2,7 +2,7 @@
 {
   "point_clouds" :
   {
-    "ground": "point_cloud/sampled_ground_200k.ply",
+    "ground": "point_cloud/sampled_ground_150k.ply",
     "buildings" : "point_cloud/sampled_buildings_500k.ply"
   },
   "polygons" : [
@@ -23,7 +23,7 @@
   ],
 
   //-- Domain dimensions
-  "point_of_interest": [85420, 446221],
+  "point_of_interest": [85376, 446125],
   "influence_region": 300,            // Radius, Polygon points, GeoJSON polygon, or null for BPG
   "domain_bnd":       null,           // Same as above
   "top_height":       300,            // Doesn't matter if BPG are used for domain size
@@ -47,5 +47,9 @@
   //-- Output
   "output_file_name":  "Mesh",
   "output_format":     "obj",
-  "output_separately": true
+  "output_separately": true,
+
+  //-- Log
+  "output_log": true,       // Opional, also outputs GeoJSON file of building polygons that couldn't be reconstructed
+  "log_file": "logFile.log" // Optional, defaults to 'log'
 }

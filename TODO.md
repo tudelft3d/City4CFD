@@ -12,6 +12,6 @@
     - Polygon simplification
 
 ## Earliest tested lib verisons
-    - cmake 3.10
-    - CGAL 5.1.1
+    - cmake 3.1
+    - CGAL 5.0.2
     - Boost 1.65

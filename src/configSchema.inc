@@ -115,6 +115,14 @@ namespace jsonschema {
         },
         "output_separately": {
           "type": "boolean"
+        },
+        "output_log": {
+          "description": "Flag to output log file and GeoJSON of failed reconstructions, optional",
+          "type": "boolean"
+        },
+        "log_name": {
+          "description": "Optional, default to 'log'",
+          "type": "string"
         }
       },
       "$defs": {

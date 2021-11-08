@@ -1,6 +1,6 @@
 project(CityCFD)
 
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.1)
 
 #set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/Modules/" ${CMAKE_MODULE_PATH})
 #set( CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS true )
@@ -31,7 +31,7 @@ FILE(GLOB SRC_FILES "src/*.cpp")
 add_executable(CityCFD ${SRC_FILES})
 set_target_properties(
         CityCFD
-        PROPERTIES CXX_STANDARD 11
+        PROPERTIES CXX_STANDARD 14
 )
 
 target_link_libraries( CityCFD ${CGAL_LIBRARIES} ${CGAL_3RD_PARTY_LIBRARIES} Boost::filesystem)

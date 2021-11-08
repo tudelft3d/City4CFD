@@ -1,13 +1,13 @@
 #include "PolyFeature.h"
 
 PolyFeature::PolyFeature()
-        : TopoFeature(), _poly(), _base_heights() {}
+        : TopoFeature(), _poly(), _base_heights(), _polyInternalID() {}
 
 PolyFeature::PolyFeature(const int outputLayerID)
-        : TopoFeature(outputLayerID), _poly(), _base_heights() {}
+        : TopoFeature(outputLayerID), _poly(), _base_heights(), _polyInternalID() {}
 
 PolyFeature::PolyFeature(const nlohmann::json& poly)
-        : TopoFeature(), _base_heights() {
+        : TopoFeature(), _base_heights(), _polyInternalID() {
     for (auto& polyEdges : poly) {
         Polygon_2 tempPoly;
         for (auto& coords : polyEdges) {
@@ -27,6 +27,13 @@ PolyFeature::PolyFeature(const nlohmann::json& poly)
 PolyFeature::PolyFeature(const nlohmann::json& poly, const int outputLayerID)
         : PolyFeature(poly) {
     _outputLayerID = outputLayerID;
+    if (_outputLayerID  >= _numOfOutputLayers) _numOfOutputLayers = _outputLayerID + 1;
+}
+
+PolyFeature::PolyFeature(const nlohmann::json& poly, const int outputLayerID, const int internalID)
+        : PolyFeature(poly) {
+    _polyInternalID = internalID;
+    _outputLayerID    = outputLayerID;
     if (_outputLayerID  >= _numOfOutputLayers) _numOfOutputLayers = _outputLayerID + 1;
 }
 
@@ -107,4 +114,8 @@ const Polygon_with_holes_2& PolyFeature::get_poly() const {
 
 const std::vector<std::vector<double>>& PolyFeature::get_base_heights() const {
     return _base_heights;
+}
+
+const int PolyFeature::get_internal_id() const {
+    return _polyInternalID;
 }

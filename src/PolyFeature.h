@@ -9,6 +9,7 @@ public:
     PolyFeature(const int outputLayerID);
     PolyFeature(const nlohmann::json& poly);
     PolyFeature(const nlohmann::json& poly, const int outputLayerID);
+    PolyFeature(const nlohmann::json& poly, const int outputLayerID, const int internalID);
     virtual ~PolyFeature();
 
     void  calc_footprint_elevation_nni(const DT& dt);
@@ -24,8 +25,10 @@ public:
     Polygon_with_holes_2&                    get_poly();
     const Polygon_with_holes_2&              get_poly() const;
     const std::vector<std::vector<double>>&  get_base_heights() const;
+    const int                                get_internal_id() const;
 
 protected:
+    int                               _polyInternalID;
     Polygon_with_holes_2              _poly;
     std::vector<std::vector<double>>  _base_heights;
 };

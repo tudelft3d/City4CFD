@@ -7,6 +7,7 @@ class Building : public PolyFeature {
 public:
     Building();
     Building(const nlohmann::json& poly);
+    Building(const nlohmann::json& poly, const int internalID);
     ~Building();
 
     void   check_feature_scope(const Polygon_2& influRegion);

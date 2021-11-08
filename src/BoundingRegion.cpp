@@ -44,7 +44,7 @@ BoundingRegion::calc_influ_region_bpg(const DT& dt, const Point_set_3& pointClou
     }
     if (!foundBuilding)
         throw std::invalid_argument("Point of interest does not belong to any building! "
-                                    "Impossible to determine influence region.");
+                                    "Impossible to determine influence region");
 
     geomutils::make_round_poly(config::pointOfInterest, influRegionRadius, _boundingRegion);
 }
@@ -84,11 +84,12 @@ void BoundingRegion::calc_bnd_bpg(const Polygon_2& influRegionPoly,
     config::topHeight = hMax * config::bpgDomainSize.back();
 
     //-- Blockage ratio handling
-    std::cout << "Calculating blockage ratio" << std::endl;
+    std::cout << "\nCalculating blockage ratio for flow direction (" << config::flowDirection
+              << ")" << std::endl;
     double blockRatio = this->calc_blockage_ratio(buildings, angle, localPoly);
-    std::cout << "--- Blockage ratio is: " << blockRatio << " ---" << std::endl;
+    std::cout << "    Blockage ratio is: " << blockRatio << std::endl;
     if (config::bpgBlockageRatioFlag && blockRatio > config::bpgBlockageRatio) {
-        std::cout << "Blockage ratio is more than " << config::bpgBlockageRatio * 100
+        std::cout << "INFO: Blockage ratio is more than " << config::bpgBlockageRatio * 100
                   << "%. Expanding domain cross section to meet the guideline"
                   << std::endl;
         double expRatio = std::sqrt(blockRatio / 0.03);
@@ -122,8 +123,8 @@ Polygon_2 BoundingRegion::calc_bnd_poly(const std::vector<Point_2>& candidatePts
         bndRadius = (bndRadius + hMax * config::bpgDomainSize.front()) * enlargeRatio;
         geomutils::make_round_poly(localPOI, bndRadius, localPoly);
 
-        std::cout << "--- INFO: Defined boundary radius is: "
-                  << bndRadius << " ---" << std::endl;
+        std::cout << "Calculated boundary radius is: "
+                  << bndRadius << std::endl;
 
     } else {
         //-- Get bbox
