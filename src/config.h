@@ -20,8 +20,8 @@ namespace config {
     //-- Domain setup
     extern Point_2             pointOfInterest;
     extern double              topHeight;
-    extern boost::variant<bool, double, std::string, Polygon_2> influRegionConfig;
-    extern boost::variant<bool, double, std::string, Polygon_2> domainBndConfig;
+    extern boost::variant<bool, double, Polygon_2> influRegionConfig;
+    extern boost::variant<bool, double, Polygon_2> domainBndConfig;
     extern DomainType            bpgDomainType;
     extern bool                  bpgBlockageRatioFlag;
     extern double                bpgBlockageRatio;
@@ -46,7 +46,7 @@ namespace config {
 
     void validate(nlohmann::json& j);
     void set_config(nlohmann::json& j);
-    void set_region(boost::variant<bool, double, std::string, Polygon_2>& regionType,
+    void set_region(boost::variant<bool, double, Polygon_2>& regionType,
                     std::string& regionName,
                     nlohmann::json& j);
 };

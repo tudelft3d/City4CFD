@@ -4,8 +4,6 @@
     - Changes to the buffer zone
         - Angled and option with flag
     - Option to translate the terrain up top
-    - Arbitrary number of side domains for polygons
-    - Reorganize files
     - CityJSON add surface layers as semantics
 
 ## Longer-term

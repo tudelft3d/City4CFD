@@ -5,6 +5,8 @@
 #include "valijson/schema_parser.hpp"
 #include "valijson/validator.hpp"
 
+#include "io.h"
+
 #include "configSchema.inc"
 
 namespace config {
@@ -17,8 +19,8 @@ namespace config {
     //-- Domain dimensions
     Point_2     pointOfInterest;
     double      topHeight = 0;
-    boost::variant<bool, double, std::string, Polygon_2> influRegionConfig;
-    boost::variant<bool, double, std::string, Polygon_2> domainBndConfig;
+    boost::variant<bool, double, Polygon_2> influRegionConfig;
+    boost::variant<bool, double, Polygon_2> domainBndConfig;
     DomainType            bpgDomainType;
     bool                  bpgBlockageRatioFlag = false;
     double                bpgBlockageRatio = 0.03;
@@ -141,22 +143,22 @@ void config::set_config(nlohmann::json& j) {
     }
 
     // Set domain side
-        if (domainBndConfig.type() == typeid(double) || bpgDomainType != RECTANGLE) {
-            outputSurfaces.insert(outputSurfaces.begin() + 2, "Sides");
-        } else if (bpgDomainType == RECTANGLE) { // Expand output surfaces with front and back
-            numSides = 4;
-            outputSurfaces.insert(outputSurfaces.begin() + 2, "Front");
-            outputSurfaces.insert(outputSurfaces.begin() + 2, "Side_2");
-            outputSurfaces.insert(outputSurfaces.begin() + 2, "Back");
-            outputSurfaces.insert(outputSurfaces.begin() + 2, "Side_1");
-        } else if (domainBndConfig.type() == typeid(Polygon_2)) {
-            Polygon_2 poly = boost::get<Polygon_2>(domainBndConfig);
-            numSides = poly.size();
-            for (int i = 0; i < poly.size(); ++i) {
-                outputSurfaces.insert(outputSurfaces.begin() + 2,
-                                      std::string("Side_" + std::to_string(i % poly.size())));
-            }
-        } // If it is a JSON poly it has to be deferred until the polygon is parsed
+    if (domainBndConfig.type() == typeid(Polygon_2)) {
+        Polygon_2 poly = boost::get<Polygon_2>(domainBndConfig);
+        numSides = poly.size();
+        for (int i = 0; i < poly.size(); ++i) {
+            outputSurfaces.insert(outputSurfaces.begin() + 2,
+                                  std::string("Side_" + std::to_string(i % poly.size())));
+        }
+    } else if (domainBndConfig.type() == typeid(double) || bpgDomainType != RECTANGLE) {
+        outputSurfaces.insert(outputSurfaces.begin() + 2, "Sides");
+    } else if (bpgDomainType == RECTANGLE) { // Expand output surfaces with front and back
+        numSides = 4;
+        outputSurfaces.insert(outputSurfaces.begin() + 2, "Front");
+        outputSurfaces.insert(outputSurfaces.begin() + 2, "Side_2");
+        outputSurfaces.insert(outputSurfaces.begin() + 2, "Back");
+        outputSurfaces.insert(outputSurfaces.begin() + 2, "Side_1");
+    }
 
     // Blockage ratio
     if (j.contains("bpg_blockage_ratio")) {
@@ -201,15 +203,27 @@ void config::set_config(nlohmann::json& j) {
 }
 
 //-- influRegion and domainBndConfig flow control
-void config::set_region(boost::variant<bool, double, std::string, Polygon_2>& regionType,
+void config::set_region(boost::variant<bool, double, Polygon_2>& regionType,
                         std::string& regionName,
                         nlohmann::json& j) {
-    if (j[regionName].is_string()) { //- Search for GeoJSON polygon
-        regionType = (std::string)j[regionName];
-        if(!fs::exists(boost::get<std::string>(regionType))) {
+    if (j[regionName].is_string()) { // Search for GeoJSON polygon
+        std::string polyFilePath = (std::string)j[regionName];
+        if(!fs::exists(polyFilePath)) {
             throw std::invalid_argument(std::string("Cannot find polygon file '" +
-                                        boost::get<std::string>(regionType) + "' for " + regionName));
+                                        polyFilePath + "' for " + regionName));
         }
+        //-- Read poly
+        Polygon_2 tempPoly;
+        JsonPolygons influJsonPoly;
+        IO::read_geojson_polygons(polyFilePath, influJsonPoly);
+        for (auto& coords : influJsonPoly.front()->front()) { // I know it should be only 1 polygon with 1 ring
+            tempPoly.push_back(Point_2(coords[0], coords[1]));
+        }
+        //-- Prepare poly
+        CGAL::internal::pop_back_if_equal_to_front(tempPoly);
+        if (tempPoly.is_clockwise_oriented()) tempPoly.reverse_orientation();
+
+        regionType = tempPoly;
     } else if (j[regionName].size() > 2) { // Explicitly defined region polygon with points
         Polygon_2 tempPoly;
         for (auto& pt : j[regionName]) tempPoly.push_back(Point_2(pt[0], pt[1]));

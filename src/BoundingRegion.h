@@ -11,7 +11,6 @@ public:
 
     void operator()(double radius);
     void operator()(Polygon_2& poly);
-    void operator()(std::string& polyPath);
 
     void calc_influ_region_bpg(const DT& dt, const Point_set_3& pointCloudBuildings, Buildings& buildings);
     void calc_bnd_bpg(const Polygon_2& influRegionPoly, const Buildings& buildings);

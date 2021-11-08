@@ -1,7 +1,6 @@
 #include "BoundingRegion.h"
 
 #include "geomutils.h"
-#include "io.h"
 #include "Building.h"
 
 BoundingRegion::BoundingRegion() = default;
@@ -14,17 +13,6 @@ void BoundingRegion::operator()(double radius) {
 
 void BoundingRegion::operator()(Polygon_2& poly) {
     _boundingRegion = poly;
-}
-
-void BoundingRegion::operator()(std::string& polyPath) {
-    JsonPolygons influJsonPoly;
-    IO::read_geojson_polygons(polyPath, influJsonPoly);
-
-    for (auto& coords : influJsonPoly.front()->front()) { // I know it should be only 1 polygon with 1 ring
-        _boundingRegion.push_back(Point_2(coords[0], coords[1]));
-    }
-    CGAL::internal::pop_back_if_equal_to_front(_boundingRegion);
-    if (_boundingRegion.is_clockwise_oriented()) _boundingRegion.reverse_orientation();
 }
 
 void
