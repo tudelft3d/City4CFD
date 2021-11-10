@@ -95,6 +95,16 @@ namespace jsonschema {
           "type": "number",
           "exclusiveMinimum": -99
         },
+        "terrain_simplification": {
+          "description": "Optional: Random simplification of the terrain point cloud",
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMaximum": 100
+        },
+        "smooth_terrain": {
+          "description": "Optional: Terrain smoothing flag",
+          "type": "boolean"
+        },
         "lod": {
           "type": "string"
         },

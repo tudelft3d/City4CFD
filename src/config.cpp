@@ -16,9 +16,10 @@ namespace config {
     std::string              gisdata;         // Building Polygons
     std::vector<std::string> topoLayers = {}; // Other polygons
 
-    //-- Domain dimensions
+    //-- Domain setup
     Point_2     pointOfInterest;
     double      topHeight = 0;
+    //- Influ region and domain bnd
     boost::variant<bool, double, Polygon_2> influRegionConfig;
     boost::variant<bool, double, Polygon_2> domainBndConfig;
     DomainType            bpgDomainType;
@@ -28,7 +29,11 @@ namespace config {
     std::vector<double>   bpgDomainSize;
     double                domainBuffer = -g_largnum;
 
-    //-- Reconstruction related
+    //-- Reconstruction
+    //- Terrain
+    double    terrainSimplification = 0.;
+    bool      smoothTerrain = false;
+    //- Buildings
     std::string lod;
     double      buildingPercentile;
 
@@ -178,15 +183,22 @@ void config::set_config(nlohmann::json& j) {
         }
     }
 
-    // Buffer region
-    if (j.contains("buffer_region"))
-        domainBuffer = j["buffer_region"];
-
     // Top height
     if (j.contains("top_height"))
         topHeight = j["top_height"];
 
-    //-- Reconstruction related
+    // Buffer region
+    if (j.contains("buffer_region"))
+        domainBuffer = j["buffer_region"];
+
+    //-- Reconstruction
+    // Terrain
+    if (j.contains("terrain_simplification"))
+        terrainSimplification = j["terrain_simplification"];
+    if (j.contains("smooth_terrain"))
+        smoothTerrain = j["smooth_terrain"];
+
+    // Buildings
     lod = j["lod"].front();
     buildingPercentile = (double)j["building_percentile"].front() / 100.;
 

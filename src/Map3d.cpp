@@ -85,8 +85,15 @@ void Map3d::set_features() {
             _surfaceLayers.push_back(surfacePoly);
         }
     }
-
     std::cout << "    Polygons read: " << _lsFeatures.size() << std::endl;
+
+    //-- Simplify terrain points
+    if (config::terrainSimplification > 0 + g_smallnum) {
+        std::cout <<"\nSimplyfing terrain points" << std::endl;
+        _pointCloud.remove(CGAL::random_simplify_point_set(_pointCloud, 90), _pointCloud.end());
+        _pointCloud.collect_garbage();
+        std::cout << "    Terrain points after simplification: " << _pointCloud.size() << std::endl;
+    }
 
     //-- BPG flags for influ region and domain boundary
     if (config::influRegionConfig.type() == typeid(bool)) _influRegionBPG = true;
@@ -94,9 +101,9 @@ void Map3d::set_features() {
 
     //-- Make a DT with inexact constructions for fast interpolation
     _dt.insert(_pointCloud.points().begin(), _pointCloud.points().end());
-#ifdef SMOOTH
-    geomutils::smooth_dt<DT, EPICK>(_pointCloud, _dt);
-#endif
+    if (config::smoothTerrain) {
+        geomutils::smooth_dt<DT, EPICK>(_pointCloud, _dt);
+    }
 }
 
 void Map3d::set_influ_region() {
@@ -181,7 +188,7 @@ void Map3d::reconstruct_buildings() {
         } catch (std::exception& e) {
             ++failed;
             //-- Add information to log file
-            config::log << "Failed to reconstruct building ID: " << f->get_id()
+            config::log << "Failed to reconstruct building ID: " << f->get_internal_id()
                         << " Reason: " << e.what() << std::endl;
             //-- Get JSON file ID for failed reconstructions output
             config::failedBuildings.push_back(f->get_internal_id());
@@ -242,7 +249,6 @@ void Map3d::output() {
     assert(config::outputSurfaces.size() == TopoFeature::get_num_output_layers());
 #endif
     fs::current_path(config::outputDir);
-
     std::cout << "\nOutputting surface meshes to folder: "      << std::endl;
     std::cout << "    " << fs::canonical(fs::current_path()) << std::endl;
 

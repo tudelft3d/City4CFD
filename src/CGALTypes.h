@@ -18,8 +18,6 @@ template<typename T, typename U>
 using Converter = CGAL::Cartesian_converter<T, U>;
 
 /*! CGAL Primitives !*/
-#include <CGAL/Point_set_3.h>
-#include <CGAL/Point_set_3/IO.h>
 #include <CGAL/Polygon_2.h>
 #include <CGAL/Polygon_2_algorithms.h>
 #include <CGAL/convex_hull_2.h>
@@ -28,10 +26,8 @@ using Converter = CGAL::Cartesian_converter<T, U>;
 typedef EPICK::Point_2             Point_2;
 typedef EPICK::Point_3             Point_3;
 typedef EPECK::Point_3             ePoint_3;
-typedef CGAL::Point_set_3<Point_3> Point_set_3;
 
 //-- CGAL Normal
-namespace PMP = CGAL::Polygon_mesh_processing;
 typedef   EPICK::Vector_3 Vector_3;
 typedef   EPICK::Vector_2 Vector_2;
 
@@ -72,6 +68,13 @@ struct Polygon_with_holes_2 {
 
     CGAL::Bbox_2 bbox() const {return _rings.front().bbox();}
 };
+
+/*! CGAL Point Set !*/
+#include <CGAL/Point_set_3.h>
+#include <CGAL/Point_set_3/IO.h>
+#include <CGAL/random_simplify_point_set.h>
+
+typedef CGAL::Point_set_3<Point_3> Point_set_3;
 
 /*! CGAL Mesh !*/
 #include <CGAL/Surface_mesh.h>

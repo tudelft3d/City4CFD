@@ -14,12 +14,10 @@ namespace config {
     extern std::string buildings_xyz;
     extern std::vector<std::string> topoLayers;
 
-    //-- Output info
-    extern std::string outputFileName;
-
     //-- Domain setup
-    extern Point_2             pointOfInterest;
-    extern double              topHeight;
+    extern Point_2  pointOfInterest;
+    extern double   topHeight;
+    //- Influ region and domain bnd
     extern boost::variant<bool, double, Polygon_2> influRegionConfig;
     extern boost::variant<bool, double, Polygon_2> domainBndConfig;
     extern DomainType            bpgDomainType;
@@ -30,15 +28,20 @@ namespace config {
     extern double                domainBuffer;
 
     //-- Reconstruction
+    //- Terrain
+    extern double    terrainSimplification;
+    extern bool      smoothTerrain;
+    //- Buildings
     extern std::string  lod;
     extern double       buildingPercentile;
 
     //-- Polygons related
     extern double            edgeMaxLen;
 
-    //-- Output setup
+    //-- Output
     extern fs::path                  workDir;
     extern fs::path                  outputDir;
+    extern std::string               outputFileName;
     extern OutputFormat              outputFormat;
     extern bool                      outputSeparately;
     extern std::vector<std::string>  outputSurfaces;

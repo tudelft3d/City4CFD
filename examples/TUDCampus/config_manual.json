@@ -1,8 +1,8 @@
 {
   "point_clouds" :
   {
-    "ground": "point_cloud/sampled_ground_150k.ply",
-    "buildings" : "point_cloud/sampled_buildings_500k.ply"
+    "ground": "point_cloud/sampled_ground_1m.ply",
+    "buildings" : "point_cloud/sampled_buildings_1m.ply"
   },
   "polygons" : [
     {
@@ -22,13 +22,14 @@
   ],
 
   "point_of_interest": [85376, 446125],
-  "influence_region": "polygons/influRegion.geojson",
-  "domain_bnd":       "polygons/domainBnd.geojson",  
-  "top_height":       150,         
+  "influence_region":  "polygons/influRegion.geojson",
+  "domain_bnd":        "polygons/domainBnd.geojson",
+  "top_height":        150,
+  "flow_direction":    [1, 1],
+  "buffer_region":     5,
 
-  "flow_direction":  [1, 1],       
-
-  "buffer_region":    5,         
+  "terrain_simplification": 90,
+  "smooth_terrain":         true,
 
   "lod": "1.2",
   "building_percentile": 90,

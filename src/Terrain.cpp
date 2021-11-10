@@ -15,7 +15,7 @@ Terrain::~Terrain() = default;
 void Terrain::set_cdt(const Point_set_3& pointCloud) {
     Converter<EPICK, EPECK> to_exact;
 
-    std::cout << "    Triangulating terrain" << std::endl;
+    std::cout << "    Triangulating" << std::endl;
     int count = 0;
     int pcSize = pointCloud.size();
     IO::print_progress_bar(0);
@@ -24,12 +24,13 @@ void Terrain::set_cdt(const Point_set_3& pointCloud) {
 
         IO::print_progress_bar(100 * count++ / pcSize);
     }
-    IO::print_progress_bar(100); std::clog << "\n" << std::endl;
+    IO::print_progress_bar(100); std::clog << std::endl;
 
     //-- Smoothing
-#ifdef SMOOTH
-    geomutils::smooth_dt<CDT, EPECK>(pointCloud, _cdt);
-#endif
+    if (config::smoothTerrain) {
+        std::cout << "\n    Smoothing" << std::endl;
+        geomutils::smooth_dt<CDT, EPECK>(pointCloud, _cdt);
+    }
 }
 
 void Terrain::constrain_features(const PolyFeatures& features) {
@@ -37,7 +38,7 @@ void Terrain::constrain_features(const PolyFeatures& features) {
     int numFeatures = features.size();
     //-- Constrain polygon features;
 
-    std::cout << "    Constraining polygons" << std::endl;
+    std::cout << "\n    Constraining polygons" << std::endl;
     IO::print_progress_bar(0);
     for (auto& f : features) {
         int polyCount = 0;

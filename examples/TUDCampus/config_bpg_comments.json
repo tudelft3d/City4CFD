@@ -2,8 +2,8 @@
 {
   "point_clouds" :
   {
-    "ground": "point_cloud/sampled_ground_150k.ply",
-    "buildings" : "point_cloud/sampled_buildings_500k.ply"
+    "ground": "point_cloud/sampled_ground_1m.ply",
+    "buildings" : "point_cloud/sampled_buildings_1m.ply"
   },
   "polygons" : [
     {
@@ -38,6 +38,10 @@
   "buffer_region":    -20,            // Optional - buffer region size in percentage of distance to bndpoly centroid
 
   //-- Reconstruction related
+  //- Terrain
+  "terrain_simplification": 90,       // Optional - percentage of randomly removed terrain points
+  "smooth_terrain":         true,     // Optional - smoothing flag
+  //- Buildings
   "lod": "1.2",
   "building_percentile": 90,
 
