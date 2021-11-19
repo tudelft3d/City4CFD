@@ -6,13 +6,16 @@
 //-- Typedefs for smart pointers
 class Building;    class Boundary; class TopoFeature;
 class PolyFeature; class Terrain;  class SurfaceLayer;
+class ReconstructedBuilding; class ImportedBuilding;
 typedef std::shared_ptr<Terrain>                               Terrainptr;
 typedef std::vector<std::shared_ptr<Building>>                 Buildings;
+typedef std::vector<std::shared_ptr<ReconstructedBuilding>>    ReconstructedBuildings;
+typedef std::vector<std::shared_ptr<ImportedBuilding>>         ImportedBuildings;
 typedef std::vector<std::shared_ptr<Boundary>>                 Boundaries;
 typedef std::vector<std::shared_ptr<TopoFeature>>              OutputFeatures;
 typedef std::vector<std::shared_ptr<PolyFeature>>              PolyFeatures;
 typedef std::vector<std::shared_ptr<SurfaceLayer>>             SurfaceLayers;
-typedef std::vector<std::unique_ptr<nlohmann::json>>           JsonPolygons;
+typedef std::vector<std::unique_ptr<nlohmann::json>>           JsonVector;
 
 //-- TopoClasses
 typedef enum { // temp

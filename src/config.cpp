@@ -11,10 +11,11 @@
 
 namespace config {
     //-- Input info
-    std::string              points_xyz;      // Ground
-    std::string              buildings_xyz;   // Buildings
-    std::string              gisdata;         // Building Polygons
-    std::vector<std::string> topoLayers = {}; // Other polygons
+    std::string              points_xyz;         // Ground
+    std::string              buildings_xyz;      // Buildings
+    std::string              gisdata;            // Building Polygons
+    std::vector<std::string> topoLayers = {};    // Other polygons
+    std::string              importedBuildings; // Additional pre-reconstructed buildings
 
     //-- Domain setup
     Point_2     pointOfInterest;
@@ -121,6 +122,10 @@ void config::set_config(nlohmann::json& j) {
         }
     }
 
+    //-- Additional geometries
+    if (j.contains("explicit_geometries"))
+        importedBuildings = j["explicit_geometries"]["path"];
+
     //-- Domain setup
     pointOfInterest = Point_2(j["point_of_interest"][0], j["point_of_interest"][1]);
 
@@ -226,8 +231,8 @@ void config::set_config(nlohmann::json& j) {
         outputLog = true;
         if (j.contains("log_file")) logName = j["log_file"];
     }
-    log << "!========================================= CITYCFD LOG =========================================!" << std::endl;
-    logSummary <<"\n!=========================================== SUMMARY ===========================================!" << std::endl;
+    log << "// ========================================= CITYCFD LOG ========================================= //" << std::endl;
+    logSummary <<"\n// =========================================== SUMMARY =========================================== //" << std::endl;
 }
 
 //-- influRegion and domainBndConfig flow control
@@ -242,7 +247,7 @@ void config::set_region(boost::variant<bool, double, Polygon_2>& regionType,
         }
         //-- Read poly
         Polygon_2 tempPoly;
-        JsonPolygons influJsonPoly;
+        JsonVector influJsonPoly;
         IO::read_geojson_polygons(polyFilePath, influJsonPoly);
         for (auto& coords : influJsonPoly.front()->front()) { // I know it should be only 1 polygon with 1 ring
             tempPoly.push_back(Point_2(coords[0], coords[1]));

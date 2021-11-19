@@ -13,6 +13,7 @@ namespace config {
     extern std::string gisdata;
     extern std::string buildings_xyz;
     extern std::vector<std::string> topoLayers;
+    extern std::string importedBuildings;
 
     //-- Domain setup
     extern Point_2  pointOfInterest;
@@ -32,8 +33,8 @@ namespace config {
     extern double    terrainSimplification;
     extern bool      smoothTerrain;
     //- Buildings
-    extern std::string  lod;
-    extern double       buildingPercentile;
+    extern std::string    lod;
+    extern double         buildingPercentile;
 
     //-- Polygons related
     extern double            edgeMaxLen;

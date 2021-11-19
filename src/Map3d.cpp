@@ -3,7 +3,8 @@
 #include "geomutils.h"
 #include "io.h"
 #include "Terrain.h"
-#include "Building.h"
+#include "ReconstructedBuilding.h"
+#include "ImportedBuilding.h"
 #include "SurfaceLayer.h"
 #include "Sides.h"
 #include "Top.h"
@@ -65,12 +66,13 @@ void Map3d::set_features() {
     //- Buildings
     int internalID = 0;
     for (auto& poly : _polygonsBuildings) {
-        auto building = std::make_shared<Building>(*poly, internalID++);
-        _lsFeatures.push_back(building);
+        auto building = std::make_shared<ReconstructedBuilding>(*poly, internalID++);
+        _reconstructedBuildings.push_back(building);
         _buildings.push_back(building);
+        _lsFeatures.push_back(building);
     }
 
-    //-- Boundary
+    //- Boundary
     for (int i = 0; i < config::numSides; ++i)
         _boundaries.push_back(std::make_shared<Sides>(TopoFeature::get_num_output_layers()));
     _boundaries.push_back(std::make_shared<Top>(TopoFeature::get_num_output_layers()));
@@ -81,11 +83,37 @@ void Map3d::set_features() {
         config::surfaceLayerIDs.push_back(outputLayerID); // Need it for later
         for (auto& poly : surfaceLayer) {
             auto surfacePoly = std::make_shared<SurfaceLayer>(*poly, outputLayerID);
-            _lsFeatures.push_back(surfacePoly);
             _surfaceLayers.push_back(surfacePoly);
+            _lsFeatures.push_back(surfacePoly);
         }
     }
     std::cout << "    Polygons read: " << _lsFeatures.size() << std::endl;
+
+    if (!_importedBuildingsJson.empty()) std::cout << "Importing CityJSON geometries" << std::endl;
+    //-- Imported buildings
+    std::vector<std::shared_ptr<ImportedBuilding>> appendingBuildings;
+    internalID = 0;
+    for (auto& importedBuilding : _importedBuildingsJson) {
+        auto explicitGeom = std::make_shared<ImportedBuilding>(*importedBuilding, _importedBuildingsPts, internalID++);
+        if (!explicitGeom->is_appending()) {
+            _importedBuildings.push_back(explicitGeom);
+        } else {
+            appendingBuildings.push_back(explicitGeom);
+        }
+        _buildings.push_back(explicitGeom);
+        _lsFeatures.push_back(explicitGeom);
+    }
+    //- Check for building parts that do not have footprint and append to another instance of the same building
+    for (auto& b : appendingBuildings) {
+        for (auto& importedBuilding :  _importedBuildings) {
+            if (b->get_parent_building_id() == importedBuilding->get_parent_building_id()) {
+                importedBuilding->append_nonground_part(b);
+                break;
+            }
+        }
+    }
+    if (!_importedBuildings.empty()) this->clear_inactives();
+    std::cout << "    Geometries imported: " << _importedBuildings.size() << std::endl;
 
     //-- Simplify terrain points
     if (config::terrainSimplification > 0 + g_smallnum) {
@@ -107,10 +135,21 @@ void Map3d::set_features() {
 }
 
 void Map3d::set_influ_region() {
+    std::cout << "\nDefining influence region" << std::endl;
     //-- Set the influence region --//
     if (_influRegionBPG) { // Automatically calculate influ region with BPG
         std::cout << "\nINFO: Influence region not defined in config. "
                   << "Calculating with BPG." << std::endl;
+
+        //-- Check if imported and reconstructed buildings are overlapping
+        if (!_importedBuildings.empty()) this->solve_building_conflicts();
+
+        //-- Prepare search tree in case of reconstruction
+        std::shared_ptr<SearchTree> searchTree;
+        searchTree = std::make_shared<SearchTree>(_pointCloudBuildings.points().begin(), _pointCloudBuildings.points().end());
+        for (auto& building : _reconstructedBuildings) building->set_search_tree(searchTree);
+
+        //-- Calculate influ region
         _influRegion.calc_influ_region_bpg(_dt, _pointCloudBuildings, _buildings);
     } else { // Define influ region either with radius or predefined polygon
         boost::apply_visitor(_influRegion, config::influRegionConfig);
@@ -121,6 +160,11 @@ void Map3d::set_influ_region() {
         f->check_feature_scope(_influRegion.get_bounding_region());
     }
     this->clear_inactives();
+
+    //-- Check if imported and reconstructed buildings are overlapping
+    if (!_importedBuildings.empty()) this->solve_building_conflicts();
+
+    std::cout << "    Number of building geometries in the influence region: " << _buildings.size() << std::endl;
 }
 
 void Map3d::set_bnd() {
@@ -177,14 +221,18 @@ void Map3d::reconstruct_terrain() {
 
 void Map3d::reconstruct_buildings() {
     std::cout << "\nReconstructing buildings" << std::endl;
-    SearchTree searchTree;
-    searchTree.insert(_pointCloudBuildings.points().begin(), _pointCloudBuildings.points().end());
+//    SearchTree searchTree;
+//    searchTree.insert(_pointCloudBuildings.points().begin(), _pointCloudBuildings.points().end());
+
+    std::shared_ptr<SearchTree> searchTree;
+    searchTree = std::make_shared<SearchTree>(_pointCloudBuildings.points().begin(), _pointCloudBuildings.points().end());
+    for (auto& building : _reconstructedBuildings) building->set_search_tree(searchTree);
 
     int failed = 0;
     for (auto& f : _buildings) {
         if (!f->is_active()) continue;
         try {
-            f->reconstruct(searchTree);
+            f->reconstruct();
         } catch (std::exception& e) {
             ++failed;
             //-- Add information to log file
@@ -216,6 +264,32 @@ void Map3d::reconstruct_boundaries() {
     }
 }
 
+void Map3d::solve_building_conflicts() {
+    for (auto& importedBuilding : _importedBuildings) {
+        Polygon_with_holes_2& importedPoly = importedBuilding->get_poly();
+        Point_2 importedPolyPt = CGAL::centroid(importedPoly.outer_boundary().begin(),
+                                               importedPoly.outer_boundary().end());
+        //todo for now only basic check of the centroid, but all polygon points should be checked too
+        //todo yes definitely should be done asap
+        for (auto& reconstructedBuilding : _reconstructedBuildings) {
+            Polygon_with_holes_2& reconstructedPoly = reconstructedBuilding->get_poly();
+            if (geomutils::point_in_poly(importedPolyPt, reconstructedPoly)) {
+                bool configImportedAdvantage = true; //todo temp
+                if (configImportedAdvantage) {
+                    reconstructedBuilding->deactivate();
+                } else {
+                    importedBuilding->deactivate();
+                }
+            }
+        }
+    }
+    this->clear_inactives();
+
+    //todo temp
+    for (auto& b : _importedBuildings) b->deactivate();
+    this->clear_inactives();
+}
+
 void Map3d::read_data() { // This will change with time
     //-- Read ground points
     std::cout << "Reading ground points" << std::endl;
@@ -242,6 +316,12 @@ void Map3d::read_data() { // This will change with time
         _polygonsSurfaceLayers.emplace_back();
         IO::read_geojson_polygons(topoLayer, _polygonsSurfaceLayers.back());
     }
+
+    //-- Read imported buildings
+    if (!config::importedBuildings.empty()) {
+//        std::cout << "Importing CityJSON geometries" << std::endl;
+        IO::read_explicit_geometries(config::importedBuildings, _importedBuildingsJson, _importedBuildingsPts);
+    }
 }
 
 void Map3d::output() {
@@ -249,8 +329,9 @@ void Map3d::output() {
     assert(config::outputSurfaces.size() == TopoFeature::get_num_output_layers());
 #endif
     fs::current_path(config::outputDir);
-    std::cout << "\nOutputting surface meshes to folder: "      << std::endl;
-    std::cout << "    " << fs::canonical(fs::current_path()) << std::endl;
+    std::cout << "\nOutputting surface meshes "      << std::endl;
+    std::cout << "    Folder: " << fs::canonical(fs::current_path()) << std::endl;
+//    std::cout << "    Format: " << config::outputFormat << std::endl; //todo
 
     //-- Group all features for output
     this->prep_feature_output();
@@ -297,6 +378,30 @@ void Map3d::prep_cityjson_output() { // Temp impl, might change
 };
 
 void Map3d::clear_inactives() {
+    for (unsigned long i = 0; i < _reconstructedBuildings.size();) {
+        if (_reconstructedBuildings[i]->is_active()) ++i;
+        else {
+            _reconstructedBuildings.erase(_reconstructedBuildings.begin() + i);
+        }
+    }
+    std::vector<std::string> inactiveBuildingIdxs;
+    for (auto& importedBuilding : _importedBuildings) {
+        if (!importedBuilding->is_active()) {
+            auto it = std::find(inactiveBuildingIdxs.begin(), inactiveBuildingIdxs.end(),
+                                importedBuilding->get_parent_building_id());
+            if (it == inactiveBuildingIdxs.end())
+                inactiveBuildingIdxs.push_back(importedBuilding->get_parent_building_id());
+        }
+    }
+    for (unsigned long i = 0; i < _importedBuildings.size();) {
+        auto it = std::find(inactiveBuildingIdxs.begin(), inactiveBuildingIdxs.end(),
+                            _importedBuildings[i]->get_parent_building_id());
+        if (it == inactiveBuildingIdxs.end()) ++i;
+        else {
+            _importedBuildings[i]->deactivate();
+            _importedBuildings.erase(_importedBuildings.begin() + i);
+        }
+    }
     for (unsigned long i = 0; i < _buildings.size();) {
         if (_buildings[i]->is_active()) ++i;
         else {

@@ -4,20 +4,23 @@
 #include "LoD12.h"
 
 Building::Building()
-    : PolyFeature(), _height(-g_largnum) {}
+    : PolyFeature(1), _height(-g_largnum) {}
+
+Building::Building(const int internalID)
+    : PolyFeature(1, internalID), _height(-g_largnum) {}
 
 Building::Building(const nlohmann::json& poly)
     : PolyFeature(poly, 1), _height(-g_largnum) {}
 
 Building::Building(const nlohmann::json& poly, const int internalID)
-        : PolyFeature(poly, 1, internalID), _height(-g_largnum) {}
+    : PolyFeature(poly, 1, internalID), _height(-g_largnum) {}
 
 Building::~Building() = default;
 
-void Building::check_feature_scope(const Polygon_2& influRegion) {
+void Building::check_feature_scope(const Polygon_2& otherPoly) {
         for (auto& poly: _poly.rings()) {
             for (auto& vert : poly) {
-                if (geomutils::point_in_poly(vert, influRegion))
+                if (geomutils::point_in_poly(vert, otherPoly))
                     return;
             }
         }
@@ -34,39 +37,6 @@ double Building::max_dim() {
     dims.emplace_back(_height * _height);
 
     return sqrt(*(std::max_element(dims.begin(), dims.end())));
-}
-
-void Building::reconstruct(const SearchTree& searchTree) {
-    //-- Take tree subset bounded by the polygon
-    std::vector<Point_3> subsetPts;
-    Point_3 bbox1(_poly.bbox().xmin(), _poly.bbox().ymin(), -g_largnum);
-    Point_3 bbox2(_poly.bbox().xmax(), _poly.bbox().ymax(), g_largnum);
-    Fuzzy_iso_box pts_range(bbox1, bbox2);
-    searchTree.search(std::back_inserter(subsetPts), pts_range);
-
-    //-- Check if subset point lies inside the polygon
-    std::vector<double> building_pts;
-    for (auto& pt : subsetPts) {
-        if (geomutils::point_in_poly(pt, _poly)) {
-            building_pts.push_back(pt.z());
-        }
-    }
-
-    //-- Don't reconstruct if there are no points belonging to the polygon
-    if (building_pts.empty()) {
-        this->deactivate();
-        throw std::domain_error("Found no points belonging to the building");
-    }
-
-    //-- LoD12 reconstruction
-    LoD12 lod12(_poly, _base_heights, building_pts);
-    lod12.lod12reconstruct(_mesh, _height);
-
-    double lowHeight = 2.; // Hardcoded low height here
-    if (lod12.get_height() < lowHeight) { // In case of a small height
-        this->deactivate();
-        throw std::domain_error("Building height lower than minimum prescribed height");
-    }
 }
 
 double Building::get_height() const {

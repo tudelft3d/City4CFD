@@ -6,8 +6,8 @@ cmake_minimum_required(VERSION 3.1)
 #set( CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS true )
 
 set( CMAKE_CXX_FLAGS "-O3" )
-set( CMAKE_BUILD_TYPE "Release" )
-#set( CMAKE_BUILD_TYPE "Debug" )
+#set( CMAKE_BUILD_TYPE "Release" )
+set( CMAKE_BUILD_TYPE "Debug" )
 
 #if ( COMMAND cmake_policy )
 #    cmake_policy( SET CMP0003 NEW )
@@ -20,7 +20,7 @@ find_package( Boost REQUIRED COMPONENTS filesystem)
 #find_package( LASlib REQUIRED )
 
 # CGAL
-find_package( CGAL REQUIRED QUIET COMPONENTS )
+find_package( CGAL REQUIRED QUIET COMPONENTS Qt5 Core) #remove qt5
 
 # Third-party
 include_directories( ${CMAKE_SOURCE_DIR}/thirdparty )
@@ -35,5 +35,9 @@ set_target_properties(
 )
 
 target_link_libraries( CityCFD ${CGAL_LIBRARIES} ${CGAL_3RD_PARTY_LIBRARIES} Boost::filesystem)
+
+#remove qt5 later
+target_link_libraries(CityCFD CGAL::CGAL CGAL::CGAL_Qt5 CGAL::CGAL_Core)
+add_definitions(-DCGAL_USE_BASIC_VIEWER -DQT_NO_KEYWORDS)
 
 install(TARGETS CityCFD DESTINATION bin)

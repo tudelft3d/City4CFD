@@ -1,17 +1,21 @@
 # TODO
 ## Short-term
-    - Look into averaging water
-    - Changes to the buffer zone
-        - Angled and option with flag
-    - Option to translate the terrain up top
-    - CityJSON add surface layers as semantics
+    - No terrain situation
+    - CityJSON overhaul
 
 ## Longer-term
+    - Reconstruct LoD1.2 from polygon height attribute
+    - Import triangulated buildings
+
+    - Manual extension of domain from building in m
+    - Angled buffer zone
     - Point cloud processing
         -   PC/polygon crs check
     - Polygon simplification
+    - Look into averaging water
+    - Option to translate the terrain up top
 
-## Earliest tested lib verisons
+## Tested lib verisons
     - cmake 3.1
     - CGAL 5.0.2
     - Boost 1.65

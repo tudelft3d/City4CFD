@@ -23,6 +23,24 @@ namespace geomutils {
                                                int nPts, double angInt, double ang, T& poly);
     template <typename T, typename U> void smooth_dt (const Point_set_3& pointCloud, T& dt);
     template <typename T> Polygon_2 calc_bbox_poly(const T& inputPts);
+
+    struct Array_traits {
+        typedef std::array<EPICK::FT, 3>  Custom_point;
+
+        struct Equal_3 {
+            bool operator()(const Custom_point& p, const Custom_point& q) const {
+                return (p == q);
+            }
+        };
+        struct Less_xyz_3 {
+            bool operator()(const Custom_point& p, const Custom_point& q) const {
+                return std::lexicographical_compare(p.begin(), p.end(), q.begin(), q.end());
+            }
+        };
+        Equal_3 equal_3_object() const { return Equal_3(); }
+        Less_xyz_3 less_xyz_3_object() const { return Less_xyz_3(); }
+    };
 }
+
 
 #endif //CITYCFD_GEOMUTILS_H

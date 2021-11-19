@@ -19,12 +19,11 @@ using Converter = CGAL::Cartesian_converter<T, U>;
 
 /*! CGAL Primitives !*/
 #include <CGAL/Polygon_2.h>
-#include <CGAL/Polygon_2_algorithms.h>
-#include <CGAL/convex_hull_2.h>
 
 //-- CGAL Point
 typedef EPICK::Point_2             Point_2;
 typedef EPICK::Point_3             Point_3;
+typedef EPECK::Point_2             ePoint_2;
 typedef EPECK::Point_3             ePoint_3;
 
 //-- CGAL Normal
@@ -59,6 +58,15 @@ struct Polygon_with_holes_2 {
         return _rings.front();
     }
 
+    CGAL::Polygon_with_holes_2<EPICK> get_cgal_type() {
+       CGAL::Polygon_with_holes_2<EPICK> cgalPoly;
+       cgalPoly.outer_boundary() = _rings.front();
+       for (int i = 1; i < _rings.size(); ++i) {
+           cgalPoly.add_hole(_rings[i]);
+       }
+       return cgalPoly;
+    }
+
     std::vector<Polygon_2>::const_iterator holes_begin() const {
         if (has_holes()) return _rings.begin() + 1; else return _rings.end();
     }
@@ -69,6 +77,13 @@ struct Polygon_with_holes_2 {
     CGAL::Bbox_2 bbox() const {return _rings.front().bbox();}
 };
 
+/*! CGAL Polygon Processing !*/ //todo move under 'Polygon'
+#include <CGAL/Polygon_2_algorithms.h>
+#include <CGAL/convex_hull_2.h>
+#include <CGAL/Polygon_mesh_processing/repair_polygon_soup.h>
+#include <CGAL/Polygon_mesh_processing/orient_polygon_soup.h>
+#include <CGAL/Polygon_mesh_processing/polygon_soup_to_polygon_mesh.h>
+
 /*! CGAL Point Set !*/
 #include <CGAL/Point_set_3.h>
 #include <CGAL/Point_set_3/IO.h>
@@ -78,7 +93,7 @@ typedef CGAL::Point_set_3<Point_3> Point_set_3;
 
 /*! CGAL Mesh !*/
 #include <CGAL/Surface_mesh.h>
-#include <CGAL/Polygon_mesh_processing/remesh.h>
+#include <CGAL/Polygon_mesh_processing/triangulate_faces.h>
 
 typedef CGAL::Surface_mesh<Point_3>                      Mesh;
 typedef Mesh::Vertex_index                               vertex_descriptor;
@@ -141,5 +156,10 @@ typedef CGAL::Orthogonal_k_neighbor_search<Traits>    Neighbor_search;
 typedef Neighbor_search::Tree                         SearchTree;
 typedef CGAL::Fuzzy_iso_box<Traits>                   Fuzzy_iso_box;
 typedef CGAL::Fuzzy_sphere<Traits>                    Fuzzy_sphere;
+
+// DEVELOP
+/*! CGAL draw polygons !*/ //todo temp
+#include <CGAL/draw_polygon_with_holes_2.h> // Test to draw
+#include <CGAL/Qt/Basic_viewer_qt.h> // Test to draw
 
 #endif //CITYCFD_CGALTYPES_H

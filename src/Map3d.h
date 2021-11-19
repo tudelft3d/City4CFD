@@ -16,21 +16,28 @@ public:
     void output();
 
 private:
-    Point_set_3                _pointCloud;
-    Point_set_3                _pointCloudBuildings;
-    JsonPolygons               _polygonsBuildings;
-    std::vector<JsonPolygons>  _polygonsSurfaceLayers;
-    Terrainptr                 _terrain;
-    Buildings                  _buildings;
-    SurfaceLayers              _surfaceLayers;
-    Boundaries                 _boundaries;
-    PolyFeatures               _lsFeatures;
-    OutputFeatures             _outputFeatures;
-    BoundingRegion             _influRegion;
-    BoundingRegion             _domainBnd;
-    DT                         _dt;
-    bool                       _influRegionBPG = false;
-    bool                       _bndBPG = false;
+    Point_set_3                 _pointCloud;
+    Point_set_3                 _pointCloudBuildings;
+    JsonVector                  _polygonsBuildings;
+    JsonVector                  _importedBuildingsJson;
+    std::vector<JsonVector>     _polygonsSurfaceLayers;
+    std::vector<Point_3>        _importedBuildingsPts;
+
+    Terrainptr                  _terrain;
+    Buildings                   _buildings;
+    ReconstructedBuildings      _reconstructedBuildings;
+    ImportedBuildings           _importedBuildings;
+    SurfaceLayers               _surfaceLayers;
+    Boundaries                  _boundaries;
+    PolyFeatures                _lsFeatures;
+    OutputFeatures              _outputFeatures;
+
+    BoundingRegion              _influRegion;
+    BoundingRegion              _domainBnd;
+    DT                          _dt;
+
+    bool                        _influRegionBPG = false;
+    bool                        _bndBPG = false;
 
     void set_features();
     void set_influ_region();
@@ -39,6 +46,7 @@ private:
     void reconstruct_terrain();
     void reconstruct_buildings();
     void reconstruct_boundaries();
+    void solve_building_conflicts();
 
     void prep_feature_output();
     void prep_cityjson_output();

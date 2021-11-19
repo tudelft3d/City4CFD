@@ -8,21 +8,11 @@ PolyFeature::PolyFeature(const int outputLayerID)
 
 PolyFeature::PolyFeature(const nlohmann::json& poly)
         : TopoFeature(), _base_heights(), _polyInternalID() {
-    for (auto& polyEdges : poly) {
-        Polygon_2 tempPoly;
-        for (auto& coords : polyEdges) {
-            tempPoly.push_back(Point_2(coords[0], coords[1]));
-        }
-        CGAL::internal::pop_back_if_equal_to_front(tempPoly);
-
-        if (_poly._rings.empty()) {
-            if (tempPoly.is_clockwise_oriented()) tempPoly.reverse_orientation();
-        } else {
-            if (tempPoly.is_counterclockwise_oriented()) tempPoly.reverse_orientation();
-        }
-        _poly._rings.push_back(tempPoly);
-    }
+    this->parse_json_poly(poly);
 }
+
+PolyFeature::PolyFeature(const int outputLayerID, const int internalID)
+    : TopoFeature(outputLayerID), _polyInternalID(internalID) {}
 
 PolyFeature::PolyFeature(const nlohmann::json& poly, const int outputLayerID)
         : PolyFeature(poly) {
@@ -118,4 +108,21 @@ const std::vector<std::vector<double>>& PolyFeature::get_base_heights() const {
 
 const int PolyFeature::get_internal_id() const {
     return _polyInternalID;
+}
+
+void PolyFeature::parse_json_poly(const nlohmann::json& poly) {
+    for (auto& polyEdges : poly) {
+        Polygon_2 tempPoly;
+        for (auto& coords : polyEdges) {
+            tempPoly.push_back(Point_2(coords[0], coords[1]));
+        }
+        CGAL::internal::pop_back_if_equal_to_front(tempPoly);
+
+        if (_poly._rings.empty()) {
+            if (tempPoly.is_clockwise_oriented()) tempPoly.reverse_orientation();
+        } else {
+            if (tempPoly.is_counterclockwise_oriented()) tempPoly.reverse_orientation();
+        }
+        _poly._rings.push_back(tempPoly);
+    }
 }

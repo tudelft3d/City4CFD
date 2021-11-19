@@ -22,15 +22,12 @@ BoundingRegion::calc_influ_region_bpg(const DT& dt, const Point_set_3& pointClou
 #endif
     double influRegionRadius;
     //-- Find building where the point of interest lies in and define radius of interest with BPG
-    SearchTree searchTreeBuildings;
-    searchTreeBuildings.insert(pointCloudBuildings.points().begin(), pointCloudBuildings.points().end()); //TODO Maybe save as member variable
-
     bool foundBuilding = false;
     for (auto& f : buildings) {
         if (geomutils::point_in_poly(config::pointOfInterest, f->get_poly())) {
             f->calc_footprint_elevation_nni(dt);
             try {
-                f->reconstruct(searchTreeBuildings);
+                f->reconstruct();
             } catch (std::exception& e) {
                 std::cerr << std::endl << "Error: " << e.what() << std::endl;
                 throw std::runtime_error("Impossible to automatically determine influence region");

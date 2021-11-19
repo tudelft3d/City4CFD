@@ -38,7 +38,7 @@ bool IO::read_point_cloud(std::string& file, Point_set_3& pc) {
     return true;
 }
 
-void IO::read_geojson_polygons(std::string& file, JsonPolygons& jsonPolygons) { // For now specifically GeoJSON, but can potentially change
+void IO::read_geojson_polygons(std::string& file, JsonVector& jsonPolygons) { // For now specifically GeoJSON, but can potentially change
     try {
         std::ifstream ifs(file);
         nlohmann::json j = nlohmann::json::parse(ifs);
@@ -58,6 +58,31 @@ void IO::read_geojson_polygons(std::string& file, JsonPolygons& jsonPolygons) { 
 //                          << feature["geometry"]["type"] << ". Object ID: " << count << std::endl;
             }
             ++count;
+        }
+    } catch (std::exception& e) {
+        throw std::runtime_error(std::string("Error parsing JSON file '" + file + "'. Details: " + e.what()));
+    }
+}
+
+void IO::read_explicit_geometries(std::string& file, JsonVector& importedBuildings,
+                                  std::vector<Point_3>& importedBuildingPts) {
+    try {
+        std::ifstream ifs(file);
+        nlohmann::json j = nlohmann::json::parse(ifs);
+
+        //-- Add vertices
+        for (auto& pt : j["vertices"]) {
+            double ptx = ((double)pt[0] * (double)j["transform"]["scale"][0]) + (double)j["transform"]["translate"][0];
+            double pty = ((double)pt[1] * (double)j["transform"]["scale"][1]) + (double)j["transform"]["translate"][1];
+            double ptz = ((double)pt[2] * (double)j["transform"]["scale"][2]) + (double)j["transform"]["translate"][2];
+            importedBuildingPts.emplace_back(ptx, pty, ptz);
+        }
+
+        //-- Separate individual buildings
+        for (auto& cityObj : j["CityObjects"]) {
+            if (cityObj["type"] == "BuildingPart") {
+                importedBuildings.push_back(std::make_unique<nlohmann::json>(cityObj));
+            }
         }
     } catch (std::exception& e) {
         throw std::runtime_error(std::string("Error parsing JSON file '" + file + "'. Details: " + e.what()));
@@ -222,15 +247,11 @@ void IO::get_obj_pts(const Mesh& mesh,
                 faceIdx.push_back(it->second);
             }
         }
-        //- Check for problematic faces
-        std::sort(faceIdx.begin(), faceIdx.end());
-        auto it = std::unique(faceIdx.begin(), faceIdx.end());
-        bool wasUnique = (it == faceIdx.end());
 
-        if (wasUnique) {
+        if (IO::not_small(faceIdx)) {
             bs += "\nf";
             bs += bsTemp;
-        } else {
+//        } else {
 //            std::cerr << "Found duplicates!" << std::endl;
         }
     }
@@ -241,10 +262,19 @@ void IO::get_stl_pts(Mesh& mesh, std::string& fs) {
     auto fnormals = mesh.add_property_map<face_descriptor, Vector_3>("f:normals", CGAL::NULL_VECTOR).first;
     PMP::compute_normals(mesh, vnormals, fnormals);
     for (auto& face : mesh.faces()) {
+        std::vector<std::string> outputPts;
+        for (auto index: CGAL::vertices_around_face(mesh.halfedge(face), mesh)) {
+            outputPts.push_back(gen_key_bucket(mesh.point(index)));
+        }
+        //-- Check for round off of small triangles
+        if (outputPts[0] == outputPts[1]
+         || outputPts[0] == outputPts[2]
+         || outputPts[1] == outputPts[2]) continue;
+
         fs += "\nfacet normal " + gen_key_bucket(fnormals[face]);
         fs += "\n    outer loop";
-        for (auto index : CGAL::vertices_around_face(mesh.halfedge(face), mesh)) {
-            fs += "\n        vertex " + gen_key_bucket(mesh.point(index));
+        for (auto pt: outputPts) {
+            fs += "\n        vertex " + pt;
         }
         fs += "\n    endloop";
         fs += "\nendfacet";
@@ -275,23 +305,28 @@ void IO::get_cityjson_geom(const Mesh& mesh, nlohmann::json& g, std::unordered_m
                 tempPoly.push_back(it->second);
             }
         }
-        //- Check for problematic faces
-        std::sort(faceIdx.begin(), faceIdx.end());
-        auto it = std::unique(faceIdx.begin(), faceIdx.end());
-        bool wasUnique = (it == faceIdx.end());
 
-        if (wasUnique) {
+        if (IO::not_small(faceIdx)) {
             g["boundaries"].push_back({tempPoly});
-        } else {
+//        } else {
 //            std::cerr << "Found duplicates!" << std::endl;
         }
     }
+}
+
+//-- Check for round off of small triangles
+bool IO::not_small(std::vector<int> idxLst) {
+    std::sort(idxLst.begin(), idxLst.end());
+    auto it = std::unique(idxLst.begin(), idxLst.end());
+
+    return (it == idxLst.end());
 }
 
 void IO::output_log() {
     if (!config::outputLog) return;
 
     //-- Output log file
+    config::logSummary <<"\n// ----------------------------------------------------------------------------------------------- //" << std::endl;
     std::cout << "\nCreating log file '" << config::logName << "'" << std::endl;
     std::ofstream of;
     of.open(config::logName);

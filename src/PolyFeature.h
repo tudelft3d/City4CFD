@@ -8,6 +8,7 @@ public:
     PolyFeature();
     PolyFeature(const int outputLayerID);
     PolyFeature(const nlohmann::json& poly);
+    PolyFeature(const int outputLayerID, const int internalID);
     PolyFeature(const nlohmann::json& poly, const int outputLayerID);
     PolyFeature(const nlohmann::json& poly, const int outputLayerID, const int internalID);
     virtual ~PolyFeature();
@@ -31,6 +32,8 @@ protected:
     int                               _polyInternalID;
     Polygon_with_holes_2              _poly;
     std::vector<std::vector<double>>  _base_heights;
+
+    void parse_json_poly(const nlohmann::json& poly);
 };
 
 #endif //CITYCFD_POLYFEATURE_H

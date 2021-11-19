@@ -6,13 +6,15 @@
 class Building : public PolyFeature {
 public:
     Building();
+    Building(const int internalID);
     Building(const nlohmann::json& poly);
     Building(const nlohmann::json& poly, const int internalID);
     ~Building();
 
+    virtual void reconstruct() = 0;
+
     void   check_feature_scope(const Polygon_2& influRegion);
     double max_dim();
-    void   reconstruct(const SearchTree& searchTree);
 
     double get_height() const;
 
@@ -22,7 +24,7 @@ public:
     virtual TopoClass   get_class() const override;
     virtual std::string get_class_name() const override;
 
-private:
+protected:
     double _height;
 };
 
