@@ -266,14 +266,8 @@ void Map3d::reconstruct_boundaries() {
 
 void Map3d::solve_building_conflicts() {
     for (auto& importedBuilding : _importedBuildings) {
-        Polygon_with_holes_2& importedPoly = importedBuilding->get_poly();
-        Point_2 importedPolyPt = CGAL::centroid(importedPoly.outer_boundary().begin(),
-                                               importedPoly.outer_boundary().end());
-        //todo for now only basic check of the centroid, but all polygon points should be checked too
-        //todo yes definitely should be done asap
         for (auto& reconstructedBuilding : _reconstructedBuildings) {
-            Polygon_with_holes_2& reconstructedPoly = reconstructedBuilding->get_poly();
-            if (geomutils::point_in_poly(importedPolyPt, reconstructedPoly)) {
+            if (geomutils::polygons_in_contact(importedBuilding->get_poly(), reconstructedBuilding->get_poly())) {
                 bool configImportedAdvantage = true; //todo temp
                 if (configImportedAdvantage) {
                     reconstructedBuilding->deactivate();
@@ -285,9 +279,9 @@ void Map3d::solve_building_conflicts() {
     }
     this->clear_inactives();
 
-    //todo temp
-    for (auto& b : _importedBuildings) b->deactivate();
-    this->clear_inactives();
+   // to check if conflicts are solved
+//    for (auto& b : _importedBuildings) b->deactivate();
+//    this->clear_inactives();
 }
 
 void Map3d::read_data() { // This will change with time

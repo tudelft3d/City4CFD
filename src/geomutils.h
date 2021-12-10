@@ -14,6 +14,7 @@ namespace geomutils {
     void    shorten_long_poly_edges(Polygon_2& poly, double maxLen = config::edgeMaxLen);
     Point_2 rotate_pt(Point_2& pt, const double angle, Point_2 centerPt = Point_2(0, 0));
     void    interpolate_poly_from_pc(const Polygon_2& poly, std::vector<double>& heights, const Point_set_3& pointCloud);
+    bool    polygons_in_contact(const Polygon_with_holes_2& firstPoly, const Polygon_with_holes_2& secondPoly);
 
     //-- Templated functions
     template <typename T> bool point_in_poly(const T& pt2, const Polygon_with_holes_2& polygon);
@@ -26,7 +27,6 @@ namespace geomutils {
 
     struct Array_traits {
         typedef std::array<EPICK::FT, 3>  Custom_point;
-
         struct Equal_3 {
             bool operator()(const Custom_point& p, const Custom_point& q) const {
                 return (p == q);
@@ -41,6 +41,5 @@ namespace geomutils {
         Less_xyz_3 less_xyz_3_object() const { return Less_xyz_3(); }
     };
 }
-
 
 #endif //CITYCFD_GEOMUTILS_H

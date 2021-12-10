@@ -1,11 +1,13 @@
 # TODO
+## Currently working
+    - Import CityJSON buildings
+
 ## Short-term
     - No terrain situation
     - CityJSON overhaul
 
 ## Longer-term
     - Reconstruct LoD1.2 from polygon height attribute
-    - Import triangulated buildings
 
     - Manual extension of domain from building in m
     - Angled buffer zone

@@ -169,6 +169,16 @@ void geomutils::interpolate_poly_from_pc(const Polygon_2& poly, std::vector<doub
     }
 }
 
+bool geomutils::polygons_in_contact(const Polygon_with_holes_2& firstPoly, const Polygon_with_holes_2& secondPoly) {
+    if (CGAL::do_overlap(firstPoly.bbox(), secondPoly.bbox())) {
+        if (CGAL::do_intersect(firstPoly.get_exact(),
+                               secondPoly.get_exact())) {
+            return true;
+        }
+    }
+    return false;
+}
+
 //-- Templated functions
 //-- Check if the point is inside a polygon on a 2D projection
 template <typename T>

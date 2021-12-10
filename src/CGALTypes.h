@@ -34,7 +34,7 @@ typedef   EPICK::Vector_2 Vector_2;
 typedef CGAL::Polygon_2<EPICK>             Polygon_2;
 typedef CGAL::Polygon_2<Projection_traits> Polygon_3;
 
-//-- CGAL's Polygon_with_holes container expanded with iterator over all rings
+//-- CGAL's Polygon_with_holes container expanded
 struct Polygon_with_holes_2 {
     std::vector<Polygon_2> _rings;
 
@@ -58,13 +58,28 @@ struct Polygon_with_holes_2 {
         return _rings.front();
     }
 
-    CGAL::Polygon_with_holes_2<EPICK> get_cgal_type() {
+    const CGAL::Polygon_with_holes_2<EPICK> get_cgal_type() const {
        CGAL::Polygon_with_holes_2<EPICK> cgalPoly;
        cgalPoly.outer_boundary() = _rings.front();
        for (int i = 1; i < _rings.size(); ++i) {
            cgalPoly.add_hole(_rings[i]);
        }
        return cgalPoly;
+    }
+    const CGAL::Polygon_with_holes_2<EPECK> get_exact() const {
+        Converter<EPICK, EPECK> to_exact;
+        CGAL::Polygon_with_holes_2<EPECK> cgalPoly;
+        for (auto& pt : _rings.front()) {
+            cgalPoly.outer_boundary().push_back(to_exact(pt));
+        }
+        for (auto hole = holes_begin(); hole != holes_end(); ++hole) {
+            CGAL::Polygon_2<EPECK> holePoly;
+            for (auto& pt : *hole) {
+                holePoly.push_back(to_exact(pt));
+            }
+            cgalPoly.add_hole(holePoly);
+        }
+        return cgalPoly;
     }
 
     std::vector<Polygon_2>::const_iterator holes_begin() const {
@@ -79,6 +94,7 @@ struct Polygon_with_holes_2 {
 
 /*! CGAL Polygon Processing !*/ //todo move under 'Polygon'
 #include <CGAL/Polygon_2_algorithms.h>
+#include <CGAL/Boolean_set_operations_2.h>
 #include <CGAL/convex_hull_2.h>
 #include <CGAL/Polygon_mesh_processing/repair_polygon_soup.h>
 #include <CGAL/Polygon_mesh_processing/orient_polygon_soup.h>

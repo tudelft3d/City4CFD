@@ -55,19 +55,25 @@ ImportedBuilding::ImportedBuilding(nlohmann::json buildingJson, const std::vecto
     for (int & footprintIdx : _footprintIdxList) {
         nlohmann::json coordBnd = geometry["boundaries"].front()[footprintIdx];
         for (auto& ring: coordBnd) {
-            _poly.rings().emplace_back();
+            Polygon_2 tempPoly;
+            //todo need to map those points to _dPts so I can edit them later
             for (auto& ptIdx: ring) {
-                _poly.rings().back().push_back(Point_2(_dPts[ptIdx].x(), _dPts[ptIdx].y()));
+                tempPoly.push_back(Point_2(_dPts[ptIdx].x(), _dPts[ptIdx].y()));
                 footprintElevations.push_back(_dPts[ptIdx].z());
             }
-            if (!_poly.outer_boundary().is_simple()) {
+            if (!tempPoly.is_simple()) {
                 config::log << "Failed to import building: " << this->get_parent_building_id()
                             << " Reason: " << "Footprint polygon is not valid." << std::endl;
                 this->deactivate();
                 return;
             }
-            CGAL::internal::pop_back_if_equal_to_front(_poly.rings().back());
-            if (_poly.rings().back().is_clockwise_oriented()) _poly.rings().back().reverse_orientation();
+            CGAL::internal::pop_back_if_equal_to_front(tempPoly);
+            if (_poly._rings.empty()) {
+                if (tempPoly.is_clockwise_oriented()) tempPoly.reverse_orientation();
+            } else {
+                if (tempPoly.is_counterclockwise_oriented()) tempPoly.reverse_orientation();
+            }
+            _poly._rings.push_back(tempPoly);
         }
     }
 
@@ -119,15 +125,14 @@ ImportedBuilding::ImportedBuilding(nlohmann::json buildingJson, const std::vecto
 ImportedBuilding::~ImportedBuilding() = default;
 
 void ImportedBuilding::reconstruct() {
-    nlohmann::json& geometry = _buildingJson["geometry"][_lodIdx];
-    int surfIdx = -1;
-
     typedef EPICK::FT                 FT;
     typedef std::array<FT, 3>         Custom_point;
     typedef std::vector<std::size_t>  CGAL_Polygon;
+    nlohmann::json& geometry = _buildingJson["geometry"][_lodIdx];
 
-    std::vector<std::array<FT, 3> > points;
+    std::vector<std::array<FT, 3>> points;
     std::vector<CGAL_Polygon> polygons;
+    int surfIdx = -1;
     for (auto& faces : geometry["boundaries"].front()) {
         //-- Remove bottom surface
         ++surfIdx;
