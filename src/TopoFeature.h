@@ -25,8 +25,8 @@ public:
     std::string get_id() const;
     const int   get_output_layer_id() const;
     bool        is_active() const;
+    bool        is_imported() const;
     void        deactivate();
-    void test();
 
 protected:
     static int _numOfOutputLayers;
@@ -34,6 +34,7 @@ protected:
     Mesh           _mesh;
     std::string    _id;
     bool           _f_active;
+    bool           _f_imported;
     int            _outputLayerID; // 0- Terrain
                                    // 1- Buildings
                                    // 2- Sides

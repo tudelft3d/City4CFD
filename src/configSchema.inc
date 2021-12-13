@@ -22,7 +22,7 @@ namespace jsonschema {
               "type": "string"
             }
           },
-          "required": ["ground", "buildings"],
+          "required": ["ground"],
           "additionalProperties": false
         },
         "polygons": {
@@ -45,16 +45,26 @@ namespace jsonschema {
               "properties": {"layer_name": {"type": "string"}}
             },
             "required": ["type", "path"]
-          },
-          "contains": {
-            "description": "Need at least building polygons",
-            "type": "object",
-            "properties": {
-              "type": {
-                "const": "Building"
-              }
-            }
           }
+        },
+        "import_geometries": {
+          "description": "Handling imoprted CityJSON geometries",
+          "type": "object",
+          "properties": {
+            "path": {
+              "type": "string"
+            },
+            "advantage": {
+              "type": "boolean"
+            },
+            "true_height": {
+              "type": "boolean"
+            },
+            "lod": {
+              "type": "string"
+            }
+          },
+          "required": ["path", "advantage", "true_height", "lod"]
         },
         "point_of_interest": {
           "$ref": "#/$defs/point"
@@ -89,9 +99,10 @@ namespace jsonschema {
           "$ref": "#/$defs/point"
         },
         "bpg_domain_size": {
-          "description": "Optional BPG multiplication factor, defined down below as a conditional statement"
+          "description": "Optional: BPG multiplication factor, defined down below as a conditional statement"
         },
         "buffer_region": {
+          "description": "Optional: Buffer region that can extrude both inwards and outwards",
           "type": "number",
           "exclusiveMinimum": -99
         },
@@ -172,6 +183,28 @@ namespace jsonschema {
       },
       "allOf": [
         {
+          "anyOf": [
+            {
+              "required": ["point_clouds"],
+              "properties": {
+                "point_clouds": {"required": ["buildings"]},
+                "polygons": {
+                  "contains": {
+                    "description": "Need at least building polygons",
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "const": "Building"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "required": ["import_geometries"]
+            }
+          ],
           "if": {
             "properties": {"domain_bnd": {"type": "null"}}
           },

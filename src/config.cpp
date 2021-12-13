@@ -37,6 +37,10 @@ namespace config {
     //- Buildings
     std::string lod;
     double      buildingPercentile;
+    //- Imported buildings
+    bool        importAdvantage;
+    bool        importTrueHeight;
+    std::string importLoD;
 
     //-- Polygons related
     double edgeMaxLen;
@@ -104,8 +108,10 @@ void config::validate(nlohmann::json& j) {
 void config::set_config(nlohmann::json& j) {
     //-- Schema validation
     //-- Path to point cloud(s)
-    points_xyz    = j["point_clouds"]["ground"];
-    buildings_xyz = j["point_clouds"]["buildings"];
+    if (j.contains("point_clouds")) {
+        if (j["point_clouds"].contains("ground")) points_xyz = j["point_clouds"]["ground"];
+        if (j["point_clouds"].contains("buildings")) buildings_xyz = j["point_clouds"]["buildings"];
+    }
 
     //-- Path to polygons
     int i = 0;
@@ -123,8 +129,8 @@ void config::set_config(nlohmann::json& j) {
     }
 
     //-- Additional geometries
-    if (j.contains("explicit_geometries"))
-        importedBuildings = j["explicit_geometries"]["path"];
+    if (j.contains("import_geometries"))
+        importedBuildings = j["import_geometries"]["path"];
 
     //-- Domain setup
     pointOfInterest = Point_2(j["point_of_interest"][0], j["point_of_interest"][1]);
@@ -206,6 +212,13 @@ void config::set_config(nlohmann::json& j) {
     // Buildings
     lod = j["lod"].front();
     buildingPercentile = (double)j["building_percentile"].front() / 100.;
+
+    // Imported buildings
+    if (j.contains("import_geometries")) {
+        importAdvantage  = j["import_geometries"]["advantage"];
+        importTrueHeight = j["import_geometries"]["true_height"];
+        importLoD = j["import_geometries"]["lod"];
+    }
 
     //-- Polygons related
     edgeMaxLen = j["edge_max_len"];

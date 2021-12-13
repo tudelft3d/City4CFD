@@ -1,0 +1,51 @@
+{
+  "point_clouds" :
+  {
+    "ground": "point_cloud/sampled_ground_1m.ply",
+    "buildings" : "point_cloud/sampled_buildings_1m.ply"
+  },
+  "polygons" : [
+    {
+      "type": "Building",
+      "path": "polygons/tudcampus.geojson"
+    },
+    {
+      "type": "SurfaceLayer",
+      "path": "polygons/Vegetation.geojson",
+       "layer_name" : "Vegetation"
+    },
+    {
+      "type":       "SurfaceLayer",
+      "path":       "polygons/Water.geojson",
+      "layer_name": "Water"
+    }
+  ],
+  "import_geometries": {
+    "path": "import_buildings/TUD_geometries.json",
+    "advantage": true,
+    "true_height": true,
+    "lod": "1.3"
+  },
+
+  "point_of_interest": [85376, 446125],
+  "influence_region":  "polygons/influRegion.geojson",
+  "domain_bnd":        "polygons/domainBnd.geojson",
+  "top_height":        150,
+  "flow_direction":    [1, 1],
+  "buffer_region":     5,
+
+  "terrain_simplification": 90,
+  "smooth_terrain":         true,
+
+  "lod": "1.2",
+  "building_percentile": 90,
+
+  "edge_max_len": 2,
+
+  "output_file_name":  "Mesh",
+  "output_format":     "obj",
+  "output_separately": true,
+
+  "output_log": true,
+  "log_file": "logFile.log"
+}

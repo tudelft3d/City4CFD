@@ -173,9 +173,4 @@ typedef Neighbor_search::Tree                         SearchTree;
 typedef CGAL::Fuzzy_iso_box<Traits>                   Fuzzy_iso_box;
 typedef CGAL::Fuzzy_sphere<Traits>                    Fuzzy_sphere;
 
-// DEVELOP
-/*! CGAL draw polygons !*/ //todo temp
-#include <CGAL/draw_polygon_with_holes_2.h> // Test to draw
-#include <CGAL/Qt/Basic_viewer_qt.h> // Test to draw
-
 #endif //CITYCFD_CGALTYPES_H

@@ -35,6 +35,10 @@ namespace config {
     //- Buildings
     extern std::string    lod;
     extern double         buildingPercentile;
+    //- Imported Buildings
+    extern bool        importAdvantage;
+    extern bool        importTrueHeight;
+    extern std::string importLoD;
 
     //-- Polygons related
     extern double            edgeMaxLen;

@@ -6,7 +6,7 @@
 class ImportedBuilding : public Building {
 public:
     ImportedBuilding() = delete;
-    ImportedBuilding(nlohmann::json  poly, const std::vector<Point_3>& importedBuildingPts, const int internalID);
+    ImportedBuilding(nlohmann::json  poly, std::vector<Point_3>& importedBuildingPts, const int internalID);
     ~ImportedBuilding();
 
     virtual void  reconstruct() override;
@@ -22,14 +22,14 @@ public:
 //    virtual void  get_cityjson_semantics(nlohmann::json& g) const override;
 
 protected:
-    nlohmann::json               _buildingJson;
-    double                       _avgFootprintHeight;
-    std::vector<int>             _footprintIdxList;
-    std::string                  _parentBuildingID;
-    bool                         _appendToBuilding;
-    int                          _lodIdx;
-    const std::vector<Point_3>&  _dPts;
+    nlohmann::json                   _buildingJson;
+    double                           _avgFootprintHeight;
+    std::vector<int>                 _footprintIdxList;
+    std::vector<std::vector<int>>    _footprintPtsIdxList;
+    std::string                      _parentBuildingID;
+    bool                             _appendToBuilding;
+    int                              _lodIdx;
+    std::vector<Point_3>&            _dPts;
 };
-
 
 #endif //CITYCFD_EXPLICITBUILDING_H

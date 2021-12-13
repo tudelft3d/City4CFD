@@ -2,25 +2,26 @@
 
 #include "geomutils.h"
 
-ImportedBuilding::ImportedBuilding(nlohmann::json buildingJson, const std::vector<Point_3>& importedBuildingPts, const int internalID)
+ImportedBuilding::ImportedBuilding(nlohmann::json buildingJson, std::vector<Point_3>& importedBuildingPts, const int internalID)
         : Building(internalID), _buildingJson(std::move(buildingJson)), _dPts(importedBuildingPts),
           _avgFootprintHeight(-9999), _footprintIdxList(), _parentBuildingID(),
-          _appendToBuilding(false), _lodIdx(-1) {
+          _appendToBuilding(false), _lodIdx(-1), _footprintPtsIdxList() {
 
+    _f_imported = true;
     //-- Get parent building ID
     _parentBuildingID = _buildingJson["parents"].front();
 
     //-- Define LoD
+    std::map<std::string, int> lodGeomLst;
     int idx = 0;
     for (auto& lodGeom : _buildingJson["geometry"]) {
-//                    if (building["lod"] == "2.2") {
-        if (lodGeom["lod"] == 2.2) { //todo make it an option and bump to CityJSON 1.1
-            _lodIdx = idx;
-            break; // todo make it search for highest LoD as option
-        }
-        ++idx;
+        lodGeomLst[lodGeom["lod"]] = idx++;
     }
-    if (_lodIdx == -1) throw std::runtime_error(std::string("Didn't find LoD in question for buildingPart ID:" + std::to_string(internalID)));
+    auto it = lodGeomLst.find(config::importLoD);
+    if (it == lodGeomLst.end()) {
+        --it;
+    }
+    _lodIdx = it->second;
 
     nlohmann::json& geometry = _buildingJson["geometry"][_lodIdx];
 
@@ -34,6 +35,7 @@ ImportedBuilding::ImportedBuilding(nlohmann::json buildingJson, const std::vecto
             break;
         }
     }
+    //todo exception handling
     if (groundSemanticIdx == -9999) throw std::runtime_error("Cannot find 'GroundSurface' in imported buildings CityJSON file!");
 
     //- Find boundary ID of the footprint
@@ -52,13 +54,14 @@ ImportedBuilding::ImportedBuilding(nlohmann::json buildingJson, const std::vecto
 
     //- Construct footprint polygon from ground surface
     std::vector<double> footprintElevations;
-    for (int & footprintIdx : _footprintIdxList) {
+    for (auto& footprintIdx : _footprintIdxList) {
         nlohmann::json coordBnd = geometry["boundaries"].front()[footprintIdx];
         for (auto& ring: coordBnd) {
+            std::vector<int> ringFootprintIdxs;
             Polygon_2 tempPoly;
-            //todo need to map those points to _dPts so I can edit them later
             for (auto& ptIdx: ring) {
                 tempPoly.push_back(Point_2(_dPts[ptIdx].x(), _dPts[ptIdx].y()));
+                ringFootprintIdxs.push_back(ptIdx);
                 footprintElevations.push_back(_dPts[ptIdx].z());
             }
             if (!tempPoly.is_simple()) {
@@ -67,57 +70,66 @@ ImportedBuilding::ImportedBuilding(nlohmann::json buildingJson, const std::vecto
                 this->deactivate();
                 return;
             }
-            CGAL::internal::pop_back_if_equal_to_front(tempPoly);
+//            CGAL::internal::pop_back_if_equal_to_front(tempPoly);
             if (_poly._rings.empty()) {
-                if (tempPoly.is_clockwise_oriented()) tempPoly.reverse_orientation();
+                if (tempPoly.is_clockwise_oriented()) {
+                    tempPoly.reverse_orientation();
+                    std::reverse(ringFootprintIdxs.begin() + 1, ringFootprintIdxs.end()); // Following the reverse of CGAL
+//                    std::reverse(footprintElevations.begin(), footprintElevations.end());
+                }
             } else {
-                if (tempPoly.is_counterclockwise_oriented()) tempPoly.reverse_orientation();
+                if (tempPoly.is_counterclockwise_oriented()) {
+                    tempPoly.reverse_orientation();
+                    std::reverse(ringFootprintIdxs.begin() + 1, ringFootprintIdxs.end());
+//                    std::reverse(footprintElevations.begin(), footprintElevations.end());
+                }
             }
+            _footprintPtsIdxList.push_back(ringFootprintIdxs);
             _poly._rings.push_back(tempPoly);
         }
     }
 
-    /*
-    //todo need to rewrite this in case of triangulation! Or not if I can avoid handling triangulated footprints
-//    CGAL::Polygon_2<EPECK> inftyPoly;
-//    inftyPoly.push_back(ePoint_2(0,0));
-//    inftyPoly.push_back(ePoint_2(g_largnum,0));
-//    inftyPoly.push_back(ePoint_2(g_largnum,g_largnum));
-//    inftyPoly.push_back(ePoint_2(0,g_largnum));
+            /*
+            //todo need to rewrite this in case of triangulation! Or not if I can avoid handling triangulated footprints
+        //    CGAL::Polygon_2<EPECK> inftyPoly;
+        //    inftyPoly.push_back(ePoint_2(0,0));
+        //    inftyPoly.push_back(ePoint_2(g_largnum,0));
+        //    inftyPoly.push_back(ePoint_2(g_largnum,g_largnum));
+        //    inftyPoly.push_back(ePoint_2(0,g_largnum));
 
-    CGAL::Polygon_set_2<EPECK> polySet;
-//    polySet.insert(inftyPoly);
-    std::vector<double> footprintElevations;
-//    int polyNo = 0;
-    for (int i = 0; i < _footprintIdxList.size(); ++i) {
-        auto& footprintIdx = _footprintIdxList[i];
-        //-- Construct footprint polygon from ground surface
-        nlohmann::json coordBnd = _buildingJson["boundaries"].front()[footprintIdx].front();
-        CGAL::Polygon_2<EPECK> facePoly;
-        for (auto& ptIdx: coordBnd) {
-            facePoly.push_back(ePoint_2(_dPts[ptIdx].x(), _dPts[ptIdx].y()));
-            footprintElevations.push_back(_dPts[ptIdx].z());
-        }
-        CGAL::internal::pop_back_if_equal_to_front(facePoly);
-        if (facePoly.is_clockwise_oriented()) facePoly.reverse_orientation();
+            CGAL::Polygon_set_2<EPECK> polySet;
+        //    polySet.insert(inftyPoly);
+            std::vector<double> footprintElevations;
+        //    int polyNo = 0;
+            for (int i = 0; i < _footprintIdxList.size(); ++i) {
+                auto& footprintIdx = _footprintIdxList[i];
+                //-- Construct footprint polygon from ground surface
+                nlohmann::json coordBnd = _buildingJson["boundaries"].front()[footprintIdx].front();
+                CGAL::Polygon_2<EPECK> facePoly;
+                for (auto& ptIdx: coordBnd) {
+                    facePoly.push_back(ePoint_2(_dPts[ptIdx].x(), _dPts[ptIdx].y()));
+                    footprintElevations.push_back(_dPts[ptIdx].z());
+                }
+                CGAL::internal::pop_back_if_equal_to_front(facePoly);
+                if (facePoly.is_clockwise_oriented()) facePoly.reverse_orientation();
 
-//        std::cout << facePoly << std::endl;
-//        std::cout << "NOW HANDLING POLY NO: " << polyNo++ << std::endl;
-        polySet.join(facePoly);
-    }
-//    polySet.remove_redundant_edges();
-//    std::cout << "NUMBER OF POLYGONS IN THIS COMPOUND:" << polySet.number_of_polygons_with_holes() << std::endl;
-    std::list<CGAL::Polygon_with_holes_2<EPECK>> res;
-    polySet.polygons_with_holes(std::back_inserter (res));
+        //        std::cout << facePoly << std::endl;
+        //        std::cout << "NOW HANDLING POLY NO: " << polyNo++ << std::endl;
+                polySet.join(facePoly);
+            }
+        //    polySet.remove_redundant_edges();
+        //    std::cout << "NUMBER OF POLYGONS IN THIS COMPOUND:" << polySet.number_of_polygons_with_holes() << std::endl;
+            std::list<CGAL::Polygon_with_holes_2<EPECK>> res;
+            polySet.polygons_with_holes(std::back_inserter (res));
 
-    Converter<EPECK, EPICK> to_inexact;
-    Polygon_2 transferKernelPoly;
-    for (auto& outerPt : res.front().outer_boundary()) {
-        Point_2 polyPt = to_inexact(outerPt);
-        transferKernelPoly.push_back(polyPt);
-    }
-    _poly._rings.push_back(transferKernelPoly);
-     */
+            Converter<EPECK, EPICK> to_inexact;
+            Polygon_2 transferKernelPoly;
+            for (auto& outerPt : res.front().outer_boundary()) {
+                Point_2 polyPt = to_inexact(outerPt);
+                transferKernelPoly.push_back(polyPt);
+            }
+            _poly._rings.push_back(transferKernelPoly);
+             */
 
     _avgFootprintHeight = geomutils::avg(footprintElevations);
 }
@@ -130,6 +142,33 @@ void ImportedBuilding::reconstruct() {
     typedef std::vector<std::size_t>  CGAL_Polygon;
     nlohmann::json& geometry = _buildingJson["geometry"][_lodIdx];
 
+    //-- Adjust building height points
+    if (!config::importTrueHeight) {
+        Vector_3 movePt(0, 0, _avgFootprintHeight);
+        std::vector<int> checkedPt;
+        for (auto& faces : geometry["boundaries"].front()) {
+            for (auto& faceLst : faces) {
+                for (auto& facePt: faceLst) {
+                    if (std::find(checkedPt.begin(), checkedPt.end(), facePt) == checkedPt.end()) {
+                        _dPts[facePt] += movePt;
+                        checkedPt.push_back(facePt);
+                    } else continue;
+                }
+            }
+        }
+    }
+
+    //-- Adjust footprints to terrain
+    int count = 0;
+    for (int i = 0; i < _footprintPtsIdxList.size(); ++i) {
+        for (int j = 0; j < _footprintPtsIdxList[i].size(); ++j) {
+            _dPts[_footprintPtsIdxList[i][j]] = Point_3(_dPts[_footprintPtsIdxList[i][j]].x(),
+                                                         _dPts[_footprintPtsIdxList[i][j]].y(),
+                                                         _base_heights[i][j]);
+        }
+    }
+
+    //-- Add points to mesh
     std::vector<std::array<FT, 3>> points;
     std::vector<CGAL_Polygon> polygons;
     int surfIdx = -1;
@@ -141,8 +180,8 @@ void ImportedBuilding::reconstruct() {
 
         for (auto& faceLst : faces) {
             CGAL_Polygon p;
-            for (auto& face : faceLst) {
-                points.push_back(CGAL::make_array<FT>(_dPts[face].x(), _dPts[face].y(), _dPts[face].z()));
+            for (auto& facePt : faceLst) {
+                points.push_back(CGAL::make_array<FT>(_dPts[facePt].x(), _dPts[facePt].y(), _dPts[facePt].z()));
                 p.push_back(points.size() - 1);
             }
             polygons.push_back(p);
@@ -153,34 +192,6 @@ void ImportedBuilding::reconstruct() {
     PMP::orient_polygon_soup(points, polygons);
     PMP::polygon_soup_to_polygon_mesh(points, polygons, _mesh);
     PMP::triangulate_faces(_mesh);
-
-        /*
-        //-- Add other surfaces
-        std::vector<Mesh::Vertex_index> faceVertices;
-        int facid = -1; //todo temp
-        for (auto& faceLst : faces) {
-            if (++facid > 0) std::cout << "YO THERE's A FACE NO: " << facid << std::endl;
-//            if (!(facid > 0)) continue;
-            for (auto& face: faceLst) {
-                faceVertices.emplace_back(_mesh.add_vertex(_dPts[face]));
-            }
-            bool isReconstruct = _mesh.add_face(faceVertices);
-            //todo temp
-            if (!isReconstruct) {
-                std::cout << "I have a failed surface!!!" << std::endl;
-                CGAL::Polygon_with_holes_2<EPICK> tempPoly;
-                for (auto& face : faceLst) {
-                    tempPoly.outer_boundary().push_back(Point_2(_dPts[face].x(), _dPts[face].y()));
-                }
-                std::cout << "IS THAT FAILED SURFACE VALID POLY?? : " << tempPoly.outer_boundary().is_simple() << std::endl;
-//                CGAL::draw(tempPoly);
-            }
-            PMP::duplicate_non_manifold_vertices(_mesh);
-        }
-    }
-    PMP::stitch_borders(_mesh);
-    PMP::triangulate_faces(_mesh);
-    */
 }
 
 void ImportedBuilding::append_nonground_part(const std::shared_ptr<ImportedBuilding>& other) {

@@ -62,7 +62,7 @@ void Map3d::set_features() {
     //-- First feature is the terrain
     _terrain = std::make_shared<Terrain>();
 
-    //-- Add polygons as features
+    //-- Add features - order in _lsFeatures defines the advantage in marking terrain polygons
     //- Buildings
     int internalID = 0;
     for (auto& poly : _polygonsBuildings) {
@@ -70,6 +70,33 @@ void Map3d::set_features() {
         _reconstructedBuildings.push_back(building);
         _buildings.push_back(building);
         _lsFeatures.push_back(building);
+    }
+    //- Imported buildings
+    if (!_importedBuildingsJson.empty())  std::cout << "Importing CityJSON geometries" << std::endl;
+    std::vector<std::shared_ptr<ImportedBuilding>> appendingBuildings;
+    internalID = 0;
+    for (auto& importedBuilding : _importedBuildingsJson) {
+        auto explicitGeom = std::make_shared<ImportedBuilding>(*importedBuilding, _importedBuildingsPts, internalID++);
+        if (!explicitGeom->is_appending()) {
+            _importedBuildings.push_back(explicitGeom);
+            _buildings.push_back(explicitGeom);
+            _lsFeatures.push_back(explicitGeom);
+        } else {
+            appendingBuildings.push_back(explicitGeom);
+        }
+    }
+    //- Check for building parts that do not have footprint and append to another instance of the same building
+    for (auto& b : appendingBuildings) {
+        for (auto& importedBuilding :  _importedBuildings) {
+            if (b->get_parent_building_id() == importedBuilding->get_parent_building_id()) {
+                importedBuilding->append_nonground_part(b);
+                break;
+            }
+        }
+    }
+    if (!_importedBuildings.empty()) {
+        this->clear_inactives();
+        std::cout << "    Geometries imported: " << _importedBuildings.size() << std::endl;
     }
 
     //- Boundary
@@ -88,32 +115,6 @@ void Map3d::set_features() {
         }
     }
     std::cout << "    Polygons read: " << _lsFeatures.size() << std::endl;
-
-    if (!_importedBuildingsJson.empty()) std::cout << "Importing CityJSON geometries" << std::endl;
-    //-- Imported buildings
-    std::vector<std::shared_ptr<ImportedBuilding>> appendingBuildings;
-    internalID = 0;
-    for (auto& importedBuilding : _importedBuildingsJson) {
-        auto explicitGeom = std::make_shared<ImportedBuilding>(*importedBuilding, _importedBuildingsPts, internalID++);
-        if (!explicitGeom->is_appending()) {
-            _importedBuildings.push_back(explicitGeom);
-        } else {
-            appendingBuildings.push_back(explicitGeom);
-        }
-        _buildings.push_back(explicitGeom);
-        _lsFeatures.push_back(explicitGeom);
-    }
-    //- Check for building parts that do not have footprint and append to another instance of the same building
-    for (auto& b : appendingBuildings) {
-        for (auto& importedBuilding :  _importedBuildings) {
-            if (b->get_parent_building_id() == importedBuilding->get_parent_building_id()) {
-                importedBuilding->append_nonground_part(b);
-                break;
-            }
-        }
-    }
-    if (!_importedBuildings.empty()) this->clear_inactives();
-    std::cout << "    Geometries imported: " << _importedBuildings.size() << std::endl;
 
     //-- Simplify terrain points
     if (config::terrainSimplification > 0 + g_smallnum) {
@@ -221,8 +222,11 @@ void Map3d::reconstruct_terrain() {
 
 void Map3d::reconstruct_buildings() {
     std::cout << "\nReconstructing buildings" << std::endl;
-//    SearchTree searchTree;
-//    searchTree.insert(_pointCloudBuildings.points().begin(), _pointCloudBuildings.points().end());
+    if (!_importedBuildings.empty()) {
+        std::cout << "    Will try to reconstruct imported buildings in LoD: " << config::importLoD
+                  << ". If I cannot find a geometry with that LoD, I will reconstruct in the highest LoD available"
+                  << std::endl;
+    }
 
     std::shared_ptr<SearchTree> searchTree;
     searchTree = std::make_shared<SearchTree>(_pointCloudBuildings.points().begin(), _pointCloudBuildings.points().end());
@@ -268,8 +272,7 @@ void Map3d::solve_building_conflicts() {
     for (auto& importedBuilding : _importedBuildings) {
         for (auto& reconstructedBuilding : _reconstructedBuildings) {
             if (geomutils::polygons_in_contact(importedBuilding->get_poly(), reconstructedBuilding->get_poly())) {
-                bool configImportedAdvantage = true; //todo temp
-                if (configImportedAdvantage) {
+                if (config::importAdvantage) {
                     reconstructedBuilding->deactivate();
                 } else {
                     importedBuilding->deactivate();
@@ -286,24 +289,29 @@ void Map3d::solve_building_conflicts() {
 
 void Map3d::read_data() { // This will change with time
     //-- Read ground points
+    if (!config::points_xyz.empty()) {
     std::cout << "Reading ground points" << std::endl;
     IO::read_point_cloud(config::points_xyz, _pointCloud);
-    if (_pointCloud.size() == 0) {
-        std::cout << "Didn't find any ground points! Calculating ground as flat surface" << std::endl;
-        //todo check this case out
-    }
     std::cout << "    Points read: " << _pointCloud.size() << std::endl;
+    } else {
+        std::cout << "INFO: Did not find any ground points! Calculating ground as flat surface\n" << std::endl;
+        //todo needs to be implemented - handled with the schema for now
+    }
 
     //-- Read building points
-    std::cout << "Reading building points" << std::endl;
-    IO::read_point_cloud(config::buildings_xyz, _pointCloudBuildings);
-    if (_pointCloudBuildings.empty()) throw std::invalid_argument("Didn't find any building points!");
-    std::cout << "    Points read: " << _pointCloudBuildings.size() << std::endl;
+    if (!config::buildings_xyz.empty()) {
+        std::cout << "Reading building points" << std::endl;
+        IO::read_point_cloud(config::buildings_xyz, _pointCloudBuildings);
+        if (_pointCloudBuildings.empty()) throw std::invalid_argument("Didn't find any building points!");
+        std::cout << "    Points read: " << _pointCloudBuildings.size() << std::endl;
+    }
 
     //-- Read building polygons
-    std::cout << "Reading polygons" << std::endl;
-    IO::read_geojson_polygons(config::gisdata, _polygonsBuildings);
-    if (_polygonsBuildings.empty()) throw std::invalid_argument("Didn't find any building polygons!");
+    if (!config::gisdata.empty()) {
+        std::cout << "Reading polygons" << std::endl;
+        IO::read_geojson_polygons(config::gisdata, _polygonsBuildings);
+        if (_polygonsBuildings.empty()) throw std::invalid_argument("Didn't find any building polygons!");
+    }
 
     //-- Read surface layer polygons
     for (auto& topoLayer: config::topoLayers) {
@@ -420,16 +428,16 @@ void Map3d::clear_inactives() {
 template<typename T>
 void Map3d::shorten_polygons(T& feature) {
     for (auto& f : feature) {
-        if (!f->is_active()) continue;
+        if (!f->is_active() || f->is_imported()) continue;
         for (auto& ring : f->get_poly().rings()) {
             geomutils::shorten_long_poly_edges(ring);
         }
     }
 }
 //- Explicit template instantiation
-template void Map3d::shorten_polygons<Buildings>    (Buildings& feature);
-template void Map3d::shorten_polygons<SurfaceLayers>(SurfaceLayers& feature);
-template void Map3d::shorten_polygons<PolyFeatures> (PolyFeatures& feature);
+template void Map3d::shorten_polygons<Buildings>              (Buildings& feature);
+template void Map3d::shorten_polygons<SurfaceLayers>          (SurfaceLayers& feature);
+template void Map3d::shorten_polygons<PolyFeatures>           (PolyFeatures& feature);
 
 template<typename T>
 void Map3d::set_footprint_elevation(T& features) {
