@@ -355,6 +355,12 @@ void IO::output_log() {
     }
 }
 
+std::string IO::gen_key_bucket(const Point_2 p) {
+    std::stringstream ss;
+    ss << std::fixed << std::setprecision(3) << p.x() << " " << p.y();
+    return ss.str();
+}
+
 //-- Templated functions
 template<typename T>
 std::string IO::gen_key_bucket(const T& p) {

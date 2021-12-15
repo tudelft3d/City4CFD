@@ -26,6 +26,8 @@ namespace IO {
 
     void output_log();
 
+    std::string gen_key_bucket(const Point_2 p);
+
     //-- Templated function
     template <typename T> std::string gen_key_bucket(const T& p);
 }

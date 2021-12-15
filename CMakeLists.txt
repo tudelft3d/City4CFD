@@ -6,8 +6,8 @@ cmake_minimum_required(VERSION 3.1)
 #set( CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS true )
 
 set( CMAKE_CXX_FLAGS "-O3" )
-set( CMAKE_BUILD_TYPE "Release" )
-#set( CMAKE_BUILD_TYPE "Debug" )
+#set( CMAKE_BUILD_TYPE "Release" )
+set( CMAKE_BUILD_TYPE "Debug" )
 
 #if ( COMMAND cmake_policy )
 #    cmake_policy( SET CMP0003 NEW )

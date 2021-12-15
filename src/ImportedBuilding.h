@@ -30,6 +30,8 @@ protected:
     bool                             _appendToBuilding;
     int                              _lodIdx;
     std::vector<Point_3>&            _dPts;
+
+    void check_simplicity(Polygon_2& ring);
 };
 
 #endif //CITYCFD_EXPLICITBUILDING_H
