@@ -210,7 +210,7 @@ namespace jsonschema {
           },
           "then": {
             "required": ["bnd_type_bpg"],
-            "oneOf": [
+            "anyOf": [
               {
                 "properties": {"bnd_type_bpg": {"const": "Round"}}
               },
