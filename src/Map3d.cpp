@@ -119,7 +119,7 @@ void Map3d::set_features() {
     //-- Simplify terrain points
     if (config::terrainSimplification > 0 + g_smallnum) {
         std::cout <<"\nSimplyfing terrain points" << std::endl;
-        _pointCloud.remove(CGAL::random_simplify_point_set(_pointCloud, 90), _pointCloud.end());
+        _pointCloud.remove(CGAL::random_simplify_point_set(_pointCloud, config::terrainSimplification), _pointCloud.end());
         _pointCloud.collect_garbage();
         std::cout << "    Terrain points after simplification: " << _pointCloud.size() << std::endl;
     }
