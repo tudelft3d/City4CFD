@@ -16,11 +16,11 @@ set( CMAKE_BUILD_TYPE "Release" )
 # BOOST
 find_package( Boost REQUIRED COMPONENTS filesystem)
 
+# CGAL
+find_package( CGAL REQUIRED QUIET COMPONENTS)
+
 # LAStools
 add_subdirectory(  ${CMAKE_SOURCE_DIR}/thirdparty/LAStools )
-
-# CGAL
-find_package( CGAL REQUIRED QUIET COMPONENTS) #remove qt5
 
 # Third-party
 include_directories( ${CMAKE_SOURCE_DIR}/thirdparty )

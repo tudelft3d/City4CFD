@@ -99,11 +99,6 @@ void Map3d::set_features() {
         std::cout << "    Geometries imported: " << _importedBuildings.size() << std::endl;
     }
 
-    //- Boundary
-    for (int i = 0; i < config::numSides; ++i)
-        _boundaries.push_back(std::make_shared<Sides>(TopoFeature::get_num_output_layers()));
-    _boundaries.push_back(std::make_shared<Top>(TopoFeature::get_num_output_layers()));
-
     //- Other polygons
     for (auto& surfaceLayer : _polygonsSurfaceLayers) {
         int outputLayerID = TopoFeature::get_num_output_layers();
@@ -115,6 +110,11 @@ void Map3d::set_features() {
         }
     }
     std::cout << "    Polygons read: " << _lsFeatures.size() << std::endl;
+
+    //-- Boundaries
+    for (int i = 0; i < config::numSides; ++i)
+        _boundaries.push_back(std::make_shared<Sides>(TopoFeature::get_num_output_layers()));
+    _boundaries.push_back(std::make_shared<Top>(TopoFeature::get_num_output_layers()));
 
     //-- Simplify terrain points
     if (config::terrainSimplification > 0 + g_smallnum) {
@@ -213,8 +213,11 @@ void Map3d::bnd_sanity_check() {
 
 void Map3d::reconstruct_terrain() {
     std::cout << "\nReconstructing terrain" << std::endl;
+
+    _terrain->prep_constraints(_lsFeatures, _pointCloud);
+    if (!config::averageSurfaces.empty()) this->average_polygon_points();
     _terrain->set_cdt(_pointCloud);
-    _terrain->constrain_features(_lsFeatures);
+    _terrain->constrain_features();
 
     std::cout << "\n    Creating terrain mesh" << std::endl;
     _terrain->create_mesh(_lsFeatures);
@@ -268,6 +271,53 @@ void Map3d::reconstruct_boundaries() {
     }
 }
 
+void Map3d::average_polygon_points() {
+    std::cout << "\n    Averaging surfaces" << std::endl;
+    std::map<int, Point_3> averagedPts;
+
+    //-- Construct a connectivity map and remove duplicates along the way
+    std::unordered_map<Point_3, int> pointCloudConnectivity;
+    auto it = _pointCloud.points().begin();
+    int count = 0;
+    while (it != _pointCloud.points().end()) {
+        auto itPC = pointCloudConnectivity.find(*it);
+        if (itPC != pointCloudConnectivity.end()) {
+            _pointCloud.remove(_pointCloud.begin() + count);
+        } else {
+            pointCloudConnectivity[*it] = count;
+            ++it;
+            ++count;
+        }
+    }
+    _pointCloud.collect_garbage(); // Free removed points from the memory
+
+    //-- Construct search tree from ground points
+    SearchTree searchTree(_pointCloud.points().begin(), _pointCloud.points().end());
+
+    //-- Perform averaging
+    for (auto& f : _lsFeatures) {
+        auto it = config::averageSurfaces.find(f->get_output_layer_id());
+        if (it != config::averageSurfaces.end()) {
+            f->average_polygon_inner_points(_pointCloud, averagedPts, searchTree, pointCloudConnectivity);
+        }
+    }
+
+    //-- CGAL's Point Set is meant to be constant -> construct new Point Set with averaged values
+    Point_set_3 newPointCloud;
+    for (auto& it : averagedPts) {
+        newPointCloud.insert(it.second);
+    }
+    for (int i = 0; i < _pointCloud.points().size(); ++i) {
+        auto it = averagedPts.find(i);
+        if (it == averagedPts.end()) {
+            newPointCloud.insert(_pointCloud.point(i));
+        } else averagedPts.erase(i);
+    }
+
+    //-- Put the new point cloud in place of the old one
+    _pointCloud = newPointCloud;
+}
+
 void Map3d::solve_building_conflicts() {
     for (auto& importedBuilding : _importedBuildings) {
         for (auto& reconstructedBuilding : _reconstructedBuildings) {
@@ -303,6 +353,7 @@ void Map3d::read_data() { // This will change with time
         std::cout << "Reading building points" << std::endl;
         IO::read_point_cloud(config::buildings_xyz, _pointCloudBuildings);
         if (_pointCloudBuildings.empty()) throw std::invalid_argument("Didn't find any building points!");
+
         std::cout << "    Points read: " << _pointCloudBuildings.size() << std::endl;
     }
 

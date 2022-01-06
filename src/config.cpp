@@ -43,7 +43,8 @@ namespace config {
     std::string importLoD;
 
     //-- Polygons related
-    double edgeMaxLen;
+    double                edgeMaxLen;
+    std::map<int, double> averageSurfaces;
 
     //-- Output
     fs::path                  workDir;
@@ -51,7 +52,7 @@ namespace config {
     std::string               outputFileName;
     OutputFormat              outputFormat;
     bool                      outputSeparately = false;
-    std::vector<std::string>  outputSurfaces = {"Terrain", "Buildings", "Top"};
+    std::vector<std::string>  outputSurfaces = {"Terrain", "Buildings"};
     int                       numSides = 1;
     std::vector<int>          surfaceLayerIDs;
 
@@ -115,16 +116,24 @@ void config::set_config(nlohmann::json& j) {
 
     //-- Path to polygons
     int i = 0;
+    int surfLayerIdx = 2; // 0 - terrain, 1 - buildings, surface layers star from 2
     for (auto& poly : j["polygons"]) {
         if (poly["type"] == "Building") {
             gisdata = poly["path"];
         }
         if (poly["type"] == "SurfaceLayer") {
             topoLayers.push_back(poly["path"]);
-            if (poly.contains("layer_name"))
+            if (poly.contains("layer_name")) {
                 outputSurfaces.push_back(poly["layer_name"]);
-            else
+            } else {
                 outputSurfaces.push_back("SurfaceLayer" + std::to_string(++i));
+            }
+            if (poly.contains("average_surface")) {
+                if (poly["average_surface"]) {
+                    averageSurfaces[surfLayerIdx] = poly["surface_percentile"];
+                }
+            }
+            ++surfLayerIdx;
         }
     }
 
@@ -166,23 +175,23 @@ void config::set_config(nlohmann::json& j) {
         } else bpgDomainSize = {5, 5, 15, 5}; // BPG
     }
 
-    // Set domain side
+    // Set domain side and top
     if (domainBndConfig.type() == typeid(Polygon_2)) {
         Polygon_2 poly = boost::get<Polygon_2>(domainBndConfig);
         numSides = poly.size();
         for (int i = 0; i < poly.size(); ++i) {
-            outputSurfaces.insert(outputSurfaces.begin() + 2,
-                                  std::string("Side_" + std::to_string(i % poly.size())));
+            outputSurfaces.emplace_back("Side_" + std::to_string(i % poly.size()));
         }
     } else if (domainBndConfig.type() == typeid(double) || bpgDomainType != RECTANGLE) {
-        outputSurfaces.insert(outputSurfaces.begin() + 2, "Sides");
+        outputSurfaces.emplace_back("Sides");
     } else if (bpgDomainType == RECTANGLE) { // Expand output surfaces with front and back
         numSides = 4;
-        outputSurfaces.insert(outputSurfaces.begin() + 2, "Front");
-        outputSurfaces.insert(outputSurfaces.begin() + 2, "Side_2");
-        outputSurfaces.insert(outputSurfaces.begin() + 2, "Back");
-        outputSurfaces.insert(outputSurfaces.begin() + 2, "Side_1");
+        outputSurfaces.emplace_back("Front");
+        outputSurfaces.emplace_back("Side_2");
+        outputSurfaces.emplace_back("Back");
+        outputSurfaces.emplace_back("Side_1");
     }
+    outputSurfaces.emplace_back("Top");
 
     // Blockage ratio
     if (j.contains("bpg_blockage_ratio")) {

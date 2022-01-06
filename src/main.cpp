@@ -3,6 +3,7 @@
 #include "Map3d.h"
 
 void printWelcome() {
+    printf("\e[?25l");
     auto logo{
             R"(
     #===========================================================#
@@ -26,7 +27,7 @@ void printWelcome() {
     };
 
     std::cout << logo;
-    std::cout << "CityCFD Copyright (C) 2021 3D geoinformation research group, TU Delft\n" << std::endl;
+    std::cout << "CityCFD Copyright (C) 2021-2022 3D geoinformation research group, TU Delft\n" << std::endl;
 }
 
 void printHelp() {

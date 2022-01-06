@@ -1,5 +1,7 @@
 #include "PolyFeature.h"
 
+#include "geomutils.h"
+
 PolyFeature::PolyFeature()
         : TopoFeature(), _poly(), _base_heights(), _polyInternalID() {}
 
@@ -86,6 +88,45 @@ void PolyFeature::calc_footprint_elevation_linear(const DT& dt) {
             ringHeights.push_back(h);
         }
         _base_heights.push_back(ringHeights);
+    }
+}
+
+void PolyFeature::average_polygon_inner_points(const Point_set_3& pointCloud,
+                                               std::map<int, Point_3>& averagedPts,
+                                               const SearchTree& searchTree,
+                                               const std::unordered_map<Point_3, int>& pointCloudConnectivity) const {
+    std::vector<int>    indices;
+    std::vector<double> originalHeights;
+    //-- Take tree subset bounded by the polygon
+    std::vector<Point_3> subsetPts;
+    Polygon_2 bbox = geomutils::calc_bbox_poly(_poly.rings().front());
+    Point_3 bbox1(bbox[0].x(), bbox[0].y(), -g_largnum);
+    Point_3 bbox2(bbox[2].x(), bbox[2].y(), g_largnum);
+    Fuzzy_iso_box pts_range(bbox1, bbox2);
+    searchTree.search(std::back_inserter(subsetPts), pts_range);
+
+    //-- Collect points that haven't been averaged already
+    for (auto& pt3 : subsetPts) {
+        Point_2 pt(pt3.x(), pt3.y());
+        if (CGAL::bounded_side_2(_poly._rings.front().begin(), _poly._rings.front().end(), pt) != CGAL::ON_UNBOUNDED_SIDE) {
+            auto itIdx = pointCloudConnectivity.find(pt3);
+            auto it = averagedPts.find(itIdx->second);
+            if (it == averagedPts.end()) {
+                indices.push_back(itIdx->second);
+                originalHeights.push_back(pointCloud.point(itIdx->second).z());
+            }
+        }
+    }
+    //-- Average points
+    if (indices.empty()) {
+        return;
+    }
+    double avgHeight = geomutils::percentile(originalHeights, config::averageSurfaces[this->get_output_layer_id()] / 100);
+
+    //-- Add new points to the temp map
+    for (auto& i : indices) {
+        Point_3 pt = pointCloud.point(i);
+        averagedPts[i] = Point_3(pt.x(), pt.y(), avgHeight);
     }
 }
 

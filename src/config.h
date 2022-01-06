@@ -41,7 +41,8 @@ namespace config {
     extern std::string importLoD;
 
     //-- Polygons related
-    extern double            edgeMaxLen;
+    extern double                edgeMaxLen;
+    extern std::map<int, double> averageSurfaces;
 
     //-- Output
     extern fs::path                  workDir;

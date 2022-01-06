@@ -42,7 +42,14 @@ namespace jsonschema {
               "properties": {"type": {"const": "SurfaceLayer"}}
             },
             "then": {
-              "properties": {"layer_name": {"type": "string"}}
+              "properties": {
+                "layer_name": {"type": "string"},
+                "average_surface": {"type": "boolean"},
+                "surface_percentile": {"type": "number"}
+              },
+              "dependencies": {
+                "average_surface": ["surface_percentile"]
+              }
             },
             "required": ["type", "path"]
           }

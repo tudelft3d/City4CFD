@@ -15,6 +15,9 @@ public:
 
     void  calc_footprint_elevation_nni(const DT& dt);
     void  calc_footprint_elevation_linear(const DT& dt);
+    void  average_polygon_inner_points(const Point_set_3& pointCloud, std::map<int, Point_3>& averagedPts,
+                                       const SearchTree& searchTree, const std::unordered_map<Point_3,
+                                       int>& pointCloudConnectivity) const;
     void  clear_feature();
 
     virtual void        get_cityjson_info(nlohmann::json& b) const = 0;

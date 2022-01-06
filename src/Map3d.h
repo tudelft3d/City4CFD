@@ -46,6 +46,7 @@ private:
     void reconstruct_terrain();
     void reconstruct_buildings();
     void reconstruct_boundaries();
+    void average_polygon_points();
     void solve_building_conflicts();
 
     void prep_feature_output();

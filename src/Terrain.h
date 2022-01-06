@@ -11,7 +11,8 @@ public:
     ~Terrain();
 
     void set_cdt(const Point_set_3 &pointCloud);
-    void constrain_features(const PolyFeatures& features);
+    void prep_constraints(const PolyFeatures& features, Point_set_3& pointCloud);
+    void constrain_features();
     void create_mesh(const PolyFeatures& features);
 
     CDT&         get_cdt();
@@ -25,8 +26,9 @@ public:
     const SurfaceLayers& get_surface_layers() const;
 
 protected:
-    CDT  _cdt;
-    SurfaceLayers _surfaceLayersTerrain;
+    CDT                    _cdt;
+    SurfaceLayers          _surfaceLayersTerrain;
+    std::vector<Polygon_3> _constrainedPolys;
 };
 
 #endif //CITYCFD_TERRAIN_H

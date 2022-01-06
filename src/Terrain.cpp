@@ -5,25 +5,28 @@
 #include "SurfaceLayer.h"
 
 Terrain::Terrain()
-    : TopoFeature(0) {}
+    : TopoFeature(0), _cdt(), _surfaceLayersTerrain(), _constrainedPolys() {}
 
 Terrain::Terrain(int pid)
-    : TopoFeature(pid) {}
+    : TopoFeature(pid), _cdt(), _surfaceLayersTerrain(), _constrainedPolys() {}
 
 Terrain::~Terrain() = default;
 
 void Terrain::set_cdt(const Point_set_3& pointCloud) {
     Converter<EPICK, EPECK> to_exact;
 
-    std::cout << "    Triangulating" << std::endl;
+    std::cout << "\n    Triangulating" << std::endl;
     int count = 0;
     int pcSize = pointCloud.size();
+    std::vector<ePoint_3> pts;
     IO::print_progress_bar(0);
     for (auto& pt : pointCloud.points()) {
-        _cdt.insert(to_exact(pt));
+        pts.push_back(to_exact(pt));
 
-        IO::print_progress_bar(100 * count++ / pcSize);
+        IO::print_progress_bar(90 * count++ / pcSize);
     }
+    IO::print_progress_bar(90);
+    _cdt.insert(pts.begin(), pts.end());
     IO::print_progress_bar(100); std::clog << std::endl;
 
     //-- Smoothing
@@ -33,13 +36,9 @@ void Terrain::set_cdt(const Point_set_3& pointCloud) {
     }
 }
 
-void Terrain::constrain_features(const PolyFeatures& features) {
-    int count = 0;
-    int numFeatures = features.size();
-    //-- Constrain polygon features;
-
-    std::cout << "\n    Constraining polygons" << std::endl;
-    IO::print_progress_bar(0);
+void Terrain::prep_constraints(const PolyFeatures& features, Point_set_3& pointCloud) {
+    std::cout << "    Lifting polygon edges to terrain height" << std::endl;
+    int countFeatures = 0;
     for (auto& f : features) {
         int polyCount = 0;
         if (!f->is_active()) continue;
@@ -48,20 +47,31 @@ void Terrain::constrain_features(const PolyFeatures& features) {
             //-- Add ring points
             int i = 0;
             Polygon_3 pts;
-            std::vector<Vertex_handle> vertex;
             for (auto& polyVertex : ring) {
-                pts.push_back(ePoint_3(polyVertex.x(), polyVertex.y(), heights[polyCount][i++]));
+                pts.push_back(ePoint_3(polyVertex.x(), polyVertex.y(), heights[polyCount][i]));
+                pointCloud.insert(Point_3(polyVertex.x(), polyVertex.y(), heights[polyCount][i++]));
             }
-            //-- Set added points as constraints
-            _cdt.insert_constraint(pts.begin(), pts.end(), true);
-
+            _constrainedPolys.push_back(pts);
             ++polyCount;
         }
+        ++countFeatures;
+    }
+    std::clog << "\n    Num of polygons to constrain: " << countFeatures << std::endl;
+}
+
+void Terrain::constrain_features() {
+    int count = 0;
+    int numFeatures = _constrainedPolys.size();
+
+    std::cout << "\n    Constraining polygons" << std::endl;
+    IO::print_progress_bar(0);
+    for (auto& ring : _constrainedPolys) {
+        //-- Set added points as constraints
+        _cdt.insert_constraint(ring.begin(), ring.end(), true);
 
         IO::print_progress_bar(100 * count++ / numFeatures);
     }
     IO::print_progress_bar(100); std::clog << std::endl;
-    std::clog << "    Num of constrained polygons: " << count << std::endl;
 }
 
 void Terrain::create_mesh(const PolyFeatures& features) {
