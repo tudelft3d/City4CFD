@@ -166,8 +166,6 @@ void ImportedBuilding::reconstruct() {
             polygons.push_back(p);
         }
     }
-    //-- Add points to mesh
-
     //-- Do mumbo-jumbo to make everything work
     PMP::repair_polygon_soup(points, polygons, CGAL::parameters::geom_traits(geomutils::Array_traits()));
     PMP::orient_polygon_soup(points, polygons);

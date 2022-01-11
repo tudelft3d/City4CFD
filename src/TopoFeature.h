@@ -37,9 +37,9 @@ protected:
     bool           _f_imported;
     int            _outputLayerID; // 0- Terrain
                                    // 1- Buildings
-                                   // 2- Sides
-                                   // 3- Top
-                                   // 4 Onwards - surface layers
+                                   //    Surface Layers
+                                   //    Sides
+                                   //    Top
 };
 
 #endif //CITYCFD_TOPOFEATURE_H

@@ -4,16 +4,16 @@
 #include "LoD12.h"
 
 Building::Building()
-    : PolyFeature(1), _height(-g_largnum) {}
+        : PolyFeature(1), _height(-g_largnum) {}
 
 Building::Building(const int internalID)
-    : PolyFeature(1, internalID), _height(-g_largnum) {}
+        : PolyFeature(1, internalID), _height(-g_largnum) {}
 
 Building::Building(const nlohmann::json& poly)
-    : PolyFeature(poly, 1), _height(-g_largnum) {}
+        : PolyFeature(poly, 1), _height(-g_largnum) {}
 
 Building::Building(const nlohmann::json& poly, const int internalID)
-    : PolyFeature(poly, 1, internalID), _height(-g_largnum) {}
+        : PolyFeature(poly, 1, internalID), _height(-g_largnum) {}
 
 Building::~Building() = default;
 

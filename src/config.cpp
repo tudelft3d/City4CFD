@@ -15,7 +15,7 @@ namespace config {
     std::string              buildings_xyz;      // Buildings
     std::string              gisdata;            // Building Polygons
     std::vector<std::string> topoLayers = {};    // Other polygons
-    std::string              importedBuildings; // Additional pre-reconstructed buildings
+    std::string              importedBuildings;  // Additional pre-reconstructed buildings
 
     //-- Domain setup
     Point_2     pointOfInterest;

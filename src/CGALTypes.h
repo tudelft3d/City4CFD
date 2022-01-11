@@ -138,12 +138,12 @@ struct FaceInfo2
     }
     int surfaceLayer = -9999; // Face handle to output mesh for specific surface layer
 };
-typedef CGAL::Triangulation_vertex_base_with_id_2<eProjection_traits>               Vb;
-typedef CGAL::Triangulation_face_base_with_info_2<FaceInfo2, eProjection_traits>    Fbb;
-typedef CGAL::Constrained_triangulation_face_base_2<eProjection_traits, Fbb>        Fb;
+typedef CGAL::Triangulation_vertex_base_with_id_2<eProjection_traits>              Vb;
+typedef CGAL::Triangulation_face_base_with_info_2<FaceInfo2, eProjection_traits>   Fbb;
+typedef CGAL::Constrained_triangulation_face_base_2<eProjection_traits, Fbb>       Fb;
 typedef CGAL::Triangulation_data_structure_2<Vb,Fb>                                TDS;
 typedef CGAL::Exact_intersections_tag                                              Itag;
-typedef CGAL::Constrained_Delaunay_triangulation_2<eProjection_traits, TDS, Itag>   CDTt;
+typedef CGAL::Constrained_Delaunay_triangulation_2<eProjection_traits, TDS, Itag>  CDTt;
 typedef CGAL::Constrained_triangulation_plus_2<CDTt>                               CDT;
 typedef CDT::Point                                                                 Point;
 typedef CDT::Face_handle                                                           Face_handle;

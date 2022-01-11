@@ -4,8 +4,9 @@
         - Speed optimization
 
 ## High-priority
-    - Averaging water
+    - Terrain smoothing must not touch averaged surface layers
     - No terrain situation
+    - Option to choose unique ID
 
 ## Longer-term
     - Reconstruct LoD1.2 from polygon height attribute

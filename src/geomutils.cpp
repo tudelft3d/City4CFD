@@ -93,7 +93,13 @@ void geomutils::mark_domains(CDT& ct,
         queue.pop_front();
         if (fh->info().nesting_level == -1) {
             fh->info().nesting_level = index;
-            if (surfaceLayer != -1) fh->info().surfaceLayer = surfaceLayer;
+            if (surfaceLayer != -1) {
+                if (check_layer_normal(fh, surfaceLayer)) {
+                    fh->info().surfaceLayer = surfaceLayer;
+                } else {
+                    fh->info().surfaceLayer = -2;
+                }
+            }
             for (int i = 0; i < 3; i++) {
                 CDT::Edge e(fh,i);
                 Face_handle n = fh->neighbor(i);
@@ -112,7 +118,7 @@ void geomutils::mark_domains(CDT& cdt, PolyFeatures features) {
     }
     std::list<CDT::Edge> border;
     mark_domains(cdt, cdt.infinite_face(), 0, border, features);
-    while (! border.empty()) {
+    while (!border.empty()) {
         CDT::Edge e = border.front();
         border.pop_front();
         Face_handle n = e.first->neighbor(e.second);
@@ -120,11 +126,32 @@ void geomutils::mark_domains(CDT& cdt, PolyFeatures features) {
             mark_domains(cdt, n, e.first->info().nesting_level + 1, border, features);
         }
     }
+    for (CDT::Face_handle f : cdt.all_face_handles()) {
+        if (f->info().surfaceLayer == -2) {
+            f->info().surfaceLayer = -9999;
+        }
+    }
 }
 
-void geomutils::shorten_long_poly_edges(Polygon_2& poly, double maxLen) {
-    auto& polyVec = poly.container();
-    for (auto i = 0; i < polyVec.size();) {
+bool geomutils::check_layer_normal(const Face_handle& fh, int surfaceLayer) {
+    auto it = config::averageSurfaces.find(surfaceLayer);
+    if (it != config::averageSurfaces.end()) {
+        Converter<EPECK, EPICK> to_inexact;
+        Vector_3 vertical(0, 0, 1);
+        Vector_3 norm = CGAL::normal(to_inexact(fh->vertex(0)->point()),
+                                     to_inexact(fh->vertex(1)->point()),
+                                     to_inexact(fh->vertex(2)->point()));
+
+        if (CGAL::approximate_angle(norm, vertical) < 60.0) {
+            return true;
+        }
+    }
+    return false;
+}
+
+    void geomutils::shorten_long_poly_edges(Polygon_2& poly, double maxLen) {
+        auto& polyVec = poly.container();
+        for (auto i = 0; i < polyVec.size();) {
         auto edge = polyVec[(i + 1) % polyVec.size()] - polyVec[i];
         double edgeSqLen = edge.squared_length();
         if (edgeSqLen > maxLen*maxLen) {

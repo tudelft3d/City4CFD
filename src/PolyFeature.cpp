@@ -3,13 +3,13 @@
 #include "geomutils.h"
 
 PolyFeature::PolyFeature()
-        : TopoFeature(), _poly(), _base_heights(), _polyInternalID() {}
+    : TopoFeature(), _poly(), _base_heights(), _polyInternalID() {}
 
 PolyFeature::PolyFeature(const int outputLayerID)
-        : TopoFeature(outputLayerID), _poly(), _base_heights(), _polyInternalID() {}
+    : TopoFeature(outputLayerID), _poly(), _base_heights(), _polyInternalID() {}
 
 PolyFeature::PolyFeature(const nlohmann::json& poly)
-        : TopoFeature(), _base_heights(), _polyInternalID() {
+    : TopoFeature(), _base_heights(), _polyInternalID() {
     this->parse_json_poly(poly);
 }
 
@@ -17,13 +17,13 @@ PolyFeature::PolyFeature(const int outputLayerID, const int internalID)
     : TopoFeature(outputLayerID), _polyInternalID(internalID) {}
 
 PolyFeature::PolyFeature(const nlohmann::json& poly, const int outputLayerID)
-        : PolyFeature(poly) {
+    : PolyFeature(poly) {
     _outputLayerID = outputLayerID;
     if (_outputLayerID  >= _numOfOutputLayers) _numOfOutputLayers = _outputLayerID + 1;
 }
 
 PolyFeature::PolyFeature(const nlohmann::json& poly, const int outputLayerID, const int internalID)
-        : PolyFeature(poly) {
+    : PolyFeature(poly) {
     _polyInternalID = internalID;
     _outputLayerID    = outputLayerID;
     if (_outputLayerID  >= _numOfOutputLayers) _numOfOutputLayers = _outputLayerID + 1;
@@ -105,7 +105,7 @@ void PolyFeature::average_polygon_inner_points(const Point_set_3& pointCloud,
     Fuzzy_iso_box pts_range(bbox1, bbox2);
     searchTree.search(std::back_inserter(subsetPts), pts_range);
 
-    //-- Collect points that haven't been averaged already
+    //-- Collect points that have not been already averaged
     for (auto& pt3 : subsetPts) {
         Point_2 pt(pt3.x(), pt3.y());
         if (CGAL::bounded_side_2(_poly._rings.front().begin(), _poly._rings.front().end(), pt) != CGAL::ON_UNBOUNDED_SIDE) {
@@ -125,8 +125,7 @@ void PolyFeature::average_polygon_inner_points(const Point_set_3& pointCloud,
 
     //-- Add new points to the temp map
     for (auto& i : indices) {
-        Point_3 pt = pointCloud.point(i);
-        averagedPts[i] = Point_3(pt.x(), pt.y(), avgHeight);
+        averagedPts[i] = Point_3(pointCloud.point(i).x(), pointCloud.point(i).y(), avgHeight);
     }
 }
 

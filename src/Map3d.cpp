@@ -302,7 +302,7 @@ void Map3d::average_polygon_points() {
         }
     }
 
-    //-- CGAL's Point Set is meant to be constant -> construct new Point Set with averaged values
+    //-- Construct new Point Set with averaged values
     Point_set_3 newPointCloud;
     for (auto& it : averagedPts) {
         newPointCloud.insert(it.second);
@@ -313,8 +313,7 @@ void Map3d::average_polygon_points() {
             newPointCloud.insert(_pointCloud.point(i));
         } else averagedPts.erase(i);
     }
-
-    //-- Put the new point cloud in place of the old one
+    //- Replace the old point cloud with the new one
     _pointCloud = newPointCloud;
 }
 

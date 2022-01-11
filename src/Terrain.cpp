@@ -5,10 +5,10 @@
 #include "SurfaceLayer.h"
 
 Terrain::Terrain()
-    : TopoFeature(0), _cdt(), _surfaceLayersTerrain(), _constrainedPolys() {}
+        : TopoFeature(0), _cdt(), _surfaceLayersTerrain(), _constrainedPolys() {}
 
 Terrain::Terrain(int pid)
-    : TopoFeature(pid), _cdt(), _surfaceLayersTerrain(), _constrainedPolys() {}
+        : TopoFeature(pid), _cdt(), _surfaceLayersTerrain(), _constrainedPolys() {}
 
 Terrain::~Terrain() = default;
 

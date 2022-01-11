@@ -2,13 +2,13 @@
 
 //-- TopoFeature class
 TopoFeature::TopoFeature()
-    : _mesh(), _id(), _f_active(true), _f_imported(false), _outputLayerID(-1) {}
+        : _mesh(), _id(), _f_active(true), _f_imported(false), _outputLayerID(-1) {}
 
 TopoFeature::TopoFeature(std::string pid)
-    : _mesh(), _id(std::move(pid)), _f_active(true), _f_imported(false), _outputLayerID(-1) {}
+        : _mesh(), _id(std::move(pid)), _f_active(true), _f_imported(false), _outputLayerID(-1) {}
 
 TopoFeature::TopoFeature(int outputLayerID)
-    : _mesh(), _id(), _f_active(true), _f_imported(false), _outputLayerID(outputLayerID) {
+        : _mesh(), _id(), _f_active(true), _f_imported(false), _outputLayerID(outputLayerID) {
     if (_outputLayerID  >= _numOfOutputLayers) _numOfOutputLayers = _outputLayerID + 1;
 }
 

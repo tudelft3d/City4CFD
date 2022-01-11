@@ -3,10 +3,10 @@
 #include "geomutils.h"
 
 Boundary::Boundary()
-    : TopoFeature(), _sideOutputPts() {}
+        : TopoFeature(), _sideOutputPts() {}
 
 Boundary::Boundary(const int outputLayerID)
-    : TopoFeature(outputLayerID), _sideOutputPts() {}
+        : TopoFeature(outputLayerID), _sideOutputPts() {}
 
 Boundary::~Boundary() = default;
 
