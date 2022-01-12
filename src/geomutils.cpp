@@ -94,11 +94,8 @@ void geomutils::mark_domains(CDT& ct,
         if (fh->info().nesting_level == -1) {
             fh->info().nesting_level = index;
             if (surfaceLayer != -1) {
-                if (check_layer_normal(fh, surfaceLayer)) {
-                    fh->info().surfaceLayer = surfaceLayer;
-                } else {
-                    fh->info().surfaceLayer = -2;
-                }
+//                fh->info().surfaceLayer = surfaceLayer;
+                check_layer(fh, surfaceLayer);
             }
             for (int i = 0; i < 3; i++) {
                 CDT::Edge e(fh,i);
@@ -133,7 +130,7 @@ void geomutils::mark_domains(CDT& cdt, PolyFeatures features) {
     }
 }
 
-bool geomutils::check_layer_normal(const Face_handle& fh, int surfaceLayer) {
+void geomutils::check_layer(const Face_handle& fh, int surfaceLayer) {
     auto it = config::averageSurfaces.find(surfaceLayer);
     if (it != config::averageSurfaces.end()) {
         Converter<EPECK, EPICK> to_inexact;
@@ -143,15 +140,18 @@ bool geomutils::check_layer_normal(const Face_handle& fh, int surfaceLayer) {
                                      to_inexact(fh->vertex(2)->point()));
 
         if (CGAL::approximate_angle(norm, vertical) < 60.0) {
-            return true;
+            fh->info().surfaceLayer = surfaceLayer;
+        } else {
+            fh->info().surfaceLayer = -2;
         }
+    } else {
+        fh->info().surfaceLayer = surfaceLayer;
     }
-    return false;
 }
 
-    void geomutils::shorten_long_poly_edges(Polygon_2& poly, double maxLen) {
-        auto& polyVec = poly.container();
-        for (auto i = 0; i < polyVec.size();) {
+void geomutils::shorten_long_poly_edges(Polygon_2& poly, double maxLen) {
+    auto& polyVec = poly.container();
+    for (auto i = 0; i < polyVec.size();) {
         auto edge = polyVec[(i + 1) % polyVec.size()] - polyVec[i];
         double edgeSqLen = edge.squared_length();
         if (edgeSqLen > maxLen*maxLen) {
@@ -291,20 +291,20 @@ void geomutils::smooth_dt(const Point_set_3& pointCloud, T& dt) {
         {
             if (!dt.is_infinite(circ))
             {
-                double sq_dist = CGAL::to_double(CGAL::squared_distance (vh->point(), circ->point()));
-                double weight = std::exp(- sq_dist / gaussian_variance);
+                double sq_dist = CGAL::to_double(CGAL::squared_distance(vh->point(), circ->point()));
+                double weight = std::exp(-sq_dist / gaussian_variance);
                 z += weight * CGAL::to_double(circ->point().z());
                 total_weight += weight;
             }
         }
         while (++ circ != start);
         z /= total_weight;
-        vh->point() = CGAL::Point_3<U> (vh->point().x(), vh->point().y(), z);
+        vh->point() = CGAL::Point_3<U>(vh->point().x(), vh->point().y(), z);
     }
 }
 //-- Explicit template instantiation
-template void geomutils::smooth_dt<DT, EPICK>  (const Point_set_3& pointCloud, DT& dt);
-template void geomutils::smooth_dt<CDT, EPECK> (const Point_set_3& pointCloud, CDT& dt);
+template void geomutils::smooth_dt<DT, EPICK>(const Point_set_3& pointCloud, DT& dt);
+template void geomutils::smooth_dt<CDT, EPECK>(const Point_set_3& pointCloud, CDT& dt);
 
 template <typename T>
 Polygon_2 geomutils::calc_bbox_poly(const T& inputPts) {

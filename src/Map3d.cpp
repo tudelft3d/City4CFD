@@ -289,7 +289,7 @@ void Map3d::average_polygon_points() {
             ++count;
         }
     }
-    _pointCloud.collect_garbage(); // Free removed points from the memory
+    _pointCloud.collect_garbage();
 
     //-- Construct search tree from ground points
     SearchTree searchTree(_pointCloud.points().begin(), _pointCloud.points().end());
@@ -302,19 +302,19 @@ void Map3d::average_polygon_points() {
         }
     }
 
-    //-- Construct new Point Set with averaged values
-    Point_set_3 newPointCloud;
+    //-- Change points with averaged values
+    int pcOrigSize = _pointCloud.points().size();
     for (auto& it : averagedPts) {
-        newPointCloud.insert(it.second);
+        _pointCloud.insert(it.second);
     }
-    for (int i = 0; i < _pointCloud.points().size(); ++i) {
+    for (int i = 0; i < pcOrigSize; ++i) {
         auto it = averagedPts.find(i);
-        if (it == averagedPts.end()) {
-            newPointCloud.insert(_pointCloud.point(i));
-        } else averagedPts.erase(i);
+        if (it != averagedPts.end()) {
+            _pointCloud.remove(i);
+            averagedPts.erase(i);
+        }
     }
-    //- Replace the old point cloud with the new one
-    _pointCloud = newPointCloud;
+    _pointCloud.collect_garbage();
 }
 
 void Map3d::solve_building_conflicts() {

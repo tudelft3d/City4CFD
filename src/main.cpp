@@ -3,7 +3,7 @@
 #include "Map3d.h"
 
 void printWelcome() {
-    printf("\e[?25l");
+//    printf("\e[?25l");
     auto logo{
             R"(
     #===========================================================#
