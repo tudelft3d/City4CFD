@@ -4,7 +4,9 @@
         - Speed optimization
 
 ## High-priority
-    - Terrain smoothing must not touch averaged surface layers
+    - Averaged surfaces
+        - Terrain smoothing must not touch averaged surface layers
+        - Handling averaged surfaces that touch buildings
     - No terrain situation
     - Option to choose unique ID
 

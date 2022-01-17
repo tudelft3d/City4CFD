@@ -97,6 +97,7 @@ void PolyFeature::average_polygon_inner_points(const Point_set_3& pointCloud,
                                                const std::unordered_map<Point_3, int>& pointCloudConnectivity) const {
     std::vector<int>    indices;
     std::vector<double> originalHeights;
+    auto is_building_pt = pointCloud.property_map<bool>("is_building_point").first;
     //-- Take tree subset bounded by the polygon
     std::vector<Point_3> subsetPts;
     Polygon_2 bbox = geomutils::calc_bbox_poly(_poly.rings().front());
@@ -110,6 +111,12 @@ void PolyFeature::average_polygon_inner_points(const Point_set_3& pointCloud,
         Point_2 pt(pt3.x(), pt3.y());
         if (CGAL::bounded_side_2(_poly._rings.front().begin(), _poly._rings.front().end(), pt) != CGAL::ON_UNBOUNDED_SIDE) {
             auto itIdx = pointCloudConnectivity.find(pt3);
+
+            auto pointSetIt = pointCloud.begin();
+            std::advance(pointSetIt, itIdx->second);
+            if (is_building_pt[*pointSetIt])
+                return; //todo temp solution when having adjacent buildings
+
             auto it = averagedPts.find(itIdx->second);
             if (it == averagedPts.end()) {
                 indices.push_back(itIdx->second);

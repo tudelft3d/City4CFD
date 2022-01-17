@@ -18,12 +18,12 @@ void Terrain::set_cdt(const Point_set_3& pointCloud) {
     std::cout << "\n    Triangulating" << std::endl;
     int count = 0;
     int pcSize = pointCloud.size();
-    std::vector<ePoint_3> pts;
+    std::vector<ePoint_3> pts; //todo check progress bar
     IO::print_progress_bar(0);
     for (auto& pt : pointCloud.points()) {
-        pts.push_back(to_exact(pt));
+        pts.emplace_back(to_exact(pt));
 
-        IO::print_progress_bar(90 * count++ / pcSize);
+        IO::print_progress_bar(99 * count++ / pcSize);
     }
     IO::print_progress_bar(90);
     _cdt.insert(pts.begin(), pts.end());
@@ -39,9 +39,12 @@ void Terrain::set_cdt(const Point_set_3& pointCloud) {
 void Terrain::prep_constraints(const PolyFeatures& features, Point_set_3& pointCloud) {
     std::cout << "    Lifting polygon edges to terrain height" << std::endl;
     int countFeatures = 0;
+    auto is_building_pt = pointCloud.property_map<bool>("is_building_point").first;
     for (auto& f : features) {
-        int polyCount = 0;
         if (!f->is_active()) continue;
+        bool is_building = false;
+        if (f->get_class() == BUILDING) is_building = true;
+        int polyCount = 0;
         for (auto& ring : f->get_poly().rings()) {
             auto& heights = f->get_base_heights();
             //-- Add ring points
@@ -49,7 +52,8 @@ void Terrain::prep_constraints(const PolyFeatures& features, Point_set_3& pointC
             Polygon_3 pts;
             for (auto& polyVertex : ring) {
                 pts.push_back(ePoint_3(polyVertex.x(), polyVertex.y(), heights[polyCount][i]));
-                pointCloud.insert(Point_3(polyVertex.x(), polyVertex.y(), heights[polyCount][i++]));
+                auto it = pointCloud.insert(Point_3(polyVertex.x(), polyVertex.y(), heights[polyCount][i++]));
+                if (is_building) is_building_pt[*it] = true;
             }
             _constrainedPolys.push_back(pts);
             ++polyCount;

@@ -276,6 +276,7 @@ void Map3d::average_polygon_points() {
     std::map<int, Point_3> averagedPts;
 
     //-- Construct a connectivity map and remove duplicates along the way
+    auto is_building_pt = _pointCloud.property_map<bool>("is_building_point").first;
     std::unordered_map<Point_3, int> pointCloudConnectivity;
     auto it = _pointCloud.points().begin();
     int count = 0;
@@ -341,6 +342,7 @@ void Map3d::read_data() { // This will change with time
     if (!config::points_xyz.empty()) {
     std::cout << "Reading ground points" << std::endl;
     IO::read_point_cloud(config::points_xyz, _pointCloud);
+    _pointCloud.add_property_map<bool> ("is_building_point", false);
     std::cout << "    Points read: " << _pointCloud.size() << std::endl;
     } else {
         std::cout << "INFO: Did not find any ground points! Calculating ground as flat surface\n" << std::endl;
