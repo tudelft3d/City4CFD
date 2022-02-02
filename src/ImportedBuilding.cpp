@@ -69,7 +69,7 @@ ImportedBuilding::ImportedBuilding(nlohmann::json buildingJson, std::vector<Poin
             footprintElevations.push_back(_dPts[ptIdx].z());
             pointConectivity[IO::gen_key_bucket(Point_2(_dPts[ptIdx].x(), _dPts[ptIdx].y()))] = ptIdx;
         }
-        CGAL::internal::pop_back_if_equal_to_front(facePoly);
+        geomutils::pop_back_if_equal_to_front(facePoly);
         if (facePoly.is_clockwise_oriented()) facePoly.reverse_orientation();
 
         polySet.join(facePoly);

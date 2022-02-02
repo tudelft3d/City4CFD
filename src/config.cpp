@@ -6,6 +6,7 @@
 #include "valijson/validator.hpp"
 
 #include "io.h"
+#include "geomutils.h"
 
 #include "configSchema.inc"
 
@@ -275,7 +276,7 @@ void config::set_region(boost::variant<bool, double, Polygon_2>& regionType,
             tempPoly.push_back(Point_2(coords[0], coords[1]));
         }
         //-- Prepare poly
-        CGAL::internal::pop_back_if_equal_to_front(tempPoly);
+        geomutils::pop_back_if_equal_to_front(tempPoly);
         if (tempPoly.is_clockwise_oriented()) tempPoly.reverse_orientation();
 
         regionType = tempPoly;

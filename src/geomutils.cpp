@@ -327,3 +327,15 @@ Polygon_2 geomutils::calc_bbox_poly(const T& inputPts) {
 //- Explicit template instantiation
 template Polygon_2 geomutils::calc_bbox_poly<std::vector<Point_2>>(const std::vector<Point_2>& inputPts);
 template Polygon_2 geomutils::calc_bbox_poly<Polygon_2>(const Polygon_2& inputPts);
+
+template <typename T>
+void geomutils::pop_back_if_equal_to_front(CGAL::Polygon_2<T>& poly)
+{
+    typename CGAL::Polygon_2<T>::iterator it = poly.end();
+    --it;
+    if((*poly.begin()) == *it)
+        poly.erase(it);
+}
+//- Explicit template instantiation
+template void geomutils::pop_back_if_equal_to_front<EPICK>(CGAL::Polygon_2<EPICK>& poly);
+template void geomutils::pop_back_if_equal_to_front<EPECK>(CGAL::Polygon_2<EPECK>& poly);

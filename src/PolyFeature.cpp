@@ -163,7 +163,7 @@ void PolyFeature::parse_json_poly(const nlohmann::json& poly) {
         for (auto& coords : polyEdges) {
             tempPoly.push_back(Point_2(coords[0], coords[1]));
         }
-        CGAL::internal::pop_back_if_equal_to_front(tempPoly);
+        geomutils::pop_back_if_equal_to_front(tempPoly);
 
         if (_poly._rings.empty()) {
             if (tempPoly.is_clockwise_oriented()) tempPoly.reverse_orientation();
