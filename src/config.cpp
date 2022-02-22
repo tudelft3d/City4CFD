@@ -115,29 +115,6 @@ void config::set_config(nlohmann::json& j) {
         if (j["point_clouds"].contains("buildings")) buildings_xyz = j["point_clouds"]["buildings"];
     }
 
-    //-- Path to polygons
-    int i = 0;
-    int surfLayerIdx = 2; // 0 - terrain, 1 - buildings, surface layers star from 2
-    for (auto& poly : j["polygons"]) {
-        if (poly["type"] == "Building") {
-            gisdata = poly["path"];
-        }
-        if (poly["type"] == "SurfaceLayer") {
-            topoLayers.push_back(poly["path"]);
-            if (poly.contains("layer_name")) {
-                outputSurfaces.push_back(poly["layer_name"]);
-            } else {
-                outputSurfaces.push_back("SurfaceLayer" + std::to_string(++i));
-            }
-            if (poly.contains("average_surface")) {
-                if (poly["average_surface"]) {
-                    averageSurfaces[surfLayerIdx] = poly["surface_percentile"];
-                }
-            }
-            ++surfLayerIdx;
-        }
-    }
-
     //-- Additional geometries
     if (j.contains("import_geometries"))
         importedBuildings = j["import_geometries"]["path"];
@@ -193,6 +170,29 @@ void config::set_config(nlohmann::json& j) {
         outputSurfaces.emplace_back("Side_1");
     }
     outputSurfaces.emplace_back("Top");
+
+    //-- Path to polygons
+    int i = 0;
+    int surfLayerIdx = outputSurfaces.size(); // 0 - terrain, 1 - buildings, surface layers star from 2
+    for (auto& poly : j["polygons"]) {
+        if (poly["type"] == "Building") {
+            gisdata = poly["path"];
+        }
+        if (poly["type"] == "SurfaceLayer") {
+            topoLayers.push_back(poly["path"]);
+            if (poly.contains("layer_name")) {
+                outputSurfaces.push_back(poly["layer_name"]);
+            } else {
+                outputSurfaces.push_back("SurfaceLayer" + std::to_string(++i));
+            }
+            if (poly.contains("average_surface")) {
+                if (poly["average_surface"]) {
+                    averageSurfaces[surfLayerIdx] = poly["surface_percentile"];
+                }
+            }
+            ++surfLayerIdx;
+        }
+    }
 
     // Blockage ratio
     if (j.contains("bpg_blockage_ratio")) {

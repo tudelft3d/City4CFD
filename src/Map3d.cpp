@@ -98,8 +98,12 @@ void Map3d::set_features() {
         this->clear_inactives();
         std::cout << "    Geometries imported: " << _importedBuildings.size() << std::endl;
     }
+    //-- Boundaries
+    for (int i = 0; i < config::numSides; ++i)
+        _boundaries.push_back(std::make_shared<Sides>(TopoFeature::get_num_output_layers()));
+    _boundaries.push_back(std::make_shared<Top>(TopoFeature::get_num_output_layers()));
 
-    //- Other polygons
+    //-- Other polygons
     for (auto& surfaceLayer : _polygonsSurfaceLayers) {
         int outputLayerID = TopoFeature::get_num_output_layers();
         config::surfaceLayerIDs.push_back(outputLayerID); // Need it for later
@@ -110,12 +114,6 @@ void Map3d::set_features() {
         }
     }
     std::cout << "    Polygons read: " << _lsFeatures.size() << std::endl;
-
-    //-- Boundaries
-    for (int i = 0; i < config::numSides; ++i)
-        _boundaries.push_back(std::make_shared<Sides>(TopoFeature::get_num_output_layers()));
-    _boundaries.push_back(std::make_shared<Top>(TopoFeature::get_num_output_layers()));
-
     //-- Simplify terrain points
     if (config::terrainSimplification > 0 + g_smallnum) {
         std::cout <<"\nSimplyfing terrain points" << std::endl;
