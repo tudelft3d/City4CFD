@@ -25,7 +25,7 @@ void Terrain::set_cdt(const Point_set_3& pointCloud) {
 
         IO::print_progress_bar(99 * count++ / pcSize);
     }
-    IO::print_progress_bar(90);
+    IO::print_progress_bar(99);
     _cdt.insert(pts.begin(), pts.end());
     IO::print_progress_bar(100); std::clog << std::endl;
 

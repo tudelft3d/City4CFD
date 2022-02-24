@@ -75,8 +75,8 @@ void geomutils::mark_domains(CDT& ct,
             //- Polygons are already ordered according to importance - find first polygon
             if (geomutils::point_in_poly(chkPoint, feature->get_poly())) {
                 if (feature->get_class() == BUILDING) {
-                    surfaceLayer = 9999; //- Remove building footprints from terrain
-//                    surfaceLayer = -1; //- Leave building footprints as part of terrain
+//                    surfaceLayer = 9999; //- Remove building footprints from terrain
+                    surfaceLayer = -1; //- Leave building footprints as part of terrain
                     break;
                 } else {
                     surfaceLayer = feature->get_output_layer_id();

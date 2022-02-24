@@ -164,10 +164,10 @@ void config::set_config(nlohmann::json& j) {
         outputSurfaces.emplace_back("Sides");
     } else if (bpgDomainType == RECTANGLE) { // Expand output surfaces with front and back
         numSides = 4;
-        outputSurfaces.emplace_back("Front");
-        outputSurfaces.emplace_back("Side_2");
-        outputSurfaces.emplace_back("Back");
         outputSurfaces.emplace_back("Side_1");
+        outputSurfaces.emplace_back("Back");
+        outputSurfaces.emplace_back("Side_2");
+        outputSurfaces.emplace_back("Front");
     }
     outputSurfaces.emplace_back("Top");
 
