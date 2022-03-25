@@ -1,5 +1,5 @@
-#ifndef CITYCFD_CONFIG_H
-#define CITYCFD_CONFIG_H
+#ifndef CITY4CFD_CONFIG_H
+#define CITY4CFD_CONFIG_H
 
 #include "types.h"
 #include "CGALTypes.h"
@@ -68,4 +68,4 @@ namespace config {
                     nlohmann::json& j);
 };
 
-#endif //CITYCFD_CONFIG_H
+#endif //CITY4CFD_CONFIG_H

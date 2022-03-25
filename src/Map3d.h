@@ -1,5 +1,5 @@
-#ifndef CITYCFD_MAP3D_H
-#define CITYCFD_MAP3D_H
+#ifndef CITY4CFD_MAP3D_H
+#define CITY4CFD_MAP3D_H
 
 #include "types.h"
 #include "CGALTypes.h"
@@ -59,4 +59,4 @@ private:
     template<typename T> void set_footprint_elevation(T& features);
 };
 
-#endif //CITYCFD_MAP3D_H
+#endif //CITY4CFD_MAP3D_H

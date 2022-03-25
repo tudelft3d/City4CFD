@@ -1,5 +1,5 @@
-#ifndef CITYCFD_CGALTYPES_H
-#define CITYCFD_CGALTYPES_H
+#ifndef CITY4CFD_CGALTYPES_H
+#define CITY4CFD_CGALTYPES_H
 
 /*! CGAL Basics !*/
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
@@ -173,4 +173,4 @@ typedef Neighbor_search::Tree                         SearchTree;
 typedef CGAL::Fuzzy_iso_box<Traits>                   Fuzzy_iso_box;
 typedef CGAL::Fuzzy_sphere<Traits>                    Fuzzy_sphere;
 
-#endif //CITYCFD_CGALTYPES_H
+#endif //CITY4CFD_CGALTYPES_H

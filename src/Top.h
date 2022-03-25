@@ -1,5 +1,5 @@
-#ifndef CITYCFD_TOP_H
-#define CITYCFD_TOP_H
+#ifndef CITY4CFD_TOP_H
+#define CITY4CFD_TOP_H
 
 #include "Boundary.h"
 
@@ -14,4 +14,4 @@ public:
     virtual std::string get_class_name() const override;
 };
 
-#endif //CITYCFD_TOP_H
+#endif //CITY4CFD_TOP_H

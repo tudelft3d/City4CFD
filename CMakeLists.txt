@@ -1,4 +1,4 @@
-project(CityCFD)
+project(City4CFD)
 
 cmake_minimum_required(VERSION 3.1)
 
@@ -26,14 +26,14 @@ add_subdirectory(  ${CMAKE_SOURCE_DIR}/thirdparty/LAStools )
 include_directories( ${CMAKE_SOURCE_DIR}/thirdparty )
 include_directories( ${CMAKE_SOURCE_DIR}/thirdparty/valijson )
 
-# Creating entries for target: cityCFD
+# Creating entries for target: City4CFD
 FILE(GLOB SRC_FILES "src/*.cpp")
-add_executable(CityCFD ${SRC_FILES})
+add_executable(City4CFD ${SRC_FILES})
 set_target_properties(
-        CityCFD
+        City4CFD
         PROPERTIES CXX_STANDARD 14
 )
 
-target_link_libraries( CityCFD ${CGAL_LIBRARIES} ${CGAL_3RD_PARTY_LIBRARIES} Boost::filesystem)
+target_link_libraries( City4CFD ${CGAL_LIBRARIES} ${CGAL_3RD_PARTY_LIBRARIES} Boost::filesystem)
 
-install(TARGETS CityCFD DESTINATION bin)
+install(TARGETS City4CFD DESTINATION bin)

@@ -1,5 +1,5 @@
-#ifndef CITYCFD_IO_H
-#define CITYCFD_IO_H
+#ifndef CITY4CFD_IO_H
+#define CITY4CFD_IO_H
 
 #include "types.h"
 #include "CGALTypes.h"
@@ -32,4 +32,4 @@ namespace IO {
     template <typename T> std::string gen_key_bucket(const T& p);
 }
 
-#endif //CITYCFD_IO_H
+#endif //CITY4CFD_IO_H

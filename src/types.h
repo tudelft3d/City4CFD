@@ -1,5 +1,5 @@
-#ifndef CITYCFD_TYPES_H
-#define CITYCFD_TYPES_H
+#ifndef CITY4CFD_TYPES_H
+#define CITY4CFD_TYPES_H
 
 #include "nlohmann/json.hpp"
 
@@ -44,4 +44,4 @@ typedef enum {
 const double g_largnum  = 1e7;
 const double g_smallnum = 1e-7;
 
-#endif //CITYCFD_TYPES_H
+#endif //CITY4CFD_TYPES_H

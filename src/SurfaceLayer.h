@@ -1,5 +1,5 @@
-#ifndef CITYCFD_SURFACELAYER_H
-#define CITYCFD_SURFACELAYER_H
+#ifndef CITY4CFD_SURFACELAYER_H
+#define CITY4CFD_SURFACELAYER_H
 
 #include "PolyFeature.h"
 
@@ -23,4 +23,4 @@ private:
 
 };
 
-#endif //CITYCFD_SURFACELAYER_H
+#endif //CITY4CFD_SURFACELAYER_H

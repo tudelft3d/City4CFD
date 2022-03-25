@@ -1,5 +1,5 @@
-#ifndef CITYCFD_BOUNDINGREGION_H
-#define CITYCFD_BOUNDINGREGION_H
+#ifndef CITY4CFD_BOUNDINGREGION_H
+#define CITY4CFD_BOUNDINGREGION_H
 
 #include "types.h"
 #include "CGALTypes.h"
@@ -27,4 +27,4 @@ protected:
 
 };
 
-#endif //CITYCFD_BOUNDINGREGION_H
+#endif //CITY4CFD_BOUNDINGREGION_H

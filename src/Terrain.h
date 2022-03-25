@@ -1,5 +1,5 @@
-#ifndef CITYCFD_TERRAIN_H
-#define CITYCFD_TERRAIN_H
+#ifndef CITY4CFD_TERRAIN_H
+#define CITY4CFD_TERRAIN_H
 
 #include "TopoFeature.h"
 
@@ -31,4 +31,4 @@ protected:
     std::vector<Polygon_3> _constrainedPolys;
 };
 
-#endif //CITYCFD_TERRAIN_H
+#endif //CITY4CFD_TERRAIN_H

@@ -1,5 +1,5 @@
-#ifndef CITYCFD_GEOMUTILS_H
-#define CITYCFD_GEOMUTILS_H
+#ifndef CITY4CFD_GEOMUTILS_H
+#define CITY4CFD_GEOMUTILS_H
 
 #include "config.h"
 
@@ -44,4 +44,4 @@ namespace geomutils {
     };
 }
 
-#endif //CITYCFD_GEOMUTILS_H
+#endif //CITY4CFD_GEOMUTILS_H

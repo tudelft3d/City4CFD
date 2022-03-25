@@ -3,7 +3,7 @@
 cd ${0%/*} || exit 1
 WORKDIR="$PWD"
 
-#!** Script to prepare point cloud for CityCFD reconstruction using LAStools **!#
+#!** Script to prepare point cloud for City4CFD reconstruction using LAStools **!#
 #! What this script does:
     #- Merges multiple .las and .las tiles
     #- Removes points outside a bounding box
@@ -17,20 +17,20 @@ WORKDIR="$PWD"
 
 #! PLEASE SET THE INPUT VARIABLES BEFORE RUNNING THE SCRIPT !#
 #!---------------------------- INPUT VARIALBES --------------------------------#!
-# Full path of the CityCFD source folder
-CITYCFD_DIR=${PWD%/*}
+# Full path of the City4CFD source folder
+CITY4CFD_DIR=${PWD%/*}
 
 # Eastimate the bounding box of the dataset
 # Min_x Min_y Max_x Max_y
 BBOX="89973.860 435350.211 90632.581 435937.505"
 #===============================================================================#
 
-echo "Preparing point cloud using LAStools for CityCFD reconstruction"
+echo "Preparing point cloud using LAStools for City4CFD reconstruction"
 echo "Working directory: $WORKDIR"
 echo ""
 
-lasmerge="$CITYCFD_DIR/thirdparty/LAStools/bin64/lasmerge64"
-las2las="$CITYCFD_DIR/thirdparty/LAStools/bin64/las2las64"
+lasmerge="$CITY4CFD_DIR/thirdparty/LAStools/bin64/lasmerge64"
+las2las="$CITY4CFD_DIR/thirdparty/LAStools/bin64/las2las64"
 
 mkdir pctempfiles
 

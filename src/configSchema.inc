@@ -1,5 +1,5 @@
-#ifndef CITYCFD_CONFIGSCHEMA_INC
-#define CITYCFD_CONFIGSCHEMA_INC
+#ifndef CITY4CFD_CONFIGSCHEMA_INC
+#define CITY4CFD_CONFIGSCHEMA_INC
 
 #include "types.h"
 
@@ -9,7 +9,7 @@ namespace jsonschema {
     {
       "$schema": "https://json-schema.org/draft-07/schema#",
       "$id": "https://json-schema.org/draft-07/schema",
-      "title": "CityCFD Configuration File Schema",
+      "title": "City4CFD Configuration File Schema",
       "type": "object",
       "properties": {
         "point_clouds": {
@@ -268,4 +268,4 @@ namespace jsonschema {
         )"_json;
 }
 
-#endif //CITYCFD_CONFIGSCHEMA_INC
+#endif //CITY4CFD_CONFIGSCHEMA_INC

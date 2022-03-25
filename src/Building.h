@@ -1,5 +1,5 @@
-#ifndef CITYCFD_BUILDING_H
-#define CITYCFD_BUILDING_H
+#ifndef CITY4CFD_BUILDING_H
+#define CITY4CFD_BUILDING_H
 
 #include "PolyFeature.h"
 
@@ -28,4 +28,4 @@ protected:
     double _height;
 };
 
-#endif //CITYCFD_BUILDING_H
+#endif //CITY4CFD_BUILDING_H

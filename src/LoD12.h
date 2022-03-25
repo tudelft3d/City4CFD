@@ -1,5 +1,5 @@
-#ifndef CITYCFD_LOD12_H
-#define CITYCFD_LOD12_H
+#ifndef CITY4CFD_LOD12_H
+#define CITY4CFD_LOD12_H
 
 #include "CGALTypes.h"
 
@@ -21,4 +21,4 @@ private:
     void create_mesh(Mesh& mesh);
 };
 
-#endif //CITYCFD_LOD12_H
+#endif //CITY4CFD_LOD12_H

@@ -1,5 +1,5 @@
-#ifndef CITYCFD_TOPOFEATURE_H
-#define CITYCFD_TOPOFEATURE_H
+#ifndef CITY4CFD_TOPOFEATURE_H
+#define CITY4CFD_TOPOFEATURE_H
 
 #include "types.h"
 #include "CGALTypes.h"
@@ -42,4 +42,4 @@ protected:
                                    //    Top
 };
 
-#endif //CITYCFD_TOPOFEATURE_H
+#endif //CITY4CFD_TOPOFEATURE_H

@@ -1,5 +1,5 @@
-#ifndef CITYCFD_POLYFEATURE_H
-#define CITYCFD_POLYFEATURE_H
+#ifndef CITY4CFD_POLYFEATURE_H
+#define CITY4CFD_POLYFEATURE_H
 
 #include "TopoFeature.h"
 
@@ -39,4 +39,4 @@ protected:
     void parse_json_poly(const nlohmann::json& poly);
 };
 
-#endif //CITYCFD_POLYFEATURE_H
+#endif //CITY4CFD_POLYFEATURE_H

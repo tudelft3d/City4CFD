@@ -1,5 +1,5 @@
-#ifndef CITYCFD_BOUNDARY_H
-#define CITYCFD_BOUNDARY_H
+#ifndef CITY4CFD_BOUNDARY_H
+#define CITY4CFD_BOUNDARY_H
 
 #include "TopoFeature.h"
 
@@ -31,4 +31,4 @@ protected:
     static double               _outerBndHeight;
     std::vector<Point_3>        _sideOutputPts;
 };
-#endif //CITYCFD_BOUNDARY_H
+#endif //CITY4CFD_BOUNDARY_H

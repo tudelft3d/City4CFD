@@ -1,5 +1,5 @@
-#ifndef CITYCFD_EXPLICITBUILDING_H
-#define CITYCFD_EXPLICITBUILDING_H
+#ifndef CITY4CFD_EXPLICITBUILDING_H
+#define CITY4CFD_EXPLICITBUILDING_H
 
 #include "Building.h"
 
@@ -34,4 +34,4 @@ protected:
     void check_simplicity(Polygon_2& ring);
 };
 
-#endif //CITYCFD_EXPLICITBUILDING_H
+#endif //CITY4CFD_EXPLICITBUILDING_H
