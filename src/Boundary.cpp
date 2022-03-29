@@ -68,9 +68,11 @@ void Boundary::set_bounds_to_terrain(Point_set_3& pointCloud, const Polygon_2& b
     _outerBndHeight = geomutils::avg(bndHeights); // Height for buffer (for now) - average of outer pts
 
     if (config::domainBuffer > -g_largnum + g_smallnum) {
+        /*
         for (auto& pt : startBufferPoly) {
             pointCloud.insert(Point_3(pt.x(), pt.y(), _outerBndHeight));
         }
+         */
         for (auto& pt : bndPoly) {
             _outerPts.emplace_back(Point_3(pt.x(), pt.y(), _outerBndHeight));
             pointCloud.insert(_outerPts.back());

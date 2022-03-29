@@ -7,10 +7,18 @@ LoD12::LoD12(const Polygon_with_holes_2& poly,
              const std::vector<double>& building_pts)
         : _height(), _poly(poly), _baseHeights(base_heights), _buildingPts(building_pts) {}
 
-void LoD12::lod12reconstruct(Mesh& mesh, double& height) {
+LoD12::LoD12(const Polygon_with_holes_2& poly,
+             const std::vector<std::vector<double>>& base_heights,
+             const std::vector<double>& building_pts,
+             const double height)
+        : _height(height), _poly(poly), _baseHeights(base_heights), _buildingPts(building_pts) {}
+
+void LoD12::lod12_calc_height(double& height) {
     _height = geomutils::percentile(_buildingPts, config::buildingPercentile);
     height = _height;
+}
 
+void LoD12::lod12_reconstruct(Mesh& mesh) {
     this->create_mesh(mesh);
 }
 

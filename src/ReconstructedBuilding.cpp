@@ -4,16 +4,48 @@
 #include "LoD12.h"
 
 ReconstructedBuilding::ReconstructedBuilding()
-        : Building(), _searchTree(nullptr) {}
+        : Building(), _searchTree(nullptr),
+        _attributeHeight(-9999), _attributeHeightAdvantage(config::buildingHeightAttributeAdvantage) {}
 
 ReconstructedBuilding::ReconstructedBuilding(const int internalID)
-        : Building(internalID), _searchTree(nullptr) {}
+        : Building(internalID), _searchTree(nullptr),
+          _attributeHeight(-9999), _attributeHeightAdvantage(config::buildingHeightAttributeAdvantage) {}
+
 
 ReconstructedBuilding::ReconstructedBuilding(const nlohmann::json& poly)
-        : Building(poly), _searchTree(nullptr) {}
+        : Building(poly), _searchTree(nullptr),
+          _attributeHeight(-9999), _attributeHeightAdvantage(config::buildingHeightAttributeAdvantage) {
+    if (!config::buildingUniqueId.empty()) {
+        _id = poly["properties"][config::buildingUniqueId].dump();
+    }
+    if (poly["properties"].contains(config::buildingHeightAttribute)) {
+        if (poly["properties"][config::buildingHeightAttribute].is_number()) {
+            _attributeHeight = poly["properties"][config::buildingHeightAttribute];
+        }
+    } else if (poly["properties"].contains(config::floorAttribute)) {
+        _attributeHeight = (double)poly["properties"][config::floorAttribute] * config::floorHeight;
+    }
+}
 
 ReconstructedBuilding::ReconstructedBuilding(const nlohmann::json& poly, const int internalID)
-        : Building(poly, internalID), _searchTree(nullptr) {}
+        : Building(poly, internalID), _searchTree(nullptr),
+          _attributeHeight(-9999), _attributeHeightAdvantage(config::buildingHeightAttributeAdvantage) {
+    //todo maybe move id to polyFeature?
+    if (!config::buildingUniqueId.empty()) {
+        _id = poly["properties"][config::buildingUniqueId].dump();
+    } else {
+        _id = std::to_string(internalID);
+    }
+    if (poly["properties"].contains(config::buildingHeightAttribute)) {
+        if (poly["properties"][config::buildingHeightAttribute].is_number()) {
+            _attributeHeight = poly["properties"][config::buildingHeightAttribute];
+        }
+    } else if (poly["properties"].contains(config::floorAttribute)) {
+        if (poly["properties"][config::floorAttribute].is_number()) {
+            _attributeHeight = (double) poly["properties"][config::floorAttribute] * config::floorHeight;
+        }
+    }
+}
 
 ReconstructedBuilding::~ReconstructedBuilding() = default;
 
@@ -22,6 +54,12 @@ void ReconstructedBuilding::set_search_tree(const std::shared_ptr<SearchTree>& s
 }
 
 void ReconstructedBuilding::reconstruct() {
+    //-- Check if reconstructing from height attribute takes precedence
+    if (_attributeHeightAdvantage) {
+        this->reconstruct_from_attribute();
+        return;
+    }
+
     //-- Take tree subset bounded by the polygon
     std::vector<Point_3> subsetPts;
     Point_3 bbox1(_poly.bbox().xmin(), _poly.bbox().ymin(), -g_largnum);
@@ -39,16 +77,23 @@ void ReconstructedBuilding::reconstruct() {
 
     //-- Don't reconstruct if there are no points belonging to the polygon
     if (building_pts.empty()) {
-        this->deactivate();
-        throw std::domain_error("Found no points belonging to the building");
+        if (this->reconstruct_again_from_attribute("Found no points belonging to the building")) {
+            return;
+        } else {
+            this->deactivate();
+            throw std::domain_error("Found no points belonging to the building");
+        }
     }
 
     //-- LoD12 reconstruction
     LoD12 lod12(_poly, _base_heights, building_pts);
-    lod12.lod12reconstruct(_mesh, _height);
+    lod12.lod12_calc_height(_height);
+    lod12.lod12_reconstruct(_mesh);
 
-    double lowHeight = 2.; // Hardcoded low height here
-    if (lod12.get_height() < lowHeight) { // In case of a small height
+    if (lod12.get_height() < _lowHeight) { // In case of a small height
+        if (this->reconstruct_again_from_attribute("Building height lower than minimum prescribed height")) {
+            return;
+        }
         this->deactivate();
         throw std::domain_error("Building height lower than minimum prescribed height");
     }
@@ -81,5 +126,43 @@ void ReconstructedBuilding::get_cityjson_semantics(nlohmann::json& g) const { //
         if (it == surfaceId.end()) throw std::runtime_error("Could not find semantic attribute!");
 
         g["semantics"]["values"][faceIdx.idx()] = it->second;
+    }
+}
+
+void ReconstructedBuilding::reconstruct_from_attribute() {
+    //-- Check attribute height
+    if (_attributeHeight <= 0) {
+        this->deactivate();
+        throw std::runtime_error("Attribute height from geojson file is invalid!");
+    }
+
+    //-- Average the fooprint height to get ground-zero height
+    std::vector<double> footprintElevations;
+    for (auto& rings : _base_heights) {
+        for (auto& pt : rings) footprintElevations.push_back(pt);
+    }
+    double baseHeight = geomutils::avg(footprintElevations);
+
+    //-- Set the height from attribute and reconstruct
+    _height = baseHeight + _attributeHeight;
+    LoD12 lod12HeightAttribute(_poly, _base_heights, {}, _height);
+    lod12HeightAttribute.lod12_reconstruct(_mesh);
+
+    //-- Low height check
+    if (lod12HeightAttribute.get_height() < _lowHeight) { // In case of a small height
+        this->deactivate();
+        throw std::domain_error("Building height attribute in geojson file lower than minimum prescribed height");
+    }
+}
+
+bool ReconstructedBuilding::reconstruct_again_from_attribute(const std::string& reason) {
+    if (_attributeHeight > 0) {
+        config::log << "Failed to reconstruct using point cloud building ID: " << _id
+                    << " Reason: " << reason
+                    << ". Reconstructing using height attribute from JSON polygon." << std::endl;
+        this->reconstruct_from_attribute();
+        return true;
+    } else {
+        return false;
     }
 }

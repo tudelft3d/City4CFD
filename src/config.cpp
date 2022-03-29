@@ -33,11 +33,17 @@ namespace config {
 
     //-- Reconstruction
     //- Terrain
-    double    terrainSimplification = 0.;
+    double    terrainThinning = 0.;
     bool      smoothTerrain = false;
     //- Buildings
+    std::string buildingUniqueId;
     std::string lod;
     double      buildingPercentile;
+    // Height from attributes
+    std::string buildingHeightAttribute;
+    std::string floorAttribute;
+    double      floorHeight;
+    bool        buildingHeightAttributeAdvantage = false;
     //- Imported buildings
     bool        importAdvantage;
     bool        importTrueHeight;
@@ -139,7 +145,7 @@ void config::set_config(nlohmann::json& j) {
             bpgDomainType = ROUND;
             if (j.contains("bpg_domain_size")) {
                 bpgDomainSize = {j["bpg_domain_size"][0], j["bpg_domain_size"][1]};
-            } else bpgDomainSize = {15, 5}; // BPG
+            } else bpgDomainSize = {15, 6}; // BPG
         } else if (boost::iequals(bpgDomainConfig, "rectangle")) {
             bpgDomainType = RECTANGLE;
         } else if (boost::iequals(bpgDomainConfig, "oval")) {
@@ -150,7 +156,7 @@ void config::set_config(nlohmann::json& j) {
     if (bpgDomainType == RECTANGLE || bpgDomainType == OVAL) {
         if (j.contains("bpg_domain_size")) {
             bpgDomainSize = {j["bpg_domain_size"][0], j["bpg_domain_size"][1], j["bpg_domain_size"][2], j["bpg_domain_size"][3]};
-        } else bpgDomainSize = {5, 5, 15, 5}; // BPG
+        } else bpgDomainSize = {5, 5, 15, 6}; // BPG
     }
 
     // Set domain side and top
@@ -173,10 +179,20 @@ void config::set_config(nlohmann::json& j) {
 
     //-- Path to polygons
     int i = 0;
-    int surfLayerIdx = outputSurfaces.size(); // 0 - terrain, 1 - buildings, surface layers star from 2
+    int surfLayerIdx = outputSurfaces.size(); // 0 - terrain, 1 - buildings, surface layers start from 2
     for (auto& poly : j["polygons"]) {
         if (poly["type"] == "Building") {
             gisdata = poly["path"];
+            if (poly.contains("unique_id"))
+                buildingUniqueId = poly["unique_id"];
+            if (poly.contains("height_attribute"))
+                buildingHeightAttribute = poly["height_attribute"];
+            if (poly.contains("height_attribute_advantage"))
+                buildingHeightAttributeAdvantage = poly["height_attribute_advantage"];
+            if (poly.contains("floor_attribute"))
+                floorAttribute = poly["floor_attribute"];
+            if (poly.contains("floor_height"))
+                floorHeight = (double)poly["floor_height"];
         }
         if (poly["type"] == "SurfaceLayer") {
             topoLayers.push_back(poly["path"]);
@@ -215,7 +231,7 @@ void config::set_config(nlohmann::json& j) {
     //-- Reconstruction
     // Terrain
     if (j.contains("terrain_simplification"))
-        terrainSimplification = j["terrain_simplification"];
+        terrainThinning = j["terrain_simplification"];
     if (j.contains("smooth_terrain"))
         smoothTerrain = j["smooth_terrain"];
 

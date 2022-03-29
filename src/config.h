@@ -30,11 +30,17 @@ namespace config {
 
     //-- Reconstruction
     //- Terrain
-    extern double    terrainSimplification;
+    extern double    terrainThinning;
     extern bool      smoothTerrain;
     //- Buildings
+    extern std::string    buildingUniqueId;
     extern std::string    lod;
     extern double         buildingPercentile;
+    // Attributes
+    extern std::string    buildingHeightAttribute;
+    extern std::string    floorAttribute;
+    extern double         floorHeight;
+    extern bool           buildingHeightAttributeAdvantage;
     //- Imported Buildings
     extern bool        importAdvantage;
     extern bool        importTrueHeight;
@@ -55,11 +61,11 @@ namespace config {
     extern std::vector<int>          surfaceLayerIDs;
 
     //-- Data log
-    extern bool               outputLog;
-    extern std::string        logName;
-    extern std::ostringstream log;
-    extern std::ostringstream logSummary;
-    extern std::vector<int>   failedBuildings;
+    extern bool                 outputLog;
+    extern std::string          logName;
+    extern std::ostringstream   log;
+    extern std::ostringstream   logSummary;
+    extern std::vector<int>     failedBuildings;
 
     void validate(nlohmann::json& j);
     void set_config(nlohmann::json& j);

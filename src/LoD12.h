@@ -6,10 +6,14 @@
 class LoD12 {
 public:
     LoD12() = default;
-    LoD12(const Polygon_with_holes_2& poly, const std::vector<std::vector<double>>& base_heights, const std::vector<double>& building_pts);
+    LoD12(const Polygon_with_holes_2& poly, const std::vector<std::vector<double>>& base_heights,
+          const std::vector<double>& building_pts);
+    LoD12(const Polygon_with_holes_2& poly, const std::vector<std::vector<double>>& base_heights,
+          const std::vector<double>& building_pts, const double height);
     ~LoD12() = default;
 
-    void   lod12reconstruct(Mesh &mesh, double& height);
+    void   lod12_calc_height(double& height);
+    void   lod12_reconstruct(Mesh& mesh);
     double get_height() const;
 
 private:

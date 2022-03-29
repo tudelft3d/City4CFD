@@ -1,7 +1,7 @@
 {
   "point_clouds" :
   {
-    "ground": "point_cloud/sampled_ground_1m.ply",
+    "ground": "point_cloud/sampled_ground_10m.ply",
     "buildings" : "point_cloud/sampled_buildings_1m.ply"
   },
   "polygons" : [
@@ -17,7 +17,9 @@
     {
       "type":       "SurfaceLayer",
       "path":       "polygons/Water.geojson",
-      "layer_name": "Water"
+      "layer_name": "Water",
+      "average_surface": true,
+      "surface_percentile": 10
     }
   ],
 
@@ -31,8 +33,8 @@
   "flow_direction":     [1, 1],
   "buffer_region":     -20,
 
-  "terrain_simplification": 90,
-  "smooth_terrain":         true,
+  "terrain_simplification": 60,
+  "smooth_terrain":         false,
 
   "lod": "1.2",
   "building_percentile": 90,

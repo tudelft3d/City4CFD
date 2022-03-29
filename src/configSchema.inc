@@ -38,24 +38,55 @@ namespace jsonschema {
                 "type": "string"
               }
             },
-            "if": {
-              "properties": {"type": {"const": "SurfaceLayer"}}
-            },
-            "then": {
-              "properties": {
-                "layer_name": {"type": "string"},
-                "average_surface": {"type": "boolean"},
-                "surface_percentile": {"type": "number"}
+            "allOf": [
+              {
+                "if": {
+                  "properties": {"type": {"const": "Building"}}
+                },
+                "then": {
+                  "properties": {
+                    "height_attribute": {"type": "string"},
+                    "floor_attribute": {"type": "string"},
+                    "floor_height": {"type": "number"},
+                    "height_attribute_advantage": {"type": "boolean"}
+                  },
+                  "dependencies": {
+                    "floor_attribute": ["floor_height"]
+                  },
+                  "if": {
+                    "not": {
+                      "properties": {"height_attribute_advantage": {"const": false}}
+                    }
+                  },
+                  "then": {
+                    "anyOf": [
+                      {"required": ["height_attribute"]},
+                      {"required": ["floor_attribute"]}
+                    ]
+                  }
+                }
               },
-              "dependencies": {
-                "average_surface": ["surface_percentile"]
+              {
+                "if": {
+                  "properties": {"type": {"const": "SurfaceLayer"}}
+                },
+                "then": {
+                  "properties": {
+                    "layer_name": {"type": "string"},
+                    "average_surface": {"type": "boolean"},
+                    "surface_percentile": {"type": "number"}
+                  },
+                  "dependencies": {
+                    "average_surface": ["surface_percentile"]
+                  }
+                }
               }
-            },
+            ],
             "required": ["type", "path"]
           }
         },
         "import_geometries": {
-          "description": "Handling imoprted CityJSON geometries",
+          "description": "Handling imported CityJSON geometries",
           "type": "object",
           "properties": {
             "path": {
@@ -192,6 +223,7 @@ namespace jsonschema {
         {
           "anyOf": [
             {
+              "description": "Input for buildings can be point cloud, reconstructed buildings, attribute and their combination",
               "required": ["point_clouds"],
               "properties": {
                 "point_clouds": {"required": ["buildings"]},
@@ -204,6 +236,22 @@ namespace jsonschema {
                         "const": "Building"
                       }
                     }
+                  }
+                }
+              }
+            },
+            {
+              "properties": {
+                "polygons": {
+                  "contains": {
+                    "type": "object",
+                    "properties": {
+                      "type": {"const": "Building"}
+                    },
+                    "anyOf": [
+                      {"required": ["height_attribute"]},
+                      {"required": ["floor_attribute"]}
+                    ]
                   }
                 }
               }

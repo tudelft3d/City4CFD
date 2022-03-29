@@ -38,7 +38,7 @@ bool IO::read_point_cloud(std::string& file, Point_set_3& pc) {
     return true;
 }
 
-void IO::read_geojson_polygons(std::string& file, JsonVector& jsonPolygons) { // For now specifically GeoJSON, but can potentially change
+void IO::read_geojson_polygons(std::string& file, JsonVector& jsonPolygons) {
     try {
         std::ifstream ifs(file);
         nlohmann::json j = nlohmann::json::parse(ifs);
@@ -46,11 +46,13 @@ void IO::read_geojson_polygons(std::string& file, JsonVector& jsonPolygons) { //
         int count;
         for (auto& feature : j["features"]) {
             if (feature["geometry"]["type"] == "Polygon") {
-                auto poly = feature["geometry"]["coordinates"];
-                jsonPolygons.emplace_back(std::make_unique<nlohmann::json>(poly));
+                jsonPolygons.emplace_back(std::make_unique<nlohmann::json>(feature));
             } else if (feature["geometry"]["type"] == "MultiPolygon") {
                 for (auto& poly : feature["geometry"]["coordinates"]) {
-                    jsonPolygons.emplace_back(std::make_unique<nlohmann::json>(poly));
+                    nlohmann::json newPoly;
+                    newPoly["properties"] = feature["properties"];
+                    newPoly["geometry"]["coordinates"] = poly;
+                    jsonPolygons.emplace_back(std::make_unique<nlohmann::json>(newPoly));
                 }
             } else {
                 // Exception handling - maybe write to log file
@@ -243,7 +245,6 @@ void IO::get_obj_pts(const Mesh& mesh,
                 dPts[pt] = dPts.size() + 1;
             } else {
                 bsTemp += " " + std::to_string(it->second);
-
                 faceIdx.push_back(it->second);
             }
         }

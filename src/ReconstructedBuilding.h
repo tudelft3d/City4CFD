@@ -19,6 +19,14 @@ public:
 
 protected:
     std::shared_ptr<SearchTree> _searchTree;
+    double _attributeHeight;
+    bool   _attributeHeightAdvantage;
+
+    //-- Hardcoded low height info
+    double _lowHeight = 2.0;
+
+    void reconstruct_from_attribute();
+    bool reconstruct_again_from_attribute(const std::string& reason);
 };
 
 

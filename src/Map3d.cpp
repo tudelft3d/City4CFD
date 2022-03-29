@@ -103,7 +103,7 @@ void Map3d::set_features() {
         _boundaries.push_back(std::make_shared<Sides>(TopoFeature::get_num_output_layers()));
     _boundaries.push_back(std::make_shared<Top>(TopoFeature::get_num_output_layers()));
 
-    //-- Other polygons
+    //- Other polygons
     for (auto& surfaceLayer : _polygonsSurfaceLayers) {
         int outputLayerID = TopoFeature::get_num_output_layers();
         config::surfaceLayerIDs.push_back(outputLayerID); // Need it for later
@@ -115,11 +115,11 @@ void Map3d::set_features() {
     }
     std::cout << "    Polygons read: " << _lsFeatures.size() << std::endl;
     //-- Simplify terrain points
-    if (config::terrainSimplification > 0 + g_smallnum) {
+    if (config::terrainThinning > 0 + g_smallnum) {
         std::cout <<"\nSimplyfing terrain points" << std::endl;
-        _pointCloud.remove(CGAL::random_simplify_point_set(_pointCloud, config::terrainSimplification), _pointCloud.end());
+        _pointCloud.remove(CGAL::random_simplify_point_set(_pointCloud, config::terrainThinning), _pointCloud.end());
         _pointCloud.collect_garbage();
-        std::cout << "    Terrain points after simplification: " << _pointCloud.size() << std::endl;
+        std::cout << "    Terrain points after thinning: " << _pointCloud.size() << std::endl;
     }
 
     //-- BPG flags for influ region and domain boundary
@@ -241,7 +241,7 @@ void Map3d::reconstruct_buildings() {
         } catch (std::exception& e) {
             ++failed;
             //-- Add information to log file
-            config::log << "Failed to reconstruct building ID: " << f->get_internal_id()
+            config::log << "Failed to reconstruct building ID: " << f->get_id()
                         << " Reason: " << e.what() << std::endl;
             //-- Get JSON file ID for failed reconstructions output
             config::failedBuildings.push_back(f->get_internal_id());
