@@ -116,7 +116,7 @@ void Map3d::set_features() {
     std::cout << "    Polygons read: " << _lsFeatures.size() << std::endl;
     //-- Simplify terrain points
     if (config::terrainThinning > 0 + g_smallnum) {
-        std::cout <<"\nSimplyfing terrain points" << std::endl;
+        std::cout <<"\nRandomly thinning terrain points" << std::endl;
         _pointCloud.remove(CGAL::random_simplify_point_set(_pointCloud, config::terrainThinning), _pointCloud.end());
         _pointCloud.collect_garbage();
         std::cout << "    Terrain points after thinning: " << _pointCloud.size() << std::endl;

@@ -230,8 +230,8 @@ void config::set_config(nlohmann::json& j) {
 
     //-- Reconstruction
     // Terrain
-    if (j.contains("terrain_simplification"))
-        terrainThinning = j["terrain_simplification"];
+    if (j.contains("terrain_thinning"))
+        terrainThinning = j["terrain_thinning"];
     if (j.contains("smooth_terrain"))
         smoothTerrain = j["smooth_terrain"];
 

@@ -8,12 +8,17 @@
   "polygons" : [
     {
       "type": "Building",
-      "path": "polygons/tudcampus.geojson"
+      "path": "polygons/tudcampus.geojson",
+      "unique_id": "gid"                     // Optional argument, to use building ID from geojson file
+//      "height_attribute": "height",        // Optional argument, to use height from geojson file for reconstruction
+//      "floor_attribute": "num_floors",     // Optional argument, to use number of floors for reconstruction
+//      "floor_height": 3,                   // Floor height, required if 'floor_attribute' is defined
+//      "height_attribute_advantage": false  // In case height attribute takes precedence over other reconstruction from point cloud
     },
     {
       "type": "SurfaceLayer",
       "path": "polygons/Vegetation.geojson",
-       "layer_name" : "Vegetation"
+       "layer_name" : "Vegetation"           // Optional argument to choose a layer name
     },
     {
       "type":       "SurfaceLayer",
@@ -39,7 +44,7 @@
 
   //-- Reconstruction related
   //- Terrain
-  "terrain_simplification": 90,       // Optional - percentage of randomly removed terrain points
+  "terrain_thinning": 90,             // Optional - percentage of randomly removed terrain points
   "smooth_terrain":         true,     // Optional - smoothing flag
   //- Buildings
   "lod": "1.2",

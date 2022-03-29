@@ -144,8 +144,8 @@ namespace jsonschema {
           "type": "number",
           "exclusiveMinimum": -99
         },
-        "terrain_simplification": {
-          "description": "Optional: Random simplification of the terrain point cloud",
+        "terrain_thinning": {
+          "description": "Optional: Random thinning of the terrain point cloud",
           "type": "number",
           "minimum": 0,
           "exclusiveMaximum": 100
