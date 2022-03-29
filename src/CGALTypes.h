@@ -184,8 +184,6 @@ typedef CGAL::Delaunay_triangulation_2<CGAL::Projection_traits_xy_3<EPICK>>     
 #include <CGAL/Search_traits_2.h>
 #include <CGAL/Search_traits_3.h>
 #include <CGAL/Orthogonal_k_neighbor_search.h>
-#include <CGAL/natural_neighbor_coordinates_2.h>
-#include <CGAL/Barycentric_coordinates_2/Triangle_coordinates_2.h>
 
 typedef CGAL::Search_traits_3<EPICK>                 Traits;
 //typedef CGAL::Kd_tree<Traits>                         SearchTree;

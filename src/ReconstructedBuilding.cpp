@@ -51,7 +51,6 @@ ReconstructedBuilding::ReconstructedBuilding(const nlohmann::json& poly)
 ReconstructedBuilding::ReconstructedBuilding(const nlohmann::json& poly, const int internalID)
         : Building(poly, internalID), _searchTree(nullptr),
           _attributeHeight(-9999), _attributeHeightAdvantage(config::buildingHeightAttributeAdvantage) {
-    //todo maybe move id to polyFeature?
     if (!config::buildingUniqueId.empty()) {
         _id = poly["properties"][config::buildingUniqueId].dump();
     } else {

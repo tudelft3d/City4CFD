@@ -68,7 +68,10 @@ namespace jsonschema {
                   "properties": {
                     "height_attribute": {"type": "string"},
                     "floor_attribute": {"type": "string"},
-                    "floor_height": {"type": "number"},
+                    "floor_height": {
+                      "type": "number",
+                      "exclusiveMinimum": 0
+                    },
                     "height_attribute_advantage": {"type": "boolean"}
                   },
                   "dependencies": {
@@ -95,7 +98,11 @@ namespace jsonschema {
                   "properties": {
                     "layer_name": {"type": "string"},
                     "average_surface": {"type": "boolean"},
-                    "surface_percentile": {"type": "number"}
+                    "surface_percentile": {
+                      "type": "number",
+                      "exclusiveMinimum": 0,
+                      "maximum": 100
+                    }
                   },
                   "dependencies": {
                     "average_surface": ["surface_percentile"]
@@ -136,7 +143,8 @@ namespace jsonschema {
         },
         "top_height": {
           "description": "Not required when domain_bnd is null",
-          "type": "number"
+          "type": "number",
+          "exclusiveMinimum": 0
         },
         "bnd_type_bpg": {
           "enum": ["Round", "Rectangle", "Oval"]

@@ -35,7 +35,9 @@ public:
     virtual ~PolyFeature();
 
     void  calc_footprint_elevation_nni(const DT& dt);
+#ifndef NDEBUG
     void  calc_footprint_elevation_linear(const DT& dt);
+#endif
     void  average_polygon_inner_points(const Point_set_3& pointCloud, std::map<int, Point_3>& averagedPts,
                                        const SearchTree& searchTree, const std::unordered_map<Point_3,
                                        int>& pointCloudConnectivity) const;

@@ -23,6 +23,11 @@
 
 #include "geomutils.h"
 
+#include <CGAL/natural_neighbor_coordinates_2.h>
+#ifndef NDEBUG
+#include <CGAL/Barycentric_coordinates_2/Triangle_coordinates_2.h>
+#endif
+
 PolyFeature::PolyFeature()
     : TopoFeature(), _poly(), _base_heights(), _polyInternalID() {}
 
@@ -80,6 +85,7 @@ void PolyFeature::calc_footprint_elevation_nni(const DT& dt) {
     }
 }
 
+#ifndef NDEBUG
 void PolyFeature::calc_footprint_elevation_linear(const DT& dt) {
     typedef CGAL::Barycentric_coordinates::Triangle_coordinates_2<iProjection_traits>   Triangle_coordinates;
     DT::Face_handle fh = nullptr;
@@ -111,6 +117,7 @@ void PolyFeature::calc_footprint_elevation_linear(const DT& dt) {
         _base_heights.push_back(ringHeights);
     }
 }
+#endif
 
 void PolyFeature::average_polygon_inner_points(const Point_set_3& pointCloud,
                                                std::map<int, Point_3>& averagedPts,
