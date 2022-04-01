@@ -192,4 +192,9 @@ typedef Neighbor_search::Tree                         SearchTree;
 typedef CGAL::Fuzzy_iso_box<Traits>                   Fuzzy_iso_box;
 typedef CGAL::Fuzzy_sphere<Traits>                    Fuzzy_sphere;
 
+//-- Global constants
+namespace global {
+    const Point_2 nullPt(0, 0);
+}
+
 #endif //CITY4CFD_CGALTYPES_H

@@ -29,7 +29,7 @@ BoundingRegion::~BoundingRegion() = default;
 
 //-- Operators to read bounded region if explicitly defined in config
 void BoundingRegion::operator()(double radius) {
-    geomutils::make_round_poly(config::pointOfInterest, radius, _boundingRegion);
+    geomutils::make_round_poly(global::nullPt, radius, _boundingRegion);
 }
 
 void BoundingRegion::operator()(Polygon_2& poly) {
@@ -45,7 +45,7 @@ BoundingRegion::calc_influ_region_bpg(const DT& dt, const Point_set_3& pointClou
     //-- Find building where the point of interest lies in and define radius of interest with BPG
     bool foundBuilding = false;
     for (auto& f : buildings) {
-        if (geomutils::point_in_poly(config::pointOfInterest, f->get_poly())) {
+        if (geomutils::point_in_poly(global::nullPt, f->get_poly())) {
             f->calc_footprint_elevation_nni(dt);
             try {
                 f->reconstruct();
@@ -64,7 +64,7 @@ BoundingRegion::calc_influ_region_bpg(const DT& dt, const Point_set_3& pointClou
         throw std::invalid_argument("Point of interest does not belong to any building! "
                                     "Impossible to determine influence region");
 
-    geomutils::make_round_poly(config::pointOfInterest, influRegionRadius, _boundingRegion);
+    geomutils::make_round_poly(global::nullPt, influRegionRadius, _boundingRegion);
 }
 
 void BoundingRegion::calc_bnd_bpg(const Polygon_2& influRegionPoly,
@@ -131,7 +131,7 @@ Polygon_2 BoundingRegion::calc_bnd_poly(const std::vector<Point_2>& candidatePts
                                         const double hMax, const double angle, const double enlargeRatio) const {
     Polygon_2 localPoly;
     if (config::bpgDomainType == ROUND) {
-        Point_2 localPOI = geomutils::rotate_pt(config::pointOfInterest, -angle);
+        Point_2 localPOI = geomutils::rotate_pt(global::nullPt, -angle);
 
         double bndRadius = 0;
         for (auto& pt: candidatePts) {

@@ -56,6 +56,15 @@ bool IO::read_point_cloud(std::string& file, Point_set_3& pc) {
     //todo test CGAL 5.3 if it can read .las without external reader
     std::ifstream ifile(file, std::ios_base::binary);
     ifile >> pc;
+
+    CGAL::Aff_transformation_3<EPICK> translate(CGAL::TRANSLATION, CGAL::Vector_3<EPICK>(-config::pointOfInterest.x(),
+                                                                                         -config::pointOfInterest.y(),
+                                                                                         0));
+    Point_set_3 transformPC;
+    for (auto it = pc.points().begin(); it != pc.points().end(); ++it) {
+        transformPC.insert(it->transform(translate));
+    }
+    pc = transformPC;
     return true;
 }
 
@@ -95,8 +104,8 @@ void IO::read_explicit_geometries(std::string& file, JsonVector& importedBuildin
 
         //-- Add vertices
         for (auto& pt : j["vertices"]) {
-            double ptx = ((double)pt[0] * (double)j["transform"]["scale"][0]) + (double)j["transform"]["translate"][0];
-            double pty = ((double)pt[1] * (double)j["transform"]["scale"][1]) + (double)j["transform"]["translate"][1];
+            double ptx = ((double)pt[0] * (double)j["transform"]["scale"][0]) + (double)j["transform"]["translate"][0] - config::pointOfInterest.x();
+            double pty = ((double)pt[1] * (double)j["transform"]["scale"][1]) + (double)j["transform"]["translate"][1] - config::pointOfInterest.y();
             double ptz = ((double)pt[2] * (double)j["transform"]["scale"][2]) + (double)j["transform"]["translate"][2];
             importedBuildingPts.emplace_back(ptx, pty, ptz);
         }

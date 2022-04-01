@@ -189,7 +189,8 @@ void PolyFeature::parse_json_poly(const nlohmann::json& poly) {
     for (auto& polyEdges : poly["geometry"]["coordinates"]) {
         Polygon_2 tempPoly;
         for (auto& coords : polyEdges) {
-            tempPoly.push_back(Point_2(coords[0], coords[1]));
+            tempPoly.push_back(Point_2((double)coords[0] - config::pointOfInterest.x(),
+                                       (double)coords[1] - config::pointOfInterest.y()));
         }
         geomutils::pop_back_if_equal_to_front(tempPoly);
 

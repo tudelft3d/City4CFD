@@ -34,15 +34,15 @@ namespace geomutils {
                          std::list<CDT::Edge>& border, PolyFeatures& features);
     void    check_layer(const Face_handle& fh, int surfaceLayer);
     void    shorten_long_poly_edges(Polygon_2& poly, double maxLen = config::edgeMaxLen);
-    Point_2 rotate_pt(Point_2& pt, const double angle, Point_2 centerPt = Point_2(0, 0));
+    Point_2 rotate_pt(const Point_2& pt, const double angle, Point_2 centerPt = Point_2(0, 0));
     void    interpolate_poly_from_pc(const Polygon_2& poly, std::vector<double>& heights, const Point_set_3& pointCloud);
     bool    polygons_in_contact(const Polygon_with_holes_2& firstPoly, const Polygon_with_holes_2& secondPoly);
 
     //-- Templated functions
     template <typename T> bool point_in_poly(const T& pt2, const Polygon_with_holes_2& polygon);
     template <typename T> bool point_in_poly(const T& pt2, const Polygon_2& polygon);
-    template <typename T> void make_round_poly(Point_2& centre, double radius, T& poly);
-    template <typename T> void make_round_poly(Point_2& centre, double radius1, double radius2,
+    template <typename T> void make_round_poly(const Point_2& centre, double radius, T& poly);
+    template <typename T> void make_round_poly(const Point_2& centre, double radius1, double radius2,
                                                int nPts, double angInt, double ang, T& poly);
     template <typename T, typename U> void smooth_dt (const Point_set_3& pointCloud, T& dt);
     template <typename T> Polygon_2 calc_bbox_poly(const T& inputPts);
