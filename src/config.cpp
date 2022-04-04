@@ -309,8 +309,9 @@ void config::set_region(boost::variant<bool, double, Polygon_2>& regionType,
         Polygon_2 tempPoly;
         JsonVector influJsonPoly;
         IO::read_geojson_polygons(polyFilePath, influJsonPoly);
-        for (auto& coords : influJsonPoly.front()->front()) { // I know it should be only 1 polygon with 1 ring
-            tempPoly.push_back(Point_2(coords[0], coords[1]));
+        for (auto& coords : influJsonPoly.front()->at("geometry").at("coordinates").front()) { // I know it should be only 1 polygon with 1 ring
+            tempPoly.push_back(Point_2((double)coords[0] - config::pointOfInterest.x(),
+                                       (double)coords[1] - config::pointOfInterest.y()));
         }
         //-- Prepare poly
         geomutils::pop_back_if_equal_to_front(tempPoly);
@@ -319,7 +320,8 @@ void config::set_region(boost::variant<bool, double, Polygon_2>& regionType,
         regionType = tempPoly;
     } else if (j[regionName].size() > 2) { // Explicitly defined region polygon with points
         Polygon_2 tempPoly;
-        for (auto& pt : j[regionName]) tempPoly.push_back(Point_2(pt[0], pt[1]));
+        for (auto& pt : j[regionName]) tempPoly.push_back(Point_2((double)pt[0] - config::pointOfInterest.x(),
+                                                                              (double)pt[1] - config::pointOfInterest.y()));
         regionType = tempPoly;
     } else if (j[regionName].is_number() || j[regionName].is_array() && j[regionName][0].is_number()) { // Influ region radius
         regionType = (double)j[regionName].front();
