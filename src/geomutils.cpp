@@ -22,6 +22,7 @@
 #include "geomutils.h"
 
 #include "PolyFeature.h"
+#include <CGAL/Polygon_mesh_processing/repair.h>
 
 double geomutils::avg(const std::vector<double>& values) {
     if (values.empty()) throw std::length_error("Can't calculate average of a zero-sized vector!");
@@ -52,7 +53,7 @@ void geomutils::cdt_to_mesh(CDT& cdt, Mesh& mesh, const int surfaceLayerID) {
     std::map<CDT::Vertex_handle, int> indices;
     std::vector<Mesh::vertex_index> mesh_vertex;
     std::vector<Mesh::face_index> face_index;
-    mesh_vertex.reserve(cdt.dimension());
+    mesh_vertex.reserve(cdt.number_of_vertices());
 
     int counter = 0;
     for (const auto& it : cdt.finite_vertex_handles()) {
@@ -217,6 +218,14 @@ void geomutils::interpolate_poly_from_pc(const Polygon_2& poly, std::vector<doub
 //        }
         heights.emplace_back(geomutils::avg(poly_height));
     }
+}
+
+void geomutils::remove_self_intersections(Mesh& mesh) {
+#if CGAL_VERSION_NR >= 1050401000 // 5.4.0
+    PMP::experimental::remove_self_intersections(mesh);
+#else
+    PMP::remove_self_intersections(mesh);
+#endif
 }
 
 bool geomutils::polygons_in_contact(const Polygon_with_holes_2& firstPoly, const Polygon_with_holes_2& secondPoly) {

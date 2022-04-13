@@ -24,6 +24,8 @@
 
 #include "TopoFeature.h"
 
+typedef std::unordered_map<Point_3, std::vector<face_descriptor>> vertex_face_map;
+
 class Terrain : public TopoFeature {
 public:
     using TopoFeature::TopoFeature;
@@ -35,9 +37,14 @@ public:
     void prep_constraints(const PolyFeatures& features, Point_set_3& pointCloud);
     void constrain_features();
     void create_mesh(const PolyFeatures& features);
+    void prepare_subset();
+    Mesh mesh_subset(const Polygon_with_holes_2& poly) const;
+    void clear_subset();
 
-    CDT&         get_cdt();
-    const CDT&   get_cdt() const;
+    CDT&                   get_cdt();
+    const CDT&             get_cdt() const;
+    const vertex_face_map& get_vertex_face_map() const;
+    const SearchTree&      get_mesh_search_tree() const;
 
     void         get_cityjson_info(nlohmann::json& b) const override;
     std::string  get_cityjson_primitive() const override;
@@ -49,7 +56,9 @@ public:
 protected:
     CDT                    _cdt;
     SurfaceLayers          _surfaceLayersTerrain;
-    std::vector<Polygon_3> _constrainedPolys;
+    std::list<Polygon_3>   _constrainedPolys;
+    vertex_face_map        _vertexFaceMap;
+    SearchTree             _searchTree;
 };
 
 #endif //CITY4CFD_TERRAIN_H

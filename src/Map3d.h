@@ -69,6 +69,7 @@ private:
     void reconstruct_boundaries();
     void average_polygon_points();
     void solve_building_conflicts();
+    void clip_buildings();
 
     void prep_feature_output();
     void prep_cityjson_output();

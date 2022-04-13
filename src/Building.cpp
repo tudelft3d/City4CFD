@@ -23,6 +23,11 @@
 
 #include "geomutils.h"
 #include "LoD12.h"
+#include "Terrain.h"
+
+#include <CGAL/Polygon_mesh_processing/orientation.h>
+#include <CGAL/Polygon_mesh_processing/repair.h>
+#include <CGAL/Polygon_mesh_processing/clip.h>
 
 Building::Building()
         : PolyFeature(1), _height(-g_largnum) {}
@@ -38,13 +43,41 @@ Building::Building(const nlohmann::json& poly, const int internalID)
 
 Building::~Building() = default;
 
-void Building::check_feature_scope(const Polygon_2& otherPoly) {
-        for (auto& poly: _poly.rings()) {
-            for (auto& vert : poly) {
-                if (geomutils::point_in_poly(vert, otherPoly))
-                    return;
-            }
+void Building::clip_bottom(const Terrainptr& terrain) {
+    //-- Get terrain subset
+    Mesh terrainSubsetMesh = terrain->mesh_subset(_poly);
+    PMP::reverse_face_orientations(terrainSubsetMesh);
+
+    //-- Set exact point maps
+    Exact_point_map mesh1_exact_points =
+            terrainSubsetMesh.add_property_map<vertex_descriptor,EK::Point_3>("v:exact_point").first;
+    Exact_point_map mesh2_exact_points =
+            _mesh.add_property_map<vertex_descriptor,EK::Point_3>("v:exact_point").first;
+    Exact_vertex_point_map mesh1_vpm(mesh1_exact_points, terrainSubsetMesh);
+    Exact_vertex_point_map mesh2_vpm(mesh2_exact_points, _mesh);
+
+    //-- Mesh processing and clip
+    PMP::remove_degenerate_faces(_mesh);
+    PMP::remove_degenerate_edges(_mesh);
+    geomutils::remove_self_intersections(_mesh); //-- Todo handle for hybrid reconstruction
+    PMP::clip(_mesh, terrainSubsetMesh, params::vertex_point_map(mesh2_vpm), params::vertex_point_map(mesh1_vpm));
+}
+
+void Building::translate_footprint(const double h) {
+    for (auto& ring : _base_heights) {
+        for (auto& pt : ring) {
+            pt += h;
         }
+    }
+}
+
+void Building::check_feature_scope(const Polygon_2& otherPoly) {
+    for (auto& poly: _poly.rings()) {
+        for (auto& vert : poly) {
+            if (geomutils::point_in_poly(vert, otherPoly))
+                return;
+        }
+    }
 //    std::cout << "Poly ID " << this->get_id() << " is outside the influ region. Deactivating." << std::endl;
     this->deactivate();
 }

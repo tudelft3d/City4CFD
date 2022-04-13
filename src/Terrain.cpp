@@ -26,10 +26,12 @@
 #include "SurfaceLayer.h"
 
 Terrain::Terrain()
-        : TopoFeature(0), _cdt(), _surfaceLayersTerrain(), _constrainedPolys() {}
+        : TopoFeature(0), _cdt(), _surfaceLayersTerrain(),
+          _constrainedPolys(), _vertexFaceMap(), _searchTree() {}
 
 Terrain::Terrain(int pid)
-        : TopoFeature(pid), _cdt(), _surfaceLayersTerrain(), _constrainedPolys() {}
+        : TopoFeature(pid), _cdt(), _surfaceLayersTerrain(),
+          _constrainedPolys(), _vertexFaceMap(), _searchTree() {}
 
 Terrain::~Terrain() = default;
 
@@ -38,13 +40,11 @@ void Terrain::set_cdt(const Point_set_3& pointCloud) {
 
     std::cout << "\n    Triangulating" << std::endl;
     int count = 0;
-    int pcSize = pointCloud.size();
     std::vector<ePoint_3> pts; //todo check progress bar
-    IO::print_progress_bar(0);
     for (auto& pt : pointCloud.points()) {
-        pts.emplace_back(to_exact(pt));
+        pts.push_back(to_exact(pt));
 
-        IO::print_progress_bar(99 * count++ / pcSize);
+        IO::print_progress_bar(99 * count++ / pointCloud.size());
     }
     IO::print_progress_bar(99);
     _cdt.insert(pts.begin(), pts.end());
@@ -100,8 +100,9 @@ void Terrain::constrain_features() {
 }
 
 void Terrain::create_mesh(const PolyFeatures& features) {
+    _mesh.clear();
     //-- Mark surface layer
-    geomutils::mark_domains(this->get_cdt(), features);
+    geomutils::mark_domains(_cdt, features);
 
     //-- Create the mesh for the terrain
     geomutils::cdt_to_mesh(_cdt, _mesh);
@@ -112,6 +113,85 @@ void Terrain::create_mesh(const PolyFeatures& features) {
         geomutils::cdt_to_mesh(_cdt, layer->get_mesh(), i); // Create mesh for surface layers
         _surfaceLayersTerrain.push_back(layer);
     }
+}
+
+void Terrain::prepare_subset() {
+    typedef std::vector<std::size_t>  CGAL_Polygon;
+
+    //-- Make terrain mesh without surface layers marked
+    geomutils::cdt_to_mesh(_cdt, _mesh);
+    if (_mesh.is_empty()) throw std::runtime_error("Cannot create vertex-face map of empty mesh!");
+
+    //-- Construct vertex-face map used for search
+    _vertexFaceMap.clear();
+    for (auto& face : _mesh.faces()) {
+        for (auto vertex : CGAL::vertices_around_face(_mesh.halfedge(face), _mesh)) {
+            auto pt = _mesh.point(vertex);
+            auto it = _vertexFaceMap.find(pt);
+            if (it == _vertexFaceMap.end()) {
+                _vertexFaceMap[pt].push_back(face);
+            } else {
+                it->second.push_back(face);
+            }
+        }
+    }
+    //-- Construct search tree
+    _searchTree.clear();
+    for (auto& pt : _mesh.points()) {
+        _searchTree.insert(pt);
+    }
+}
+
+Mesh Terrain::mesh_subset(const Polygon_with_holes_2& poly) const {
+    //-- Get mesh vertices that are bounded by the polygon
+    std::vector<Point_3> subsetPts;
+    double expandSearch = 1;
+    while (subsetPts.size() <= poly.outer_boundary().size()) {
+        subsetPts.clear();
+        Point_3 bbox1(poly.bbox().xmin() - expandSearch, poly.bbox().ymin() - expandSearch, -g_largnum);
+        Point_3 bbox2(poly.bbox().xmax() + expandSearch, poly.bbox().ymax() + expandSearch, g_largnum);
+        Fuzzy_iso_box pts_range(bbox1, bbox2);
+        _searchTree.search(std::back_inserter(subsetPts), pts_range);
+        expandSearch *= 2;
+    }
+
+    //-- Generate mesh subset from vertices
+    Mesh subsetMesh;
+    std::unordered_map<Point_3, vertex_descriptor> dPts;
+    std::vector<face_descriptor> faceLst;
+    for (auto& pt : subsetPts) {
+//        auto it = _vertexFaceMap.find(IO::gen_key_bucket(pt));
+        auto it = _vertexFaceMap.find(pt);
+        assert(it != _vertexFaceMap.end());
+        for (auto& face : it->second) {
+            //- Make sure the same face isn't added multiple times
+            if (std::find(faceLst.begin(), faceLst.end(), face) == faceLst.end()) {
+                faceLst.push_back(face);
+            } else {
+                continue;
+            }
+            //- Take subset
+            std::vector<vertex_descriptor> facePts; facePts.reserve(3);
+            for (auto vertex : CGAL::vertices_around_face(_mesh.halfedge(face), _mesh)) {
+                auto meshPt = _mesh.point(vertex);
+                auto vertexIt = dPts.find(meshPt);
+                if (vertexIt == dPts.end()) {
+                    auto meshVertId = subsetMesh.add_vertex(meshPt);
+                    dPts[meshPt] = meshVertId;
+                    facePts.push_back(meshVertId);
+                } else {
+                    facePts.push_back(vertexIt->second);
+                }
+            }
+            subsetMesh.add_face(facePts[0], facePts[1], facePts[2]);
+        }
+    }
+    return subsetMesh;
+}
+
+void Terrain::clear_subset() {
+    _vertexFaceMap.clear();
+    _searchTree.clear();
 }
 
 void Terrain::get_cityjson_info(nlohmann::json& b) const {
@@ -129,6 +209,14 @@ CDT& Terrain::get_cdt() {
 
 const CDT& Terrain::get_cdt() const {
     return _cdt;
+}
+
+const vertex_face_map& Terrain::get_vertex_face_map() const {
+    return _vertexFaceMap;
+}
+
+const SearchTree& Terrain::get_mesh_search_tree() const {
+    return _searchTree;
 }
 
 TopoClass Terrain::get_class() const {

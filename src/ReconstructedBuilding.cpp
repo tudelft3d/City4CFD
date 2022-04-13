@@ -74,6 +74,10 @@ void ReconstructedBuilding::set_search_tree(const std::shared_ptr<SearchTree>& s
 }
 
 void ReconstructedBuilding::reconstruct() {
+    if (config::clip) {
+        this->translate_footprint(-5);
+    }
+
     //-- Check if reconstructing from height attribute takes precedence
     if (_attributeHeightAdvantage) {
         this->reconstruct_from_attribute();
@@ -116,6 +120,10 @@ void ReconstructedBuilding::reconstruct() {
         }
         this->deactivate();
         throw std::domain_error("Building height lower than minimum prescribed height");
+    }
+
+    if (config::clip) {
+        this->translate_footprint(5);
     }
 }
 

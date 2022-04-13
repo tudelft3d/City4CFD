@@ -60,6 +60,8 @@ namespace config {
     std::string buildingUniqueId;
     std::string lod;
     double      buildingPercentile;
+    bool        clip = false;
+    bool        handleSelfIntersections = false;
     // Height from attributes
     std::string buildingHeightAttribute;
     std::string floorAttribute;
@@ -293,6 +295,14 @@ void config::set_config(nlohmann::json& j) {
     }
     log << "// ========================================= CITY4CFD LOG ========================================= //" << std::endl;
     logSummary <<"\n// =========================================== SUMMARY =========================================== //" << std::endl;
+
+    //-- Experimental
+    if (j.contains("experimental")) {
+        if (j["experimental"].contains("clip"))
+            clip = j["experimental"]["clip"];
+        if (j["experimental"].contains("handle_self_intersections"))
+            handleSelfIntersections = j["experimental"]["handle_self_intersections"];
+    }
 }
 
 //-- influRegion and domainBndConfig flow control

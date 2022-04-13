@@ -72,6 +72,9 @@ void Map3d::reconstruct() {
         this->set_footprint_elevation(_surfaceLayers);
     }
 
+    //-- Clip building bottoms
+    if (config::clip) this->clip_buildings();
+
     //-- Constrain features, generate terrain mesh from CDT
     this->reconstruct_terrain();
 
@@ -231,12 +234,13 @@ void Map3d::bnd_sanity_check() {
 }
 
 void Map3d::reconstruct_terrain() {
-    std::cout << "\nReconstructing terrain" << std::endl;
-
-    _terrain->prep_constraints(_lsFeatures, _pointCloud);
-    if (!config::averageSurfaces.empty()) this->average_polygon_points();
-    _terrain->set_cdt(_pointCloud);
-    _terrain->constrain_features();
+    if (_terrain->get_cdt().number_of_vertices() == 0) {
+        std::cout << "\nReconstructing terrain" << std::endl;
+        _terrain->prep_constraints(_lsFeatures, _pointCloud);
+        if (!config::averageSurfaces.empty()) this->average_polygon_points();
+        _terrain->set_cdt(_pointCloud);
+        _terrain->constrain_features();
+    }
 
     std::cout << "\n    Creating terrain mesh" << std::endl;
     _terrain->create_mesh(_lsFeatures);
@@ -354,6 +358,28 @@ void Map3d::solve_building_conflicts() {
    // to check if conflicts are solved
 //    for (auto& b : _importedBuildings) b->deactivate();
 //    this->clear_inactives();
+}
+
+void Map3d::clip_buildings() {
+    //todo hybrid reconstruction
+    //-- Prepare terrain with subset
+    std::cout << "\nReconstructing terrain" << std::endl;
+    _terrain->prep_constraints(_lsFeatures, _pointCloud);
+    if (!config::averageSurfaces.empty()) this->average_polygon_points();
+    _terrain->set_cdt(_pointCloud);
+    _terrain->constrain_features();
+    _terrain->prepare_subset();
+
+    //-- Do the clipping
+    std::cout << "\n    Clipping buildings to terrain" << std::endl;
+    int count = 0;
+    for (auto& b : _buildings) {
+        b->clip_bottom(_terrain);
+
+        IO::print_progress_bar(100 * count ++ / _buildings.size());
+    }
+    IO::print_progress_bar(100); std::cout << std::endl;
+    _terrain->clear_subset();
 }
 
 void Map3d::read_data() { // This will change with time

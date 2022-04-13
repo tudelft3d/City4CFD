@@ -142,6 +142,9 @@ void ImportedBuilding::reconstruct() {
     typedef std::vector<std::size_t>  CGAL_Polygon;
     nlohmann::json& geometry = _buildingJson["geometry"][_lodIdx];
 
+    if (config::clip) {
+        this->translate_footprint(-5);
+    }
     //-- Adjust building height points
     if (!config::importTrueHeight) {
         Vector_3 movePt(0, 0, _avgFootprintHeight);
@@ -192,6 +195,10 @@ void ImportedBuilding::reconstruct() {
     PMP::orient_polygon_soup(points, polygons);
     PMP::polygon_soup_to_polygon_mesh(points, polygons, _mesh);
     PMP::triangulate_faces(_mesh);
+
+    if (config::clip) {
+        this->translate_footprint(5);
+    }
 
         /*
         //-- Add other surfaces
