@@ -74,7 +74,8 @@ void ReconstructedBuilding::set_search_tree(const std::shared_ptr<SearchTree>& s
 }
 
 void ReconstructedBuilding::reconstruct() {
-    if (config::clip) {
+    _mesh.clear();
+    if (_clip_bottom) {
         this->translate_footprint(-5);
     }
 
@@ -122,7 +123,7 @@ void ReconstructedBuilding::reconstruct() {
         throw std::domain_error("Building height lower than minimum prescribed height");
     }
 
-    if (config::clip) {
+    if (_clip_bottom) {
         this->translate_footprint(5);
     }
 }

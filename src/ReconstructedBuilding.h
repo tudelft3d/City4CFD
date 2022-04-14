@@ -32,7 +32,7 @@ public:
     ReconstructedBuilding(const nlohmann::json& poly, const int internalID);
     ~ReconstructedBuilding();
 
-    void   set_search_tree(const std::shared_ptr<SearchTree>& searchTree);
+    void  set_search_tree(const std::shared_ptr<SearchTree>& searchTree);
 
     virtual void  reconstruct() override;
     virtual void  get_cityjson_info(nlohmann::json& b) const override;

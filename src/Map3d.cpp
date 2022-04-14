@@ -263,6 +263,12 @@ void Map3d::reconstruct_buildings() {
         if (!f->is_active()) continue;
         try {
             f->reconstruct();
+
+            //-- In case of hybrid boolean/constraining reconstruction
+            if (config::clip && !config::handleSelfIntersections && f->has_self_intersections()) {
+                f->set_clip_flag(false);
+                f->reconstruct();
+            }
         } catch (std::exception& e) {
             ++failed;
             //-- Add information to log file
@@ -361,7 +367,6 @@ void Map3d::solve_building_conflicts() {
 }
 
 void Map3d::clip_buildings() {
-    //todo hybrid reconstruction
     //-- Prepare terrain with subset
     std::cout << "\nReconstructing terrain" << std::endl;
     _terrain->prep_constraints(_lsFeatures, _pointCloud);

@@ -100,8 +100,8 @@ void LoD12::create_mesh(Mesh& mesh) {
         std::advance(it2, cdtToMesh[it->vertex(1)]);
         std::advance(it3, cdtToMesh[it->vertex(2)]);
 
-//        mesh.add_face(*it1, *it3, *it2); // Bottom face
-//        surfaceType[fIdx] = "GroundSurface";
+        mesh.add_face(*it1, *it3, *it2); // Bottom face
+        surfaceType[fIdx] = "GroundSurface";
 
         fIdx = mesh.add_face(*std::next(it1), *std::next(it2), *std::next(it3));
         surfaceType[fIdx] = "RoofSurface";

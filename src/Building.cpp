@@ -44,6 +44,10 @@ Building::Building(const nlohmann::json& poly, const int internalID)
 Building::~Building() = default;
 
 void Building::clip_bottom(const Terrainptr& terrain) {
+    if (!_clip_bottom) return;
+    if (this->has_self_intersections() && !config::handleSelfIntersections) throw
+                std::runtime_error(std::string("Clip error in building ID " + std::to_string(this->get_internal_id())
+                                               + ". Cannot clip if there are self intersections!"));
     //-- Get terrain subset
     Mesh terrainSubsetMesh = terrain->mesh_subset(_poly);
     PMP::reverse_face_orientations(terrainSubsetMesh);
@@ -59,7 +63,7 @@ void Building::clip_bottom(const Terrainptr& terrain) {
     //-- Mesh processing and clip
     PMP::remove_degenerate_faces(_mesh);
     PMP::remove_degenerate_edges(_mesh);
-    geomutils::remove_self_intersections(_mesh); //-- Todo handle for hybrid reconstruction
+    if (config::handleSelfIntersections) geomutils::remove_self_intersections(_mesh);
     PMP::clip(_mesh, terrainSubsetMesh, params::vertex_point_map(mesh2_vpm), params::vertex_point_map(mesh1_vpm));
 }
 
@@ -80,6 +84,14 @@ void Building::check_feature_scope(const Polygon_2& otherPoly) {
     }
 //    std::cout << "Poly ID " << this->get_id() << " is outside the influ region. Deactivating." << std::endl;
     this->deactivate();
+}
+
+void Building::set_clip_flag(const bool flag) {
+    _clip_bottom = flag;
+}
+
+bool Building::has_self_intersections() const {
+    return PMP::does_self_intersect(_mesh);
 }
 
 double Building::max_dim() {

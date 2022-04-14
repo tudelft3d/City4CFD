@@ -125,7 +125,7 @@ ImportedBuilding::ImportedBuilding(nlohmann::json buildingJson, std::vector<Poin
         std::vector<int> ringFootprintIdxs;
         for (auto& pt : ring) {
             auto itPt = pointConectivity.find(IO::gen_key_bucket(pt));
-            assert(itPt != pointConectivity.end()); //todo temp
+            assert(itPt != pointConectivity.end());
             ringFootprintIdxs.push_back(itPt->second);
         }
         _footprintPtsIdxList.push_back(ringFootprintIdxs);
@@ -142,7 +142,8 @@ void ImportedBuilding::reconstruct() {
     typedef std::vector<std::size_t>  CGAL_Polygon;
     nlohmann::json& geometry = _buildingJson["geometry"][_lodIdx];
 
-    if (config::clip) {
+    _mesh.clear();
+    if (_clip_bottom) {
         this->translate_footprint(-5);
     }
     //-- Adjust building height points
@@ -162,7 +163,6 @@ void ImportedBuilding::reconstruct() {
     }
 
     //-- Adjust footprints to terrain
-    int count = 0;
     for (int i = 0; i < _footprintPtsIdxList.size(); ++i) {
         for (int j = 0; j < _footprintPtsIdxList[i].size(); ++j) {
             _dPts[_footprintPtsIdxList[i][j]] = Point_3(_dPts[_footprintPtsIdxList[i][j]].x(),
@@ -176,10 +176,12 @@ void ImportedBuilding::reconstruct() {
     std::vector<CGAL_Polygon> polygons;
     int surfIdx = -1;
     for (auto& faces : geometry["boundaries"].front()) {
+        /*
         //-- Remove bottom surface
         ++surfIdx;
         if (std::find(_footprintIdxList.begin(), _footprintIdxList.end(), surfIdx) != _footprintIdxList.end())
             continue;
+        */
 
         for (auto& faceLst : faces) {
             CGAL_Polygon p;
@@ -190,13 +192,13 @@ void ImportedBuilding::reconstruct() {
             polygons.push_back(p);
         }
     }
-    //-- Do mumbo-jumbo to make everything work
+    //-- Polygon soup to polygon mesh
     PMP::repair_polygon_soup(points, polygons, CGAL::parameters::geom_traits(geomutils::Array_traits()));
     PMP::orient_polygon_soup(points, polygons);
     PMP::polygon_soup_to_polygon_mesh(points, polygons, _mesh);
     PMP::triangulate_faces(_mesh);
 
-    if (config::clip) {
+    if (_clip_bottom) {
         this->translate_footprint(5);
     }
 
