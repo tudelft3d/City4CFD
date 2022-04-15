@@ -38,8 +38,8 @@ public:
     void   clip_bottom(const Terrainptr& terrain);
     void   translate_footprint(const double h);
     void   check_feature_scope(const Polygon_2& influRegion);
-    void  set_clip_flag (const bool flag);
-    bool  has_self_intersections() const;
+    void   set_clip_flag (const bool flag);
+    bool   has_self_intersections() const;
     double max_dim();
 
     double get_height() const;
