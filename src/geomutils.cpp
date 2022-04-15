@@ -221,7 +221,7 @@ void geomutils::interpolate_poly_from_pc(const Polygon_2& poly, std::vector<doub
 }
 
 void geomutils::remove_self_intersections(Mesh& mesh) {
-#if CGAL_VERSION_NR >= 1050401000 // 5.4.0
+#if CGAL_VERSION_NR >= 1050101000 // 5.1.0
     PMP::experimental::remove_self_intersections(mesh);
 #else
     PMP::remove_self_intersections(mesh);
