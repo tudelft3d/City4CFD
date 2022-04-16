@@ -174,7 +174,7 @@ void ImportedBuilding::reconstruct() {
     //-- Add points to mesh
     std::vector<std::array<FT, 3>> points;
     std::vector<CGAL_Polygon> polygons;
-    int surfIdx = -1;
+//    int surfIdx = -1;
     for (auto& faces : geometry["boundaries"].front()) {
         /*
         //-- Remove bottom surface
@@ -188,6 +188,8 @@ void ImportedBuilding::reconstruct() {
             for (auto& facePt : faceLst) {
                 points.push_back(CGAL::make_array<FT>(_dPts[facePt].x(), _dPts[facePt].y(), _dPts[facePt].z()));
                 p.push_back(points.size() - 1);
+                //-- Store max height to calculate building height later
+                if (_dPts[facePt].z() > _height) _height = _dPts[facePt].z();
             }
             polygons.push_back(p);
         }
@@ -197,6 +199,9 @@ void ImportedBuilding::reconstruct() {
     PMP::orient_polygon_soup(points, polygons);
     PMP::polygon_soup_to_polygon_mesh(points, polygons, _mesh);
     PMP::triangulate_faces(_mesh);
+
+    //-- Get height attribute
+    _height -= _avgFootprintHeight;
 
     if (_clip_bottom) {
         this->translate_footprint(5);
