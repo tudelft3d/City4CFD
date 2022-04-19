@@ -40,6 +40,13 @@ void LoD12::lod12_calc_height(double& height) {
 }
 
 void LoD12::lod12_reconstruct(Mesh& mesh) {
+    mesh.clear();
+    this->create_mesh(mesh);
+}
+
+void LoD12::lod12_reconstruct(Mesh& mesh, const double height) {
+    mesh.clear();
+    _height = height;
     this->create_mesh(mesh);
 }
 

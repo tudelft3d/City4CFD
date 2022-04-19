@@ -35,6 +35,7 @@ public:
 
     void   lod12_calc_height(double& height);
     void   lod12_reconstruct(Mesh& mesh);
+    void   lod12_reconstruct(Mesh& mesh, const double height);
     double get_height() const;
 
 private:

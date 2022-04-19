@@ -116,11 +116,10 @@ void ReconstructedBuilding::reconstruct() {
     lod12.lod12_reconstruct(_mesh);
 
     if (lod12.get_height() < _lowHeight) { // In case of a small height
-        if (this->reconstruct_again_from_attribute("Building height lower than minimum prescribed height")) {
-            return;
-        }
-        this->deactivate();
-        throw std::domain_error("Building height lower than minimum prescribed height");
+        Config::get().log << "Building height lower than minimum prescribed height, ID: " << this->get_id()
+                          << std::endl;
+        _height = _lowHeight;
+        lod12.lod12_reconstruct(_mesh, _height);
     }
 
     if (_clip_bottom) {
@@ -179,8 +178,10 @@ void ReconstructedBuilding::reconstruct_from_attribute() {
 
     //-- Low height check
     if (lod12HeightAttribute.get_height() < _lowHeight) { // In case of a small height
-        this->deactivate();
-        throw std::domain_error("Building height attribute in geojson file lower than minimum prescribed height");
+        Config::get().log << "Building height lower than minimum prescribed height, ID: " << this->get_id()
+                          << std::endl;
+        _height = _lowHeight;
+        lod12HeightAttribute.lod12_reconstruct(_mesh, _height);
     }
 }
 

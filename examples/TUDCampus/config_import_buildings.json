@@ -7,7 +7,8 @@
   "polygons" : [
     {
       "type": "Building",
-      "path": "polygons/tudcampus.geojson"
+      "path": "polygons/tudcampus.geojson",
+      "unique_id": "gid"
     },
     {
       "type": "SurfaceLayer",
