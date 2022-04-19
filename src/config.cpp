@@ -71,6 +71,8 @@ namespace config {
     bool        importAdvantage;
     bool        importTrueHeight;
     std::string importLoD;
+    //- Boundary
+    bool  reconstructBoundaries = false;
 
     //-- Polygons related
     double                edgeMaxLen;
@@ -268,6 +270,10 @@ void config::set_config(nlohmann::json& j) {
         importTrueHeight = j["import_geometries"]["true_height"];
         importLoD = j["import_geometries"]["lod"];
     }
+
+    // Boundary
+    if (j.contains("reconstruct_boundaries"))
+        reconstructBoundaries = j["reconstruct_boundaries"];
 
     //-- Polygons related
     edgeMaxLen = j["edge_max_len"];

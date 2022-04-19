@@ -191,6 +191,9 @@ namespace jsonschema {
           "exclusiveMinimum": 0,
           "exclusiveMaximum": 100
         },
+        "reconstruct_boundaries": {
+          "type": "boolean"
+        },
         "edge_max_len": {
           "type": "number",
           "exclusiveMinimum": 0

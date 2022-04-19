@@ -68,6 +68,8 @@ namespace config {
     extern bool        importAdvantage;
     extern bool        importTrueHeight;
     extern std::string importLoD;
+    //- Boundary
+    extern bool  reconstructBoundaries;
 
     //-- Polygons related
     extern double                edgeMaxLen;

@@ -27,9 +27,10 @@
   "top_height":        150,
   "flow_direction":    [1, 1],
   "buffer_region":     5,
+  "reconstruct_boundaries": true,
 
   "terrain_thinning": 80,
-  "smooth_terrain":         false,
+  "smooth_terrain":   false,
 
   "lod": "1.2",
   "building_percentile": 90,

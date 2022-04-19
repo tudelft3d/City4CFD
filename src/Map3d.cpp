@@ -79,7 +79,7 @@ void Map3d::reconstruct() {
     this->reconstruct_terrain();
 
     //-- Generate side and top boundaries
-    this->reconstruct_boundaries();
+    if (config::reconstructBoundaries) this->reconstruct_boundaries();
 }
 
 void Map3d::set_features() {
