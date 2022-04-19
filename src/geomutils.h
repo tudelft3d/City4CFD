@@ -22,7 +22,7 @@
 #ifndef CITY4CFD_GEOMUTILS_H
 #define CITY4CFD_GEOMUTILS_H
 
-#include "config.h"
+#include "Config.h"
 
 namespace geomutils {
     double  avg(const std::vector<double>& values);
@@ -33,7 +33,7 @@ namespace geomutils {
     void    mark_domains(CDT& ct, const Face_handle& start, int index,
                          std::list<CDT::Edge>& border, PolyFeatures& features);
     void    check_layer(const Face_handle& fh, int surfaceLayer);
-    void    shorten_long_poly_edges(Polygon_2& poly, double maxLen = config::edgeMaxLen);
+    void    shorten_long_poly_edges(Polygon_2& poly, double maxLen = Config::get().edgeMaxLen);
     Point_2 rotate_pt(const Point_2& pt, const double angle, Point_2 centerPt = Point_2(0, 0));
     void    interpolate_poly_from_pc(const Polygon_2& poly, std::vector<double>& heights, const Point_set_3& pointCloud);
     bool    polygons_in_contact(const Polygon_with_holes_2& firstPoly, const Polygon_with_holes_2& secondPoly);

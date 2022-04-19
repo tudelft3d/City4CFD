@@ -45,7 +45,7 @@ Building::~Building() = default;
 
 void Building::clip_bottom(const Terrainptr& terrain) {
     if (!_clip_bottom) return;
-    if (this->has_self_intersections() && !config::handleSelfIntersections) throw
+    if (this->has_self_intersections() && !Config::get().handleSelfIntersections) throw
                 std::runtime_error(std::string("Clip error in building ID " + std::to_string(this->get_internal_id())
                                                + ". Cannot clip if there are self intersections!"));
     //-- Get terrain subset
@@ -63,7 +63,7 @@ void Building::clip_bottom(const Terrainptr& terrain) {
     //-- Mesh processing and clip
     PMP::remove_degenerate_faces(_mesh);
     PMP::remove_degenerate_edges(_mesh);
-    if (config::handleSelfIntersections) geomutils::remove_self_intersections(_mesh);
+    if (Config::get().handleSelfIntersections) geomutils::remove_self_intersections(_mesh);
     PMP::clip(_mesh, terrainSubsetMesh, params::vertex_point_map(mesh2_vpm), params::vertex_point_map(mesh1_vpm));
 }
 

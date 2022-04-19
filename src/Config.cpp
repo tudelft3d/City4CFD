@@ -19,7 +19,7 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>
 */
 
-#include "config.h"
+#include "Config.h"
 
 #include "valijson/adapters/nlohmann_json_adapter.hpp"
 #include "valijson/schema.hpp"
@@ -31,72 +31,7 @@
 
 #include "configSchema.inc"
 
-namespace config {
-    //-- Input info
-    std::string              points_xyz;         // Ground
-    std::string              buildings_xyz;      // Buildings
-    std::string              gisdata;            // Building Polygons
-    std::vector<std::string> topoLayers = {};    // Other polygons
-    std::string              importedBuildings;  // Additional pre-reconstructed buildings
-
-    //-- Domain setup
-    Point_2     pointOfInterest;
-    double      topHeight = 0;
-    //- Influ region and domain bnd
-    boost::variant<bool, double, Polygon_2> influRegionConfig;
-    boost::variant<bool, double, Polygon_2> domainBndConfig;
-    DomainType            bpgDomainType;
-    bool                  bpgBlockageRatioFlag = false;
-    double                bpgBlockageRatio = 0.03;
-    Vector_2              flowDirection(1, 0);
-    std::vector<double>   bpgDomainSize;
-    double                domainBuffer = -g_largnum;
-
-    //-- Reconstruction
-    //- Terrain
-    double    terrainThinning = 0.;
-    bool      smoothTerrain = false;
-    //- Buildings
-    std::string buildingUniqueId;
-    std::string lod;
-    double      buildingPercentile;
-    bool        clip = false;
-    bool        handleSelfIntersections = false;
-    // Height from attributes
-    std::string buildingHeightAttribute;
-    std::string floorAttribute;
-    double      floorHeight;
-    bool        buildingHeightAttributeAdvantage = false;
-    //- Imported buildings
-    bool        importAdvantage;
-    bool        importTrueHeight;
-    std::string importLoD;
-    //- Boundary
-    bool  reconstructBoundaries = false;
-
-    //-- Polygons related
-    double                edgeMaxLen;
-    std::map<int, double> averageSurfaces;
-
-    //-- Output
-    fs::path                  workDir;
-    fs::path                  outputDir = fs::current_path();
-    std::string               outputFileName;
-    OutputFormat              outputFormat;
-    bool                      outputSeparately = false;
-    std::vector<std::string>  outputSurfaces = {"Terrain", "Buildings"};
-    int                       numSides = 1;
-    std::vector<int>          surfaceLayerIDs;
-
-    //-- Data log
-    bool               outputLog = false;
-    std::string        logName("log");
-    std::ostringstream log;
-    std::ostringstream logSummary;
-    std::vector<int>   failedBuildings;
-}
-
-void config::validate(nlohmann::json& j) {
+void Config::validate(nlohmann::json& j) {
     using valijson::Schema;
     using valijson::SchemaParser;
     using valijson::Validator;
@@ -138,7 +73,7 @@ void config::validate(nlohmann::json& j) {
     }
 }
 
-void config::set_config(nlohmann::json& j) {
+void Config::set_config(nlohmann::json& j) {
     //-- Schema validation
     //-- Path to point cloud(s)
     if (j.contains("point_clouds")) {
@@ -155,11 +90,11 @@ void config::set_config(nlohmann::json& j) {
 
     //- Influence region
     std::string influRegionCursor = "influence_region";
-    config::set_region(influRegionConfig, influRegionCursor, j);
+    Config::get().set_region(influRegionConfig, influRegionCursor, j);
 
     //- Domain boundaries
     std::string domainBndCursor = "domain_bnd";
-    config::set_region(domainBndConfig, domainBndCursor, j);
+    Config::get().set_region(domainBndConfig, domainBndCursor, j);
     // Define domain type if using BPG
     if (domainBndConfig.type() == typeid(bool)) {
         if (j.contains("flow_direction"))
@@ -312,22 +247,22 @@ void config::set_config(nlohmann::json& j) {
 }
 
 //-- influRegion and domainBndConfig flow control
-void config::set_region(boost::variant<bool, double, Polygon_2>& regionType,
+void Config::set_region(boost::variant<bool, double, Polygon_2>& regionType,
                         std::string& regionName,
                         nlohmann::json& j) {
     if (j[regionName].is_string()) { // Search for GeoJSON polygon
         std::string polyFilePath = (std::string)j[regionName];
         if(!fs::exists(polyFilePath)) {
             throw std::invalid_argument(std::string("Cannot find polygon file '" +
-                                        polyFilePath + "' for " + regionName));
+                                                    polyFilePath + "' for " + regionName));
         }
         //-- Read poly
         Polygon_2 tempPoly;
         JsonVector influJsonPoly;
         IO::read_geojson_polygons(polyFilePath, influJsonPoly);
         for (auto& coords : influJsonPoly.front()->at("geometry").at("coordinates").front()) { // I know it should be only 1 polygon with 1 ring
-            tempPoly.push_back(Point_2((double)coords[0] - config::pointOfInterest.x(),
-                                       (double)coords[1] - config::pointOfInterest.y()));
+            tempPoly.push_back(Point_2((double)coords[0] - Config::get().pointOfInterest.x(),
+                                       (double)coords[1] - Config::get().pointOfInterest.y()));
         }
         //-- Prepare poly
         geomutils::pop_back_if_equal_to_front(tempPoly);
@@ -336,8 +271,8 @@ void config::set_region(boost::variant<bool, double, Polygon_2>& regionType,
         regionType = tempPoly;
     } else if (j[regionName].size() > 2) { // Explicitly defined region polygon with points
         Polygon_2 tempPoly;
-        for (auto& pt : j[regionName]) tempPoly.push_back(Point_2((double)pt[0] - config::pointOfInterest.x(),
-                                                                              (double)pt[1] - config::pointOfInterest.y()));
+        for (auto& pt : j[regionName]) tempPoly.push_back(Point_2((double)pt[0] - Config::get().pointOfInterest.x(),
+                                                                  (double)pt[1] - Config::get().pointOfInterest.y()));
         regionType = tempPoly;
     } else if (j[regionName].is_number() || j[regionName].is_array() && j[regionName][0].is_number()) { // Influ region radius
         regionType = (double)j[regionName].front();

@@ -19,7 +19,7 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>
 */
 
-#include "config.h"
+#include "Config.h"
 #include "io.h"
 #include "Map3d.h"
 
@@ -90,12 +90,12 @@ int main(int argc, char** argv) {
             } else if (boost::iequals(argv[i], "--output_dir")) {
                 if (i + 1 == argc) throw std::invalid_argument("Missing argument for --output_dir");
 
-                config::outputDir = fs::absolute(fs::current_path().append(argv[++i]));
-                if (!fs::exists(config::outputDir)) throw std::invalid_argument("Output directory does not exist!");
+                Config::get().outputDir = fs::absolute(fs::current_path().append(argv[++i]));
+                if (!fs::exists(Config::get().outputDir)) throw std::invalid_argument("Output directory does not exist!");
             } else if (boost::iequals(argv[i], "--output_file")) {
                 if (i + 1 == argc) throw std::invalid_argument("Missing argument for --output_file");
 
-                config::outputFileName = argv[++i];
+                Config::get().outputFileName = argv[++i];
             } else {
                 if (i > 1) throw std::invalid_argument(std::string("Unknown option " + std::string(argv[i])));
             }

@@ -38,14 +38,14 @@ double               Boundary::_outerBndHeight;
 void Boundary::set_bnd_poly(Polygon_2& bndPoly, Polygon_2& pcBndPoly, Polygon_2& startBufferPoly) {
     Polygon_2 bufferPoly;
     //-- Set bndPoly and pcBndPoly depending on the buffer setup
-    if (config::domainBuffer > -g_largnum) {
-        double bufferLen = config::domainBuffer / 100.;
+    if (Config::get().domainBuffer > -g_largnum) {
+        double bufferLen = Config::get().domainBuffer / 100.;
         Point_2 center = CGAL::centroid(bndPoly.begin(), bndPoly.end(),
                                         CGAL::Dimension_tag<0>());
         for (auto& pt: bndPoly)
             bufferPoly.push_back(pt + (pt - center) * bufferLen);
 
-        if (config::domainBuffer < 0) {
+        if (Config::get().domainBuffer < 0) {
             startBufferPoly = bufferPoly;
         } else {
             startBufferPoly = bndPoly;
@@ -88,7 +88,7 @@ void Boundary::set_bounds_to_terrain(Point_set_3& pointCloud, const Polygon_2& b
     geomutils::interpolate_poly_from_pc(bndPoly, bndHeights, pointCloud);
     _outerBndHeight = geomutils::avg(bndHeights); // Height for buffer (for now) - average of outer pts
 
-    if (config::domainBuffer > -g_largnum + g_smallnum) {
+    if (Config::get().domainBuffer > -g_largnum + g_smallnum) {
         /*
         for (auto& pt : startBufferPoly) {
             pointCloud.insert(Point_3(pt.x(), pt.y(), _outerBndHeight));

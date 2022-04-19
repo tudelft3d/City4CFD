@@ -21,7 +21,7 @@
 
 #include "Sides.h"
 
-#include "config.h"
+#include "Config.h"
 
 Sides::Sides(const int outputLayerID)
         : Boundary(outputLayerID) {
@@ -35,7 +35,7 @@ void Sides::reconstruct() {
     //-- Add mesh vertices and store them in a vector
     for (auto it = _sideOutputPts.begin(); it != _sideOutputPts.end(); ++it) {
         mesh_vertex_side.emplace_back(_mesh.add_vertex(*it));
-        mesh_vertex_side.emplace_back(_mesh.add_vertex(Point_3(it->x(), it->y(), config::topHeight)));
+        mesh_vertex_side.emplace_back(_mesh.add_vertex(Point_3(it->x(), it->y(), Config::get().topHeight)));
     }
 
     //-- Add middle top point to mesh

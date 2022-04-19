@@ -41,7 +41,7 @@ ImportedBuilding::ImportedBuilding(nlohmann::json buildingJson, std::vector<Poin
     for (auto& lodGeom : _buildingJson["geometry"]) {
         lodGeomLst[lodGeom["lod"]] = idx++;
     }
-    auto it = lodGeomLst.find(config::importLoD);
+    auto it = lodGeomLst.find(Config::get().importLoD);
     if (it == lodGeomLst.end()) {
         --it;
     }
@@ -147,7 +147,7 @@ void ImportedBuilding::reconstruct() {
         this->translate_footprint(-5);
     }
     //-- Adjust building height points
-    if (!config::importTrueHeight) {
+    if (!Config::get().importTrueHeight) {
         Vector_3 movePt(0, 0, _avgFootprintHeight);
         std::vector<int> checkedPt;
         for (auto& faces : geometry["boundaries"].front()) {
@@ -259,7 +259,7 @@ const bool ImportedBuilding::is_appending() const {
 
 void ImportedBuilding::check_simplicity(Polygon_2& ring) {
     if (!ring.is_simple()) {
-        config::log << "Failed to import building: " << this->get_parent_building_id()
+        Config::get().log << "Failed to import building: " << this->get_parent_building_id()
                     << " Reason: " << "Footprint polygon is not simple." << std::endl;
         this->deactivate();
         return;

@@ -39,7 +39,7 @@ void BoundingRegion::operator()(Polygon_2& poly) {
 void
 BoundingRegion::calc_influ_region_bpg(const DT& dt, const Point_set_3& pointCloudBuildings, Buildings& buildings) {
 #ifndef NDEBUG
-    assert(boost::get<bool>(config::influRegionConfig));
+    assert(boost::get<bool>(Config::get().influRegionConfig));
 #endif
     double influRegionRadius;
     //-- Find building where the point of interest lies in and define radius of interest with BPG
@@ -69,7 +69,7 @@ BoundingRegion::calc_influ_region_bpg(const DT& dt, const Point_set_3& pointClou
 
 void BoundingRegion::calc_bnd_bpg(const Polygon_2& influRegionPoly,
                                   const Buildings& buildings) {
-    double angle = std::atan2(config::flowDirection.y(), config::flowDirection.x());
+    double angle = std::atan2(Config::get().flowDirection.y(), Config::get().flowDirection.x());
 
     //-- Find candidate points for the AABB
     std::vector<Point_2> candidatePts;
@@ -99,22 +99,22 @@ void BoundingRegion::calc_bnd_bpg(const Polygon_2& influRegionPoly,
     Polygon_2 localPoly = this->calc_bnd_poly(candidatePts, hMax, angle);
 
     //-- Set the top
-    config::topHeight = hMax * config::bpgDomainSize.back();
+    Config::get().topHeight = hMax * Config::get().bpgDomainSize.back();
 
     //-- Blockage ratio handling
-    std::cout << "\nCalculating blockage ratio for flow direction (" << config::flowDirection
+    std::cout << "\nCalculating blockage ratio for flow direction (" << Config::get().flowDirection
               << ")" << std::endl;
     double blockRatio = this->calc_blockage_ratio(buildings, angle, localPoly);
     std::cout << "    Blockage ratio is: " << blockRatio << std::endl;
-    if (config::bpgBlockageRatioFlag && blockRatio > config::bpgBlockageRatio) {
-        std::cout << "INFO: Blockage ratio is more than " << config::bpgBlockageRatio * 100
+    if (Config::get().bpgBlockageRatioFlag && blockRatio > Config::get().bpgBlockageRatio) {
+        std::cout << "INFO: Blockage ratio is more than " << Config::get().bpgBlockageRatio * 100
                   << "%. Expanding domain cross section to meet the guideline"
                   << std::endl;
         double expRatio = std::sqrt(blockRatio / 0.03);
         //-- Recalculate the bnd poly and height with new values
         localPoly.clear();
         localPoly = this->calc_bnd_poly(candidatePts, hMax, angle, expRatio);
-        config::topHeight = hMax * config::bpgDomainSize.back() * expRatio;
+        Config::get().topHeight = hMax * Config::get().bpgDomainSize.back() * expRatio;
     }
     //-- Return the points back to global coordinates
     for (auto& pt : localPoly) _boundingRegion.push_back(geomutils::rotate_pt(pt, angle));
@@ -130,7 +130,7 @@ const Polygon_2& BoundingRegion::get_bounding_region() const {
 Polygon_2 BoundingRegion::calc_bnd_poly(const std::vector<Point_2>& candidatePts,
                                         const double hMax, const double angle, const double enlargeRatio) const {
     Polygon_2 localPoly;
-    if (config::bpgDomainType == ROUND) {
+    if (Config::get().bpgDomainType == ROUND) {
         Point_2 localPOI = geomutils::rotate_pt(global::nullPt, -angle);
 
         double bndRadius = 0;
@@ -138,7 +138,7 @@ Polygon_2 BoundingRegion::calc_bnd_poly(const std::vector<Point_2>& candidatePts
             double sqDist = CGAL::squared_distance(localPOI, pt);
             if (sqDist > bndRadius * bndRadius) bndRadius = sqrt(sqDist);
         }
-        bndRadius = (bndRadius + hMax * config::bpgDomainSize.front()) * enlargeRatio;
+        bndRadius = (bndRadius + hMax * Config::get().bpgDomainSize.front()) * enlargeRatio;
         geomutils::make_round_poly(localPOI, bndRadius, localPoly);
 
         std::cout << "Calculated boundary radius is: "
@@ -148,13 +148,13 @@ Polygon_2 BoundingRegion::calc_bnd_poly(const std::vector<Point_2>& candidatePts
         //-- Get bbox
         Polygon_2 bbox = geomutils::calc_bbox_poly(candidatePts);
 
-        if (config::bpgDomainType == RECTANGLE) {
+        if (Config::get().bpgDomainType == RECTANGLE) {
             //-- Construct enlargement vector
             std::vector<Vector_2> translateBoundary;
-            translateBoundary.emplace_back(Vector_2(-config::bpgDomainSize[0], 0));
-            translateBoundary.emplace_back(Vector_2(0, -config::bpgDomainSize[1] * enlargeRatio));
-            translateBoundary.emplace_back(Vector_2(config::bpgDomainSize[2], 0));
-            translateBoundary.emplace_back(Vector_2(0, config::bpgDomainSize[1] * enlargeRatio));
+            translateBoundary.emplace_back(Vector_2(-Config::get().bpgDomainSize[0], 0));
+            translateBoundary.emplace_back(Vector_2(0, -Config::get().bpgDomainSize[1] * enlargeRatio));
+            translateBoundary.emplace_back(Vector_2(Config::get().bpgDomainSize[2], 0));
+            translateBoundary.emplace_back(Vector_2(0, Config::get().bpgDomainSize[1] * enlargeRatio));
 
             //-- Additional enlargement for the bbox in case of large blockage ratio
             std::vector<Vector_2> addEnlargementVector;
@@ -170,12 +170,12 @@ Polygon_2 BoundingRegion::calc_bnd_poly(const std::vector<Point_2>& candidatePts
                 localPoly.push_back(pt);
                 ++i;
             }
-        } else if (config::bpgDomainType == OVAL) {
+        } else if (Config::get().bpgDomainType == OVAL) {
             std::vector<double> bpgDomainDist;
-            bpgDomainDist.push_back(config::bpgDomainSize[1]); // Down
-            bpgDomainDist.push_back(config::bpgDomainSize[2]); // Right (Back)
-            bpgDomainDist.push_back(config::bpgDomainSize[1]); // Up
-            bpgDomainDist.push_back(config::bpgDomainSize[0]); // Left (Front)
+            bpgDomainDist.push_back(Config::get().bpgDomainSize[1]); // Down
+            bpgDomainDist.push_back(Config::get().bpgDomainSize[2]); // Right (Back)
+            bpgDomainDist.push_back(Config::get().bpgDomainSize[1]); // Up
+            bpgDomainDist.push_back(Config::get().bpgDomainSize[0]); // Left (Front)
 
             Point_2 centerPt = CGAL::centroid(bbox.begin(), bbox.end());
             std::vector<double> distances;
@@ -250,7 +250,7 @@ double BoundingRegion::calc_blockage_ratio(const Buildings& buildings, const dou
     //-- Get blockArea of the domain cross section at the influence region
     Polygon_2 bbox = geomutils::calc_bbox_poly(localPoly);
     double domainCrossArea = std::sqrt(Vector_2(bbox.vertex(3) - bbox.vertex(0)).squared_length())
-                           * config::topHeight;
+                           * Config::get().topHeight;
 
     //-- Return the blockage ration
     return blockArea / domainCrossArea;

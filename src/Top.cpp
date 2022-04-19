@@ -35,7 +35,7 @@ void Top::reconstruct() {
     //-- Top is done by making a CDT of outerPts
     CDT cdt_top;
     for (auto& pt : _outerPts) {
-        cdt_top.insert(ePoint_3(pt.x(), pt.y(), config::topHeight));
+        cdt_top.insert(ePoint_3(pt.x(), pt.y(), Config::get().topHeight));
     }
 
     //-- Add mesh faces for top

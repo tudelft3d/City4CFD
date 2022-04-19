@@ -35,7 +35,7 @@ LoD12::LoD12(const Polygon_with_holes_2& poly,
         : _height(height), _poly(poly), _baseHeights(base_heights), _buildingPts(building_pts) {}
 
 void LoD12::lod12_calc_height(double& height) {
-    _height = geomutils::percentile(_buildingPts, config::buildingPercentile);
+    _height = geomutils::percentile(_buildingPts, Config::get().buildingPercentile);
     height = _height;
 }
 

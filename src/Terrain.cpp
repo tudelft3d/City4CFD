@@ -51,7 +51,7 @@ void Terrain::set_cdt(const Point_set_3& pointCloud) {
     IO::print_progress_bar(100); std::clog << std::endl;
 
     //-- Smoothing
-    if (config::smoothTerrain) {
+    if (Config::get().smoothTerrain) {
         std::cout << "\n    Smoothing" << std::endl;
         geomutils::smooth_dt<CDT, EPECK>(pointCloud, _cdt);
     }
@@ -108,7 +108,7 @@ void Terrain::create_mesh(const PolyFeatures& features) {
     geomutils::cdt_to_mesh(_cdt, _mesh);
 
     // -- Surface layer meshes are stored here
-    for (int i : config::surfaceLayerIDs) {
+    for (int i : Config::get().surfaceLayerIDs) {
         auto layer = std::make_shared<SurfaceLayer>(i);
         geomutils::cdt_to_mesh(_cdt, layer->get_mesh(), i); // Create mesh for surface layers
         _surfaceLayersTerrain.push_back(layer);

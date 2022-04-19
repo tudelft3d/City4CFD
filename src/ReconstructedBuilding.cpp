@@ -26,43 +26,43 @@
 
 ReconstructedBuilding::ReconstructedBuilding()
         : Building(), _searchTree(nullptr),
-        _attributeHeight(-9999), _attributeHeightAdvantage(config::buildingHeightAttributeAdvantage) {}
+        _attributeHeight(-9999), _attributeHeightAdvantage(Config::get().buildingHeightAttributeAdvantage) {}
 
 ReconstructedBuilding::ReconstructedBuilding(const int internalID)
         : Building(internalID), _searchTree(nullptr),
-          _attributeHeight(-9999), _attributeHeightAdvantage(config::buildingHeightAttributeAdvantage) {}
+          _attributeHeight(-9999), _attributeHeightAdvantage(Config::get().buildingHeightAttributeAdvantage) {}
 
 
 ReconstructedBuilding::ReconstructedBuilding(const nlohmann::json& poly)
         : Building(poly), _searchTree(nullptr),
-          _attributeHeight(-9999), _attributeHeightAdvantage(config::buildingHeightAttributeAdvantage) {
-    if (!config::buildingUniqueId.empty()) {
-        _id = poly["properties"][config::buildingUniqueId].dump();
+          _attributeHeight(-9999), _attributeHeightAdvantage(Config::get().buildingHeightAttributeAdvantage) {
+    if (!Config::get().buildingUniqueId.empty()) {
+        _id = poly["properties"][Config::get().buildingUniqueId].dump();
     }
-    if (poly["properties"].contains(config::buildingHeightAttribute)) {
-        if (poly["properties"][config::buildingHeightAttribute].is_number()) {
-            _attributeHeight = poly["properties"][config::buildingHeightAttribute];
+    if (poly["properties"].contains(Config::get().buildingHeightAttribute)) {
+        if (poly["properties"][Config::get().buildingHeightAttribute].is_number()) {
+            _attributeHeight = poly["properties"][Config::get().buildingHeightAttribute];
         }
-    } else if (poly["properties"].contains(config::floorAttribute)) {
-        _attributeHeight = (double)poly["properties"][config::floorAttribute] * config::floorHeight;
+    } else if (poly["properties"].contains(Config::get().floorAttribute)) {
+        _attributeHeight = (double)poly["properties"][Config::get().floorAttribute] * Config::get().floorHeight;
     }
 }
 
 ReconstructedBuilding::ReconstructedBuilding(const nlohmann::json& poly, const int internalID)
         : Building(poly, internalID), _searchTree(nullptr),
-          _attributeHeight(-9999), _attributeHeightAdvantage(config::buildingHeightAttributeAdvantage) {
-    if (!config::buildingUniqueId.empty()) {
-        _id = poly["properties"][config::buildingUniqueId].dump();
+          _attributeHeight(-9999), _attributeHeightAdvantage(Config::get().buildingHeightAttributeAdvantage) {
+    if (!Config::get().buildingUniqueId.empty()) {
+        _id = poly["properties"][Config::get().buildingUniqueId].dump();
     } else {
         _id = std::to_string(internalID);
     }
-    if (poly["properties"].contains(config::buildingHeightAttribute)) {
-        if (poly["properties"][config::buildingHeightAttribute].is_number()) {
-            _attributeHeight = poly["properties"][config::buildingHeightAttribute];
+    if (poly["properties"].contains(Config::get().buildingHeightAttribute)) {
+        if (poly["properties"][Config::get().buildingHeightAttribute].is_number()) {
+            _attributeHeight = poly["properties"][Config::get().buildingHeightAttribute];
         }
-    } else if (poly["properties"].contains(config::floorAttribute)) {
-        if (poly["properties"][config::floorAttribute].is_number()) {
-            _attributeHeight = (double) poly["properties"][config::floorAttribute] * config::floorHeight;
+    } else if (poly["properties"].contains(Config::get().floorAttribute)) {
+        if (poly["properties"][Config::get().floorAttribute].is_number()) {
+            _attributeHeight = (double) poly["properties"][Config::get().floorAttribute] * Config::get().floorHeight;
         }
     }
 }
@@ -186,7 +186,7 @@ void ReconstructedBuilding::reconstruct_from_attribute() {
 
 bool ReconstructedBuilding::reconstruct_again_from_attribute(const std::string& reason) {
     if (_attributeHeight > 0) {
-        config::log << "Failed to reconstruct using point cloud building ID: " << _id
+        Config::get().log << "Failed to reconstruct using point cloud building ID: " << _id
                     << " Reason: " << reason
                     << ". Reconstructing using height attribute from JSON polygon." << std::endl;
         this->reconstruct_from_attribute();

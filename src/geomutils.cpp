@@ -154,8 +154,8 @@ void geomutils::mark_domains(CDT& cdt, PolyFeatures features) {
 
 void geomutils::check_layer(const Face_handle& fh, int surfaceLayer) {
     if (fh->info().surfaceLayer == 9999) return;
-    auto it = config::averageSurfaces.find(surfaceLayer);
-    if (it != config::averageSurfaces.end()) {
+    auto it = Config::get().averageSurfaces.find(surfaceLayer);
+    if (it != Config::get().averageSurfaces.end()) {
         Converter<EPECK, EPICK> to_inexact;
         Vector_3 vertical(0, 0, 1);
         Vector_3 norm = CGAL::normal(to_inexact(fh->vertex(0)->point()),

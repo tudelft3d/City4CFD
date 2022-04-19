@@ -23,7 +23,7 @@
 #define CITY4CFD_BUILDING_H
 
 #include "PolyFeature.h"
-#include "config.h"
+#include "Config.h"
 
 class Building : public PolyFeature {
 public:
@@ -52,7 +52,7 @@ public:
 
 protected:
     double _height;
-    bool   _clip_bottom = config::clip;
+    bool   _clip_bottom = Config::get().clip;
 };
 
 //-- Struct for clipping

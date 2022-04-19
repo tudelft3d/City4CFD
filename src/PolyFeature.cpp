@@ -156,7 +156,7 @@ void PolyFeature::average_polygon_inner_points(const Point_set_3& pointCloud,
     if (indices.empty()) {
         return;
     }
-    double avgHeight = geomutils::percentile(originalHeights, config::averageSurfaces[this->get_output_layer_id()] / 100);
+    double avgHeight = geomutils::percentile(originalHeights, Config::get().averageSurfaces[this->get_output_layer_id()] / 100);
 
     //-- Add new points to the temp map
     for (auto& i : indices) {
@@ -189,8 +189,8 @@ void PolyFeature::parse_json_poly(const nlohmann::json& poly) {
     for (auto& polyEdges : poly["geometry"]["coordinates"]) {
         Polygon_2 tempPoly;
         for (auto& coords : polyEdges) {
-            tempPoly.push_back(Point_2((double)coords[0] - config::pointOfInterest.x(),
-                                       (double)coords[1] - config::pointOfInterest.y()));
+            tempPoly.push_back(Point_2((double)coords[0] - Config::get().pointOfInterest.x(),
+                                       (double)coords[1] - Config::get().pointOfInterest.y()));
         }
         geomutils::pop_back_if_equal_to_front(tempPoly);
 

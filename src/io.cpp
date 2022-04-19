@@ -21,7 +21,7 @@
 
 #include "io.h"
 
-#include "config.h"
+#include "Config.h"
 #include "TopoFeature.h"
 #include "Boundary.h"
 
@@ -32,9 +32,9 @@ void IO::read_config(std::string& config_path) {
         throw std::invalid_argument(std::string("Configuration file " + config_path + " not found."));
 
     //-- Filepaths in the json file are relative to the location of the json file
-    config::workDir = fs::path(config_path).parent_path();
-    fs::current_path(config::workDir);
-    std::cout << "Work directory path: " << fs::canonical(config::workDir) << std::endl;
+    Config::get().workDir = fs::path(config_path).parent_path();
+    fs::current_path(Config::get().workDir);
+    std::cout << "Work directory path: " << fs::canonical(Config::get().workDir) << std::endl;
 
     nlohmann::json j;
     try {
@@ -46,10 +46,10 @@ void IO::read_config(std::string& config_path) {
     }
 
     std::cout << "\nValidating JSON configuration file...";
-    config::validate(j);
+    Config::get().validate(j);
     std::cout <<"Configuration file is valid! \n" << std::endl;
 
-    config::set_config(j);
+    Config::get().set_config(j);
 }
 
 bool IO::read_point_cloud(std::string& file, Point_set_3& pc) {
@@ -57,8 +57,8 @@ bool IO::read_point_cloud(std::string& file, Point_set_3& pc) {
     std::ifstream ifile(file, std::ios_base::binary);
     ifile >> pc;
 
-    CGAL::Aff_transformation_3<EPICK> translate(CGAL::TRANSLATION, CGAL::Vector_3<EPICK>(-config::pointOfInterest.x(),
-                                                                                         -config::pointOfInterest.y(),
+    CGAL::Aff_transformation_3<EPICK> translate(CGAL::TRANSLATION, CGAL::Vector_3<EPICK>(-Config::get().pointOfInterest.x(),
+                                                                                         -Config::get().pointOfInterest.y(),
                                                                                          0));
     Point_set_3 transformPC;
     for (auto it = pc.points().begin(); it != pc.points().end(); ++it) {
@@ -104,8 +104,8 @@ void IO::read_explicit_geometries(std::string& file, JsonVector& importedBuildin
 
         //-- Add vertices
         for (auto& pt : j["vertices"]) {
-            double ptx = ((double)pt[0] * (double)j["transform"]["scale"][0]) + (double)j["transform"]["translate"][0] - config::pointOfInterest.x();
-            double pty = ((double)pt[1] * (double)j["transform"]["scale"][1]) + (double)j["transform"]["translate"][1] - config::pointOfInterest.y();
+            double ptx = ((double)pt[0] * (double)j["transform"]["scale"][0]) + (double)j["transform"]["translate"][0] - Config::get().pointOfInterest.x();
+            double pty = ((double)pt[1] * (double)j["transform"]["scale"][1]) + (double)j["transform"]["translate"][1] - Config::get().pointOfInterest.y();
             double ptz = ((double)pt[2] * (double)j["transform"]["scale"][2]) + (double)j["transform"]["translate"][2];
             importedBuildingPts.emplace_back(ptx, pty, ptz);
         }
@@ -148,7 +148,7 @@ void IO::output_obj(const OutputFeatures& allFeatures) {
     std::vector<std::unordered_map<std::string, int>> dPts(numOutputSurfaces);
     //-- Output points
     for (auto& f : allFeatures) {
-        if (config::outputSeparately)
+        if (Config::get().outputSeparately)
             IO::get_obj_pts(f->get_mesh(),
                             fs[f->get_output_layer_id()],
                             bs[f->get_output_layer_id()],
@@ -161,18 +161,18 @@ void IO::output_obj(const OutputFeatures& allFeatures) {
     }
 
     //-- Add class name and output to file
-    if (!config::outputSeparately) {
+    if (!Config::get().outputSeparately) {
         of.emplace_back();
-        of.back().open(config::outputFileName + ".obj");
+        of.back().open(Config::get().outputFileName + ".obj");
     }
     for (int i = 0; i < fs.size(); ++i) {
         if (bs[i].empty()) continue;
-        if (config::outputSeparately) {
+        if (Config::get().outputSeparately) {
             of.emplace_back();
-            of.back().open(config::outputFileName + "_" + config::outputSurfaces[i] + ".obj");
+            of.back().open(Config::get().outputFileName + "_" + Config::get().outputSurfaces[i] + ".obj");
         }
 
-        of.back() << fs[i] << "\ng " << config::outputSurfaces[i] << bs[i];
+        of.back() << fs[i] << "\ng " << Config::get().outputSurfaces[i] << bs[i];
     }
     for (auto& f : of) f.close();
 }
@@ -189,26 +189,25 @@ void IO::output_stl(const OutputFeatures& allFeatures) {
     }
 
     //-- Add class name and output to file
-    if (!config::outputSeparately) {
+    if (!Config::get().outputSeparately) {
         of.emplace_back();
-        of.back().open(config::outputFileName + ".stl");
+        of.back().open(Config::get().outputFileName + ".stl");
     }
     for (int i = 0; i < fs.size(); ++i) {
         if (fs[i].empty()) continue;
-        if (config::outputSeparately) {
+        if (Config::get().outputSeparately) {
             of.emplace_back();
-            of.back().open(config::outputFileName + "_" + config::outputSurfaces[i] + ".stl");
+            of.back().open(Config::get().outputFileName + "_" + Config::get().outputSurfaces[i] + ".stl");
         }
 
-        of.back() << "\nsolid " << config::outputSurfaces[i];
+        of.back() << "\nsolid " << Config::get().outputSurfaces[i];
         of.back() << fs[i];
-        of.back() << "\nendsolid " << config::outputSurfaces[i];
+        of.back() << "\nendsolid " << Config::get().outputSurfaces[i];
     }
     for (auto& f : of) f.close();
 }
 
 void IO::output_cityjson(const OutputFeatures& allFeatures) {
-    using namespace config;
     std::ofstream of;
     nlohmann::json j;
 
@@ -250,7 +249,7 @@ void IO::output_cityjson(const OutputFeatures& allFeatures) {
         j["vertices"].push_back({std::stod(c[0], NULL), std::stod(c[1], NULL), std::stod(c[2], NULL) });
     }
 
-    of.open(outputFileName + ".json");
+    of.open(Config::get().outputFileName + ".json");
     of << j.dump() << std::endl;
 }
 
@@ -315,7 +314,7 @@ void IO::get_stl_pts(Mesh& mesh, std::string& fs) {
 void IO::get_cityjson_geom(const Mesh& mesh, nlohmann::json& g, std::unordered_map<std::string, int>& dPts,
                            std::string primitive) {
     g["type"] = primitive;
-    g["lod"] = config::lod;
+    g["lod"] = Config::get().lod;
     g["boundaries"];
     for (auto& face: mesh.faces()) {
         std::vector<int> faceIdx;
@@ -354,26 +353,26 @@ bool IO::not_small(std::vector<int> idxLst) {
 }
 
 void IO::output_log() {
-    if (!config::outputLog) return;
+    if (!Config::get().outputLog) return;
 
     //-- Output log file
-    config::logSummary <<"\n// ----------------------------------------------------------------------------------------------- //" << std::endl;
-    std::cout << "\nCreating log file '" << config::logName << "'" << std::endl;
+    Config::get().logSummary <<"\n// ----------------------------------------------------------------------------------------------- //" << std::endl;
+    std::cout << "\nCreating log file '" << Config::get().logName << "'" << std::endl;
     std::ofstream of;
-    of.open(config::logName);
-    of << config::log.str() << config::logSummary.str();
+    of.open(Config::get().logName);
+    of << Config::get().log.str() << Config::get().logSummary.str();
     of.close();
 
     //-- Output failed reconstructions
-    if (!config::failedBuildings.empty()) {
+    if (!Config::get().failedBuildings.empty()) {
         std::cout << "Outputting failed building reconstructions to 'failedReconstructions.geojson'"
                   << std::endl;
         //- Parse again the buildings polygon
-        std::ifstream ifs(config::workDir.append(config::gisdata).string());
+        std::ifstream ifs(Config::get().workDir.append(Config::get().gisdata).string());
         nlohmann::json j = nlohmann::json::parse(ifs);
         //- Extract failed reconstructions
         nlohmann::json b;
-        for (int i: config::failedBuildings) {
+        for (int i: Config::get().failedBuildings) {
             b["features"].push_back(j["features"][i]);
         }
         b["crs"] = j["crs"];

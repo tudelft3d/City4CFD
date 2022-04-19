@@ -73,13 +73,13 @@ void Map3d::reconstruct() {
     }
 
     //-- Clip building bottoms
-    if (config::clip) this->clip_buildings();
+    if (Config::get().clip) this->clip_buildings();
 
     //-- Constrain features, generate terrain mesh from CDT
     this->reconstruct_terrain();
 
     //-- Generate side and top boundaries
-    if (config::reconstructBoundaries) this->reconstruct_boundaries();
+    if (Config::get().reconstructBoundaries) this->reconstruct_boundaries();
 }
 
 void Map3d::set_features() {
@@ -123,14 +123,14 @@ void Map3d::set_features() {
         std::cout << "    Geometries imported: " << _importedBuildings.size() << std::endl;
     }
     //-- Boundaries
-    for (int i = 0; i < config::numSides; ++i)
+    for (int i = 0; i < Config::get().numSides; ++i)
         _boundaries.push_back(std::make_shared<Sides>(TopoFeature::get_num_output_layers()));
     _boundaries.push_back(std::make_shared<Top>(TopoFeature::get_num_output_layers()));
 
     //- Other polygons
     for (auto& surfaceLayer : _polygonsSurfaceLayers) {
         int outputLayerID = TopoFeature::get_num_output_layers();
-        config::surfaceLayerIDs.push_back(outputLayerID); // Need it for later
+        Config::get().surfaceLayerIDs.push_back(outputLayerID); // Need it for later
         for (auto& poly : surfaceLayer) {
             auto surfacePoly = std::make_shared<SurfaceLayer>(*poly, outputLayerID);
             _surfaceLayers.push_back(surfacePoly);
@@ -139,20 +139,20 @@ void Map3d::set_features() {
     }
     std::cout << "    Polygons read: " << _lsFeatures.size() << std::endl;
     //-- Simplify terrain points
-    if (config::terrainThinning > 0 + g_smallnum) {
+    if (Config::get().terrainThinning > 0 + g_smallnum) {
         std::cout <<"\nRandomly thinning terrain points" << std::endl;
-        _pointCloud.remove(CGAL::random_simplify_point_set(_pointCloud, config::terrainThinning), _pointCloud.end());
+        _pointCloud.remove(CGAL::random_simplify_point_set(_pointCloud, Config::get().terrainThinning), _pointCloud.end());
         _pointCloud.collect_garbage();
         std::cout << "    Terrain points after thinning: " << _pointCloud.size() << std::endl;
     }
 
     //-- BPG flags for influ region and domain boundary
-    if (config::influRegionConfig.type() == typeid(bool)) _influRegionBPG = true;
-    if (config::domainBndConfig.type() == typeid(bool))   _bndBPG = true;
+    if (Config::get().influRegionConfig.type() == typeid(bool)) _influRegionBPG = true;
+    if (Config::get().domainBndConfig.type() == typeid(bool))   _bndBPG = true;
 
     //-- Make a DT with inexact constructions for fast interpolation
     _dt.insert(_pointCloud.points().begin(), _pointCloud.points().end());
-    if (config::smoothTerrain) {
+    if (Config::get().smoothTerrain) {
         geomutils::smooth_dt<DT, EPICK>(_pointCloud, _dt);
     }
 }
@@ -175,7 +175,7 @@ void Map3d::set_influ_region() {
         //-- Calculate influ region
         _influRegion.calc_influ_region_bpg(_dt, _pointCloudBuildings, _buildings);
     } else { // Define influ region either with radius or predefined polygon
-        boost::apply_visitor(_influRegion, config::influRegionConfig);
+        boost::apply_visitor(_influRegion, Config::get().influRegionConfig);
     }
 
     //-- Deactivate buildings that are out of influ region
@@ -199,7 +199,7 @@ void Map3d::set_bnd() {
         _domainBnd.calc_bnd_bpg(_influRegion.get_bounding_region(), _buildings);
     } else {
         //-- Define boundary region with values set in config
-        boost::apply_visitor(_domainBnd, config::domainBndConfig);
+        boost::apply_visitor(_domainBnd, Config::get().domainBndConfig);
     }
     this->bnd_sanity_check(); // Check if outer bnd is larger than the influ region
 
@@ -207,7 +207,7 @@ void Map3d::set_bnd() {
     Polygon_2 bndPoly, pcBndPoly, startBufferPoly; // Depends on the buffer region
     bndPoly = _domainBnd.get_bounding_region();
     if (_boundaries.size() > 2) { 
-        geomutils::shorten_long_poly_edges(bndPoly, 20 * config::edgeMaxLen); // Outer poly edge size is hardcoded atm
+        geomutils::shorten_long_poly_edges(bndPoly, 20 * Config::get().edgeMaxLen); // Outer poly edge size is hardcoded atm
         Boundary::set_bnd_poly(bndPoly, pcBndPoly, startBufferPoly);
     } else
         // If it's only one side bnd, edge length is already okay
@@ -237,7 +237,7 @@ void Map3d::reconstruct_terrain() {
     if (_terrain->get_cdt().number_of_vertices() == 0) {
         std::cout << "\nReconstructing terrain" << std::endl;
         _terrain->prep_constraints(_lsFeatures, _pointCloud);
-        if (!config::averageSurfaces.empty()) this->average_polygon_points();
+        if (!Config::get().averageSurfaces.empty()) this->average_polygon_points();
         _terrain->set_cdt(_pointCloud);
         _terrain->constrain_features();
     }
@@ -249,7 +249,7 @@ void Map3d::reconstruct_terrain() {
 void Map3d::reconstruct_buildings() {
     std::cout << "\nReconstructing buildings" << std::endl;
     if (!_importedBuildings.empty()) {
-        std::cout << "    Will try to reconstruct imported buildings in LoD: " << config::importLoD
+        std::cout << "    Will try to reconstruct imported buildings in LoD: " << Config::get().importLoD
                   << ". If I cannot find a geometry with that LoD, I will reconstruct in the highest LoD available"
                   << std::endl;
     }
@@ -265,20 +265,20 @@ void Map3d::reconstruct_buildings() {
             f->reconstruct();
 
             //-- In case of hybrid boolean/constraining reconstruction
-            if (config::clip && !config::handleSelfIntersections && f->has_self_intersections()) {
+            if (Config::get().clip && !Config::get().handleSelfIntersections && f->has_self_intersections()) {
                 f->set_clip_flag(false);
                 f->reconstruct();
             }
         } catch (std::exception& e) {
             ++failed;
             //-- Add information to log file
-            config::log << "Failed to reconstruct building ID: " << f->get_id()
+            Config::get().log << "Failed to reconstruct building ID: " << f->get_id()
                         << " Reason: " << e.what() << std::endl;
             //-- Get JSON file ID for failed reconstructions output
-            config::failedBuildings.push_back(f->get_internal_id());
+            Config::get().failedBuildings.push_back(f->get_internal_id());
         }
     }
-    config::logSummary << "BUILDING RECONSTRUCTION SUMMARY: TOTAL FAILED RECONSTRUCTIONS: "
+    Config::get().logSummary << "BUILDING RECONSTRUCTION SUMMARY: TOTAL FAILED RECONSTRUCTIONS: "
                        << failed << std::endl;
 
     this->clear_inactives();
@@ -326,8 +326,8 @@ void Map3d::average_polygon_points() {
 
     //-- Perform averaging
     for (auto& f : _lsFeatures) {
-        auto it = config::averageSurfaces.find(f->get_output_layer_id());
-        if (it != config::averageSurfaces.end()) {
+        auto it = Config::get().averageSurfaces.find(f->get_output_layer_id());
+        if (it != Config::get().averageSurfaces.end()) {
             f->average_polygon_inner_points(_pointCloud, averagedPts, searchTree, pointCloudConnectivity);
         }
     }
@@ -351,7 +351,7 @@ void Map3d::solve_building_conflicts() {
     for (auto& importedBuilding : _importedBuildings) {
         for (auto& reconstructedBuilding : _reconstructedBuildings) {
             if (geomutils::polygons_in_contact(importedBuilding->get_poly(), reconstructedBuilding->get_poly())) {
-                if (config::importAdvantage) {
+                if (Config::get().importAdvantage) {
                     reconstructedBuilding->deactivate();
                 } else {
                     importedBuilding->deactivate();
@@ -370,7 +370,7 @@ void Map3d::clip_buildings() {
     //-- Prepare terrain with subset
     std::cout << "\nReconstructing terrain" << std::endl;
     _terrain->prep_constraints(_lsFeatures, _pointCloud);
-    if (!config::averageSurfaces.empty()) this->average_polygon_points();
+    if (!Config::get().averageSurfaces.empty()) this->average_polygon_points();
     _terrain->set_cdt(_pointCloud);
     _terrain->constrain_features();
     _terrain->prepare_subset();
@@ -389,9 +389,9 @@ void Map3d::clip_buildings() {
 
 void Map3d::read_data() { // This will change with time
     //-- Read ground points
-    if (!config::points_xyz.empty()) {
+    if (!Config::get().points_xyz.empty()) {
     std::cout << "Reading ground points" << std::endl;
-    IO::read_point_cloud(config::points_xyz, _pointCloud);
+    IO::read_point_cloud(Config::get().points_xyz, _pointCloud);
     _pointCloud.add_property_map<bool> ("is_building_point", false);
     std::cout << "    Points read: " << _pointCloud.size() << std::endl;
     } else {
@@ -400,47 +400,47 @@ void Map3d::read_data() { // This will change with time
     }
 
     //-- Read building points
-    if (!config::buildings_xyz.empty()) {
+    if (!Config::get().buildings_xyz.empty()) {
         std::cout << "Reading building points" << std::endl;
-        IO::read_point_cloud(config::buildings_xyz, _pointCloudBuildings);
+        IO::read_point_cloud(Config::get().buildings_xyz, _pointCloudBuildings);
         if (_pointCloudBuildings.empty()) throw std::invalid_argument("Didn't find any building points!");
 
         std::cout << "    Points read: " << _pointCloudBuildings.size() << std::endl;
     }
 
     //-- Read building polygons
-    if (!config::gisdata.empty()) {
+    if (!Config::get().gisdata.empty()) {
         std::cout << "Reading polygons" << std::endl;
-        IO::read_geojson_polygons(config::gisdata, _polygonsBuildings);
+        IO::read_geojson_polygons(Config::get().gisdata, _polygonsBuildings);
         if (_polygonsBuildings.empty()) throw std::invalid_argument("Didn't find any building polygons!");
     }
 
     //-- Read surface layer polygons
-    for (auto& topoLayer: config::topoLayers) {
+    for (auto& topoLayer: Config::get().topoLayers) {
         _polygonsSurfaceLayers.emplace_back();
         IO::read_geojson_polygons(topoLayer, _polygonsSurfaceLayers.back());
     }
 
     //-- Read imported buildings
-    if (!config::importedBuildings.empty()) {
+    if (!Config::get().importedBuildings.empty()) {
 //        std::cout << "Importing CityJSON geometries" << std::endl;
-        IO::read_explicit_geometries(config::importedBuildings, _importedBuildingsJson, _importedBuildingsPts);
+        IO::read_explicit_geometries(Config::get().importedBuildings, _importedBuildingsJson, _importedBuildingsPts);
     }
 }
 
 void Map3d::output() {
 #ifndef NDEBUG
-    assert(config::outputSurfaces.size() == TopoFeature::get_num_output_layers());
+    assert(Config::get().outputSurfaces.size() == TopoFeature::get_num_output_layers());
 #endif
-    fs::current_path(config::outputDir);
+    fs::current_path(Config::get().outputDir);
     std::cout << "\nOutputting surface meshes "      << std::endl;
     std::cout << "    Folder: " << fs::canonical(fs::current_path()) << std::endl;
-//    std::cout << "    Format: " << config::outputFormat << std::endl; //todo
+//    std::cout << "    Format: " << Config::get().outputFormat << std::endl; //todo
 
     //-- Group all features for output
     this->prep_feature_output();
 
-    switch (config::outputFormat) {
+    switch (Config::get().outputFormat) {
         case OBJ:
             IO::output_obj(_outputFeatures);
             break;
