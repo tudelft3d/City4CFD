@@ -406,7 +406,8 @@ void Map3d::prep_feature_output() {
 void Map3d::prep_cityjson_output() { // Temp impl, might change
     for (unsigned long i = 0; i < _outputFeatures.size(); ++i) {
         if (_outputFeatures[i]->is_active()) {
-            _outputFeatures[i]->set_id(i++);
+            _outputFeatures[i]->set_id(i);
+            ++i;
         }
         else {
             _outputFeatures.erase(_outputFeatures.begin() + i);

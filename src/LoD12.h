@@ -26,7 +26,7 @@
 
 class LoD12 {
 public:
-    LoD12() = default;
+    LoD12() = delete;
     LoD12(const Polygon_with_holes_2& poly, const std::vector<std::vector<double>>& base_heights,
           const std::vector<double>& building_pts);
     LoD12(const Polygon_with_holes_2& poly, const std::vector<std::vector<double>>& base_heights,
