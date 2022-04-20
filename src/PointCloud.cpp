@@ -22,6 +22,7 @@
 #include "PointCloud.h"
 
 #include "io.h"
+#include "geomutils.h"
 #include "Config.h"
 #include "PolyFeature.h"
 
@@ -37,6 +38,17 @@ void PointCloud::random_thin_pts() {
         _pointCloudTerrain.collect_garbage();
         std::cout << "    Terrain points after thinning: " << _pointCloudTerrain.size() << std::endl;
     }
+}
+
+void PointCloud::smooth_terrain() {
+    std::cout << "\nSmoothing terrain" << std::endl;
+    DT dt(_pointCloudTerrain.points().begin(), _pointCloudTerrain.points().end());
+    geomutils::smooth_dt<DT, EPICK>(_pointCloudTerrain, dt);
+
+    //-- Return new pts to the point cloud
+    _pointCloudTerrain.clear();
+    for (auto& pt : dt.points()) _pointCloudTerrain.insert(pt);
+    _pointCloudTerrain.add_property_map<bool> ("is_building_point", false);
 }
 
 void PointCloud::average_polygon_pts(const PolyFeatures& lsFeatures) {

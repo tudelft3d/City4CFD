@@ -33,6 +33,7 @@ public:
     ~PointCloud();
 
     void random_thin_pts();
+    void smooth_terrain();
     void average_polygon_pts(const PolyFeatures& lsFeatures);
     SearchTreePtr make_search_tree_buildings();
     void read_point_clouds();

@@ -50,11 +50,13 @@ void Terrain::set_cdt(const Point_set_3& pointCloud) {
     _cdt.insert(pts.begin(), pts.end());
     IO::print_progress_bar(100); std::clog << std::endl;
 
+    /*
     //-- Smoothing
     if (Config::get().smoothTerrain) {
         std::cout << "\n    Smoothing" << std::endl;
         geomutils::smooth_dt<CDT, EPECK>(pointCloud, _cdt);
     }
+   */
 }
 
 void Terrain::prep_constraints(const PolyFeatures& features, Point_set_3& pointCloud) {
