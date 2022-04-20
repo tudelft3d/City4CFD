@@ -85,16 +85,14 @@ void Terrain::prep_constraints(const PolyFeatures& features, Point_set_3& pointC
 }
 
 void Terrain::constrain_features() {
-    int count = 0;
-    int numFeatures = _constrainedPolys.size();
-
     std::cout << "\n    Constraining polygons" << std::endl;
-    IO::print_progress_bar(0);
+
+    int count = 0;
     for (auto& ring : _constrainedPolys) {
         //-- Set added points as constraints
         _cdt.insert_constraint(ring.begin(), ring.end(), true);
 
-        IO::print_progress_bar(100 * count++ / numFeatures);
+        IO::print_progress_bar(100 * count++ / _constrainedPolys.size());
     }
     IO::print_progress_bar(100); std::clog << std::endl;
 }

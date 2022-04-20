@@ -263,12 +263,12 @@ void Map3d::reconstruct_buildings() {
         if (!f->is_active()) continue;
         try {
             f->reconstruct();
-
             //-- In case of hybrid boolean/constraining reconstruction
-            if (Config::get().clip && !Config::get().handleSelfIntersections && f->has_self_intersections()) {
+            if (Config::get().clip && !Config::get().handleSelfIntersect && f->has_self_intersections()) {
                 f->set_clip_flag(false);
                 f->reconstruct();
             }
+            if (Config::get().refineBuildings) f->refine();
         } catch (std::exception& e) {
             ++failed;
             //-- Add information to log file

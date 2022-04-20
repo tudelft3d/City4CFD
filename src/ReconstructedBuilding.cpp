@@ -26,16 +26,16 @@
 
 ReconstructedBuilding::ReconstructedBuilding()
         : Building(), _searchTree(nullptr),
-        _attributeHeight(-9999), _attributeHeightAdvantage(Config::get().buildingHeightAttributeAdvantage) {}
+        _attributeHeight(-9999), _attributeHeightAdvantage(Config::get().buildingHeightAttrAdv) {}
 
 ReconstructedBuilding::ReconstructedBuilding(const int internalID)
         : Building(internalID), _searchTree(nullptr),
-          _attributeHeight(-9999), _attributeHeightAdvantage(Config::get().buildingHeightAttributeAdvantage) {}
+          _attributeHeight(-9999), _attributeHeightAdvantage(Config::get().buildingHeightAttrAdv) {}
 
 
 ReconstructedBuilding::ReconstructedBuilding(const nlohmann::json& poly)
         : Building(poly), _searchTree(nullptr),
-          _attributeHeight(-9999), _attributeHeightAdvantage(Config::get().buildingHeightAttributeAdvantage) {
+          _attributeHeight(-9999), _attributeHeightAdvantage(Config::get().buildingHeightAttrAdv) {
     if (!Config::get().buildingUniqueId.empty()) {
         _id = poly["properties"][Config::get().buildingUniqueId].dump();
     }
@@ -50,7 +50,7 @@ ReconstructedBuilding::ReconstructedBuilding(const nlohmann::json& poly)
 
 ReconstructedBuilding::ReconstructedBuilding(const nlohmann::json& poly, const int internalID)
         : Building(poly, internalID), _searchTree(nullptr),
-          _attributeHeight(-9999), _attributeHeightAdvantage(Config::get().buildingHeightAttributeAdvantage) {
+          _attributeHeight(-9999), _attributeHeightAdvantage(Config::get().buildingHeightAttrAdv) {
     if (!Config::get().buildingUniqueId.empty()) {
         _id = poly["properties"][Config::get().buildingUniqueId].dump();
     } else {

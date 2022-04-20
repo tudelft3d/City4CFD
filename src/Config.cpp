@@ -148,7 +148,7 @@ void Config::set_config(nlohmann::json& j) {
             if (poly.contains("height_attribute"))
                 buildingHeightAttribute = poly["height_attribute"];
             if (poly.contains("height_attribute_advantage"))
-                buildingHeightAttributeAdvantage = poly["height_attribute_advantage"];
+                buildingHeightAttrAdv = poly["height_attribute_advantage"];
             if (poly.contains("floor_attribute"))
                 floorAttribute = poly["floor_attribute"];
             if (poly.contains("floor_height"))
@@ -242,7 +242,9 @@ void Config::set_config(nlohmann::json& j) {
         if (j["experimental"].contains("clip"))
             clip = j["experimental"]["clip"];
         if (j["experimental"].contains("handle_self_intersections"))
-            handleSelfIntersections = j["experimental"]["handle_self_intersections"];
+            handleSelfIntersect = j["experimental"]["handle_self_intersections"];
+        if (j["experimental"].contains("refine_buildings"))
+            refineBuildings = j["experimental"]["refine_buildings"];
     }
 }
 

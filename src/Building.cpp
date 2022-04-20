@@ -28,6 +28,8 @@
 #include <CGAL/Polygon_mesh_processing/orientation.h>
 #include <CGAL/Polygon_mesh_processing/repair.h>
 #include <CGAL/Polygon_mesh_processing/clip.h>
+#include <CGAL/Polygon_mesh_processing/remesh.h>
+#include <CGAL/Mesh_3/dihedral_angle_3.h>
 
 Building::Building()
         : PolyFeature(1), _height(-g_largnum) {}
@@ -45,7 +47,7 @@ Building::~Building() = default;
 
 void Building::clip_bottom(const Terrainptr& terrain) {
     if (!_clip_bottom) return;
-    if (this->has_self_intersections() && !Config::get().handleSelfIntersections) throw
+    if (this->has_self_intersections() && !Config::get().handleSelfIntersect) throw
                 std::runtime_error(std::string("Clip error in building ID " + std::to_string(this->get_internal_id())
                                                + ". Cannot clip if there are self intersections!"));
     //-- Get terrain subset
@@ -63,8 +65,47 @@ void Building::clip_bottom(const Terrainptr& terrain) {
     //-- Mesh processing and clip
     PMP::remove_degenerate_faces(_mesh);
     PMP::remove_degenerate_edges(_mesh);
-    if (Config::get().handleSelfIntersections) geomutils::remove_self_intersections(_mesh);
+    if (Config::get().handleSelfIntersect) geomutils::remove_self_intersections(_mesh);
     PMP::clip(_mesh, terrainSubsetMesh, params::vertex_point_map(mesh2_vpm), params::vertex_point_map(mesh1_vpm));
+}
+
+void Building::refine() {
+    typedef Mesh::Halfedge_index           halfedge_descriptor;
+    typedef Mesh::Edge_index               edge_descriptor;
+
+    double target_edge_length = 5; //5;
+    unsigned int nb_iter =  30;   //30;
+
+    PMP::remove_degenerate_faces(_mesh);
+    /*
+    if (PMP::does_self_intersect(_mesh)) {
+        ++config::selfIntersecting;
+        PMP::remove_self_intersections(_mesh);
+    }
+     */
+
+    //-- Set the property map for constrained edges
+    Mesh::Property_map<edge_descriptor,bool> is_constrained =
+            _mesh.add_property_map<edge_descriptor,bool>("e:is_constrained",false).first;
+
+    //-- Detect sharp features
+    for (auto& e : edges(_mesh)) {
+        halfedge_descriptor hd = halfedge(e,_mesh);
+        if (!is_border(e,_mesh)) {
+            double angle = CGAL::Mesh_3::dihedral_angle(_mesh.point(source(hd,_mesh)),
+                                                        _mesh.point(target(hd,_mesh)),
+                                                        _mesh.point(target(next(hd,_mesh),_mesh)),
+                                                        _mesh.point(target(next(opposite(hd,_mesh),_mesh),_mesh)));
+            if (CGAL::abs(angle)<179.5)
+                is_constrained[e]=true;
+        }
+    }
+
+    PMP::isotropic_remeshing(faces(_mesh), target_edge_length, _mesh,
+                             PMP::parameters::number_of_iterations(nb_iter)
+                                     .edge_is_constrained_map(is_constrained));
+
+//    PMP::remove_self_intersections(_mesh);
 }
 
 void Building::translate_footprint(const double h) {

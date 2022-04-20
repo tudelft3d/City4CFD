@@ -52,43 +52,44 @@ public:
     std::string              points_xyz;         // Ground
     std::string              buildings_xyz;      // Buildings
     std::string              gisdata;            // Building Polygons
-    std::vector<std::string> topoLayers = {};         // Other polygons
+    std::vector<std::string> topoLayers = {};    // Other polygons
     std::string              importedBuildings;  // Additional pre-reconstructed buildings
 
     //-- Domain setup
     Point_2     pointOfInterest;
-    double      topHeight = 0;
+    double      topHeight                       = 0;
     //- Influ region and domain bnd
     boost::variant<bool, double, Polygon_2> influRegionConfig;
     boost::variant<bool, double, Polygon_2> domainBndConfig;
     DomainType            bpgDomainType;
-    bool                  bpgBlockageRatioFlag = false;
-    double                bpgBlockageRatio     = 0.03;
-    Vector_2              flowDirection        = Vector_2(1,0);
+    bool                  bpgBlockageRatioFlag  = false;
+    double                bpgBlockageRatio      = 0.03;
+    Vector_2              flowDirection         = Vector_2(1,0);
     std::vector<double>   bpgDomainSize;
-    double                domainBuffer         = -g_largnum;
+    double                domainBuffer          = -g_largnum;
 
     //-- Reconstruction
     //- Terrain
-    double    terrainThinning = 0.;
-    bool      smoothTerrain   = false;
+    double    terrainThinning                   = 0.;
+    bool      smoothTerrain                     = false;
     //- Buildings
     std::string buildingUniqueId;
     std::string lod;
     double      buildingPercentile;
-    bool        clip                     = false;
-    bool        handleSelfIntersections  = false;
+    bool        clip                            = false;
+    bool        handleSelfIntersect             = false;
+    bool        refineBuildings                 = false;
     // Height from attributes
     std::string buildingHeightAttribute;
     std::string floorAttribute;
     double      floorHeight;
-    bool        buildingHeightAttributeAdvantage = false;
+    bool        buildingHeightAttrAdv           = false;
     //- Imported buildings
     bool        importAdvantage;
     bool        importTrueHeight;
     std::string importLoD;
     //- Boundary
-    bool  reconstructBoundaries = false;
+    bool  reconstructBoundaries                = false;
 
     //-- Polygons related
     double                edgeMaxLen;
@@ -105,8 +106,8 @@ public:
     std::vector<int>          surfaceLayerIDs;
 
     //-- Data log
-    bool               outputLog = false;
-    std::string        logName   = std::string("log");
+    bool               outputLog               = false;
+    std::string        logName                 = std::string("log");
     std::ostringstream log;
     std::ostringstream logSummary;
     std::vector<int>   failedBuildings;

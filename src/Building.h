@@ -36,6 +36,7 @@ public:
     virtual void reconstruct() = 0;
 
     void   clip_bottom(const Terrainptr& terrain);
+    void   refine();
     void   translate_footprint(const double h);
     void   check_feature_scope(const Polygon_2& influRegion);
     void   set_clip_flag (const bool flag);

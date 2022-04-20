@@ -130,7 +130,6 @@ ImportedBuilding::ImportedBuilding(nlohmann::json buildingJson, std::vector<Poin
         }
         _footprintPtsIdxList.push_back(ringFootprintIdxs);
     }
-
     _avgFootprintHeight = geomutils::avg(footprintElevations);
 }
 
