@@ -25,6 +25,7 @@
 #include "types.h"
 #include "CGALTypes.h"
 #include "BoundingRegion.h"
+#include "PointCloud.h"
 
 class Map3d {
 public:
@@ -37,8 +38,7 @@ public:
     void output();
 
 private:
-    Point_set_3                 _pointCloud;
-    Point_set_3                 _pointCloudBuildings;
+    PointCloud                  _pointCloud;
     JsonVector                  _polygonsBuildings;
     JsonVector                  _importedBuildingsJson;
     std::vector<JsonVector>     _polygonsSurfaceLayers;
@@ -67,7 +67,6 @@ private:
     void reconstruct_terrain();
     void reconstruct_buildings();
     void reconstruct_boundaries();
-    void average_polygon_points();
     void solve_building_conflicts();
     void clip_buildings();
 

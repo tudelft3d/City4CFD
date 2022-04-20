@@ -57,9 +57,10 @@ bool IO::read_point_cloud(std::string& file, Point_set_3& pc) {
     std::ifstream ifile(file, std::ios_base::binary);
     ifile >> pc;
 
-    CGAL::Aff_transformation_3<EPICK> translate(CGAL::TRANSLATION, CGAL::Vector_3<EPICK>(-Config::get().pointOfInterest.x(),
-                                                                                         -Config::get().pointOfInterest.y(),
-                                                                                         0));
+    CGAL::Aff_transformation_3<EPICK> translate(CGAL::TRANSLATION,
+                                                CGAL::Vector_3<EPICK>(-Config::get().pointOfInterest.x(),
+                                                                      -Config::get().pointOfInterest.y(),
+                                                                      0));
     Point_set_3 transformPC;
     for (auto it = pc.points().begin(); it != pc.points().end(); ++it) {
         transformPC.insert(it->transform(translate));

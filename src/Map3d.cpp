@@ -138,22 +138,19 @@ void Map3d::set_features() {
         }
     }
     std::cout << "    Polygons read: " << _lsFeatures.size() << std::endl;
-    //-- Simplify terrain points
-    if (Config::get().terrainThinning > 0 + g_smallnum) {
-        std::cout <<"\nRandomly thinning terrain points" << std::endl;
-        _pointCloud.remove(CGAL::random_simplify_point_set(_pointCloud, Config::get().terrainThinning), _pointCloud.end());
-        _pointCloud.collect_garbage();
-        std::cout << "    Terrain points after thinning: " << _pointCloud.size() << std::endl;
-    }
+
+    //-- Thin terrain points
+    _pointCloud.random_thin_pts();
 
     //-- BPG flags for influ region and domain boundary
     if (Config::get().influRegionConfig.type() == typeid(bool)) _influRegionBPG = true;
     if (Config::get().domainBndConfig.type() == typeid(bool))   _bndBPG = true;
 
     //-- Make a DT with inexact constructions for fast interpolation
-    _dt.insert(_pointCloud.points().begin(), _pointCloud.points().end());
+    _dt.insert(_pointCloud.get_terrain().points().begin(),
+               _pointCloud.get_terrain().points().end());
     if (Config::get().smoothTerrain) {
-        geomutils::smooth_dt<DT, EPICK>(_pointCloud, _dt);
+        geomutils::smooth_dt<DT, EPICK>(_pointCloud.get_terrain(), _dt);
     }
 }
 
@@ -168,12 +165,11 @@ void Map3d::set_influ_region() {
         if (!_importedBuildings.empty()) this->solve_building_conflicts();
 
         //-- Prepare search tree in case of reconstruction
-        std::shared_ptr<SearchTree> searchTree;
-        searchTree = std::make_shared<SearchTree>(_pointCloudBuildings.points().begin(), _pointCloudBuildings.points().end());
+        std::shared_ptr<SearchTree> searchTree = _pointCloud.make_search_tree_buildings();
         for (auto& building : _reconstructedBuildings) building->set_search_tree(searchTree);
 
         //-- Calculate influ region
-        _influRegion.calc_influ_region_bpg(_dt, _pointCloudBuildings, _buildings);
+        _influRegion.calc_influ_region_bpg(_dt, _pointCloud.get_buildings(), _buildings);
     } else { // Define influ region either with radius or predefined polygon
         boost::apply_visitor(_influRegion, Config::get().influRegionConfig);
     }
@@ -214,9 +210,9 @@ void Map3d::set_bnd() {
         Boundary::set_bnd_poly(bndPoly, pcBndPoly, startBufferPoly);
 
     //-- Deactivate point cloud points that are out of bounds
-    Boundary::set_bounds_to_terrain(_pointCloud, bndPoly,
-                                    pcBndPoly, startBufferPoly);
-    Boundary::set_bounds_to_pc(_pointCloudBuildings, startBufferPoly);
+    Boundary::set_bounds_to_terrain(_pointCloud.get_terrain(),
+                                    bndPoly, pcBndPoly, startBufferPoly);
+    Boundary::set_bounds_to_pc(_pointCloud.get_buildings(), startBufferPoly);
 
     //-- Check feature scope for surface layers now that the full domain is known
     for (auto& f: _surfaceLayers) {
@@ -236,9 +232,9 @@ void Map3d::bnd_sanity_check() {
 void Map3d::reconstruct_terrain() {
     if (_terrain->get_cdt().number_of_vertices() == 0) {
         std::cout << "\nReconstructing terrain" << std::endl;
-        _terrain->prep_constraints(_lsFeatures, _pointCloud);
-        if (!Config::get().averageSurfaces.empty()) this->average_polygon_points();
-        _terrain->set_cdt(_pointCloud);
+        _terrain->prep_constraints(_lsFeatures, _pointCloud.get_terrain());
+        if (!Config::get().averageSurfaces.empty()) _pointCloud.average_polygon_pts(_lsFeatures);
+        _terrain->set_cdt(_pointCloud.get_terrain());
         _terrain->constrain_features();
     }
 
@@ -254,8 +250,7 @@ void Map3d::reconstruct_buildings() {
                   << std::endl;
     }
 
-    std::shared_ptr<SearchTree> searchTree;
-    searchTree = std::make_shared<SearchTree>(_pointCloudBuildings.points().begin(), _pointCloudBuildings.points().end());
+    std::shared_ptr<SearchTree> searchTree = _pointCloud.make_search_tree_buildings();
     for (auto& building : _reconstructedBuildings) building->set_search_tree(searchTree);
 
     int failed = 0;
@@ -300,53 +295,6 @@ void Map3d::reconstruct_boundaries() {
     }
 }
 
-void Map3d::average_polygon_points() {
-    std::cout << "\n    Averaging surfaces" << std::endl;
-    std::map<int, Point_3> averagedPts;
-
-    //-- Construct a connectivity map and remove duplicates along the way
-    auto is_building_pt = _pointCloud.property_map<bool>("is_building_point").first;
-    std::unordered_map<Point_3, int> pointCloudConnectivity;
-    auto it = _pointCloud.points().begin();
-    int count = 0;
-    while (it != _pointCloud.points().end()) {
-        auto itPC = pointCloudConnectivity.find(*it);
-        if (itPC != pointCloudConnectivity.end()) {
-            _pointCloud.remove(_pointCloud.begin() + count);
-        } else {
-            pointCloudConnectivity[*it] = count;
-            ++it;
-            ++count;
-        }
-    }
-    _pointCloud.collect_garbage();
-
-    //-- Construct search tree from ground points
-    SearchTree searchTree(_pointCloud.points().begin(), _pointCloud.points().end());
-
-    //-- Perform averaging
-    for (auto& f : _lsFeatures) {
-        auto it = Config::get().averageSurfaces.find(f->get_output_layer_id());
-        if (it != Config::get().averageSurfaces.end()) {
-            f->average_polygon_inner_points(_pointCloud, averagedPts, searchTree, pointCloudConnectivity);
-        }
-    }
-
-    //-- Change points with averaged values
-    int pcOrigSize = _pointCloud.points().size();
-    for (auto& it : averagedPts) {
-        _pointCloud.insert(it.second);
-    }
-    for (int i = 0; i < pcOrigSize; ++i) {
-        auto it = averagedPts.find(i);
-        if (it != averagedPts.end()) {
-            _pointCloud.remove(i);
-            averagedPts.erase(i);
-        }
-    }
-    _pointCloud.collect_garbage();
-}
-
 void Map3d::solve_building_conflicts() {
     for (auto& importedBuilding : _importedBuildings) {
         for (auto& reconstructedBuilding : _reconstructedBuildings) {
@@ -369,9 +317,9 @@ void Map3d::solve_building_conflicts() {
 void Map3d::clip_buildings() {
     //-- Prepare terrain with subset
     std::cout << "\nReconstructing terrain" << std::endl;
-    _terrain->prep_constraints(_lsFeatures, _pointCloud);
-    if (!Config::get().averageSurfaces.empty()) this->average_polygon_points();
-    _terrain->set_cdt(_pointCloud);
+    _terrain->prep_constraints(_lsFeatures, _pointCloud.get_terrain());
+    if (!Config::get().averageSurfaces.empty()) _pointCloud.average_polygon_pts(_lsFeatures);
+    _terrain->set_cdt(_pointCloud.get_terrain());
     _terrain->constrain_features();
     _terrain->prepare_subset();
 
@@ -388,25 +336,8 @@ void Map3d::clip_buildings() {
 }
 
 void Map3d::read_data() { // This will change with time
-    //-- Read ground points
-    if (!Config::get().points_xyz.empty()) {
-    std::cout << "Reading ground points" << std::endl;
-    IO::read_point_cloud(Config::get().points_xyz, _pointCloud);
-    _pointCloud.add_property_map<bool> ("is_building_point", false);
-    std::cout << "    Points read: " << _pointCloud.size() << std::endl;
-    } else {
-        std::cout << "INFO: Did not find any ground points! Calculating ground as flat surface\n" << std::endl;
-        //todo needs to be implemented - handled with the schema for now
-    }
-
-    //-- Read building points
-    if (!Config::get().buildings_xyz.empty()) {
-        std::cout << "Reading building points" << std::endl;
-        IO::read_point_cloud(Config::get().buildings_xyz, _pointCloudBuildings);
-        if (_pointCloudBuildings.empty()) throw std::invalid_argument("Didn't find any building points!");
-
-        std::cout << "    Points read: " << _pointCloudBuildings.size() << std::endl;
-    }
+    //-- Read point clouds
+    _pointCloud.read_point_clouds();
 
     //-- Read building polygons
     if (!Config::get().gisdata.empty()) {
