@@ -25,6 +25,7 @@ add_subdirectory(  ${CMAKE_SOURCE_DIR}/thirdparty/LAStools )
 # Third-party
 include_directories( ${CMAKE_SOURCE_DIR}/thirdparty )
 include_directories( ${CMAKE_SOURCE_DIR}/thirdparty/valijson )
+include_directories( ${Boost_INCLUDE_DIR} )
 
 # Creating entries for target: City4CFD
 FILE(GLOB SRC_FILES "src/*.cpp")
@@ -34,6 +35,11 @@ set_target_properties(
         PROPERTIES CXX_STANDARD 14
 )
 
-target_link_libraries( City4CFD ${CGAL_LIBRARIES} ${CGAL_3RD_PARTY_LIBRARIES} Boost::filesystem)
+target_link_libraries( City4CFD
+        ${CGAL_LIBRARIES}
+        ${CGAL_3RD_PARTY_LIBRARIES}
+        ${Boost_SYSTEM_LIBRARY}
+        ${Boost_FILESYSTEM_LIBRARY}
+        )
 
 install(TARGETS City4CFD DESTINATION bin)
