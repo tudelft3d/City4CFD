@@ -32,7 +32,6 @@ ReconstructedBuilding::ReconstructedBuilding(const int internalID)
         : Building(internalID), _searchTree(nullptr),
           _attributeHeight(-9999), _attributeHeightAdvantage(Config::get().buildingHeightAttrAdv) {}
 
-
 ReconstructedBuilding::ReconstructedBuilding(const nlohmann::json& poly)
         : Building(poly), _searchTree(nullptr),
           _attributeHeight(-9999), _attributeHeightAdvantage(Config::get().buildingHeightAttrAdv) {

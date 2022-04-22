@@ -80,8 +80,7 @@ ImportedBuilding::ImportedBuilding(nlohmann::json buildingJson, std::vector<Poin
     CGAL::Polygon_set_2<EPECK> polySet;
     std::vector<double> footprintElevations;
     //    int polyNo = 0;
-    for (int i = 0; i < _footprintIdxList.size(); ++i) {
-        auto& footprintIdx = _footprintIdxList[i];
+    for (int& footprintIdx : _footprintIdxList) {
         //-- Construct footprint polygon from ground surface
         nlohmann::json coordBnd = geometry["boundaries"].front()[footprintIdx].front();
         CGAL::Polygon_2<EPECK> facePoly;
@@ -146,7 +145,7 @@ void ImportedBuilding::reconstruct() {
         this->translate_footprint(-5);
     }
     //-- Adjust building height points
-    if (!Config::get().importTrueHeight) {
+    if (!Config::get().importTrueHeight || Config::get().points_xyz.empty()) {
         Vector_3 movePt(0, 0, _avgFootprintHeight);
         std::vector<int> checkedPt;
         for (auto& faces : geometry["boundaries"].front()) {

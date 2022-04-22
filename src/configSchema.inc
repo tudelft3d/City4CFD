@@ -43,7 +43,6 @@ namespace jsonschema {
               "type": "string"
             }
           },
-          "required": ["ground"],
           "additionalProperties": false
         },
         "polygons": {

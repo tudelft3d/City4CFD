@@ -139,8 +139,12 @@ void Map3d::set_features() {
     }
     std::cout << "    Polygons read: " << _lsFeatures.size() << std::endl;
 
-    //-- Thin terrain points
-    _pointCloud.random_thin_pts();
+    //-- Set flat terrain or random thin terrain points
+    if (_pointCloud.get_terrain().empty()) {
+        _pointCloud.create_flat_terrain(_lsFeatures);
+    } else {
+        _pointCloud.random_thin_pts();
+    }
 
     //-- BPG flags for influ region and domain boundary
     if (Config::get().influRegionConfig.type() == typeid(bool)) _influRegionBPG = true;

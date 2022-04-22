@@ -51,6 +51,20 @@ void PointCloud::smooth_terrain() {
     _pointCloudTerrain.add_property_map<bool> ("is_building_point", false);
 }
 
+void PointCloud::create_flat_terrain(const PolyFeatures& lsFeatures) {
+    std::cout << "\nCreating flat terrain" << std::endl;
+    for (auto& f : lsFeatures) {
+        if (f->get_poly().rings().empty()) {
+            std::cout << "Empty polygon?" << std::endl; //todo investigate this
+            continue;
+        }
+        for (auto& pt : f->get_poly().outer_boundary()) {
+            _pointCloudTerrain.insert(Point_3(pt.x(), pt.y(), 0.0));
+        }
+    }
+    _pointCloudTerrain.add_property_map<bool> ("is_building_point", false);
+}
+
 void PointCloud::average_polygon_pts(const PolyFeatures& lsFeatures) {
     std::cout << "\n    Averaging surfaces" << std::endl;
     std::map<int, Point_3> averagedPts;
@@ -112,8 +126,9 @@ void PointCloud::read_point_clouds() {
 
         std::cout << "    Points read: " << _pointCloudTerrain.size() << std::endl;
     } else {
-        std::cout << "INFO: Did not find any ground points! Calculating ground as flat surface\n" << std::endl;
-        //todo needs to be implemented - handled with the schema for now
+        std::cout << "INFO: Did not find any ground points! Will calculate ground as a flat surface." << std::endl;
+        std::cout << "WARNING: Ground height of buildings can only be approximated. "
+                  << "If you are using point cloud to reconstruct buildings, building height estimation can be wrong.\n" << std::endl;
     }
 
     //-- Read building points
