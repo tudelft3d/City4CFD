@@ -126,6 +126,20 @@ void ReconstructedBuilding::reconstruct() {
     }
 }
 
+void ReconstructedBuilding::reconstruct_flat_terrain() {
+    _mesh.clear();
+    if (_clip_bottom) {
+        this->translate_footprint(-5);
+    }
+
+    LoD12 lod12HeightAttribute(_poly, _base_heights, {}, _height);
+    lod12HeightAttribute.lod12_reconstruct(_mesh);
+
+    if (_clip_bottom) {
+        this->translate_footprint(5);
+    }
+}
+
 void ReconstructedBuilding::get_cityjson_info(nlohmann::json& b) const {
     b["type"] = "Building";
 //  b["attributes"];

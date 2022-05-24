@@ -75,6 +75,9 @@ void Map3d::reconstruct() {
     //-- Clip building bottoms
     if (Config::get().clip) this->clip_buildings();
 
+    //-- Flatten terrain with flag
+    if (Config::get().flatTerrain) this->reconstruct_with_flat_terrain();
+
     //-- Constrain features, generate terrain mesh from CDT
     this->reconstruct_terrain();
 
@@ -142,6 +145,7 @@ void Map3d::set_features() {
     //-- Set flat terrain or random thin terrain points
     if (_pointCloud.get_terrain().empty()) {
         _pointCloud.create_flat_terrain(_lsFeatures);
+        Config::get().flatTerrain = false;
     } else {
         _pointCloud.random_thin_pts();
     }
@@ -295,10 +299,22 @@ void Map3d::reconstruct_boundaries() {
     } else {
         _boundaries.front()->prep_output();
     }
-
     for (auto& b : _boundaries) {
         b->reconstruct();
     }
+}
+
+void Map3d::reconstruct_with_flat_terrain() {
+    //-- Account for zero terrain height of surface layers
+    for (auto& sl : _surfaceLayers) {
+        sl->set_zero_borders();
+    }
+    //-- Account for zero terrain height of buildings
+    for (auto& b : _buildings) {
+        b->set_to_zero_terrain();
+    }
+    //-- Set terrain point cloud to zero height
+    _pointCloud.set_flat_terrain();
 }
 
 void Map3d::solve_building_conflicts() {

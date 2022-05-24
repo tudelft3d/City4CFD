@@ -41,6 +41,7 @@ public:
     void  average_polygon_inner_points(const Point_set_3& pointCloud, std::map<int, Point_3>& averagedPts,
                                        const SearchTree& searchTree, const std::unordered_map<Point_3,
                                        int>& pointCloudConnectivity) const;
+    void  set_zero_borders();
     void  clear_feature();
 
     virtual void        get_cityjson_info(nlohmann::json& b) const = 0;

@@ -34,6 +34,7 @@ public:
     ~Building();
 
     virtual void reconstruct() = 0;
+    virtual void reconstruct_flat_terrain() = 0;
 
     void   clip_bottom(const Terrainptr& terrain);
     void   refine();
@@ -41,6 +42,7 @@ public:
     void   check_feature_scope(const Polygon_2& influRegion);
     void   set_clip_flag (const bool flag);
     bool   has_self_intersections() const;
+    void   set_to_zero_terrain();
     double max_dim();
 
     double get_height() const;

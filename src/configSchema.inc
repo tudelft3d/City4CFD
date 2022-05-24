@@ -182,6 +182,10 @@ namespace jsonschema {
           "description": "Optional: Terrain smoothing flag",
           "type": "boolean"
         },
+        "flat_terrain": {
+          "description": "Optional: Force flat terrain",
+          "type": "boolean"
+        },
         "lod": {
           "type": "string"
         },

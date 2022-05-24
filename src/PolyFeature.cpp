@@ -85,6 +85,14 @@ void PolyFeature::calc_footprint_elevation_nni(const DT& dt) {
     }
 }
 
+void PolyFeature::set_zero_borders() {
+    for (auto& ring : _base_heights) {
+        for (auto& pt : ring) {
+            pt = 0.;
+        }
+    }
+}
+
 #ifndef NDEBUG
 void PolyFeature::calc_footprint_elevation_linear(const DT& dt) {
     typedef CGAL::Barycentric_coordinates::Triangle_coordinates_2<iProjection_traits>   Triangle_coordinates;

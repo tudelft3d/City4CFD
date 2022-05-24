@@ -67,6 +67,7 @@ private:
     void reconstruct_terrain();
     void reconstruct_buildings();
     void reconstruct_boundaries();
+    void reconstruct_with_flat_terrain();
     void solve_building_conflicts();
     void clip_buildings();
 

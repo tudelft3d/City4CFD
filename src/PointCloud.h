@@ -34,6 +34,7 @@ public:
 
     void random_thin_pts();
     void create_flat_terrain(const PolyFeatures& lsFeatures);
+    void set_flat_terrain();
     void smooth_terrain();
     void average_polygon_pts(const PolyFeatures& lsFeatures);
     SearchTreePtr make_search_tree_buildings();

@@ -72,6 +72,7 @@ public:
     //- Terrain
     double    terrainThinning                   = 0.;
     bool      smoothTerrain                     = false;
+    bool      flatTerrain                       = false;
     //- Buildings
     std::string buildingUniqueId;
     std::string lod;

@@ -135,6 +135,17 @@ bool Building::has_self_intersections() const {
     return PMP::does_self_intersect(_mesh);
 }
 
+void Building::set_to_zero_terrain() {
+    //-- Get average footprint height
+    std::vector<double> avgRings;
+    for (auto& ring : _base_heights) {
+        avgRings.emplace_back(geomutils::avg(ring));
+    }
+    _height -= geomutils::avg(avgRings);
+    this->set_zero_borders();
+    this->reconstruct_flat_terrain();
+}
+
 double Building::max_dim() {
     std::vector<double> dims;
     EPICK::Vector_2 diag(_poly.bbox().xmax() - _poly.bbox().xmin(), _poly.bbox().ymax() - _poly.bbox().ymin());

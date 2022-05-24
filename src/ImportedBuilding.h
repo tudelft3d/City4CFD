@@ -31,6 +31,7 @@ public:
     ~ImportedBuilding();
 
     virtual void  reconstruct() override;
+    virtual void  reconstruct_flat_terrain() override;
 
     void append_nonground_part(const std::shared_ptr<ImportedBuilding>& other);
 
@@ -49,6 +50,7 @@ protected:
     std::vector<std::vector<int>>    _footprintPtsIdxList;
     std::string                      _parentBuildingID;
     bool                             _appendToBuilding;
+    bool                             _trueHeight;
     int                              _lodIdx;
     std::vector<Point_3>&            _dPts;
 

@@ -194,6 +194,8 @@ void Config::set_config(nlohmann::json& j) {
         terrainThinning = j["terrain_thinning"];
     if (j.contains("smooth_terrain"))
         smoothTerrain = j["smooth_terrain"];
+    if (j.contains("flat_terrain"))
+        flatTerrain = j["flat_terrain"];
 
     // Buildings
     lod = j["lod"].front();

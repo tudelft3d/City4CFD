@@ -29,7 +29,7 @@
 ImportedBuilding::ImportedBuilding(nlohmann::json buildingJson, std::vector<Point_3>& importedBuildingPts, const int internalID)
         : Building(internalID), _buildingJson(std::move(buildingJson)), _dPts(importedBuildingPts),
           _avgFootprintHeight(-9999), _footprintIdxList(), _parentBuildingID(),
-          _appendToBuilding(false), _lodIdx(-1), _footprintPtsIdxList() {
+          _appendToBuilding(false), _lodIdx(-1), _footprintPtsIdxList(), _trueHeight(Config::get().importTrueHeight) {
 
     _f_imported = true;
     //-- Get parent building ID
@@ -145,7 +145,7 @@ void ImportedBuilding::reconstruct() {
         this->translate_footprint(-5);
     }
     //-- Adjust building height points
-    if (!Config::get().importTrueHeight || Config::get().points_xyz.empty()) {
+    if (!_trueHeight || Config::get().points_xyz.empty()) {
         Vector_3 movePt(0, 0, _avgFootprintHeight);
         std::vector<int> checkedPt;
         for (auto& faces : geometry["boundaries"].front()) {
@@ -232,6 +232,12 @@ void ImportedBuilding::reconstruct() {
     PMP::stitch_borders(_mesh);
     PMP::triangulate_faces(_mesh);
     */
+}
+
+void ImportedBuilding::reconstruct_flat_terrain() {
+    _trueHeight = false;
+    _avgFootprintHeight = 0;
+    this->reconstruct();
 }
 
 void ImportedBuilding::append_nonground_part(const std::shared_ptr<ImportedBuilding>& other) {

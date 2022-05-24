@@ -55,13 +55,22 @@ void PointCloud::create_flat_terrain(const PolyFeatures& lsFeatures) {
     std::cout << "\nCreating flat terrain" << std::endl;
     for (auto& f : lsFeatures) {
         if (f->get_poly().rings().empty()) {
-            std::cout << "Empty polygon?" << std::endl; //todo investigate this
+//            std::cout << "Empty polygon?" << std::endl; //todo investigate this
             continue;
         }
         for (auto& pt : f->get_poly().outer_boundary()) {
             _pointCloudTerrain.insert(Point_3(pt.x(), pt.y(), 0.0));
         }
     }
+    _pointCloudTerrain.add_property_map<bool> ("is_building_point", false);
+}
+
+void PointCloud::set_flat_terrain() {
+    Point_set_3 flatPC;
+    for (auto& pt : _pointCloudTerrain.points()) {
+        flatPC.insert(Point_3(pt.x(), pt.y(), 0.));
+    }
+    _pointCloudTerrain = flatPC;
     _pointCloudTerrain.add_property_map<bool> ("is_building_point", false);
 }
 
