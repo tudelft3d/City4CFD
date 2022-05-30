@@ -73,8 +73,8 @@ void Building::refine() {
     typedef Mesh::Halfedge_index           halfedge_descriptor;
     typedef Mesh::Edge_index               edge_descriptor;
 
-    double target_edge_length = 5; //5;
-    unsigned int nb_iter =  30;   //30;
+    const double target_edge_length = 5; //5;
+    const unsigned int nb_iter =  30;   //30;
 
     PMP::remove_degenerate_faces(_mesh);
     /*
@@ -82,7 +82,7 @@ void Building::refine() {
         ++config::selfIntersecting;
         PMP::remove_self_intersections(_mesh);
     }
-     */
+    */
 
     //-- Set the property map for constrained edges
     Mesh::Property_map<edge_descriptor,bool> is_constrained =

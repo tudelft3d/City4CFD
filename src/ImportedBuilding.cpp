@@ -25,6 +25,7 @@
 #include "io.h"
 
 #include "CGAL/Polygon_set_2.h"
+#include <CGAL/alpha_wrap_3.h>
 
 ImportedBuilding::ImportedBuilding(nlohmann::json buildingJson, std::vector<Point_3>& importedBuildingPts, const int internalID)
         : Building(internalID), _buildingJson(std::move(buildingJson)), _dPts(importedBuildingPts),
@@ -197,6 +198,22 @@ void ImportedBuilding::reconstruct() {
     PMP::orient_polygon_soup(points, polygons);
     PMP::polygon_soup_to_polygon_mesh(points, polygons, _mesh);
     PMP::triangulate_faces(_mesh);
+
+    /*
+    Mesh wrap;
+    const double relative_alpha = 300.;
+    const double relative_offset = 5000.;
+    CGAL::Bbox_3 bbox = CGAL::Polygon_mesh_processing::bbox(_mesh);
+    const double diag_length = std::sqrt(CGAL::square(bbox.xmax() - bbox.xmin()) +
+                                         CGAL::square(bbox.ymax() - bbox.ymin()) +
+                                         CGAL::square(bbox.zmax() - bbox.zmin()));
+    const double alpha = diag_length / relative_alpha;
+    const double offset = diag_length / relative_offset;
+//    CGAL::alpha_wrap_3(mesh, alpha, offset, wrap);
+    CGAL::alpha_wrap_3(_mesh, alpha, offset, wrap);
+//    CGAL::alpha_wrap_3(_mesh, 10, 10, wrap);
+    _mesh = wrap;
+     */
 
     //-- Get height attribute
     _height -= _avgFootprintHeight;
