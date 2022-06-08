@@ -49,11 +49,11 @@ public:
                     nlohmann::json& j);
 
     //-- Input info
-    std::string              points_xyz;         // Ground
-    std::string              buildings_xyz;      // Buildings
-    std::string              gisdata;            // Building Polygons
-    std::vector<std::string> topoLayers = {};    // Other polygons
-    std::string              importedBuildings;  // Additional pre-reconstructed buildings
+    std::string              points_xyz;             // Ground
+    std::string              buildings_xyz;          // Buildings
+    std::string              gisdata;                // Building Polygons
+    std::vector<std::string> topoLayers = {};        // Other polygons
+    std::string              importedBuildingsPath;  // Additional pre-reconstructed buildings
 
     //-- Domain setup
     Point_2     pointOfInterest;
@@ -100,7 +100,7 @@ public:
     fs::path                  workDir;
     fs::path                  outputDir        = fs::current_path();
     std::string               outputFileName;
-    OutputFormat              outputFormat;
+    GeomFormat                outputFormat;
     bool                      outputSeparately = false;
     std::vector<std::string>  outputSurfaces   = {"Terrain", "Buildings"};
     int                       numSides         = 1;

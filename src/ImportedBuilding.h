@@ -26,8 +26,11 @@
 
 class ImportedBuilding : public Building {
 public:
+    static int noBottom;
+
     ImportedBuilding() = delete;
     ImportedBuilding(nlohmann::json  poly, std::vector<Point_3>& importedBuildingPts, const int internalID);
+    ImportedBuilding(Mesh& mesh, const int internalID);
     ~ImportedBuilding();
 
     virtual void  reconstruct() override;
@@ -52,7 +55,7 @@ protected:
     bool                             _appendToBuilding;
     bool                             _trueHeight;
     int                              _lodIdx;
-    std::vector<Point_3>&            _dPts;
+    Point3VectorPtr                  _dPts;
 
     void check_simplicity(Polygon_2& ring);
 };

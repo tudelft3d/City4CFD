@@ -363,7 +363,7 @@ template Polygon_2 geomutils::calc_bbox_poly<Polygon_2>(const Polygon_2& inputPt
 template <typename T>
 void geomutils::pop_back_if_equal_to_front(CGAL::Polygon_2<T>& poly)
 {
-    typename CGAL::Polygon_2<T>::iterator it = poly.end();
+    auto it = poly.end();
     --it;
     if((*poly.begin()) == *it)
         poly.erase(it);

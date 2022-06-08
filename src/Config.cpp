@@ -83,7 +83,7 @@ void Config::set_config(nlohmann::json& j) {
 
     //-- Additional geometries
     if (j.contains("import_geometries"))
-        importedBuildings = j["import_geometries"]["path"];
+        importedBuildingsPath = j["import_geometries"]["path"];
 
     //-- Domain setup
     pointOfInterest = Point_2(j["point_of_interest"][0], j["point_of_interest"][1]);

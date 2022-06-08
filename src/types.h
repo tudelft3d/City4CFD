@@ -59,7 +59,7 @@ typedef enum {
     OBJ       = 0,
     CityJSON  = 1,
     STL       = 2,
-} OutputFormat;
+} GeomFormat;
 
 //-- Global Constants
 const double g_largnum  = 1e7;

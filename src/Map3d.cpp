@@ -99,27 +99,44 @@ void Map3d::set_features() {
         _lsFeatures.push_back(building);
     }
     //- Imported buildings
-    if (!_importedBuildingsJson.empty())  std::cout << "Importing CityJSON geometries" << std::endl;
-    std::vector<std::shared_ptr<ImportedBuilding>> appendingBuildings;
-    internalID = 0;
-    for (auto& importedBuilding : _importedBuildingsJson) {
-        auto explicitGeom = std::make_shared<ImportedBuilding>(*importedBuilding, _importedBuildingsPts, internalID++);
-        if (!explicitGeom->is_appending()) {
-            _importedBuildings.push_back(explicitGeom);
-            _buildings.push_back(explicitGeom);
-            _lsFeatures.push_back(explicitGeom);
-        } else {
-            appendingBuildings.push_back(explicitGeom);
-        }
-    }
-    //- Check for building parts that do not have footprint and append to another instance of the same building
-    for (auto& b : appendingBuildings) {
-        for (auto& importedBuilding :  _importedBuildings) {
-            if (b->get_parent_building_id() == importedBuilding->get_parent_building_id()) {
-                importedBuilding->append_nonground_part(b);
-                break;
+    if (!_importedBuildingsJSON.empty()) {
+        std::cout << "Importing CityJSON geometries" << std::endl;
+
+        std::vector<std::shared_ptr<ImportedBuilding>> appendingBuildings;
+        internalID = 0;
+        for (auto& importedBuilding: _importedBuildingsJSON) {
+            auto explicitCityJSONGeom = std::make_shared<ImportedBuilding>(*importedBuilding, _importedBuildingsPts,
+                                                                           internalID++);
+            if (!explicitCityJSONGeom->is_appending()) {
+                _importedBuildings.push_back(explicitCityJSONGeom);
+                _buildings.push_back(explicitCityJSONGeom);
+                _lsFeatures.push_back(explicitCityJSONGeom);
+            } else {
+                appendingBuildings.push_back(explicitCityJSONGeom);
             }
         }
+        //- Check for building parts that do not have footprint and append to another instance of the same building
+        for (auto& b: appendingBuildings) {
+            for (auto& importedBuilding: _importedBuildings) {
+                if (b->get_parent_building_id() == importedBuilding->get_parent_building_id()) {
+                    importedBuilding->append_nonground_part(b);
+                    break;
+                }
+            }
+        }
+        _cityjsonInput = true;
+        _importedBuildingsJSON.clear();
+    } else if (!_importedBuildingsOther.empty()) {
+        std::cout << "Importing geometries" << std::endl;
+        for (auto& mesh : _importedBuildingsOther) {
+            auto explicitOBJGeom = std::make_shared<ImportedBuilding>(mesh, internalID++);
+            _importedBuildings.push_back(explicitOBJGeom);
+            _buildings.push_back(explicitOBJGeom);
+            _lsFeatures.push_back(explicitOBJGeom);
+        }
+        Config::get().logSummary << "Number of buildings not imported due to bad surface connectivity: "
+                                 << ImportedBuilding::noBottom << std::endl;
+        _importedBuildingsOther.clear();
     }
     if (!_importedBuildings.empty()) {
         this->clear_inactives();
@@ -254,7 +271,7 @@ void Map3d::reconstruct_terrain() {
 
 void Map3d::reconstruct_buildings() {
     std::cout << "\nReconstructing buildings" << std::endl;
-    if (!_importedBuildings.empty()) {
+    if (!_importedBuildings.empty() && _cityjsonInput) {
         std::cout << "    Will try to reconstruct imported buildings in LoD: " << Config::get().importLoD
                   << ". If I cannot find a geometry with that LoD, I will reconstruct in the highest LoD available"
                   << std::endl;
@@ -375,9 +392,22 @@ void Map3d::read_data() { // This will change with time
     }
 
     //-- Read imported buildings
-    if (!Config::get().importedBuildings.empty()) {
+    if (!Config::get().importedBuildingsPath.empty()) {
 //        std::cout << "Importing CityJSON geometries" << std::endl;
-        IO::read_explicit_geometries(Config::get().importedBuildings, _importedBuildingsJson, _importedBuildingsPts);
+        auto& inputfile = Config::get().importedBuildingsPath;
+        if (IO::has_substr(inputfile, ".json")) {
+            IO::read_cityjson_geometries(inputfile, _importedBuildingsJSON, _importedBuildingsPts);
+        } else if (IO::has_substr(inputfile, ".obj") ||
+                   IO::has_substr(inputfile, ".stl") ||
+                   IO::has_substr(inputfile, ".vtp") ||
+                   IO::has_substr(inputfile, ".ply") ||
+                   IO::has_substr(inputfile, ".off")) {
+            IO::read_other_geometries(inputfile, _importedBuildingsOther);
+        } else {
+            throw std::runtime_error(std::string("File " + inputfile + "contains unknown import format."
+                                                                  " Available inputs: .obj, .stl, .vtp, "
+                                                                  ".ply. .off, or .json (CityJSON)"));
+        }
     }
 }
 
@@ -442,22 +472,31 @@ void Map3d::clear_inactives() {
             _reconstructedBuildings.erase(_reconstructedBuildings.begin() + i);
         }
     }
-    std::vector<std::string> inactiveBuildingIdxs;
-    for (auto& importedBuilding : _importedBuildings) {
-        if (!importedBuilding->is_active()) {
-            auto it = std::find(inactiveBuildingIdxs.begin(), inactiveBuildingIdxs.end(),
-                                importedBuilding->get_parent_building_id());
-            if (it == inactiveBuildingIdxs.end())
-                inactiveBuildingIdxs.push_back(importedBuilding->get_parent_building_id());
+    if (_cityjsonInput) {
+        std::vector<std::string> inactiveBuildingIdxs;
+        for (auto& importedBuilding: _importedBuildings) {
+            if (!importedBuilding->is_active()) {
+                auto it = std::find(inactiveBuildingIdxs.begin(), inactiveBuildingIdxs.end(),
+                                    importedBuilding->get_parent_building_id());
+                if (it == inactiveBuildingIdxs.end())
+                    inactiveBuildingIdxs.push_back(importedBuilding->get_parent_building_id());
+            }
         }
-    }
-    for (unsigned long i = 0; i < _importedBuildings.size();) {
-        auto it = std::find(inactiveBuildingIdxs.begin(), inactiveBuildingIdxs.end(),
-                            _importedBuildings[i]->get_parent_building_id());
-        if (it == inactiveBuildingIdxs.end()) ++i;
-        else {
-            _importedBuildings[i]->deactivate();
-            _importedBuildings.erase(_importedBuildings.begin() + i);
+        for (unsigned long i = 0; i < _importedBuildings.size();) {
+            auto it = std::find(inactiveBuildingIdxs.begin(), inactiveBuildingIdxs.end(),
+                                _importedBuildings[i]->get_parent_building_id());
+            if (it == inactiveBuildingIdxs.end()) ++i;
+            else {
+                _importedBuildings[i]->deactivate();
+                _importedBuildings.erase(_importedBuildings.begin() + i);
+            }
+        }
+    } else {
+        for (unsigned long i = 0; i < _importedBuildings.size();) {
+            if (_importedBuildings[i]->is_active()) ++i;
+            else {
+                _importedBuildings.erase(_importedBuildings.begin() + i);
+            }
         }
     }
     for (unsigned long i = 0; i < _buildings.size();) {

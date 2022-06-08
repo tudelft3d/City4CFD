@@ -25,6 +25,10 @@
 #include "TopoFeature.h"
 #include "Boundary.h"
 
+#include <CGAL/Polygon_mesh_processing/IO/polygon_mesh_io.h>
+#include <CGAL/Polygon_mesh_processing/connected_components.h>
+#include <CGAL/Polygon_mesh_processing/transform.h>
+
 //-- Input functions
 void IO::read_config(std::string& config_path) {
     std::ifstream json_file(config_path);
@@ -97,7 +101,23 @@ void IO::read_geojson_polygons(std::string& file, JsonVector& jsonPolygons) {
     }
 }
 
-void IO::read_explicit_geometries(std::string& file, JsonVector& importedBuildings,
+void IO::read_other_geometries(std::string& file, std::vector<Mesh>& meshes) {
+    typedef CGAL::Aff_transformation_3<EPICK> Affine_transformation_3;
+
+    Mesh mesh;
+    if(!PMP::IO::read_polygon_mesh(file, mesh)) {
+        throw std::runtime_error("Error parsing file '" + file);
+    }
+    PMP::transform(Affine_transformation_3(CGAL::Translation(),
+                                           Vector_3(-Config::get().pointOfInterest.x(),
+                                                    -Config::get().pointOfInterest.y(), 0.)),
+                   mesh);
+
+    //todo is there better way to keep connected components?
+    PMP::split_connected_components(mesh, meshes);
+}
+
+void IO::read_cityjson_geometries(std::string& file, JsonVector& importedBuildings,
                                   std::vector<Point_3>& importedBuildingPts) {
     try {
         std::ifstream ifs(file);
@@ -148,19 +168,22 @@ void IO::output_obj(const OutputFeatures& allFeatures) {
 
     std::vector<std::unordered_map<std::string, int>> dPts(numOutputSurfaces);
     //-- Output points
+//    int count = 0; // to output each building as a separate group
     for (auto& f : allFeatures) {
-        if (Config::get().outputSeparately)
+        if (Config::get().outputSeparately) {
+//            if (f->get_class() == BUILDING)
+//                bs[f->get_output_layer_id()] += "\ng " + std::to_string(count++);
             IO::get_obj_pts(f->get_mesh(),
                             fs[f->get_output_layer_id()],
                             bs[f->get_output_layer_id()],
                             dPts[f->get_output_layer_id()]);
-        else
+        } else {
             IO::get_obj_pts(f->get_mesh(),
                             fs[f->get_output_layer_id()],
                             bs[f->get_output_layer_id()],
                             dPts.front());
+        }
     }
-
     //-- Add class name and output to file
     if (!Config::get().outputSeparately) {
         of.emplace_back();
@@ -172,7 +195,6 @@ void IO::output_obj(const OutputFeatures& allFeatures) {
             of.emplace_back();
             of.back().open(Config::get().outputFileName + "_" + Config::get().outputSurfaces[i] + ".obj");
         }
-
         of.back() << fs[i] << "\ng " << Config::get().outputSurfaces[i] << bs[i];
     }
     for (auto& f : of) f.close();
@@ -188,7 +210,6 @@ void IO::output_stl(const OutputFeatures& allFeatures) {
         if (!f->is_active()) continue;
         IO::get_stl_pts(f->get_mesh(), fs[f->get_output_layer_id()]);
     }
-
     //-- Add class name and output to file
     if (!Config::get().outputSeparately) {
         of.emplace_back();
@@ -200,7 +221,6 @@ void IO::output_stl(const OutputFeatures& allFeatures) {
             of.emplace_back();
             of.back().open(Config::get().outputFileName + "_" + Config::get().outputSurfaces[i] + ".stl");
         }
-
         of.back() << "\nsolid " << Config::get().outputSurfaces[i];
         of.back() << fs[i];
         of.back() << "\nendsolid " << Config::get().outputSurfaces[i];
@@ -384,6 +404,15 @@ void IO::output_log() {
         of << b.dump();
         of.close();
     }
+}
+
+bool IO::has_substr(const std::string& strMain, const std::string& subStr) {
+    auto it = std::search(
+            strMain.begin(), strMain.end(),
+            subStr.begin(),  subStr.end(),
+            [](char ch1, char ch2) { return std::toupper(ch1) == std::toupper(ch2);}
+    );
+    return (it != strMain.end());
 }
 
 std::string IO::gen_key_bucket(const Point_2 p) {

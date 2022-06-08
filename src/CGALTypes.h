@@ -192,6 +192,9 @@ typedef Neighbor_search::Tree                         SearchTree;
 typedef CGAL::Fuzzy_iso_box<Traits>                   Fuzzy_iso_box;
 typedef CGAL::Fuzzy_sphere<Traits>                    Fuzzy_sphere;
 
+//-- Smart pointers with CGAl types
+typedef std::shared_ptr<std::vector<Point_3>> Point3VectorPtr;
+
 //-- Global constants
 namespace global {
     const Point_2 nullPt(0, 0);

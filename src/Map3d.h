@@ -40,9 +40,10 @@ public:
 private:
     PointCloud                  _pointCloud;
     JsonVector                  _polygonsBuildings;
-    JsonVector                  _importedBuildingsJson;
+    JsonVector                  _importedBuildingsJSON;
     std::vector<JsonVector>     _polygonsSurfaceLayers;
     std::vector<Point_3>        _importedBuildingsPts;
+    std::vector<Mesh>           _importedBuildingsOther;
 
     Terrainptr                  _terrain;
     Buildings                   _buildings;
@@ -59,6 +60,7 @@ private:
 
     bool                        _influRegionBPG = false;
     bool                        _bndBPG = false;
+    bool                        _cityjsonInput = false;
 
     void set_features();
     void set_influ_region();
