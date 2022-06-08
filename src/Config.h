@@ -77,9 +77,6 @@ public:
     std::string buildingUniqueId;
     std::string lod;
     double      buildingPercentile;
-    bool        clip                            = false;
-    bool        handleSelfIntersect             = false;
-    bool        refineBuildings                 = false;
     // Height from attributes
     std::string buildingHeightAttribute;
     std::string floorAttribute;
@@ -90,7 +87,7 @@ public:
     bool        importTrueHeight;
     std::string importLoD;
     //- Boundary
-    bool  reconstructBoundaries                = false;
+    bool  reconstructBoundaries                 = false;
 
     //-- Polygons related
     double                edgeMaxLen;
@@ -98,20 +95,25 @@ public:
 
     //-- Output
     fs::path                  workDir;
-    fs::path                  outputDir        = fs::current_path();
+    fs::path                  outputDir         = fs::current_path();
     std::string               outputFileName;
     GeomFormat                outputFormat;
-    bool                      outputSeparately = false;
-    std::vector<std::string>  outputSurfaces   = {"Terrain", "Buildings"};
-    int                       numSides         = 1;
+    bool                      outputSeparately  = false;
+    std::vector<std::string>  outputSurfaces    = {"Terrain", "Buildings"};
+    int                       numSides          = 1;
     std::vector<int>          surfaceLayerIDs;
 
     //-- Data log
-    bool               outputLog               = false;
-    std::string        logName                 = std::string("log");
+    bool               outputLog                = false;
+    std::string        logName                  = std::string("log");
     std::ostringstream log;
     std::ostringstream logSummary;
     std::vector<int>   failedBuildings;
+
+    //-- Experimental
+    bool       clip                             = false;
+    bool       handleSelfIntersect              = false;
+    bool       refineBuildings                  = false;
 };
 
 #endif //CITY4CFD_CONFIG_H

@@ -22,6 +22,8 @@ It can automatically or manually define the zone of influence and domain boundar
 
 If you happen to use it, feedback is very much appreciated.
 
+City4CFD is developed by the 3D Geoinformation Research Group at the Delft University of Technology.
+
 ## Data formats
 **Point clouds** can be imported in XYZ or PLY format. We ask separately for ground and building points. While some datasets contain building-ground classification, some do not. In case your LAS/LAZ file has buildings/ground classified, you can use [point cloud preparation script](https://github.com/tudelft3d/City4CFD/blob/main/tools/prepare_point_cloud.sh) to create separate files. If buildings and terrain are under the same class, or vegetation is not filtered out, we suggest you use [CloudCompare](https://www.danielgm.net/cc/) to prepare points.
 
@@ -32,8 +34,8 @@ If you happen to use it, feedback is very much appreciated.
 ## Prerequisites
 
 The following libraries are required to build the project:
-- [CGAL](https://www.cgal.org/) >= 5.0.1
-- Boost (usually limited by the version of CGAL)
+- [CGAL](https://www.cgal.org/) version 5
+- Boost >= 1.66
 
 Both dependencies are generally available in Linux distributions (Debian/Ubuntu/Mint) as *libcgal-dev* and *libboost-dev*, and in macOS with Homebrew as *cgal* and *boost*.
 The project uses CMake to generate makefiles, so make sure it is also installed.
@@ -65,7 +67,4 @@ The [wiki section](https://github.com/tudelft3d/City4CFD/wiki) of this project h
 
 ## Acknowledgements
 We would like to acknowdledge the authors of supporting libraries we use in this project:
-- [CGAL](https://github.com/CGAL/cgal)
-- [nlohmann/json](https://github.com/nlohmann/json)
-- [valijson](https://github.com/tristanpenman/valijson)
-- [LAStools](https://github.com/LAStools)
+[CGAL](https://github.com/CGAL/cgal), [nlohmann/json](https://github.com/nlohmann/json), [valijson](https://github.com/tristanpenman/valijson), [LAStools](https://github.com/LAStools)

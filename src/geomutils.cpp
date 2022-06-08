@@ -22,6 +22,7 @@
 #include "geomutils.h"
 
 #include "PolyFeature.h"
+
 #include <CGAL/Polygon_mesh_processing/repair.h>
 
 double geomutils::avg(const std::vector<double>& values) {
@@ -222,7 +223,13 @@ void geomutils::interpolate_poly_from_pc(const Polygon_2& poly, std::vector<doub
 
 void geomutils::remove_self_intersections(Mesh& mesh) {
 #if CGAL_VERSION_NR >= 1050101000 // 5.1.0
-//    PMP::experimental::remove_self_intersections(mesh); // clang not happy with this
+#ifndef __clang__
+    PMP::experimental::remove_self_intersections(mesh);
+#else
+    throw std::runtime_error(std::string("Function remove_self_intersections() does not work with clang compiler!"
+                                         " Set 'handle_self_intersections' to false"
+                                         " or recompile the program again using gcc"));
+#endif
 #else
     PMP::remove_self_intersections(mesh);
 #endif
