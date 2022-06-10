@@ -396,6 +396,7 @@ void Map3d::read_data() { // This will change with time
 //        std::cout << "Importing CityJSON geometries" << std::endl;
         auto& inputfile = Config::get().importedBuildingsPath;
         if (IO::has_substr(inputfile, ".json")) {
+            _importedBuildingsPts = std::make_shared<std::vector<Point_3>>();
             IO::read_cityjson_geometries(inputfile, _importedBuildingsJSON, _importedBuildingsPts);
         } else if (IO::has_substr(inputfile, ".obj") ||
                    IO::has_substr(inputfile, ".stl") ||

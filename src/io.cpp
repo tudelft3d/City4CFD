@@ -118,7 +118,7 @@ void IO::read_other_geometries(std::string& file, std::vector<Mesh>& meshes) {
 }
 
 void IO::read_cityjson_geometries(std::string& file, JsonVector& importedBuildings,
-                                  std::vector<Point_3>& importedBuildingPts) {
+                                  Point3VectorPtr& importedBuildingPts) {
     try {
         std::ifstream ifs(file);
         nlohmann::json j = nlohmann::json::parse(ifs);
@@ -128,7 +128,7 @@ void IO::read_cityjson_geometries(std::string& file, JsonVector& importedBuildin
             double ptx = ((double)pt[0] * (double)j["transform"]["scale"][0]) + (double)j["transform"]["translate"][0] - Config::get().pointOfInterest.x();
             double pty = ((double)pt[1] * (double)j["transform"]["scale"][1]) + (double)j["transform"]["translate"][1] - Config::get().pointOfInterest.y();
             double ptz = ((double)pt[2] * (double)j["transform"]["scale"][2]) + (double)j["transform"]["translate"][2];
-            importedBuildingPts.emplace_back(ptx, pty, ptz);
+            importedBuildingPts->emplace_back(ptx, pty, ptz);
         }
 
         //-- Separate individual buildings

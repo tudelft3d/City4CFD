@@ -42,7 +42,7 @@ private:
     JsonVector                  _polygonsBuildings;
     JsonVector                  _importedBuildingsJSON;
     std::vector<JsonVector>     _polygonsSurfaceLayers;
-    std::vector<Point_3>        _importedBuildingsPts;
+    Point3VectorPtr             _importedBuildingsPts;
     std::vector<Mesh>           _importedBuildingsOther;
 
     Terrainptr                  _terrain;

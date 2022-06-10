@@ -30,7 +30,7 @@ namespace IO {
     void read_config(std::string& config_path);
     bool read_point_cloud(std::string& file, Point_set_3& pc);
     void read_geojson_polygons(std::string& file, JsonVector& jsonPolygons);
-    void read_cityjson_geometries(std::string& file, JsonVector& importedBuildings, std::vector<Point_3>& importedBuildingPts);
+    void read_cityjson_geometries(std::string& file, JsonVector& importedBuildings, Point3VectorPtr& importedBuildingPts);
     void read_other_geometries(std::string& file, std::vector<Mesh>& meshes);
 
     //-- Output functions

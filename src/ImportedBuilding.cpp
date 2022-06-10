@@ -21,6 +21,8 @@
 
 #include "ImportedBuilding.h"
 
+#include <utility>
+
 #include "geomutils.h"
 #include "io.h"
 
@@ -28,8 +30,8 @@
 
 int ImportedBuilding::noBottom = 0;
 
-ImportedBuilding::ImportedBuilding(nlohmann::json buildingJson, std::vector<Point_3>& importedBuildingPts, const int internalID)
-        : Building(internalID), _buildingJson(std::move(buildingJson)), _dPts(std::make_shared<std::vector<Point_3>>(importedBuildingPts)),
+ImportedBuilding::ImportedBuilding(nlohmann::json buildingJson, Point3VectorPtr& importedBuildingPts, const int internalID)
+        : Building(internalID), _buildingJson(std::move(buildingJson)), _dPts(importedBuildingPts),
           _avgFootprintHeight(-9999), _footprintIdxList(), _parentBuildingID(),
           _appendToBuilding(false), _lodIdx(-1), _footprintPtsIdxList(), _trueHeight(Config::get().importTrueHeight) {
 

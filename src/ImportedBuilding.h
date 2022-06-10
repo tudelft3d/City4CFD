@@ -29,7 +29,7 @@ public:
     static int noBottom;
 
     ImportedBuilding() = delete;
-    ImportedBuilding(nlohmann::json  poly, std::vector<Point_3>& importedBuildingPts, const int internalID);
+    ImportedBuilding(nlohmann::json  poly, Point3VectorPtr& importedBuildingPts, const int internalID);
     ImportedBuilding(Mesh& mesh, const int internalID);
     ~ImportedBuilding();
 
