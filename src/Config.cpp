@@ -205,7 +205,8 @@ void Config::set_config(nlohmann::json& j) {
     if (j.contains("import_geometries")) {
         importAdvantage  = j["import_geometries"]["advantage"];
         importTrueHeight = j["import_geometries"]["true_height"];
-        importLoD = j["import_geometries"]["lod"];
+        if (j["import_geometries"].contains("lod"))
+            importLoD = j["import_geometries"]["lod"];
     }
 
     // Boundary

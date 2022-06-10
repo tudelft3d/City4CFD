@@ -85,7 +85,7 @@ public:
     //- Imported buildings
     bool        importAdvantage;
     bool        importTrueHeight;
-    std::string importLoD;
+    std::string importLoD                       = "9999";
     //- Boundary
     bool  reconstructBoundaries                 = false;
 

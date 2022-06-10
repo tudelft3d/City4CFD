@@ -30,19 +30,19 @@
 
 int ImportedBuilding::noBottom = 0;
 
-ImportedBuilding::ImportedBuilding(nlohmann::json buildingJson, Point3VectorPtr& importedBuildingPts, const int internalID)
+ImportedBuilding::ImportedBuilding(std::unique_ptr<nlohmann::json>& buildingJson, Point3VectorPtr& importedBuildingPts, const int internalID)
         : Building(internalID), _buildingJson(std::move(buildingJson)), _dPts(importedBuildingPts),
           _avgFootprintHeight(-9999), _footprintIdxList(), _parentBuildingID(),
           _appendToBuilding(false), _lodIdx(-1), _footprintPtsIdxList(), _trueHeight(Config::get().importTrueHeight) {
 
     _f_imported = true; // the flag is here to avoid shorten polygons later. todo to fix
     //-- Get parent building ID
-    _parentBuildingID = _buildingJson["parents"].front();
+    _parentBuildingID = (*_buildingJson)["parents"].front();
 
     //-- Define LoD
     std::map<std::string, int> lodGeomLst;
     int idx = 0;
-    for (auto& lodGeom : _buildingJson["geometry"]) {
+    for (auto& lodGeom : (*_buildingJson)["geometry"]) {
         lodGeomLst[lodGeom["lod"]] = idx++;
     }
     auto it = lodGeomLst.find(Config::get().importLoD);
@@ -51,7 +51,7 @@ ImportedBuilding::ImportedBuilding(nlohmann::json buildingJson, Point3VectorPtr&
     }
     _lodIdx = it->second;
 
-    nlohmann::json& geometry = _buildingJson["geometry"][_lodIdx];
+    nlohmann::json& geometry = (*_buildingJson)["geometry"][_lodIdx];
 
     //-- Get the footprint polygon
     //- Find GroundSurf semantic index
@@ -144,7 +144,7 @@ ImportedBuilding::ImportedBuilding(nlohmann::json buildingJson, Point3VectorPtr&
 }
 
 ImportedBuilding::ImportedBuilding(Mesh& mesh, const int internalID)
-    : Building(internalID), _buildingJson(), _dPts(nullptr),
+    : Building(internalID), _buildingJson(std::make_unique<nlohmann::json>()), _dPts(nullptr),
     _avgFootprintHeight(-9999), _footprintIdxList(), _parentBuildingID(),
     _appendToBuilding(false), _lodIdx(-1), _footprintPtsIdxList(), _trueHeight(Config::get().importTrueHeight) {
 
@@ -240,7 +240,7 @@ ImportedBuilding::ImportedBuilding(Mesh& mesh, const int internalID)
 
 //    polySet.remove_redundant_edges();
     std::list<CGAL::Polygon_with_holes_2<EPECK>> res;
-    polySet.polygons_with_holes(std::back_inserter (res));
+    polySet.polygons_with_holes(std::back_inserter(res));
 
     Converter<EPECK, EPICK> to_inexact;
     Polygon_2 transferKernelPoly;
@@ -284,8 +284,8 @@ ImportedBuilding::ImportedBuilding(Mesh& mesh, const int internalID)
         nlohmann::json faceLstJson; faceLstJson.push_back(faceJson);
         geom.push_back(faceLstJson);
     }
-    _buildingJson["geometry"].push_back({});
-    _buildingJson["geometry"].front()["boundaries"].push_back(geom);
+    (*_buildingJson)["geometry"].push_back({});
+    (*_buildingJson)["geometry"].front()["boundaries"].push_back(geom);
     mesh.clear();
 }
 
@@ -296,7 +296,7 @@ void ImportedBuilding::reconstruct() {
     typedef std::array<FT, 3>         Custom_point;
     typedef std::vector<std::size_t>  CGAL_Polygon;
 
-    nlohmann::json& geometry = _buildingJson["geometry"][_lodIdx];
+    nlohmann::json& geometry = (*_buildingJson)["geometry"][_lodIdx];
 
     _mesh.clear();
     if (_clip_bottom) {
@@ -400,12 +400,12 @@ void ImportedBuilding::reconstruct_flat_terrain() {
 }
 
 void ImportedBuilding::append_nonground_part(const std::shared_ptr<ImportedBuilding>& other) {
-    this->_buildingJson["geometry"][this->_lodIdx]["boundaries"].front()
+    (*_buildingJson)["geometry"][this->_lodIdx]["boundaries"].front()
           .push_back(other->get_building_json()["geometry"][other->get_lod_idx()]["boundaries"].front());
 }
 
 const nlohmann::json& ImportedBuilding::get_building_json() const {
-    return _buildingJson;
+    return *_buildingJson;
 }
 
 const std::string& ImportedBuilding::get_parent_building_id() const {

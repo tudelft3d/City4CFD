@@ -29,7 +29,7 @@ public:
     static int noBottom;
 
     ImportedBuilding() = delete;
-    ImportedBuilding(nlohmann::json  poly, Point3VectorPtr& importedBuildingPts, const int internalID);
+    ImportedBuilding(std::unique_ptr<nlohmann::json>& poly, Point3VectorPtr& importedBuildingPts, const int internalID);
     ImportedBuilding(Mesh& mesh, const int internalID);
     ~ImportedBuilding();
 
@@ -47,7 +47,7 @@ public:
 //    virtual void  get_cityjson_semantics(nlohmann::json& g) const override;
 
 protected:
-    nlohmann::json                   _buildingJson;
+    std::unique_ptr<nlohmann::json>  _buildingJson;
     double                           _avgFootprintHeight;
     std::vector<int>                 _footprintIdxList;
     std::vector<std::vector<int>>    _footprintPtsIdxList;

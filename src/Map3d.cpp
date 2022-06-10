@@ -105,7 +105,7 @@ void Map3d::set_features() {
         std::vector<std::shared_ptr<ImportedBuilding>> appendingBuildings;
         internalID = 0;
         for (auto& importedBuilding: _importedBuildingsJSON) {
-            auto explicitCityJSONGeom = std::make_shared<ImportedBuilding>(*importedBuilding, _importedBuildingsPts,
+            auto explicitCityJSONGeom = std::make_shared<ImportedBuilding>(importedBuilding, _importedBuildingsPts,
                                                                            internalID++);
             if (!explicitCityJSONGeom->is_appending()) {
                 _importedBuildings.push_back(explicitCityJSONGeom);

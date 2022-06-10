@@ -129,7 +129,7 @@ namespace jsonschema {
               "type": "string"
             }
           },
-          "required": ["path", "advantage", "true_height", "lod"]
+          "required": ["path", "advantage", "true_height"]
         },
         "point_of_interest": {
           "$ref": "#/$defs/point"
