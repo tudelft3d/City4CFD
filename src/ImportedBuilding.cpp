@@ -82,7 +82,7 @@ ImportedBuilding::ImportedBuilding(std::unique_ptr<nlohmann::json>& buildingJson
         return;
     }
 
-    std::unordered_map<std::string, int> pointConectivity;
+    std::unordered_map<std::string, int> pointConnectivity;
     CGAL::Polygon_set_2<EPECK> polySet;
     std::vector<double> footprintElevations;
     //    int polyNo = 0;
@@ -93,7 +93,7 @@ ImportedBuilding::ImportedBuilding(std::unique_ptr<nlohmann::json>& buildingJson
         for (auto& ptIdx: coordBnd) {
             facePoly.push_back(ePoint_2(_dPts->at(ptIdx).x(), _dPts->at(ptIdx).y()));
             footprintElevations.push_back(_dPts->at(ptIdx).z());
-            pointConectivity[IO::gen_key_bucket(Point_2(_dPts->at(ptIdx).x(), _dPts->at(ptIdx).y()))] = ptIdx;
+            pointConnectivity[IO::gen_key_bucket(Point_2(_dPts->at(ptIdx).x(), _dPts->at(ptIdx).y()))] = ptIdx;
         }
         if (!facePoly.is_simple()) {
             Config::get().log << "Failed to import building: " << this->get_parent_building_id()
@@ -106,41 +106,13 @@ ImportedBuilding::ImportedBuilding(std::unique_ptr<nlohmann::json>& buildingJson
 
         polySet.join(facePoly);
     }
-
-    //    polySet.remove_redundant_edges();
-    std::list<CGAL::Polygon_with_holes_2<EPECK>> res;
-    polySet.polygons_with_holes(std::back_inserter (res));
-
-    Converter<EPECK, EPICK> to_inexact;
-    Polygon_2 transferKernelPoly;
-    for (auto& outerPt : res.front().outer_boundary()) {
-        Point_2 polyPt = to_inexact(outerPt);
-        transferKernelPoly.push_back(polyPt);
-    }
-    this->check_simplicity(transferKernelPoly);
-    _poly._rings.push_back(transferKernelPoly);
-
-    for (auto& hole : res.front().holes()) {
-        transferKernelPoly.clear();
-        for (auto& pt : hole) {
-            Point_2 polyPt = to_inexact(pt);
-            transferKernelPoly.push_back(polyPt);
-        }
-        this->check_simplicity(transferKernelPoly);
-        _poly._rings.push_back(transferKernelPoly);
-    }
-
-    //- Connect footprint polygons to JSON object
-    for (auto& ring: _poly._rings) {
-        std::vector<int> ringFootprintIdxs;
-        for (auto& pt : ring) {
-            auto itPt = pointConectivity.find(IO::gen_key_bucket(pt));
-            assert(itPt != pointConectivity.end());
-            ringFootprintIdxs.push_back(itPt->second);
-        }
-        _footprintPtsIdxList.push_back(ringFootprintIdxs);
-    }
     _avgFootprintHeight = geomutils::avg(footprintElevations);
+
+    //-- Polyset to polygon data structure
+    this->polyset_to_polygon(polySet);
+
+    //-- Connect footprint polygons to JSON object
+    this->set_footprint_mesh_connectivity(pointConnectivity);
 }
 
 ImportedBuilding::ImportedBuilding(Mesh& mesh, const int internalID)
@@ -155,11 +127,10 @@ ImportedBuilding::ImportedBuilding(Mesh& mesh, const int internalID)
     std::vector<int> visited(mesh.faces().size(), false);
 
     std::vector<std::vector<Mesh::face_index>> downwardFaceGroups;
-    //todo move it over to geomutils to avoid code copying
     auto vnormals = mesh.add_property_map<vertex_descriptor, Vector_3>("v:normals", CGAL::NULL_VECTOR).first;
     auto fnormals = mesh.add_property_map<face_descriptor, Vector_3>("f:normals", CGAL::NULL_VECTOR).first;
     PMP::compute_normals(mesh, vnormals, fnormals);
-    const double angle = 85;
+    const double angle = 40;
     //-- Group adjacent downward-facing faces
     for (int i = 0; i < visited.size(); ++i) {
         if (visited[i]) continue;
@@ -237,41 +208,13 @@ ImportedBuilding::ImportedBuilding(Mesh& mesh, const int internalID)
 
         polySet.join(facePoly);
     }
-
-//    polySet.remove_redundant_edges();
-    std::list<CGAL::Polygon_with_holes_2<EPECK>> res;
-    polySet.polygons_with_holes(std::back_inserter(res));
-
-    Converter<EPECK, EPICK> to_inexact;
-    Polygon_2 transferKernelPoly;
-    for (auto& outerPt : res.front().outer_boundary()) {
-        Point_2 polyPt = to_inexact(outerPt);
-        transferKernelPoly.push_back(polyPt);
-    }
-    this->check_simplicity(transferKernelPoly);
-    _poly._rings.push_back(transferKernelPoly);
-
-    for (auto& hole : res.front().holes()) {
-        transferKernelPoly.clear();
-        for (auto& pt : hole) {
-            Point_2 polyPt = to_inexact(pt);
-            transferKernelPoly.push_back(polyPt);
-        }
-        this->check_simplicity(transferKernelPoly);
-        _poly._rings.push_back(transferKernelPoly);
-    }
-
-    //- Connect footprint polygons to JSON object
-    for (auto& ring: _poly._rings) {
-        std::vector<int> ringFootprintIdxs;
-        for (auto& pt : ring) {
-            auto itPt = pointConectivity.find(IO::gen_key_bucket(pt));
-            assert(itPt != pointConectivity.end());
-            ringFootprintIdxs.push_back(itPt->second);
-        }
-        _footprintPtsIdxList.push_back(ringFootprintIdxs);
-    }
     _avgFootprintHeight = geomutils::avg(footprintElevations);
+
+    //-- Polyset to polygon data structure
+    this->polyset_to_polygon(polySet);
+
+    //-- Connect footprint polygons to JSON object
+    this->set_footprint_mesh_connectivity(pointConectivity);
 
     //-- Shove it back to JSON for now
     _lodIdx = 0;
@@ -426,5 +369,42 @@ void ImportedBuilding::check_simplicity(Polygon_2& ring) {
                     << " Reason: " << "Footprint polygon is not simple." << std::endl;
         this->deactivate();
         return;
+    }
+}
+
+void ImportedBuilding::polyset_to_polygon(const CGAL::Polygon_set_2<CGAL::Epeck>& polySet) {
+//    polySet.remove_redundant_edges();
+    std::list<CGAL::Polygon_with_holes_2<EPECK>> res;
+    polySet.polygons_with_holes(std::back_inserter(res));
+
+    Converter<EPECK, EPICK> to_inexact;
+    Polygon_2 transferKernelPoly;
+    for (auto& outerPt : res.front().outer_boundary()) {
+        Point_2 polyPt = to_inexact(outerPt);
+        transferKernelPoly.push_back(polyPt);
+    }
+    this->check_simplicity(transferKernelPoly);
+    _poly._rings.push_back(transferKernelPoly);
+
+    for (auto& hole : res.front().holes()) {
+        transferKernelPoly.clear();
+        for (auto& pt : hole) {
+            Point_2 polyPt = to_inexact(pt);
+            transferKernelPoly.push_back(polyPt);
+        }
+        this->check_simplicity(transferKernelPoly);
+        _poly._rings.push_back(transferKernelPoly);
+    }
+}
+
+void ImportedBuilding::set_footprint_mesh_connectivity(const std::unordered_map<std::string, int>& pointConnectivity) {
+    for (auto& ring: _poly._rings) {
+        std::vector<int> ringFootprintIdxs;
+        for (auto& pt : ring) {
+            auto itPt = pointConnectivity.find(IO::gen_key_bucket(pt));
+            assert(itPt != pointConnectivity.end());
+            ringFootprintIdxs.push_back(itPt->second);
+        }
+        _footprintPtsIdxList.push_back(ringFootprintIdxs);
     }
 }

@@ -29,7 +29,7 @@ public:
     static int noBottom;
 
     ImportedBuilding() = delete;
-    ImportedBuilding(std::unique_ptr<nlohmann::json>& poly, Point3VectorPtr& importedBuildingPts, const int internalID);
+    ImportedBuilding(std::unique_ptr<nlohmann::json>& buildingJson, Point3VectorPtr& importedBuildingPts, const int internalID);
     ImportedBuilding(Mesh& mesh, const int internalID);
     ~ImportedBuilding();
 
@@ -58,6 +58,8 @@ protected:
     Point3VectorPtr                  _dPts;
 
     void check_simplicity(Polygon_2& ring);
+    void polyset_to_polygon(const CGAL::Polygon_set_2<CGAL::Epeck>& polySet);
+    void set_footprint_mesh_connectivity(const std::unordered_map<std::string, int>& pointConnectivity);
 };
 
 #endif //CITY4CFD_EXPLICITBUILDING_H
