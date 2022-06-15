@@ -7,14 +7,14 @@
 
 # City4CFD
 
-City for CFD is a tool that aims to automatically reconstruct 3D city geometries tailored for microscale urban flow simulations.
+City4CFD--*city for CFD*--is a tool that aims to automatically reconstruct 3D city geometries tailored for microscale urban flow simulations.
 
-It can create a terrain from a point cloud and imprint different surfaces (e.g. green areas, water, roads).
+It can create automatically a terrain from a point cloud and imprint different surfaces (e.g. green areas, water, roads).
 
-It enables the reconstruction of buildings from different sources and their combination, such as:
-- Reconstruction with the combination of 2D polygons and a point cloud,
-- Extrusion of footprints containing height or floor number attributes,
-- The import of existing building models.
+It enables us to reconstruct buildings from different sources and their combination, such as:
+  - Reconstruction with the combination of 2D polygons and a point cloud,
+  - Extrusion of footprints containing height or floor number attributes,
+  - The import of existing building models.
 
 The resulting geometry is watertight -- buildings and surfaces are seamlessly integrated into a terrain.
 
