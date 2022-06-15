@@ -16,7 +16,7 @@ WORKDIR="$PWD"
 #   ./prepare_point_cloud.sh filename, e.g. ./prepare_point_cloud.sh *.laz
 
 #! PLEASE SET THE INPUT VARIABLES BEFORE RUNNING THE SCRIPT !#
-#!---------------------------- INPUT VARIALBES --------------------------------#!
+#!---------------------------- INPUT VARIALBES --------------------------------!#
 # Full path of the City4CFD source folder
 CITY4CFD_DIR=${PWD%/*}
 

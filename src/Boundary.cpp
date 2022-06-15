@@ -1,8 +1,7 @@
 /*
-  Copyright (c) 2021-2022,
-  Ivan Pađen <i.paden@tudelft.nl>
-  3D Geoinformation,
-  Delft University of Technology
+  City4CFD
+ 
+  Copyright (c) 2021-2022, 3D Geoinformation Research Group, TU Delft  
 
   This file is part of City4CFD.
 
@@ -13,10 +12,17 @@
 
   City4CFD is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  along with this program. If not, see <http://www.gnu.org/licenses/>
+  along with City4CFD.  If not, see <http://www.gnu.org/licenses/>.
+
+  For any information or further details about the use of City4CFD, contact
+  Ivan Pađen
+  <i.paden@tudelft.nl>
+  3D Geoinformation Research Group
+  Delft University of Technology
 */
 
 #include "Boundary.h"
@@ -38,7 +44,7 @@ double               Boundary::_outerBndHeight;
 void Boundary::set_bnd_poly(Polygon_2& bndPoly, Polygon_2& pcBndPoly, Polygon_2& startBufferPoly) {
     Polygon_2 bufferPoly;
     //-- Set bndPoly and pcBndPoly depending on the buffer setup
-    if (Config::get().domainBuffer > -g_largnum) {
+    if (Config::get().domainBuffer > -global::largnum) {
         double bufferLen = Config::get().domainBuffer / 100.;
         Point_2 center = CGAL::centroid(bndPoly.begin(), bndPoly.end(),
                                         CGAL::Dimension_tag<0>());
@@ -88,7 +94,7 @@ void Boundary::set_bounds_to_terrain(Point_set_3& pointCloud, const Polygon_2& b
     geomutils::interpolate_poly_from_pc(bndPoly, bndHeights, pointCloud);
     _outerBndHeight = geomutils::avg(bndHeights); // Height for buffer (for now) - average of outer pts
 
-    if (Config::get().domainBuffer > -g_largnum + g_smallnum) {
+    if (Config::get().domainBuffer > -global::largnum + global::smallnum) {
         /*
         for (auto& pt : startBufferPoly) {
             pointCloud.insert(Point_3(pt.x(), pt.y(), _outerBndHeight));
@@ -122,7 +128,7 @@ void Boundary::prep_output(Vector_2 edge) {
                            _outerPts[i + 1].y() - _outerPts[i].y());
         checkEdge /= sqrt(checkEdge.squared_length());
 
-        if (edge * checkEdge > 1 - g_smallnum && edge * checkEdge < 1 + g_smallnum) {
+        if (edge * checkEdge > 1 - global::smallnum && edge * checkEdge < 1 + global::smallnum) {
             _sideOutputPts.push_back(_outerPts[i]);
             _sideOutputPts.push_back(_outerPts[i + 1]);
 
@@ -135,7 +141,7 @@ void Boundary::prep_output(Vector_2 edge) {
                                   _outerPts[j].y() - _outerPts[i + 1].y());
                 nextEdge /= sqrt(nextEdge.squared_length());
 
-                if (nextEdge * edge > 1 - g_smallnum && nextEdge * edge < 1 + g_smallnum) {
+                if (nextEdge * edge > 1 - global::smallnum && nextEdge * edge < 1 + global::smallnum) {
                     _sideOutputPts.push_back(_outerPts[j]);
                 } else {
                     collinear = false;
@@ -150,8 +156,8 @@ void Boundary::prep_output(Vector_2 edge) {
 
 std::vector<double> Boundary::get_domain_bbox() {
     //todo: proper bbox calculation
-    double maxx(-g_largnum), maxy(-g_largnum), maxz(-g_largnum);
-    double minx(g_largnum),  miny(g_largnum),  minz(g_largnum);
+    double maxx(-global::largnum), maxy(-global::largnum), maxz(-global::largnum);
+    double minx(global::largnum),  miny(global::largnum),  minz(global::largnum);
 
     for (auto& pt : _outerPts) {
         if (pt.x() > maxx) maxx = pt.x();

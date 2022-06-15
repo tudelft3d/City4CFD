@@ -1,8 +1,7 @@
 /*
-  Copyright (c) 2021-2022,
-  Ivan Pađen <i.paden@tudelft.nl>
-  3D Geoinformation,
-  Delft University of Technology
+  City4CFD
+ 
+  Copyright (c) 2021-2022, 3D Geoinformation Research Group, TU Delft  
 
   This file is part of City4CFD.
 
@@ -13,10 +12,17 @@
 
   City4CFD is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  along with this program. If not, see <http://www.gnu.org/licenses/>
+  along with City4CFD.  If not, see <http://www.gnu.org/licenses/>.
+
+  For any information or further details about the use of City4CFD, contact
+  Ivan Pađen
+  <i.paden@tudelft.nl>
+  3D Geoinformation Research Group
+  Delft University of Technology
 */
 
 #include "PolyFeature.h"
@@ -127,8 +133,8 @@ void PolyFeature::calc_footprint_elevation_linear(const DT& dt) {
 }
 #endif
 
-void PolyFeature::average_polygon_inner_points(const Point_set_3& pointCloud,
-                                               std::map<int, Point_3>& averagedPts,
+void PolyFeature::flatten_polygon_inner_points(const Point_set_3& pointCloud,
+                                               std::map<int, Point_3>& flattenedPts,
                                                const SearchTree& searchTree,
                                                const std::unordered_map<Point_3, int>& pointCloudConnectivity) const {
     std::vector<int>    indices;
@@ -137,12 +143,12 @@ void PolyFeature::average_polygon_inner_points(const Point_set_3& pointCloud,
     //-- Take tree subset bounded by the polygon
     std::vector<Point_3> subsetPts;
     Polygon_2 bbox = geomutils::calc_bbox_poly(_poly.rings().front());
-    Point_3 bbox1(bbox[0].x(), bbox[0].y(), -g_largnum);
-    Point_3 bbox2(bbox[2].x(), bbox[2].y(), g_largnum);
+    Point_3 bbox1(bbox[0].x(), bbox[0].y(), -global::largnum);
+    Point_3 bbox2(bbox[2].x(), bbox[2].y(), global::largnum);
     Fuzzy_iso_box pts_range(bbox1, bbox2);
     searchTree.search(std::back_inserter(subsetPts), pts_range);
 
-    //-- Collect points that have not been already averaged
+    //-- Collect points that have not been already flattened
     for (auto& pt3 : subsetPts) {
         Point_2 pt(pt3.x(), pt3.y());
         if (CGAL::bounded_side_2(_poly._rings.front().begin(), _poly._rings.front().end(), pt) != CGAL::ON_UNBOUNDED_SIDE) {
@@ -153,22 +159,22 @@ void PolyFeature::average_polygon_inner_points(const Point_set_3& pointCloud,
             if (is_building_pt[*pointSetIt])
                 return; //todo temp solution when having adjacent buildings
 
-            auto it = averagedPts.find(itIdx->second);
-            if (it == averagedPts.end()) {
+            auto it = flattenedPts.find(itIdx->second);
+            if (it == flattenedPts.end()) {
                 indices.push_back(itIdx->second);
                 originalHeights.push_back(pointCloud.point(itIdx->second).z());
             }
         }
     }
-    //-- Average points
+    //-- Flatten surface points
     if (indices.empty()) {
         return;
     }
-    double avgHeight = geomutils::percentile(originalHeights, Config::get().averageSurfaces[this->get_output_layer_id()] / 100);
+    double avgHeight = geomutils::percentile(originalHeights, Config::get().flattenSurfaces[this->get_output_layer_id()] / 100);
 
     //-- Add new points to the temp map
     for (auto& i : indices) {
-        averagedPts[i] = Point_3(pointCloud.point(i).x(), pointCloud.point(i).y(), avgHeight);
+        flattenedPts[i] = Point_3(pointCloud.point(i).x(), pointCloud.point(i).y(), avgHeight);
     }
 }
 

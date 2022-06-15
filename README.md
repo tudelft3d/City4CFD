@@ -29,6 +29,8 @@ City4CFD is developed by the [3D Geoinformation Research Group](https://3d.bk.tu
 
 **2D data** (polygons) are imported in GeoJSON format. For all pre-processing related to polygons, including conversion to GeoJSON, you can use [QGIS](https://qgis.org/en/site/).
 
+**Geometry import** supports the following formats: OBJ, STL, PLY, OFF, VTP, and CityJSON.
+
 **Output** is in the following formats: OBJ, STL, and CityJSON. The ID of each polygon is preserved, and there is a 1-to-1 mapping between the input and the output.
 
 ## Prerequisites

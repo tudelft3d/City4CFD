@@ -1,8 +1,7 @@
 /*
-  Copyright (c) 2021-2022,
-  Ivan Pađen <i.paden@tudelft.nl>
-  3D Geoinformation,
-  Delft University of Technology
+  City4CFD
+ 
+  Copyright (c) 2021-2022, 3D Geoinformation Research Group, TU Delft  
 
   This file is part of City4CFD.
 
@@ -13,10 +12,17 @@
 
   City4CFD is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  along with this program. If not, see <http://www.gnu.org/licenses/>
+  along with City4CFD.  If not, see <http://www.gnu.org/licenses/>.
+
+  For any information or further details about the use of City4CFD, contact
+  Ivan Pađen
+  <i.paden@tudelft.nl>
+  3D Geoinformation Research Group
+  Delft University of Technology
 */
 
 #include "Terrain.h"
@@ -38,17 +44,19 @@ Terrain::~Terrain() = default;
 void Terrain::set_cdt(const Point_set_3& pointCloud) {
     Converter<EPICK, EPECK> to_exact;
 
-    std::cout << "\n    Triangulating" << std::endl;
+    std::cout << "\n    Preparing triangulation" << std::endl;
     int count = 0;
-    std::vector<ePoint_3> pts; //todo check progress bar
+    std::vector<ePoint_3> pts;
     for (auto& pt : pointCloud.points()) {
         pts.push_back(to_exact(pt));
 
-        IO::print_progress_bar(99 * count++ / pointCloud.size());
+        if ((count % 1000) == 0) IO::print_progress_bar(100 * count / pointCloud.size());
+        ++count;
     }
-    IO::print_progress_bar(99);
-    _cdt.insert(pts.begin(), pts.end());
     IO::print_progress_bar(100); std::clog << std::endl;
+    std::cout << "    Triangulating..." << std::flush;
+    _cdt.insert(pts.begin(), pts.end());
+    std::cout << "\r    Triangulating   " << std::endl;
 
     /*
     //-- Smoothing
@@ -87,14 +95,15 @@ void Terrain::prep_constraints(const PolyFeatures& features, Point_set_3& pointC
 }
 
 void Terrain::constrain_features() {
-    std::cout << "\n    Constraining polygons" << std::endl;
+    std::cout << "\n    Imprinting polygons" << std::endl;
 
     int count = 0;
     for (auto& ring : _constrainedPolys) {
         //-- Set added points as constraints
         _cdt.insert_constraint(ring.begin(), ring.end(), true);
 
-        IO::print_progress_bar(100 * count++ / _constrainedPolys.size());
+        if ((count % 100) == 0) IO::print_progress_bar(100 * count / _constrainedPolys.size());
+        ++count;
     }
     IO::print_progress_bar(100); std::clog << std::endl;
 }
@@ -148,8 +157,8 @@ Mesh Terrain::mesh_subset(const Polygon_with_holes_2& poly) const {
     double expandSearch = 1;
     while (subsetPts.size() <= poly.outer_boundary().size()) {
         subsetPts.clear();
-        Point_3 bbox1(poly.bbox().xmin() - expandSearch, poly.bbox().ymin() - expandSearch, -g_largnum);
-        Point_3 bbox2(poly.bbox().xmax() + expandSearch, poly.bbox().ymax() + expandSearch, g_largnum);
+        Point_3 bbox1(poly.bbox().xmin() - expandSearch, poly.bbox().ymin() - expandSearch, -global::largnum);
+        Point_3 bbox2(poly.bbox().xmax() + expandSearch, poly.bbox().ymax() + expandSearch, global::largnum);
         Fuzzy_iso_box pts_range(bbox1, bbox2);
         _searchTree.search(std::back_inserter(subsetPts), pts_range);
         expandSearch *= 2;

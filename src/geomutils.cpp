@@ -1,8 +1,7 @@
 /*
-  Copyright (c) 2021-2022,
-  Ivan Pađen <i.paden@tudelft.nl>
-  3D Geoinformation,
-  Delft University of Technology
+  City4CFD
+ 
+  Copyright (c) 2021-2022, 3D Geoinformation Research Group, TU Delft  
 
   This file is part of City4CFD.
 
@@ -13,10 +12,17 @@
 
   City4CFD is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  along with this program. If not, see <http://www.gnu.org/licenses/>
+  along with City4CFD.  If not, see <http://www.gnu.org/licenses/>.
+
+  For any information or further details about the use of City4CFD, contact
+  Ivan Pađen
+  <i.paden@tudelft.nl>
+  3D Geoinformation Research Group
+  Delft University of Technology
 */
 
 #include "geomutils.h"
@@ -155,8 +161,8 @@ void geomutils::mark_domains(CDT& cdt, PolyFeatures features) {
 
 void geomutils::check_layer(const Face_handle& fh, int surfaceLayer) {
     if (fh->info().surfaceLayer == 9999) return;
-    auto it = Config::get().averageSurfaces.find(surfaceLayer);
-    if (it != Config::get().averageSurfaces.end()) {
+    auto it = Config::get().flattenSurfaces.find(surfaceLayer);
+    if (it != Config::get().flattenSurfaces.end()) {
         Converter<EPECK, EPICK> to_inexact;
         Vector_3 vertical(0, 0, 1);
         Vector_3 norm = CGAL::normal(to_inexact(fh->vertex(0)->point()),
@@ -348,7 +354,7 @@ template void geomutils::smooth_dt<CDT, EPECK>(const Point_set_3& pointCloud, CD
 template <typename T>
 Polygon_2 geomutils::calc_bbox_poly(const T& inputPts) {
     double bxmin, bymin, bxmax, bymax;
-    bxmin = g_largnum; bymin = g_largnum; bxmax = -g_largnum; bymax = -g_largnum;
+    bxmin = global::largnum; bymin = global::largnum; bxmax = -global::largnum; bymax = -global::largnum;
     for (auto& pt : inputPts) {
         if (pt.x() > bxmax) bxmax = pt.x();
         if (pt.x() < bxmin) bxmin = pt.x();

@@ -1,8 +1,7 @@
 /*
-  Copyright (c) 2021-2022,
-  Ivan Pađen <i.paden@tudelft.nl>
-  3D Geoinformation,
-  Delft University of Technology
+  City4CFD
+ 
+  Copyright (c) 2021-2022, 3D Geoinformation Research Group, TU Delft  
 
   This file is part of City4CFD.
 
@@ -13,10 +12,17 @@
 
   City4CFD is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  along with this program. If not, see <http://www.gnu.org/licenses/>
+  along with City4CFD.  If not, see <http://www.gnu.org/licenses/>.
+
+  For any information or further details about the use of City4CFD, contact
+  Ivan Pađen
+  <i.paden@tudelft.nl>
+  3D Geoinformation Research Group
+  Delft University of Technology
 */
 
 #include "Building.h"
@@ -32,16 +38,16 @@
 #include <CGAL/Mesh_3/dihedral_angle_3.h>
 
 Building::Building()
-        : PolyFeature(1), _height(-g_largnum) {}
+        : PolyFeature(1), _height(-global::largnum) {}
 
 Building::Building(const int internalID)
-        : PolyFeature(1, internalID), _height(-g_largnum) {}
+        : PolyFeature(1, internalID), _height(-global::largnum) {}
 
 Building::Building(const nlohmann::json& poly)
-        : PolyFeature(poly, 1), _height(-g_largnum) {}
+        : PolyFeature(poly, 1), _height(-global::largnum) {}
 
 Building::Building(const nlohmann::json& poly, const int internalID)
-        : PolyFeature(poly, 1, internalID), _height(-g_largnum) {}
+        : PolyFeature(poly, 1, internalID), _height(-global::largnum) {}
 
 Building::~Building() = default;
 
