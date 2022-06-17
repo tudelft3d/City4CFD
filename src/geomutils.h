@@ -41,6 +41,7 @@ namespace geomutils {
     void    check_layer(const Face_handle& fh, int surfaceLayer);
     void    shorten_long_poly_edges(Polygon_2& poly, double maxLen = Config::get().edgeMaxLen);
     Point_2 rotate_pt(const Point_2& pt, const double angle, Point_2 centerPt = Point_2(0, 0));
+    Point_3 rotate_pt_xy(const Point_3& pt, const double angle, Point_2 centerPt = Point_2(0, 0));
     void    interpolate_poly_from_pc(const Polygon_2& poly, std::vector<double>& heights, const Point_set_3& pointCloud);
     bool    polygons_in_contact(const Polygon_with_holes_2& firstPoly, const Polygon_with_holes_2& secondPoly);
     void    remove_self_intersections(Mesh& mesh);

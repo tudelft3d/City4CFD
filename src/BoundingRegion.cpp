@@ -110,7 +110,7 @@ void BoundingRegion::calc_bnd_bpg(const Polygon_2& influRegionPoly,
     //-- Blockage ratio handling
     std::cout << "\nCalculating blockage ratio for flow direction (" << Config::get().flowDirection
               << ")" << std::endl;
-    double blockRatio = this->calc_blockage_ratio(buildings, angle, localPoly);
+    double blockRatio = this->calc_blockage_ratio_from_edges(buildings, angle, localPoly);
     std::cout << "    Blockage ratio is: " << blockRatio << std::endl;
     if (Config::get().bpgBlockageRatioFlag && blockRatio > Config::get().bpgBlockageRatio) {
         std::cout << "INFO: Blockage ratio is more than " << Config::get().bpgBlockageRatio * 100
@@ -149,7 +149,6 @@ Polygon_2 BoundingRegion::calc_bnd_poly(const std::vector<Point_2>& candidatePts
 
         std::cout << "Calculated boundary radius is: "
                   << bndRadius << std::endl;
-
     } else {
         //-- Get bbox
         Polygon_2 bbox = geomutils::calc_bbox_poly(candidatePts);
@@ -210,8 +209,7 @@ Polygon_2 BoundingRegion::calc_bnd_poly(const std::vector<Point_2>& candidatePts
     return localPoly;
 }
 
-//-- Blockage ratio based on the flow direction
-double BoundingRegion::calc_blockage_ratio(const Buildings& buildings, const double angle, Polygon_2& localPoly) const {
+double BoundingRegion::calc_blockage_ratio_from_pts(const Buildings& buildings, const double angle, Polygon_2& localPoly) const {
     //-- We're working with a local coordinate system, normal to yz plane
     CDT projCDT;
     double blockArea = 0;
@@ -257,6 +255,42 @@ double BoundingRegion::calc_blockage_ratio(const Buildings& buildings, const dou
     Polygon_2 bbox = geomutils::calc_bbox_poly(localPoly);
     double domainCrossArea = std::sqrt(Vector_2(bbox.vertex(3) - bbox.vertex(0)).squared_length())
                            * Config::get().topHeight;
+
+    //-- Return the blockage ration
+    return blockArea / domainCrossArea;
+}
+
+double BoundingRegion::calc_blockage_ratio_from_edges(const Buildings& buildings, const double angle, Polygon_2& localPoly) const {
+    //-- We're working with a local coordinate system, normal to yz plane
+    Converter<EPICK, EPECK> to_exact;
+    CDT projCDT;
+    double blockArea = 0;
+    for (auto& b : buildings) {
+        if (!b->is_active()) continue;
+        auto& mesh = b->get_mesh();
+        for (auto& edge : mesh.edges()) {
+            ePoint_3 pt1 = to_exact(geomutils::rotate_pt_xy(mesh.point(mesh.vertex(edge, 0)), -angle));
+            ePoint_3 pt2 = to_exact(geomutils::rotate_pt_xy(mesh.point(mesh.vertex(edge, 1)), -angle));
+            projCDT.insert_constraint(pt1, pt2);
+        }
+    }
+    //-- Mark constrained regions
+    geomutils::mark_domains(projCDT);
+
+    //-- Calculate blockArea of constrained region
+    for (auto& face : projCDT.finite_face_handles()) {
+        if (!face->info().in_domain_noholes()) continue;
+        std::vector<Point_2> pts;
+        for (int i = 0; i < 3; ++i)
+            pts.emplace_back(Point_2(CGAL::to_double(face->vertex(i)->point().x()),
+                                     CGAL::to_double(face->vertex(i)->point().y())));
+
+        blockArea += CGAL::area(pts[0], pts[1], pts[2]);
+    }
+    //-- Get blockArea of the domain cross section at the influence region
+    Polygon_2 bbox = geomutils::calc_bbox_poly(localPoly);
+    double domainCrossArea = std::sqrt(Vector_2(bbox.vertex(3) - bbox.vertex(0)).squared_length())
+                             * Config::get().topHeight;
 
     //-- Return the blockage ration
     return blockArea / domainCrossArea;

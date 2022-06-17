@@ -50,7 +50,8 @@ protected:
 
     Polygon_2  calc_bnd_poly(const std::vector<Point_2>& candidatePts, const double hMax,
                              const double angle, const double enlargeRatio = 1) const;
-    double     calc_blockage_ratio(const Buildings& buildings, const double angle, Polygon_2& localPoly) const;
+    double     calc_blockage_ratio_from_pts(const Buildings& buildings, const double angle, Polygon_2& localPoly) const;
+    double     calc_blockage_ratio_from_edges(const Buildings& buildings, const double angle, Polygon_2& localPoly) const;
 
 };
 

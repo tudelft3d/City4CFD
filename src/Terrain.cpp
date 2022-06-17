@@ -50,7 +50,7 @@ void Terrain::set_cdt(const Point_set_3& pointCloud) {
     for (auto& pt : pointCloud.points()) {
         pts.push_back(to_exact(pt));
 
-        if ((count % 1000) == 0) IO::print_progress_bar(100 * count / pointCloud.size());
+        if ((count % 5000) == 0) IO::print_progress_bar(100 * count / pointCloud.size());
         ++count;
     }
     IO::print_progress_bar(100); std::clog << std::endl;

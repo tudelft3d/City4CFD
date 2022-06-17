@@ -203,6 +203,12 @@ Point_2 geomutils::rotate_pt(const Point_2& pt, const double angle, Point_2 cent
                    sin(angle) * (pt.x() - centerPt.x()) + cos(angle) * (pt.y() - centerPt.y()) + centerPt.y()};
 }
 
+Point_3 geomutils::rotate_pt_xy(const Point_3& pt, const double angle, Point_2 centerPt) {
+    return {cos(angle) * (pt.x() - centerPt.x()) - sin(angle) * (pt.y() - centerPt.y()) + centerPt.x(),
+            sin(angle) * (pt.x() - centerPt.x()) + cos(angle) * (pt.y() - centerPt.y()) + centerPt.y(),
+            pt.z()};
+}
+
 void geomutils::interpolate_poly_from_pc(const Polygon_2& poly, std::vector<double>& heights,
                                          const Point_set_3& pointCloud) {
     SearchTree searchTree(pointCloud.points().begin(), pointCloud.points().end());
