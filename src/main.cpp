@@ -29,6 +29,8 @@
 #include "io.h"
 #include "Map3d.h"
 
+std::string CITY4CFD_VERSION = "0.1.0";
+
 void printWelcome() {
 //    printf("\e[?25l");
     auto logo{
@@ -59,18 +61,22 @@ void printWelcome() {
 
 void printHelp() {
     auto helpMsg{
-R"(
-USAGE:
+R"(USAGE:
     City4CFD config_file.json OPTIONS
 
 AVAILABLE OPTIONS:
     --help            Prints out this help message
+    --version         Displays City4CFD version information
     --output_dir      Sets the directory where output files are stored
     --output_file     Overrides output file(s) name from the configuration file
 )"
     };
 
     std::cout << helpMsg;
+}
+
+void printVersion() {
+    std::cout << "Version: " << CITY4CFD_VERSION << std::endl;
 }
 
 int main(int argc, char** argv) {
@@ -92,6 +98,9 @@ int main(int argc, char** argv) {
         for (auto i = 1; i < argc; ++i) {
             if (boost::iequals(argv[i], "--help")) {
                 printHelp();
+                return EXIT_SUCCESS;
+            } else if (boost::iequals(argv[i], "--version")) {
+                printVersion();
                 return EXIT_SUCCESS;
             } else if (boost::iequals(argv[i], "--output_dir")) {
                 if (i + 1 == argc) throw std::invalid_argument("Missing argument for --output_dir");
