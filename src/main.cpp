@@ -29,10 +29,9 @@
 #include "io.h"
 #include "Map3d.h"
 
-std::string CITY4CFD_VERSION = "0.1.0";
+std::string CITY4CFD_VERSION = "0.1.0-dev";
 
 void printWelcome() {
-//    printf("\e[?25l");
     auto logo{
             R"(
      #==============================================================#

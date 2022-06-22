@@ -178,7 +178,7 @@ void IO::output_obj(const OutputFeatures& allFeatures) {
     for (auto& f : allFeatures) {
         if (Config::get().outputSeparately) {
 //            if (f->get_class() == BUILDING)
-//                bs[f->get_output_layer_id()] += "\ng " + std::to_string(count++);
+//                bs[f->get_output_layer_id()] += "\no " + std::to_string(count++);
             IO::get_obj_pts(f->get_mesh(),
                             fs[f->get_output_layer_id()],
                             bs[f->get_output_layer_id()],
