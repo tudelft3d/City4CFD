@@ -99,8 +99,15 @@ void LoD12::create_mesh(Mesh& mesh) {
             std::advance(it1, v1.idx() + 1);
             std::advance(it2, v2.idx() + 1);
 
-            fIdx = mesh.add_face(v1, v2, *it1);   surfaceType[fIdx] = "WallSurface";
-            fIdx = mesh.add_face(v2, *it2, *it1); surfaceType[fIdx] = "WallSurface";
+            fIdx = mesh.add_face(v1, v2, *it1);
+            if (fIdx != Mesh::null_face()) {
+                surfaceType[fIdx] = "WallSurface";
+            }
+
+            fIdx = mesh.add_face(v2, *it2, *it1);
+            if (fIdx != Mesh::null_face()) {
+                surfaceType[fIdx] = "WallSurface";
+            }
         }
         ++polyCount;
     }

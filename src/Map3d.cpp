@@ -374,7 +374,8 @@ void Map3d::clip_buildings() {
     for (auto& b : _buildings) {
         b->clip_bottom(_terrain);
 
-        IO::print_progress_bar(100 * count ++ / _buildings.size());
+        if ((count % 50) == 0) IO::print_progress_bar(100 * count / _buildings.size());
+        ++count;
     }
     IO::print_progress_bar(100); std::cout << std::endl;
     _terrain->clear_subset();
