@@ -46,12 +46,12 @@ SurfaceLayer::~SurfaceLayer() = default;
 void SurfaceLayer::check_feature_scope(const Polygon_2& bndPoly) {
     //-- Exclude all polygons that have at least one
     //-- vertex outside the domain
-        for (auto& vert : _poly.outer_boundary()) {
-            if (!geomutils::point_in_poly(vert, bndPoly)) {
-                this->deactivate();
-                return;
-            }
+    for (auto& vert : _poly.outer_boundary()) {
+        if (!geomutils::point_in_poly(vert, bndPoly)) {
+            this->deactivate();
+            return;
         }
+    }
 }
 
 void SurfaceLayer::get_cityjson_info(nlohmann::json& b) const {
