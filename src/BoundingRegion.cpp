@@ -233,10 +233,9 @@ double BoundingRegion::calc_blockage_ratio_from_chull(const Buildings& buildings
     for (auto& b : buildings) {
         if (!b->is_active()) continue;
         std::vector<Point_2> buildingPts;
-        auto mesh = b->get_mesh();
 
         //-- Project building mesh points onto yz plane
-        this->project_mesh_pts(mesh, angle, buildingPts);
+        this->project_mesh_pts(b->get_mesh(), angle, buildingPts);
 
         //-- Approximate the blockArea of the projection with the convex hull
         this->chull_to_cdt(buildingPts, projCDT);
@@ -263,10 +262,9 @@ double BoundingRegion::calc_blockage_ratio_from_ashape(const Buildings& building
     for (auto& b : buildings) {
         std::vector<Point_2> buildingPts;
         if (!b->is_active()) continue;
-        auto mesh = b->get_mesh();
 
         //-- Project building mesh points onto yz plane
-        this->project_mesh_pts(mesh, angle, buildingPts);
+        this->project_mesh_pts(b->get_mesh(), angle, buildingPts);
 
         const double aVal = b->get_height() * 12;
 //        const double aVal = 1100;
@@ -293,10 +291,9 @@ double BoundingRegion::calc_blockage_ratio_comb(const Buildings& buildings, cons
     for (auto& b : buildings) {
         if (!b->is_active()) continue;
         std::vector<Point_2> buildingPts;
-        auto mesh = b->get_mesh();
 
         //-- Project building mesh points onto yz plane
-        this->project_mesh_pts(mesh, angle, buildingPts);
+        this->project_mesh_pts(b->get_mesh(), angle, buildingPts);
 
         //-- Approximate the blockArea of the projection with the convex hull
         if (b->is_imported()) {
@@ -328,10 +325,9 @@ double BoundingRegion::calc_blockage_ratio_from_ashape_alt(const Buildings& buil
     std::vector<Point_2> buildingPts;
     for (auto& b : buildings) {
         if (!b->is_active()) continue;
-        auto mesh = b->get_mesh();
 
         //-- Project building mesh points onto yz plane
-        this->project_mesh_pts(mesh, angle, buildingPts);
+        this->project_mesh_pts(b->get_mesh(), angle, buildingPts);
     }
     const double aVal = 1100;
     //-- Calculate the alpha shape
