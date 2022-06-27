@@ -33,6 +33,8 @@
 
 class BoundingRegion {
 public:
+    CDT _projCDT;
+
     BoundingRegion();
     ~BoundingRegion();
 
@@ -49,10 +51,18 @@ protected:
     Polygon_2  _boundingRegion;
 
     Polygon_2  calc_bnd_poly(const std::vector<Point_2>& candidatePts, const double hMax,
-                             const double angle, const double enlargeRatio = 1) const;
-    double     calc_blockage_ratio_from_pts(const Buildings& buildings, const double angle, Polygon_2& localPoly) const;
-    double     calc_blockage_ratio_from_edges(const Buildings& buildings, const double angle, Polygon_2& localPoly) const;
+                             const double angle, const double enlargeRatio = 1);
 
+    double     calc_blockage_ratio_from_chull(const Buildings& buildings, const double angle, Polygon_2& localPoly);
+    double     calc_blockage_ratio_from_ashape(const Buildings& buildings, const double angle, Polygon_2& localPoly);
+    double     calc_blockage_ratio_comb(const Buildings& buildings, const double angle, Polygon_2& localPoly);
+    double     calc_blockage_ratio_from_ashape_alt(const Buildings& buildings, const double angle, Polygon_2& localPoly);
+    double     calc_blockage_ratio_from_edges(const Buildings& buildings, const double angle, Polygon_2& localPoly);
+
+    void       project_mesh_pts(const Mesh& mesh, const double angle, std::vector<Point_2>& buildingPts);
+    void       chull_to_cdt(const std::vector<Point_2>& buildingPts, CDT& projCDT);
+    void       ashape_to_cdt(const std::vector<Point_2>& buildingPts, CDT& projCDT, const double aVal);
+    void       calc_cross_sec_areas(CDT& projCDT, Polygon_2& localPoly, double& blockArea, double& domainCrossArea);
 };
 
 #endif //CITY4CFD_BOUNDINGREGION_H
