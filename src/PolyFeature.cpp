@@ -202,9 +202,15 @@ const int PolyFeature::get_internal_id() const {
 void PolyFeature::parse_json_poly(const nlohmann::json& poly) {
     for (auto& polyEdges : poly["geometry"]["coordinates"]) {
         Polygon_2 tempPoly;
+        Point_2 prev;
+        const double minDist = 0.001;
         for (auto& coords : polyEdges) {
-            tempPoly.push_back(Point_2((double)coords[0] - Config::get().pointOfInterest.x(),
-                                       (double)coords[1] - Config::get().pointOfInterest.y()));
+            Point_2 pt2((double)coords[0] - Config::get().pointOfInterest.x(),
+                        (double)coords[1] - Config::get().pointOfInterest.y());
+            if (CGAL::squared_distance(pt2, prev) > minDist) {
+                tempPoly.push_back(pt2);
+                prev = pt2;
+            }
         }
         geomutils::pop_back_if_equal_to_front(tempPoly);
 
@@ -213,6 +219,9 @@ void PolyFeature::parse_json_poly(const nlohmann::json& poly) {
         } else {
             if (tempPoly.is_counterclockwise_oriented()) tempPoly.reverse_orientation();
         }
+        if (!tempPoly.is_simple()) std::cout << "WARNING: Bad polygon found! This might effect reconstruction quality! "
+                                                "Please try to fix the dataset with GIS software or 'pprepair'."
+                                                << std::endl;
         _poly._rings.push_back(tempPoly);
     }
 }

@@ -103,7 +103,6 @@ void LoD12::create_mesh(Mesh& mesh) {
             if (fIdx != Mesh::null_face()) {
                 surfaceType[fIdx] = "WallSurface";
             }
-
             fIdx = mesh.add_face(v2, *it2, *it1);
             if (fIdx != Mesh::null_face()) {
                 surfaceType[fIdx] = "WallSurface";
@@ -112,7 +111,7 @@ void LoD12::create_mesh(Mesh& mesh) {
         ++polyCount;
     }
 
-    //- Handle top
+    //- Handle top and botttom
     geomutils::mark_domains(cdt_buildings);
     for (auto& it : cdt_buildings.finite_face_handles()) {
         if (!it->info().in_domain()) continue;
@@ -125,11 +124,14 @@ void LoD12::create_mesh(Mesh& mesh) {
         std::advance(it2, cdtToMesh[it->vertex(1)]);
         std::advance(it3, cdtToMesh[it->vertex(2)]);
 
-        mesh.add_face(*it1, *it3, *it2); // Bottom face
-        surfaceType[fIdx] = "GroundSurface";
-
+        fIdx = mesh.add_face(*it1, *it3, *it2); // Bottom face
+        if (fIdx != Mesh::null_face()) {
+            surfaceType[fIdx] = "GroundSurface";
+        }
         fIdx = mesh.add_face(*std::next(it1), *std::next(it2), *std::next(it3));
-        surfaceType[fIdx] = "RoofSurface";
+        if (fIdx != Mesh::null_face()) {
+            surfaceType[fIdx] = "RoofSurface";
+        }
     }
 }
 
