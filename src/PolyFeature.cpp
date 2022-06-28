@@ -133,6 +133,17 @@ void PolyFeature::calc_footprint_elevation_linear(const DT& dt) {
 }
 #endif
 
+double PolyFeature::get_avg_base_elevation() {
+    if (_base_heights.empty()) throw std::runtime_error("Polygon heights missing! Cannot calculate average");
+    std::vector<double> footprintElevations;
+    for (auto& ring : _base_heights) {
+        for (auto& pt : ring) {
+            footprintElevations.push_back(pt);
+        }
+    }
+    return geomutils::avg(footprintElevations);
+}
+
 void PolyFeature::flatten_polygon_inner_points(const Point_set_3& pointCloud,
                                                std::map<int, Point_3>& flattenedPts,
                                                const SearchTree& searchTree,
@@ -219,6 +230,7 @@ void PolyFeature::parse_json_poly(const nlohmann::json& poly) {
         } else {
             if (tempPoly.is_counterclockwise_oriented()) tempPoly.reverse_orientation();
         }
+        //todo test it out with surface features and add flag to skip bad polygons
         if (!tempPoly.is_simple()) std::cout << "WARNING: Bad polygon found! This might effect reconstruction quality! "
                                                 "Please try to fix the dataset with GIS software or 'pprepair'."
                                                 << std::endl;

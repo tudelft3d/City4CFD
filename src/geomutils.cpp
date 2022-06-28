@@ -41,6 +41,7 @@ double geomutils::avg(const std::vector<double>& values) {
 }
 
 double geomutils::percentile(std::vector<double> values, const double percentile) {
+    assert(percentile >= 0 && percentile <= 1);
     if (values.empty()) throw std::length_error("Can't calculate percentile of a zero-sized vector!");
     std::sort(values.begin(), values.end());
     int i = values.size() * percentile;
