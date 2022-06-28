@@ -62,7 +62,7 @@ void LoD12::lod12_reconstruct(Mesh& mesh, const double height) {
 }
 
 void LoD12::create_mesh(Mesh& mesh) {
-    // Test - add semantics with face properties
+    // Add semantics with face properties to the property map
     auto surfaceType = mesh.add_property_map<face_descriptor , std::string>("f:semantics", "").first;
     face_descriptor fIdx;
 

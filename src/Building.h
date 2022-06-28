@@ -49,7 +49,7 @@ public:
     void   set_clip_flag (const bool flag);
     bool   has_self_intersections() const;
     void   set_to_zero_terrain();
-    double max_dim();
+    double sq_max_dim();
 
     double get_height() const;
 

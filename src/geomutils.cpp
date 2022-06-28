@@ -41,6 +41,7 @@ double geomutils::avg(const std::vector<double>& values) {
 }
 
 double geomutils::percentile(std::vector<double> values, const double percentile) {
+    assert(percentile >= 0 && percentile <= 1);
     if (values.empty()) throw std::length_error("Can't calculate percentile of a zero-sized vector!");
     std::sort(values.begin(), values.end());
     int i = values.size() * percentile;
@@ -201,6 +202,12 @@ void geomutils::shorten_long_poly_edges(Polygon_2& poly, double maxLen) {
 Point_2 geomutils::rotate_pt(const Point_2& pt, const double angle, Point_2 centerPt) {
     return {cos(angle) * (pt.x() - centerPt.x()) - sin(angle) * (pt.y() - centerPt.y()) + centerPt.x(),
                    sin(angle) * (pt.x() - centerPt.x()) + cos(angle) * (pt.y() - centerPt.y()) + centerPt.y()};
+}
+
+Point_3 geomutils::rotate_pt_xy(const Point_3& pt, const double angle, Point_2 centerPt) {
+    return {cos(angle) * (pt.x() - centerPt.x()) - sin(angle) * (pt.y() - centerPt.y()) + centerPt.x(),
+            sin(angle) * (pt.x() - centerPt.x()) + cos(angle) * (pt.y() - centerPt.y()) + centerPt.y(),
+            pt.z()};
 }
 
 void geomutils::interpolate_poly_from_pc(const Polygon_2& poly, std::vector<double>& heights,

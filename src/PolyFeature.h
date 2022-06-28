@@ -44,7 +44,8 @@ public:
 #ifndef NDEBUG
     void  calc_footprint_elevation_linear(const DT& dt);
 #endif
-    void  flatten_polygon_inner_points(const Point_set_3& pointCloud, std::map<int, Point_3>& flattenedPts,
+    double get_avg_base_elevation();
+    void   flatten_polygon_inner_points(const Point_set_3& pointCloud, std::map<int, Point_3>& flattenedPts,
                                        const SearchTree& searchTree, const std::unordered_map<Point_3,
                                        int>& pointCloudConnectivity) const;
     void  set_zero_borders();

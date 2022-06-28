@@ -30,6 +30,11 @@
 #include "geomutils.h"
 #include "Building.h"
 
+#include <CGAL/Alpha_shape_2.h>
+#include <CGAL/Alpha_shape_vertex_base_2.h>
+#include <CGAL/Alpha_shape_face_base_2.h>
+#include <CGAL/Delaunay_triangulation_2.h>
+
 BoundingRegion::BoundingRegion() = default;
 BoundingRegion::~BoundingRegion() = default;
 
@@ -59,7 +64,7 @@ BoundingRegion::calc_influ_region_bpg(const DT& dt, const Point_set_3& pointClou
                 std::cerr << std::endl << "Error: " << e.what() << std::endl;
                 throw std::runtime_error("Impossible to automatically determine influence region");
             }
-            influRegionRadius = f->max_dim() * 3.; //- BPG by Liu
+            influRegionRadius = sqrt(f->sq_max_dim()) * 3.; //- BPG by Liu
 
             f->clear_feature();
             foundBuilding = true;
@@ -97,7 +102,8 @@ void BoundingRegion::calc_bnd_bpg(const Polygon_2& influRegionPoly,
         }
     }
 
-    //-- Axes aligning transformation
+    //-- Axes aligning transformation - get points
+    //   aligned with the flow direction
     for (auto& pt : candidatePts)
         pt = geomutils::rotate_pt(pt, -angle);
 
@@ -110,7 +116,13 @@ void BoundingRegion::calc_bnd_bpg(const Polygon_2& influRegionPoly,
     //-- Blockage ratio handling
     std::cout << "\nCalculating blockage ratio for flow direction (" << Config::get().flowDirection
               << ")" << std::endl;
-    double blockRatio = this->calc_blockage_ratio(buildings, angle, localPoly);
+
+//    double blockRatio = this->calc_blockage_ratio_from_chull(buildings, angle, localPoly);
+//    double blockRatio = this->calc_blockage_ratio_from_ashape(buildings, angle, localPoly);
+    double blockRatio = this->calc_blockage_ratio_comb(buildings, angle, localPoly);
+//    double blockRatio = this->calc_blockage_ratio_from_ashape_alt(buildings, angle, localPoly);
+//    double blockRatio = this->calc_blockage_ratio_from_edges(buildings, angle, localPoly);
+
     std::cout << "    Blockage ratio is: " << blockRatio << std::endl;
     if (Config::get().bpgBlockageRatioFlag && blockRatio > Config::get().bpgBlockageRatio) {
         std::cout << "INFO: Blockage ratio is more than " << Config::get().bpgBlockageRatio * 100
@@ -134,7 +146,7 @@ const Polygon_2& BoundingRegion::get_bounding_region() const {
 }
 
 Polygon_2 BoundingRegion::calc_bnd_poly(const std::vector<Point_2>& candidatePts,
-                                        const double hMax, const double angle, const double enlargeRatio) const {
+                                        const double hMax, const double angle, const double enlargeRatio) {
     Polygon_2 localPoly;
     if (Config::get().bpgDomainType == ROUND) {
         Point_2 localPOI = geomutils::rotate_pt(global::nullPt, -angle);
@@ -149,7 +161,6 @@ Polygon_2 BoundingRegion::calc_bnd_poly(const std::vector<Point_2>& candidatePts
 
         std::cout << "Calculated boundary radius is: "
                   << bndRadius << std::endl;
-
     } else {
         //-- Get bbox
         Polygon_2 bbox = geomutils::calc_bbox_poly(candidatePts);
@@ -210,40 +221,240 @@ Polygon_2 BoundingRegion::calc_bnd_poly(const std::vector<Point_2>& candidatePts
     return localPoly;
 }
 
-//-- Blockage ratio based on the flow direction
-double BoundingRegion::calc_blockage_ratio(const Buildings& buildings, const double angle, Polygon_2& localPoly) const {
-    //-- We're working with a local coordinate system, normal to yz plane
+/*
+ * Calculate blockage ratio from a convex hull of building points projected to a plane normal to the flow direction.
+ *
+ * Points are transformed and projected to yz plane for blockage ratio calculation. Coordinates are then flipped to the xy plane
+ * to work with CDT which is in xy projection plane.
+ *
+ * Exact for LoD1.2, approximation for others; fast
+ */
+double BoundingRegion::calc_blockage_ratio_from_chull(const Buildings& buildings, const double angle,
+                                                      Polygon_2& localPoly) const {
     CDT projCDT;
-    double blockArea = 0;
     for (auto& b : buildings) {
         if (!b->is_active()) continue;
-        double height = b->get_height();
-        std::vector<std::vector<double>> baseHeights = b->get_base_heights();
-
-        //-- Project building pts onto 2d plane
         std::vector<Point_2> buildingPts;
-        int i = 0;
-        for (auto pt : b->get_poly().outer_boundary()) {
-            pt = geomutils::rotate_pt(pt, -angle); // Get points to local system
-            buildingPts.emplace_back(Point_2(pt.y(), baseHeights.front()[i++]));
-            buildingPts.emplace_back(Point_2(pt.y(), height));
-        }
+
+        //-- Project building mesh points onto yz plane
+        this->project_mesh_pts(b->get_mesh(), angle, buildingPts);
 
         //-- Approximate the blockArea of the projection with the convex hull
-        Polygon_2 projConvHull;
-        CGAL::convex_hull_2(buildingPts.begin(), buildingPts.end(), std::back_inserter(projConvHull));
-
-        //-- Add convex hull to CDT
-        Polygon_3 projConvHullCDT;
-        for (auto& pt : projConvHull) {
-            projConvHullCDT.push_back(ePoint_3(pt.x(), pt.y(), 0));
-        }
-        projCDT.insert_constraint(projConvHullCDT.begin(), projConvHullCDT.end(), true);
+        this->chull_to_cdt(buildingPts, projCDT);
     }
+    //-- Get the area of constrained regions
+    double blockArea       = 0;
+    double domainCrossArea = 0;
+    this->calc_cross_sec_areas(projCDT, localPoly, buildings, blockArea, domainCrossArea);
+
+    //-- Return the blockage ration
+    return blockArea / domainCrossArea;
+}
+
+/*
+ * Calculate blockage ratio from an alpha shape of building points projected to a plane normal to the flow direction.
+ *
+ * Points are transformed and projected to yz plane for blockage ratio calculation. Coordinates are then flipped to the xy plane
+ * to work with CDT which is in xy projection plane.
+ *
+ * Can be slow in case of many edges
+ */
+double BoundingRegion::calc_blockage_ratio_from_ashape(const Buildings& buildings, const double angle,
+                                                       Polygon_2& localPoly) const {
+    CDT projCDT;
+    for (auto& b : buildings) {
+        std::vector<Point_2> buildingPts;
+        if (!b->is_active()) continue;
+
+        //-- Project building mesh points onto yz plane
+        this->project_mesh_pts(b->get_mesh(), angle, buildingPts);
+
+        const double aVal = b->get_height() * 12;
+//        const double aVal = 1100;
+        //-- Calculate the alpha shape
+        this->ashape_to_cdt(buildingPts, projCDT, aVal);
+    }
+    //-- Get the area of constrained regions
+    double blockArea       = 0;
+    double domainCrossArea = 0;
+    this->calc_cross_sec_areas(projCDT, localPoly, buildings, blockArea, domainCrossArea);
+
+    //-- Return the blockage ration
+    return blockArea / domainCrossArea;
+}
+
+/*
+ * Calculate blockage ratio from a combination of chull (for LoD1.2) and ashape to a plane normal to the flow direction.
+ *
+ * Points are transformed and projected to yz plane for blockage ratio calculation. Coordinates are then flipped to the xy plane
+ * to work with CDT which is in xy projection plane.
+ */
+double BoundingRegion::calc_blockage_ratio_comb(const Buildings& buildings, const double angle,
+                                                Polygon_2& localPoly) const {
+    CDT projCDT;
+    for (auto& b : buildings) {
+        if (!b->is_active()) continue;
+        std::vector<Point_2> buildingPts;
+
+        //-- Project building mesh points onto yz plane
+        this->project_mesh_pts(b->get_mesh(), angle, buildingPts);
+
+        //-- Approximate the blockArea of the projection with the convex hull
+        if (b->is_imported()) {
+//            const double aVal = 1100;
+            const double aVal = b->get_height() * 12;
+            this->ashape_to_cdt(buildingPts, projCDT, aVal);
+        } else {
+            this->chull_to_cdt(buildingPts, projCDT);
+        }
+    }
+    //-- Get the area of constrained regions
+    double blockArea       = 0;
+    double domainCrossArea = 0;
+    this->calc_cross_sec_areas(projCDT, localPoly, buildings, blockArea, domainCrossArea);
+
+    //-- Return the blockage ration
+    return blockArea / domainCrossArea;
+}
+
+/*
+ * Calculate blockage ratio from an alpha shape of *ALL* points projected to a plane normal to the flow direction.
+ *
+ * Points are transformed and projected to yz plane for blockage ratio calculation. Coordinates are then flipped to the xy plane
+ * to work with CDT which is in xy projection plane.
+ */
+double BoundingRegion::calc_blockage_ratio_from_ashape_alt(const Buildings& buildings, const double angle,
+                                                           Polygon_2& localPoly) const {
+    //-- Project building pts onto 2d plane
+    CDT projCDT;
+    std::vector<Point_2> buildingPts;
+    for (auto& b : buildings) {
+        if (!b->is_active()) continue;
+
+        //-- Project building mesh points onto yz plane
+        this->project_mesh_pts(b->get_mesh(), angle, buildingPts);
+    }
+    const double aVal = 1100;
+    //-- Calculate the alpha shape
+    this->ashape_to_cdt(buildingPts, projCDT, aVal);
+
+    //-- Get the area of constrained regions
+    double blockArea       = 0;
+    double domainCrossArea = 0;
+    this->calc_cross_sec_areas(projCDT, localPoly, buildings, blockArea, domainCrossArea);
+
+    //-- Return the blockage ration
+    return blockArea / domainCrossArea;
+}
+
+/*
+ * Calculate blockage ratio by constraining building edges.
+ *
+ * Points are transformed and projected to yz plane for blockage ratio calculation. CDT is projected onto xy plane.
+ *
+ * It is easier to project all coordinates to yz and then flip to xy, instead of
+ * writing a separate triangulation structures with yz projection traits.
+ *
+ * Takes a long time to calculate as there are many building edges.
+ */
+double BoundingRegion::calc_blockage_ratio_from_edges(const Buildings& buildings, const double angle,
+                                                      Polygon_2& localPoly) const {
+    Converter<EPICK, EPECK> to_exact;
+    CDT projCDT;
+    for (auto& b : buildings) {
+        CDT buildingCDT;
+        if (!b->is_active()) continue;
+        auto& mesh = b->get_mesh();
+        //-- Construct projected CDT from all building pts - time-consuming part
+        for (auto& edge : mesh.edges()) {
+            //-- Orient points normal to the flow direction
+            ePoint_3 pt1 = to_exact(geomutils::rotate_pt_xy(mesh.point(mesh.vertex(edge, 0)), -angle));
+            ePoint_3 pt2 = to_exact(geomutils::rotate_pt_xy(mesh.point(mesh.vertex(edge, 1)), -angle));
+            //-- Flip xyz to yz
+            pt1 = ePoint_3(pt1.y(), pt1.z(), 0);
+            pt2 = ePoint_3(pt2.y(), pt2.z(), 0);
+
+            buildingCDT.insert_constraint(pt1, pt2);
+        }
+        //-- Add only outer shell of the building triangulation to overall projected CDT
+        geomutils::mark_domains(buildingCDT);
+        for (auto it = buildingCDT.edges_begin(); it != buildingCDT.edges_end(); ++it) {
+            if (!buildingCDT.is_constrained(*it)) continue;
+            auto fh1 = it->first;
+            auto fh2 = fh1->neighbor(it->second);
+            if (fh1->info().in_domain_noholes() && !fh2->info().in_domain_noholes() ||
+               !fh1->info().in_domain_noholes() &&  fh2->info().in_domain_noholes()) {
+                auto vs = fh1->vertex(fh1->cw(it->second));
+                auto vt = fh1->vertex(fh1->ccw(it->second));
+                projCDT.insert_constraint(buildingCDT.point(vs), buildingCDT.point(vt));
+            }
+        }
+    }
+    //-- Get the area of constrained regions
+    double blockArea       = 0;
+    double domainCrossArea = 0;
+    this->calc_cross_sec_areas(projCDT, localPoly, buildings, blockArea, domainCrossArea);
+
+    //-- Return the blockage ration
+    return blockArea / domainCrossArea;
+}
+
+void BoundingRegion::project_mesh_pts(const Mesh& mesh, const double angle,
+                                      std::vector<Point_2>& buildingPts) const {
+    for (auto buildingPt : mesh.points()) {
+        buildingPt = geomutils::rotate_pt_xy(buildingPt, -angle);
+        Point_2 pt(buildingPt.y(), buildingPt.z());
+        buildingPts.push_back(pt);
+    }
+}
+
+void BoundingRegion::chull_to_cdt(const std::vector<Point_2>& buildingPts, CDT& projCDT) const {
+    Polygon_2 projConvHull;
+    CGAL::convex_hull_2(buildingPts.begin(), buildingPts.end(), std::back_inserter(projConvHull));
+
+    //-- Add convex hull to CDT
+    Polygon_3 projConvHullCDT;
+    for (auto& pt : projConvHull) {
+        projConvHullCDT.push_back(ePoint_3(pt.x(), pt.y(), 0));
+    }
+    projCDT.insert_constraint(projConvHullCDT.begin(), projConvHullCDT.end(), true);
+}
+
+void BoundingRegion::ashape_to_cdt(const std::vector<Point_2>& buildingPts, CDT& projCDT, const double aVal) const {
+    typedef CGAL::Alpha_shape_vertex_base_2<EPICK>                            Vba;
+    typedef CGAL::Alpha_shape_face_base_2<EPICK>                              Fba;
+    typedef CGAL::Triangulation_data_structure_2<Vba,Fba>                     Tds;
+    typedef CGAL::Delaunay_triangulation_2<EPICK ,Tds>                        Triangulation_2;
+    typedef CGAL::Alpha_shape_2<Triangulation_2>                              Alpha_shape_2;
+
+    typedef EPICK::FT                                                         FT;
+
+    Alpha_shape_2 A(buildingPts.begin(), buildingPts.end(), aVal, Alpha_shape_2::GENERAL);
+
+    Converter<EPICK, EPECK> to_exact;
+    for (auto it = A.finite_edges_begin(); it != A.finite_edges_end(); ++it) {
+        auto fh1 = it->first;
+        auto fh2 = it->first->neighbor(it->second);
+        if (A.classify(fh1) == Alpha_shape_2::INTERIOR && A.classify(fh2) != Alpha_shape_2::INTERIOR ||
+            A.classify(fh1) != Alpha_shape_2::INTERIOR && A.classify(fh2) == Alpha_shape_2::INTERIOR) {
+            auto vs = fh1->vertex(fh1->cw(it->second));
+            auto vt = fh1->vertex(fh1->ccw(it->second));
+            ePoint_3 pt1(A.point(vs).x(), A.point(vs).y(), 0);
+            ePoint_3 pt2(A.point(vt).x(), A.point(vt).y(), 0);
+            projCDT.insert_constraint(pt1, pt2);
+        }
+    }
+}
+
+/*
+ * Get the cross-section areas for the blocked domain, and for the full domain.
+ */
+void BoundingRegion::calc_cross_sec_areas(CDT& projCDT, Polygon_2& localPoly, const Buildings& buildings,
+                                          double& blockArea, double& domainCrossArea) const {
     //-- Mark constrained regions
     geomutils::mark_domains(projCDT);
 
-    //-- Calculate blockArea of constrained region
+    //-- Get surface area of constrained regions
     for (auto& face : projCDT.finite_face_handles()) {
         if (!face->info().in_domain_noholes()) continue;
         std::vector<Point_2> pts;
@@ -253,11 +464,17 @@ double BoundingRegion::calc_blockage_ratio(const Buildings& buildings, const dou
 
         blockArea += CGAL::area(pts[0], pts[1], pts[2]);
     }
-    //-- Get blockArea of the domain cross section at the influence region
+    //-- Get the area of the domain cross section at the influence region
     Polygon_2 bbox = geomutils::calc_bbox_poly(localPoly);
-    double domainCrossArea = std::sqrt(Vector_2(bbox.vertex(3) - bbox.vertex(0)).squared_length())
-                           * Config::get().topHeight;
+    //- Get the mean height of building bases
+    std::vector<double> footprintElevations;
+    for (auto& b : buildings) {
+        //- One elevation per building as there might be different num of points per polygon
+        footprintElevations.push_back(b->get_avg_base_elevation());
+    }
+    double medianFootprintHeight = geomutils::percentile(footprintElevations, 0.5);
 
-    //-- Return the blockage ration
-    return blockArea / domainCrossArea;
+    //- Calculate domain cross section area
+    domainCrossArea = std::sqrt(Vector_2(bbox.vertex(3) - bbox.vertex(0)).squared_length())
+                      * (Config::get().topHeight - medianFootprintHeight);
 }
