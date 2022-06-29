@@ -104,6 +104,7 @@ void Map3d::set_features() {
         _buildings.push_back(building);
         _lsFeatures.push_back(building);
     }
+    if (Config::get().avoidBadPolys) this->clear_inactives(); // Remove buildings that potentially couldn't be imported
     //- Imported buildings
     if (!_importedBuildingsJSON.empty()) {
         std::cout << "Importing CityJSON geometries" << std::endl;

@@ -38,6 +38,7 @@ ReconstructedBuilding::ReconstructedBuilding(const int internalID)
         : Building(internalID), _searchTree(nullptr),
           _attributeHeight(-9999), _attributeHeightAdvantage(Config::get().buildingHeightAttrAdv) {}
 
+/*
 ReconstructedBuilding::ReconstructedBuilding(const nlohmann::json& poly)
         : Building(poly), _searchTree(nullptr),
           _attributeHeight(-9999), _attributeHeightAdvantage(Config::get().buildingHeightAttrAdv) {
@@ -52,6 +53,7 @@ ReconstructedBuilding::ReconstructedBuilding(const nlohmann::json& poly)
         _attributeHeight = (double)poly["properties"][Config::get().floorAttribute] * Config::get().floorHeight;
     }
 }
+*/
 
 ReconstructedBuilding::ReconstructedBuilding(const nlohmann::json& poly, const int internalID)
         : Building(poly, internalID), _searchTree(nullptr),
@@ -69,6 +71,11 @@ ReconstructedBuilding::ReconstructedBuilding(const nlohmann::json& poly, const i
         if (poly["properties"][Config::get().floorAttribute].is_number()) {
             _attributeHeight = (double) poly["properties"][Config::get().floorAttribute] * Config::get().floorHeight;
         }
+    }
+    if (!this->is_active()) { // It can only fail if the polygon is not simple
+        Config::get().failedBuildings.push_back(internalID);
+        Config::get().log << "Failed to import building polygon ID:" << _id
+                          << ". Polygon is not simple." << std::endl;
     }
 }
 

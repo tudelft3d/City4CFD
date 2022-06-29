@@ -41,26 +41,33 @@ PolyFeature::PolyFeature()
 PolyFeature::PolyFeature(const int outputLayerID)
     : TopoFeature(outputLayerID), _poly(), _base_heights(), _polyInternalID(), _minBbox() {}
 
-PolyFeature::PolyFeature(const nlohmann::json& poly)
+PolyFeature::PolyFeature(const nlohmann::json& poly, const bool checkSimplicity)
     : TopoFeature(), _base_heights(), _polyInternalID(), _minBbox() {
-    this->parse_json_poly(poly);
+    this->parse_json_poly(poly, checkSimplicity);
 }
 
 PolyFeature::PolyFeature(const int outputLayerID, const int internalID)
     : TopoFeature(outputLayerID), _polyInternalID(internalID) {}
 
-PolyFeature::PolyFeature(const nlohmann::json& poly, const int outputLayerID)
-    : PolyFeature(poly) {
+PolyFeature::PolyFeature(const nlohmann::json& poly, const bool checkSimplicity, const int outputLayerID)
+    : PolyFeature(poly, checkSimplicity) {
     _outputLayerID = outputLayerID;
     if (_outputLayerID  >= _numOfOutputLayers) _numOfOutputLayers = _outputLayerID + 1;
 }
 
-PolyFeature::PolyFeature(const nlohmann::json& poly, const int outputLayerID, const int internalID)
-    : PolyFeature(poly) {
+PolyFeature::PolyFeature(const nlohmann::json& poly, const int outputLayerID)
+        : PolyFeature(poly, false, outputLayerID) {}
+
+PolyFeature::PolyFeature(const nlohmann::json& poly, const bool checkSimplicity,
+                         const int outputLayerID, const int internalID)
+    : PolyFeature(poly, checkSimplicity) {
     _polyInternalID = internalID;
     _outputLayerID    = outputLayerID;
     if (_outputLayerID  >= _numOfOutputLayers) _numOfOutputLayers = _outputLayerID + 1;
 }
+
+PolyFeature::PolyFeature(const nlohmann::json& poly, const int outputLayerID, const int internalID)
+        : PolyFeature(poly, false, outputLayerID, internalID) {}
 
 PolyFeature::~PolyFeature() = default;
 
@@ -242,12 +249,12 @@ MinBbox& PolyFeature::get_min_bbox() {
     return _minBbox;
 }
 
-void PolyFeature::parse_json_poly(const nlohmann::json& poly) {
+void PolyFeature::parse_json_poly(const nlohmann::json& poly, const bool checkSimplicity) {
     for (auto& polyEdges : poly["geometry"]["coordinates"]) {
         Polygon_2 tempPoly;
         Point_2 prev;
         const double minDist = 0.001;
-        for (auto& coords : polyEdges) {
+        for (auto& coords: polyEdges) {
             Point_2 pt2((double)coords[0] - Config::get().pointOfInterest.x(),
                         (double)coords[1] - Config::get().pointOfInterest.y());
             if (CGAL::squared_distance(pt2, prev) > minDist) {
@@ -262,10 +269,20 @@ void PolyFeature::parse_json_poly(const nlohmann::json& poly) {
         } else {
             if (tempPoly.is_counterclockwise_oriented()) tempPoly.reverse_orientation();
         }
-        //todo test it out with surface features and add flag to skip bad polygons
-        if (!tempPoly.is_simple()) std::cout << "WARNING: Bad polygon found! This might effect reconstruction quality! "
-                                                "Please try to fix the dataset with GIS software or 'pprepair'."
-                                                << std::endl;
+        if (checkSimplicity) {
+            if (!tempPoly.is_simple()) {
+                if (Config::get().avoidBadPolys) {
+                    this->deactivate();
+                    return;
+                } else {
+                    std::cout << "WARNING: Bad building polygon found! This might effect reconstruction quality! "
+                                 "If you end up having problems, try to fix the dataset with GIS software or 'pprepair'."
+                              << std::endl;
+                    std::cout << "         Alternatively, you can use the 'avoid_bad_polys' flag to skip"
+                                 " the import of problematic polygons.\n" << std::endl;
+                }
+            }
+        }
         _poly._rings.push_back(tempPoly);
     }
 }

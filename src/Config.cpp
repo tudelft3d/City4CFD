@@ -159,6 +159,8 @@ void Config::set_config(nlohmann::json& j) {
                 floorAttribute = poly["floor_attribute"];
             if (poly.contains("floor_height"))
                 floorHeight = (double)poly["floor_height"];
+            if (poly.contains("avoid_bad_polys"))
+                avoidBadPolys = poly["avoid_bad_polys"];
         }
         if (poly["type"] == "SurfaceLayer") {
             topoLayers.push_back(poly["path"]);

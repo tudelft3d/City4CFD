@@ -61,6 +61,8 @@ public:
     std::vector<std::string> topoLayers = {};        // Other polygons
     std::string              importedBuildingsPath;  // Additional pre-reconstructed buildings
 
+    bool                     avoidBadPolys      = false;
+
     //-- Domain setup
     Point_2     pointOfInterest;
     double      topHeight                       = 0;

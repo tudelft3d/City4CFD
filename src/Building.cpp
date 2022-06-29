@@ -44,10 +44,12 @@ Building::Building(const int internalID)
         : PolyFeature(1, internalID), _height(-global::largnum) {}
 
 Building::Building(const nlohmann::json& poly)
-        : PolyFeature(poly, 1), _height(-global::largnum) {}
+        : PolyFeature(poly, true, 1), _height(-global::largnum) {}
+        // 'true' here to check for polygon simplicity
 
 Building::Building(const nlohmann::json& poly, const int internalID)
-        : PolyFeature(poly, 1, internalID), _height(-global::largnum) {}
+        : PolyFeature(poly, true, 1, internalID), _height(-global::largnum) {}
+        // 'true' here to check for polygon simplicity
 
 Building::~Building() = default;
 
