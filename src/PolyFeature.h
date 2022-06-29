@@ -49,6 +49,7 @@ public:
                                        const SearchTree& searchTree, const std::unordered_map<Point_3,
                                        int>& pointCloudConnectivity) const;
     void  set_zero_borders();
+    void  calc_min_bbox();
     void  clear_feature();
 
     virtual void        get_cityjson_info(nlohmann::json& b) const = 0;
@@ -61,11 +62,13 @@ public:
     const Polygon_with_holes_2&              get_poly() const;
     const std::vector<std::vector<double>>&  get_base_heights() const;
     const int                                get_internal_id() const;
+    MinBbox&                                 get_min_bbox();
 
 protected:
     int                               _polyInternalID;
     Polygon_with_holes_2              _poly;
     std::vector<std::vector<double>>  _base_heights;
+    MinBbox                           _minBbox;
 
     void parse_json_poly(const nlohmann::json& poly);
 };

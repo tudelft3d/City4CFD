@@ -30,18 +30,19 @@
 #include "geomutils.h"
 
 #include <CGAL/natural_neighbor_coordinates_2.h>
+#include <CGAL/min_quadrilateral_2.h>
 #ifndef NDEBUG
 #include <CGAL/Barycentric_coordinates_2/Triangle_coordinates_2.h>
 #endif
 
 PolyFeature::PolyFeature()
-    : TopoFeature(), _poly(), _base_heights(), _polyInternalID() {}
+    : TopoFeature(), _poly(), _base_heights(), _polyInternalID(), _minBbox() {}
 
 PolyFeature::PolyFeature(const int outputLayerID)
-    : TopoFeature(outputLayerID), _poly(), _base_heights(), _polyInternalID() {}
+    : TopoFeature(outputLayerID), _poly(), _base_heights(), _polyInternalID(), _minBbox() {}
 
 PolyFeature::PolyFeature(const nlohmann::json& poly)
-    : TopoFeature(), _base_heights(), _polyInternalID() {
+    : TopoFeature(), _base_heights(), _polyInternalID(), _minBbox() {
     this->parse_json_poly(poly);
 }
 
@@ -91,14 +92,6 @@ void PolyFeature::calc_footprint_elevation_nni(const DT& dt) {
     }
 }
 
-void PolyFeature::set_zero_borders() {
-    for (auto& ring : _base_heights) {
-        for (auto& pt : ring) {
-            pt = 0.;
-        }
-    }
-}
-
 #ifndef NDEBUG
 void PolyFeature::calc_footprint_elevation_linear(const DT& dt) {
     typedef CGAL::Barycentric_coordinates::Triangle_coordinates_2<iProjection_traits>   Triangle_coordinates;
@@ -134,7 +127,8 @@ void PolyFeature::calc_footprint_elevation_linear(const DT& dt) {
 #endif
 
 double PolyFeature::get_avg_base_elevation() {
-    if (_base_heights.empty()) throw std::runtime_error("Polygon heights missing! Cannot calculate average");
+    if (_base_heights.empty())throw std::runtime_error("Polygon heights missing!"
+                                                       " Cannot calculate average");
     std::vector<double> footprintElevations;
     for (auto& ring : _base_heights) {
         for (auto& pt : ring) {
@@ -162,7 +156,9 @@ void PolyFeature::flatten_polygon_inner_points(const Point_set_3& pointCloud,
     //-- Collect points that have not been already flattened
     for (auto& pt3 : subsetPts) {
         Point_2 pt(pt3.x(), pt3.y());
-        if (CGAL::bounded_side_2(_poly._rings.front().begin(), _poly._rings.front().end(), pt) != CGAL::ON_UNBOUNDED_SIDE) {
+        if (CGAL::bounded_side_2(_poly._rings.front().begin(),
+                                 _poly._rings.front().end(),
+                                 pt) != CGAL::ON_UNBOUNDED_SIDE) {
             auto itIdx = pointCloudConnectivity.find(pt3);
 
             auto pointSetIt = pointCloud.begin();
@@ -181,12 +177,41 @@ void PolyFeature::flatten_polygon_inner_points(const Point_set_3& pointCloud,
     if (indices.empty()) {
         return;
     }
-    double avgHeight = geomutils::percentile(originalHeights, Config::get().flattenSurfaces[this->get_output_layer_id()] / 100);
+    double avgHeight = geomutils::percentile(originalHeights,
+                                             Config::get().flattenSurfaces[this->get_output_layer_id()] / 100);
 
     //-- Add new points to the temp map
     for (auto& i : indices) {
         flattenedPts[i] = Point_3(pointCloud.point(i).x(), pointCloud.point(i).y(), avgHeight);
     }
+}
+
+void PolyFeature::set_zero_borders() {
+    for (auto& ring : _base_heights) {
+        for (auto& pt : ring) {
+            pt = 0.;
+        }
+    }
+}
+
+void PolyFeature::calc_min_bbox() {
+    if (_poly.rings().front().is_empty()) throw std::runtime_error("Missing polygon!");
+    //-- Point set needs to be convex for the rotating caliper algorithm
+    std::vector<Point_2> chull;
+    CGAL::convex_hull_2(_poly.rings().front().vertices_begin(),
+                        _poly.rings().front().vertices_end(),
+                        std::back_inserter(chull));
+
+    std::vector<Point_2> obbPts; obbPts.reserve(4);
+    CGAL::min_rectangle_2(chull.begin(),
+                          chull.end(),
+                          std::back_inserter(obbPts));
+    assert(obbPts.size() == 4);
+
+    _minBbox.vec1 = obbPts[1] - obbPts[0];
+    _minBbox.vec2 = obbPts[3] - obbPts[0];
+
+    _minBbox.calc();
 }
 
 void PolyFeature::clear_feature() {
@@ -208,6 +233,13 @@ const std::vector<std::vector<double>>& PolyFeature::get_base_heights() const {
 
 const int PolyFeature::get_internal_id() const {
     return _polyInternalID;
+}
+
+MinBbox& PolyFeature::get_min_bbox() {
+    if (_minBbox.empty()) {
+        this->calc_min_bbox();
+    }
+    return _minBbox;
 }
 
 void PolyFeature::parse_json_poly(const nlohmann::json& poly) {

@@ -154,10 +154,14 @@ void Building::set_to_zero_terrain() {
 
 double Building::sq_max_dim() {
     std::vector<double> dims;
+    /*
     EPICK::Vector_2 diag(_poly.bbox().xmax() - _poly.bbox().xmin(), _poly.bbox().ymax() - _poly.bbox().ymin());
-
     dims.emplace_back(diag.squared_length() * pow(cos(M_PI_4), 2));
     dims.emplace_back(diag.squared_length() * pow(sin(M_PI_4), 2));
+    */
+    MinBbox& minBbox = this->get_min_bbox();
+    dims.emplace_back(minBbox.vec1.squared_length());
+    dims.emplace_back(minBbox.vec2.squared_length());
     dims.emplace_back(_height * _height);
 
     return *(std::max_element(dims.begin(), dims.end()));
