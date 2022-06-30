@@ -77,7 +77,8 @@ namespace jsonschema {
                       "type": "number",
                       "exclusiveMinimum": 0
                     },
-                    "height_attribute_advantage": {"type": "boolean"}
+                    "height_attribute_advantage": {"type": "boolean"},
+                    "avoid_bad_polys": {"type": "boolean"}
                   },
                   "dependencies": {
                     "floor_attribute": ["floor_height"]
