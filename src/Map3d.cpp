@@ -104,6 +104,7 @@ void Map3d::set_features() {
         _buildings.push_back(building);
         _lsFeatures.push_back(building);
     }
+    if (Config::get().avoidBadPolys) this->clear_inactives(); // Remove buildings that potentially couldn't be imported
     //- Imported buildings
     if (!_importedBuildingsJSON.empty()) {
         std::cout << "Importing CityJSON geometries" << std::endl;
@@ -303,7 +304,9 @@ void Map3d::reconstruct_buildings() {
             Config::get().log << "Failed to reconstruct building ID: " << f->get_id()
                         << " Reason: " << e.what() << std::endl;
             //-- Get JSON file ID for failed reconstructions output
-            Config::get().failedBuildings.push_back(f->get_internal_id());
+            //   For now only polygons (reconstructed buildings) are stored to GeoJSON
+            if (!f->is_imported())
+                Config::get().failedBuildings.push_back(f->get_internal_id());
         }
     }
     Config::get().logSummary << "BUILDING RECONSTRUCTION SUMMARY: TOTAL FAILED RECONSTRUCTIONS: "

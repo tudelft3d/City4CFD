@@ -119,6 +119,17 @@ struct Polygon_with_holes_2 {
     CGAL::Bbox_2 bbox() const {return _rings.front().bbox();}
 };
 
+//-- Minimum bbox
+struct MinBbox {
+    CGAL::Vector_2<EPICK> vec1;
+    CGAL::Vector_2<EPICK> vec2;
+
+    bool empty() const {return is_empty;};
+    void calc() {is_empty = false;};
+private:
+    bool is_empty = true;
+};
+
 /*! CGAL Polygon Processing !*/ //todo move under 'Polygon'
 #include <CGAL/Polygon_2_algorithms.h>
 #include <CGAL/Boolean_set_operations_2.h>
