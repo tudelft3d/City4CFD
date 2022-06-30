@@ -56,7 +56,7 @@ Building::~Building() = default;
 void Building::clip_bottom(const Terrainptr& terrain) {
     if (!_clip_bottom) return;
     if (this->has_self_intersections() && !Config::get().handleSelfIntersect) throw
-                std::runtime_error(std::string("Clip error in building ID " + std::to_string(this->get_internal_id())
+                std::runtime_error(std::string("Clip error in building ID " + this->get_id() +
                                                + ". Cannot clip if there are self intersections!"));
     //-- Get terrain subset
     Mesh terrainSubsetMesh = terrain->mesh_subset(_poly);

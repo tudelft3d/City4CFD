@@ -304,7 +304,9 @@ void Map3d::reconstruct_buildings() {
             Config::get().log << "Failed to reconstruct building ID: " << f->get_id()
                         << " Reason: " << e.what() << std::endl;
             //-- Get JSON file ID for failed reconstructions output
-            Config::get().failedBuildings.push_back(f->get_internal_id());
+            //   For now only polygons (reconstructed buildings) are stored to GeoJSON
+            if (!f->is_imported())
+                Config::get().failedBuildings.push_back(f->get_internal_id());
         }
     }
     Config::get().logSummary << "BUILDING RECONSTRUCTION SUMMARY: TOTAL FAILED RECONSTRUCTIONS: "
