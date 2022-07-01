@@ -42,10 +42,22 @@ if (NOT CGAL_USE_INCLUDED_HEADERS AND ALPHA_WRAP_SUPPORT)
     include_directories( ${CMAKE_SOURCE_DIR}/thirdparty/CGAL/include )
 endif()
 
-# LAStools
+# LASlib with CGAL and LAStools
+#include_directories(${CMAKE_SOURCE_DIR}/thirdparty/LAStools/LASlib/inc)
 add_subdirectory(${CMAKE_SOURCE_DIR}/thirdparty/LAStools)
+find_package(LASLIB REQUIRED)
+file(GLOB LASZIP_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/thirdparty/LAStools/LASzip/src)
+file(GLOB LASLIB_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/thirdparty/LAStools/LASlib/inc)
+if(LASLIB_FOUND AND NOT TARGET CGAL::LASLIB_support)
+    add_library(CGAL::LASLIB_support INTERFACE IMPORTED)
+    set_target_properties(CGAL::LASLIB_support PROPERTIES
+            INTERFACE_COMPILE_DEFINITIONS "CGAL_LINKED_WITH_LASLIB"
+            INTERFACE_INCLUDE_DIRECTORIES "${LASLIB_INCLUDE_DIR};${LASZIP_INCLUDE_DIR}"
+            INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${LASLIB_INCLUDE_DIR};${LASZIP_INCLUDE_DIR}"
+            INTERFACE_LINK_LIBRARIES "${LASLIB_LIBRARIES}")
+endif()
 
-# Third-party
+# Other third-party
 include_directories(${CMAKE_SOURCE_DIR}/thirdparty)
 include_directories(${CMAKE_SOURCE_DIR}/thirdparty/valijson)
 include_directories(${Boost_INCLUDE_DIR})
@@ -63,6 +75,8 @@ target_link_libraries(City4CFD
         ${CGAL_3RD_PARTY_LIBRARIES}
         ${Boost_SYSTEM_LIBRARY}
         ${Boost_FILESYSTEM_LIBRARY}
+        LASlib
+        CGAL::LASLIB_support
         )
 
 install(TARGETS City4CFD DESTINATION bin)
