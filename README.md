@@ -25,7 +25,7 @@ If you happen to use it, feedback is very much appreciated.
 City4CFD is developed by the [3D Geoinformation Research Group](https://3d.bk.tudelft.nl/) at the Delft University of Technology.
 
 ## Data formats
-**Point clouds** can be imported in XYZ or PLY format. We ask separately for ground and building points. While some datasets contain building-ground classification, some do not. In case your LAS/LAZ file has buildings/ground classified, you can use [point cloud preparation script](https://github.com/tudelft3d/City4CFD/blob/main/tools/prepare_point_cloud.sh) to create separate files. If buildings and terrain are under the same class, or vegetation is not filtered out, we suggest you use [CloudCompare](https://www.danielgm.net/cc/) to prepare points.
+**Point clouds** can be imported in LAS/LAZ, XYZ, or PLY format. We ask separately for ground and building points. While some datasets contain building-ground classification, some do not. In case your LAS/LAZ file has buildings/ground classified, you can use [point cloud preparation script](https://github.com/tudelft3d/City4CFD/blob/main/tools/prepare_point_cloud.sh) to create separate files. If buildings and terrain are under the same class, or vegetation is not filtered out, we suggest you use [CloudCompare](https://www.danielgm.net/cc/) to prepare points.
 
 **2D data** (polygons) are imported in GeoJSON format. For all pre-processing related to polygons, including conversion to GeoJSON, you can use [QGIS](https://qgis.org/en/site/).
 
