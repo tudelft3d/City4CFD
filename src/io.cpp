@@ -34,6 +34,7 @@
 #include <CGAL/Polygon_mesh_processing/IO/polygon_mesh_io.h>
 #include <CGAL/Polygon_mesh_processing/connected_components.h>
 #include <CGAL/Polygon_mesh_processing/transform.h>
+#include <CGAL/IO/read_las_points.h>
 
 //-- Input functions
 void IO::read_config(std::string& config_path) {
@@ -63,10 +64,14 @@ void IO::read_config(std::string& config_path) {
 }
 
 bool IO::read_point_cloud(std::string& file, Point_set_3& pc) {
-    //todo test CGAL 5.3 if it can read .las without external reader
     std::ifstream ifile(file, std::ios_base::binary);
-    ifile >> pc;
-
+    if (IO::has_substr(file, ".las") || IO::has_substr(file, ".laz")) {
+        if (!CGAL::IO::read_LAS(ifile, pc.point_back_inserter())) {
+            throw std::runtime_error("Error reading LAS point cloud!");
+        }
+    } else {
+        ifile >> pc;
+    }
     CGAL::Aff_transformation_3<EPICK> translate(CGAL::TRANSLATION,
                                                 CGAL::Vector_3<EPICK>(-Config::get().pointOfInterest.x(),
                                                                       -Config::get().pointOfInterest.y(),

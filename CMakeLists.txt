@@ -15,7 +15,7 @@ set(CMAKE_BUILD_TYPE "Release")
 
 #==============================
 # Alpha wrap support
-set(ALPHA_WRAP_SUPPORT  "Include CGAL version with Alpha Wrap"  OFF)
+set(ALPHA_WRAP_SUPPORT OFF)
 #==============================
 
 # BOOST
@@ -42,10 +42,8 @@ if (NOT CGAL_USE_INCLUDED_HEADERS AND ALPHA_WRAP_SUPPORT)
     include_directories( ${CMAKE_SOURCE_DIR}/thirdparty/CGAL/include )
 endif()
 
-# LAStools
-add_subdirectory(${CMAKE_SOURCE_DIR}/thirdparty/LAStools)
-
 # Third-party
+add_subdirectory(${CMAKE_SOURCE_DIR}/thirdparty/LAStools)
 include_directories(${CMAKE_SOURCE_DIR}/thirdparty)
 include_directories(${CMAKE_SOURCE_DIR}/thirdparty/valijson)
 include_directories(${Boost_INCLUDE_DIR})
@@ -63,6 +61,7 @@ target_link_libraries(City4CFD
         ${CGAL_3RD_PARTY_LIBRARIES}
         ${Boost_SYSTEM_LIBRARY}
         ${Boost_FILESYSTEM_LIBRARY}
+        LASlib
         )
 
 install(TARGETS City4CFD DESTINATION bin)
