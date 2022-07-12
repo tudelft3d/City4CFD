@@ -384,7 +384,7 @@ void Map3d::clip_buildings() {
     _terrain->clear_subset();
 }
 
-void Map3d::read_data() { // This will change with time
+void Map3d::read_data() {
     //-- Read point clouds
     _pointCloud.read_point_clouds();
 
@@ -394,13 +394,11 @@ void Map3d::read_data() { // This will change with time
         IO::read_geojson_polygons(Config::get().gisdata, _polygonsBuildings);
         if (_polygonsBuildings.empty()) throw std::invalid_argument("Didn't find any building polygons!");
     }
-
     //-- Read surface layer polygons
     for (auto& topoLayer: Config::get().topoLayers) {
         _polygonsSurfaceLayers.emplace_back();
         IO::read_geojson_polygons(topoLayer, _polygonsSurfaceLayers.back());
     }
-
     //-- Read imported buildings
     if (!Config::get().importedBuildingsPath.empty()) {
 //        std::cout << "Importing CityJSON geometries" << std::endl;

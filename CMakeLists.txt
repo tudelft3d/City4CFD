@@ -24,10 +24,10 @@ find_package(Boost 1.66 REQUIRED COMPONENTS filesystem)
 # CGAL
 find_package(CGAL REQUIRED QUIET COMPONENTS)
 if (CGAL_FOUND)
-    if (CGAL_VERSION VERSION_GREATER_EQUAL "5.1")
+    if (CGAL_VERSION VERSION_GREATER_EQUAL "5.3")
         message(STATUS "Found CGAL ${CGAL_VERSION}")
     elseif (CGAL_VERSION VERSION_GREATER_EQUAL "5.0")
-        message(STATUS "Found CGAL version greater than 5.0, but less than 5.1. "
+        message(STATUS "Found CGAL version greater than 5.0, but less than 5.3. "
                 "Proceeding to compile with included CGAL headers.")
         include_directories(${CMAKE_SOURCE_DIR}/thirdparty/CGAL/include)
         set(CGAL_USE_INCLUDED_HEADERS ON)
