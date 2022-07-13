@@ -7,7 +7,7 @@
 
 # City4CFD
 
-City4CFD--*city for CFD*--is a tool that aims to automatically reconstruct 3D city geometries tailored for microscale urban flow simulations.
+City4CFD--*City for CFD*--is a tool that aims to automatically reconstruct 3D city geometries tailored for microscale urban flow simulations.
 
 It can create automatically a terrain from a point cloud and imprint different surfaces (e.g. green areas, water, roads).
 
@@ -49,7 +49,7 @@ To build City4CFD, do the following:
 mkdir build && cd build
 cmake ..
 make
-./City4CFD
+./city4cfd
 ```
 You can speed up compilation by typing *make -j $numcores* where *$numcores* is the number of threads you can spare for compilation.
 
@@ -58,7 +58,7 @@ You can speed up compilation by typing *make -j $numcores* where *$numcores* is 
 The folder *examples* contains example datasets you can run for your first reconstruction. You can run your first reconstruction from the `/examples/TUD_Campus` folder by typing:
 ```
 mkdir results
-../../build/City4CFD config_bpg.json --output_dir results
+../../build/city4cfd config_bpg.json --output_dir results
 ```
 
 More information on the project can be found in the documentation.

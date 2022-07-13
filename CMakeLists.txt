@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.1)
 
-project(City4CFD)
+project(city4cfd)
 
 #set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/Modules/" ${CMAKE_MODULE_PATH})
 #set( CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS true )
@@ -50,13 +50,13 @@ include_directories(${Boost_INCLUDE_DIR})
 
 # Creating entries for target: City4CFD
 FILE(GLOB SRC_FILES "src/*.cpp")
-add_executable(City4CFD ${SRC_FILES})
+add_executable(city4cfd ${SRC_FILES})
 set_target_properties(
-        City4CFD
+        city4cfd
         PROPERTIES CXX_STANDARD 14
 )
 
-target_link_libraries(City4CFD
+target_link_libraries(city4cfd
         ${CGAL_LIBRARIES}
         ${CGAL_3RD_PARTY_LIBRARIES}
         ${Boost_SYSTEM_LIBRARY}
@@ -64,4 +64,4 @@ target_link_libraries(City4CFD
         LASlib
         )
 
-install(TARGETS City4CFD DESTINATION bin)
+install(TARGETS city4cfd DESTINATION bin)
