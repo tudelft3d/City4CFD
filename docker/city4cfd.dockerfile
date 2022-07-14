@@ -23,7 +23,7 @@ RUN cd /tmp && \
     rm -rf /tmp/* && \
     rm -rf /user/local/man
 
-RUN City4CFD --version
+RUN city4cfd --version
 
 # removing unnecessary headers
 RUN rm -rf /usr/local/include
@@ -50,7 +50,7 @@ RUN bash /tmp/strip-docker-image-export \
     -f /bin/ls \
     -f /data \
     -f /usr/local/share/proj/proj.db \
-    -f /usr/local/bin/City4CFD
+    -f /usr/local/bin/city4cfd
 
 #
 # Create City4CFD image
@@ -70,5 +70,5 @@ COPY --from=builder /export/ /
 
 WORKDIR /data
 
-ENTRYPOINT ["City4CFD"]
+ENTRYPOINT ["city4cfd"]
 CMD ["--help"]

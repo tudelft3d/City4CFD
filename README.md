@@ -33,16 +33,16 @@ City4CFD is developed by the [3D Geoinformation Research Group](https://3d.bk.tu
 
 **Output** is in the following formats: OBJ, STL, and CityJSON. The ID of each polygon is preserved, and there is a 1-to-1 mapping between the input and the output.
 
-## Prerequisites
+## Installation
+You can directly compile City4CFD on your system using cmake or you can choose to run it through a container.
 
+### Build from source
 The following libraries are required to build the project:
 - [CGAL](https://www.cgal.org/) version 5
 - Boost >= 1.66
 
 Both dependencies are generally available in Linux distributions (Debian/Ubuntu/Mint) as *libcgal-dev* and *libboost-dev*, and in macOS with Homebrew as *cgal* and *boost*.
 The project uses CMake to generate makefiles, so make sure it is also installed.
-
-## Installation
 
 To build City4CFD, do the following:
 ```
@@ -53,6 +53,9 @@ make
 ```
 You can speed up compilation by typing *make -j $numcores* where *$numcores* is the number of threads you can spare for compilation.
 
+### Docker
+We offer built [Docker](https://www.docker.com/) images for every release, available at the [Docker Hub](https://hub.docker.com/r/tudelft3d/city4cfd). Running the docker script for the first time will pull the docker image from the Docker Hub repository.
+
 ## Getting started
 
 The folder *examples* contains example datasets you can run for your first reconstruction. You can run your first reconstruction from the `/examples/TUD_Campus` folder by typing:
@@ -60,6 +63,15 @@ The folder *examples* contains example datasets you can run for your first recon
 mkdir results
 ../../build/city4cfd config_bpg.json --output_dir results
 ```
+in case of building from a source.
+
+To run through a Docker container, you can use one of the scripts in ```docker/run/```. The script with the extension ```.sh``` can be used in Linux and macOS, the one with the extension ```.ps1``` in Windows Powershell, and the last one with ```.bat``` in Windows Command Prompt. You have to run  a script (you can copy it beforehand) from the root directory of the project (e.g. ```examples/TUD_Campus```), and the arguments are the same as for the compiled executable, e.g.: 
+
+```
+../../docker/run/city4cfd_run.sh config_bpg.json --output_dir results
+```
+
+The script pulls the ```latest``` release from the Docker Hub. For a specific release, replace ```latest``` in the script with the released version tag, e.g. ```0.1.0```. In Linux systems, you will probably have to run the command as a sudo unless you create a 'docker' group and add users to it.
 
 More information on the project can be found in the documentation.
 
