@@ -245,8 +245,10 @@ void Config::set_config(nlohmann::json& j) {
         outputLog = true;
         if (j.contains("log_file")) logName = j["log_file"];
     }
-    log << "// ========================================= CITY4CFD LOG ========================================= //" << std::endl;
-    logSummary <<"\n// =========================================== SUMMARY =========================================== //" << std::endl;
+    logSummary     <<"// ========================================CITY4CFD SUMMARY ======================================= //" << std::endl;
+    log         << "\n// ========================================= CITY4CFD LOG ========================================= //" << std::endl;
+    // Add point of interest info to log
+    logSummary << "All coordinates are translated by -(" << pointOfInterest << ")"  << std::endl;
 
     //-- Experimental
     if (j.contains("experimental")) {

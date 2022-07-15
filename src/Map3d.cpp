@@ -309,7 +309,7 @@ void Map3d::reconstruct_buildings() {
                 Config::get().failedBuildings.push_back(f->get_internal_id());
         }
     }
-    Config::get().logSummary << "BUILDING RECONSTRUCTION SUMMARY: TOTAL FAILED RECONSTRUCTIONS: "
+    Config::get().logSummary << "Building reconstruction summary: total failed reconstructions : "
                        << failed << std::endl;
 
     this->clear_inactives();

@@ -93,6 +93,7 @@ void Boundary::set_bounds_to_terrain(Point_set_3& pointCloud, const Polygon_2& b
     std::vector<double> bndHeights;
     geomutils::interpolate_poly_from_pc(bndPoly, bndHeights, pointCloud);
     _outerBndHeight = geomutils::avg(bndHeights); // Height for buffer (for now) - average of outer pts
+    Config::get().logSummary << "Domain edge height: " << _outerBndHeight << std::endl;
 
     if (Config::get().domainBuffer > -global::largnum + global::smallnum) {
         /*

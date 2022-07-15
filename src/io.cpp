@@ -388,11 +388,11 @@ void IO::output_log() {
     if (!Config::get().outputLog) return;
 
     //-- Output log file
-    Config::get().logSummary <<"\n// ----------------------------------------------------------------------------------------------- //" << std::endl;
+    Config::get().log <<"\n// ------------------------------------------------------------------------------------------------ //" << std::endl;
     std::cout << "\nCreating log file '" << Config::get().logName << "'" << std::endl;
     std::ofstream of;
     of.open(Config::get().logName);
-    of << Config::get().log.str() << Config::get().logSummary.str();
+    of << Config::get().logSummary.str() << Config::get().log.str();
     of.close();
 
     //-- Output failed reconstructions
