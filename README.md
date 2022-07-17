@@ -34,7 +34,7 @@ City4CFD is developed by the [3D Geoinformation Research Group](https://3d.bk.tu
 **Output** is in the following formats: OBJ, STL, and CityJSON. The ID of each polygon is preserved, and there is a 1-to-1 mapping between the input and the output.
 
 ## Installation
-You can directly compile City4CFD on your system using cmake or you can choose to run it through a container.
+You can directly compile City4CFD on your system using cmake, run it through a Docker container, or install using Homebrew in case of macOS.
 
 ### Build from source
 The following libraries are required to build the project:
@@ -55,6 +55,14 @@ You can speed up compilation by typing *make -j $numcores* where *$numcores* is 
 
 ### Docker
 We offer built [Docker](https://www.docker.com/) images for every release, available at the [Docker Hub](https://hub.docker.com/r/tudelft3d/city4cfd). Running the docker script for the first time will pull the docker image from the Docker Hub repository.
+
+### macOS
+Mac users can install City4CFD through Homebrew:
+
+```
+brew tap tudelft3d/software
+brew install city4cfd
+```
 
 ## Getting started
 
