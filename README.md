@@ -1,9 +1,9 @@
 [![docs](https://img.shields.io/badge/docs-Wiki-brightgreen)](https://github.com/tudelft3d/City4CFD/wiki)
 [![GitHub license](https://img.shields.io/github/license/tudelft3d/City4CFD)](https://github.com/tudelft3d/City4CFD/blob/master/LICENSE)
+[![DOI:10.3389/fbuil.2022.899332](http://img.shields.io/badge/DOI-10.3389/fbuil.2022.899332-B62030.svg)](https://www.frontiersin.org/articles/10.3389/fbuil.2022.899332)
+
 
 [//]: # ([![GitHub issues]&#40;https://img.shields.io/github/issues/tudelft3d/3dfier&#41;]&#40;https://github.com/tudelft3d/3dfier/issues&#41;)
-[//]: # ([![DOI]&#40;https://joss.theoj.org/papers/10.21105/joss.02866/status.svg&#41;]&#40;https://doi.org/10.21105/joss.02866&#41;)
-
 
 # City4CFD
 
@@ -86,6 +86,10 @@ More information on the project can be found in the documentation.
 ## Documentation
 The [wiki section](https://github.com/tudelft3d/City4CFD/wiki) of this project has details on reconstruction setup and also contains information and suggestions on data preparation.
 
+## Citation
+If you use City4CFD in a scientific context, please cite the following paper:
+
+Pađen, Ivan, García-Sánchez, Clara and Ledoux, Hugo (2022). Towards Automatic Reconstruction of 3D City Models Tailored for Urban Flow Simulations. *Frontiers in Built Environment*, 8, 2022 [[DOI](https://www.frontiersin.org/articles/10.3389/fbuil.2022.899332)][[BibTeX](https://github.com/tudelft3d/City4CFD/blob/master/CITATION.bib)]
 
 ## Acknowledgements
 We would like to acknowdledge the authors of supporting libraries we use in this project:
