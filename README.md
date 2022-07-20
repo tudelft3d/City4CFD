@@ -3,9 +3,9 @@
 [![DOI:10.3389/fbuil.2022.899332](http://img.shields.io/badge/DOI-10.3389/fbuil.2022.899332-B62030.svg)](https://www.frontiersin.org/articles/10.3389/fbuil.2022.899332)
 
 
-[//]: # ([![GitHub issues]&#40;https://img.shields.io/github/issues/tudelft3d/3dfier&#41;]&#40;https://github.com/tudelft3d/3dfier/issues&#41;)
-
 # City4CFD
+
+![welcome_figure_2](https://user-images.githubusercontent.com/49401914/179976018-0b9fdfe1-a6a7-4e1b-adc1-e1ce3074f8a9.png)
 
 City4CFD--*City for CFD*--is a tool that aims to automatically reconstruct 3D city geometries tailored for microscale urban flow simulations.
 
