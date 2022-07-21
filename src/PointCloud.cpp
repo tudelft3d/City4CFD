@@ -42,7 +42,7 @@ void PointCloud::random_thin_pts() {
                                                                   Config::get().terrainThinning),
                                   _pointCloudTerrain.end());
         _pointCloudTerrain.collect_garbage();
-        std::cout << "    Terrain points after thinning: " << _pointCloudTerrain.size() << std::endl;
+        std::cout << "\tTerrain points after thinning: " << _pointCloudTerrain.size() << std::endl;
     }
 }
 
@@ -139,7 +139,7 @@ void PointCloud::read_point_clouds() {
         IO::read_point_cloud(Config::get().points_xyz, _pointCloudTerrain);
         _pointCloudTerrain.add_property_map<bool> ("is_building_point", false);
 
-        std::cout << "    Points read: " << _pointCloudTerrain.size() << std::endl;
+        std::cout << "\tPoints read: " << _pointCloudTerrain.size() << std::endl;
     } else {
         std::cout << "INFO: Did not find any ground points! Will calculate ground as a flat surface." << std::endl;
         std::cout << "WARNING: Ground height of buildings can only be approximated. "
@@ -152,7 +152,7 @@ void PointCloud::read_point_clouds() {
         IO::read_point_cloud(Config::get().buildings_xyz, _pointCloudBuildings);
         if (_pointCloudBuildings.empty()) throw std::invalid_argument("Didn't find any building points!");
 
-        std::cout << "    Points read: " << _pointCloudBuildings.size() << std::endl;
+        std::cout << "\tPoints read: " << _pointCloudBuildings.size() << std::endl;
     }
 }
 

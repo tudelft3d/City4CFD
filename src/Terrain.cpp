@@ -54,9 +54,9 @@ void Terrain::set_cdt(const Point_set_3& pointCloud) {
         ++count;
     }
     IO::print_progress_bar(100); std::clog << std::endl;
-    std::cout << "    Triangulating..." << std::flush;
+    std::cout << "\tTriangulating..." << std::flush;
     _cdt.insert(pts.begin(), pts.end());
-    std::cout << "\r    Triangulating   " << std::endl;
+    std::cout << "\r\tTriangulating   " << std::endl;
 
     /*
     //-- Smoothing
@@ -68,7 +68,7 @@ void Terrain::set_cdt(const Point_set_3& pointCloud) {
 }
 
 void Terrain::prep_constraints(const PolyFeatures& features, Point_set_3& pointCloud) {
-    std::cout << "    Lifting polygon edges to terrain height" << std::endl;
+    std::cout << "\tLifting polygon edges to terrain height" << std::endl;
     int countFeatures = 0;
     auto is_building_pt = pointCloud.property_map<bool>("is_building_point").first;
     for (auto& f : features) {

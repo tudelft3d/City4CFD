@@ -18,7 +18,7 @@
     {
       "type": "SurfaceLayer",
       "path": "polygons/Vegetation.geojson",
-       "layer_name" : "Vegetation"           // Optional argument to choose a layer name
+      "layer_name" : "Vegetation"            // Optional argument to choose a layer name
     },
     {
       "type":       "SurfaceLayer",

@@ -147,7 +147,7 @@ void Map3d::set_features() {
     }
     if (!_importedBuildings.empty()) {
         this->clear_inactives();
-        std::cout << "    Geometries imported: " << _importedBuildings.size() << std::endl;
+        std::cout << "\tGeometries imported: " << _importedBuildings.size() << std::endl;
     }
     //-- Boundaries
     for (int i = 0; i < Config::get().numSides; ++i)
@@ -164,7 +164,7 @@ void Map3d::set_features() {
             _lsFeatures.push_back(surfacePoly);
         }
     }
-    std::cout << "    Polygons read: " << _lsFeatures.size() << std::endl;
+    std::cout << "\tPolygons read: " << _lsFeatures.size() << std::endl;
 
     //-- Set flat terrain or random thin terrain points
     if (_pointCloud.get_terrain().empty()) {
@@ -217,7 +217,11 @@ void Map3d::set_influ_region() {
     //-- Check if imported and reconstructed buildings are overlapping
     if (!_importedBuildings.empty()) this->solve_building_conflicts();
 
-    std::cout << "    Number of building geometries in the influence region: " << _buildings.size() << std::endl;
+    std::cout << "\tNumber of building geometries in the influence region: " << _buildings.size() << std::endl;
+    if (_buildings.empty()) {
+        throw std::runtime_error("No buildings were reconstructed in the influence region!"
+                                 " If using polygons and point cloud, make sure they are aligned.");
+    }
 }
 
 void Map3d::set_bnd() {
@@ -279,7 +283,7 @@ void Map3d::reconstruct_terrain() {
 void Map3d::reconstruct_buildings() {
     std::cout << "\nReconstructing buildings" << std::endl;
     if (!_importedBuildings.empty() && _cityjsonInput) {
-        std::cout << "    Will try to reconstruct imported buildings in LoD: " << Config::get().importLoD
+        std::cout << "\tWill try to reconstruct imported buildings in LoD: " << Config::get().importLoD
                   << ". If I cannot find a geometry with that LoD, I will reconstruct in the highest LoD available"
                   << std::endl;
     }
@@ -421,13 +425,11 @@ void Map3d::read_data() {
 }
 
 void Map3d::output() {
-#ifndef NDEBUG
     assert(Config::get().outputSurfaces.size() == TopoFeature::get_num_output_layers());
-#endif
     fs::current_path(Config::get().outputDir);
     std::cout << "\nOutputting surface meshes "      << std::endl;
-    std::cout << "    Folder: " << fs::canonical(fs::current_path()) << std::endl;
-//    std::cout << "    Format: " << Config::get().outputFormat << std::endl; //todo
+    std::cout << "\tFolder: " << fs::canonical(fs::current_path()) << std::endl;
+//    std::cout << "\tFormat: " << Config::get().outputFormat << std::endl; //todo
 
     //-- Group all features for output
     this->prep_feature_output();
