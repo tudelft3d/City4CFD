@@ -30,8 +30,7 @@
 #include "geomutils.h"
 
 Top::Top(const int outputLayerID)
-        : Boundary(outputLayerID) {
-}
+        : Boundary(outputLayerID) {}
 
 Top::~Top() = default;
 
@@ -43,7 +42,6 @@ void Top::reconstruct() {
     for (auto& pt : _outerPts) {
         cdt_top.insert(ePoint_3(pt.x(), pt.y(), Config::get().topHeight));
     }
-
     //-- Add mesh faces for top
     geomutils::cdt_to_mesh(cdt_top, _mesh);
 }

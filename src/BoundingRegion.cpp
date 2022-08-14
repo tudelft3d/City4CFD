@@ -49,9 +49,7 @@ void BoundingRegion::operator()(Polygon_2& poly) {
 
 void
 BoundingRegion::calc_influ_region_bpg(const DT& dt, const Point_set_3& pointCloudBuildings, Buildings& buildings) {
-#ifndef NDEBUG
     assert(boost::get<bool>(Config::get().influRegionConfig));
-#endif
     double influRegionRadius;
     //-- Find building where the point of interest lies in and define radius of interest with BPG
     bool foundBuilding = false;
@@ -123,7 +121,7 @@ void BoundingRegion::calc_bnd_bpg(const Polygon_2& influRegionPoly,
 //    double blockRatio = this->calc_blockage_ratio_from_ashape_alt(buildings, angle, localPoly);
 //    double blockRatio = this->calc_blockage_ratio_from_edges(buildings, angle, localPoly);
 
-    std::cout << "\tBlockage ratio is: " << blockRatio << std::endl;
+    std::cout << "    Blockage ratio is: " << blockRatio << std::endl;
     if (Config::get().bpgBlockageRatioFlag && blockRatio > Config::get().bpgBlockageRatio) {
         std::cout << "INFO: Blockage ratio is more than " << Config::get().bpgBlockageRatio * 100
                   << "%. Expanding domain cross section to meet the guideline"

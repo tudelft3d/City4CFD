@@ -281,7 +281,7 @@ void PolyFeature::parse_json_poly(const nlohmann::json& poly, const bool checkSi
                     std::cout << "WARNING: Bad building polygon found! This might effect reconstruction quality! "
                                  "If you end up having problems, try to fix the dataset with GIS software or 'pprepair'."
                               << std::endl;
-                    std::cout << "\t\tAlternatively, you can use the 'avoid_bad_polys' flag to skip"
+                    std::cout << "    Alternatively, you can use the 'avoid_bad_polys' flag to skip"
                                  " the import of problematic polygons.\n" << std::endl;
                 }
             }
