@@ -218,6 +218,10 @@ void Map3d::set_influ_region() {
     if (!_importedBuildings.empty()) this->solve_building_conflicts();
 
     std::cout << "    Number of building geometries in the influence region: " << _buildings.size() << std::endl;
+    if (_buildings.empty()) {
+        throw std::runtime_error("No buildings were reconstructed in the influence region!"
+                                 " If using polygons and point cloud, make sure they are aligned.");
+    }
 }
 
 void Map3d::set_bnd() {
@@ -309,10 +313,11 @@ void Map3d::reconstruct_buildings() {
                 Config::get().failedBuildings.push_back(f->get_internal_id());
         }
     }
-    Config::get().logSummary << "Building reconstruction summary: total failed reconstructions : "
-                       << failed << std::endl;
-
     this->clear_inactives();
+    Config::get().logSummary << "Building reconstruction summary: successfully reconstructed buildings: "
+                             << _buildings.size() << std::endl;
+    Config::get().logSummary << "                                 num of failed reconstructions: "
+                             << failed << std::endl;
 }
 
 void Map3d::reconstruct_boundaries() {
@@ -421,9 +426,7 @@ void Map3d::read_data() {
 }
 
 void Map3d::output() {
-#ifndef NDEBUG
     assert(Config::get().outputSurfaces.size() == TopoFeature::get_num_output_layers());
-#endif
     fs::current_path(Config::get().outputDir);
     std::cout << "\nOutputting surface meshes "      << std::endl;
     std::cout << "    Folder: " << fs::canonical(fs::current_path()) << std::endl;

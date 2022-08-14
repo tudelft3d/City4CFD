@@ -13,7 +13,7 @@
     {
       "type": "SurfaceLayer",
       "path": "polygons/Vegetation.geojson",
-       "layer_name" : "Vegetation"
+      "layer_name" : "Vegetation"
     },
     {
       "type":       "SurfaceLayer",

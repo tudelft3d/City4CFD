@@ -386,6 +386,7 @@ bool IO::not_small(std::vector<int> idxLst) {
 
 void IO::output_log() {
     if (!Config::get().outputLog) return;
+    fs::current_path(Config::get().outputDir);
 
     //-- Output log file
     Config::get().log <<"\n// ------------------------------------------------------------------------------------------------ //" << std::endl;

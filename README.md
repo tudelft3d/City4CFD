@@ -1,11 +1,11 @@
 [![docs](https://img.shields.io/badge/docs-Wiki-brightgreen)](https://github.com/tudelft3d/City4CFD/wiki)
 [![GitHub license](https://img.shields.io/github/license/tudelft3d/City4CFD)](https://github.com/tudelft3d/City4CFD/blob/master/LICENSE)
-
-[//]: # ([![GitHub issues]&#40;https://img.shields.io/github/issues/tudelft3d/3dfier&#41;]&#40;https://github.com/tudelft3d/3dfier/issues&#41;)
-[//]: # ([![DOI]&#40;https://joss.theoj.org/papers/10.21105/joss.02866/status.svg&#41;]&#40;https://doi.org/10.21105/joss.02866&#41;)
+[![DOI:10.3389/fbuil.2022.899332](http://img.shields.io/badge/DOI-10.3389/fbuil.2022.899332-B62030.svg)](https://www.frontiersin.org/articles/10.3389/fbuil.2022.899332)
 
 
 # City4CFD
+
+![welcome_figure](https://github.com/tudelft3d/City4CFD/blob/main/docs/images/workflow.png)
 
 City4CFD--*City for CFD*--is a tool that aims to automatically reconstruct 3D city geometries tailored for microscale urban flow simulations.
 
@@ -34,7 +34,7 @@ City4CFD is developed by the [3D Geoinformation Research Group](https://3d.bk.tu
 **Output** is in the following formats: OBJ, STL, and CityJSON. The ID of each polygon is preserved, and there is a 1-to-1 mapping between the input and the output.
 
 ## Installation
-You can directly compile City4CFD on your system using cmake or you can choose to run it through a container.
+You can directly compile City4CFD on your system using cmake, run it through a Docker container, or install using Homebrew in case of macOS.
 
 ### Build from source
 The following libraries are required to build the project:
@@ -55,6 +55,14 @@ You can speed up compilation by typing *make -j $numcores* where *$numcores* is 
 
 ### Docker
 We offer built [Docker](https://www.docker.com/) images for every release, available at the [Docker Hub](https://hub.docker.com/r/tudelft3d/city4cfd). Running the docker script for the first time will pull the docker image from the Docker Hub repository.
+
+### macOS
+Mac users can install City4CFD through Homebrew:
+
+```
+brew tap tudelft3d/software
+brew install city4cfd
+```
 
 ## Getting started
 
@@ -78,6 +86,10 @@ More information on the project can be found in the documentation.
 ## Documentation
 The [wiki section](https://github.com/tudelft3d/City4CFD/wiki) of this project has details on reconstruction setup and also contains information and suggestions on data preparation.
 
+## Citation
+If you use City4CFD in a scientific context, please cite the following paper:
+
+Pađen, Ivan, García-Sánchez, Clara and Ledoux, Hugo (2022). Towards Automatic Reconstruction of 3D City Models Tailored for Urban Flow Simulations. *Frontiers in Built Environment*, 8, 2022 [[DOI](https://www.frontiersin.org/articles/10.3389/fbuil.2022.899332)][[BibTeX](https://github.com/tudelft3d/City4CFD/blob/master/CITATION.bib)]
 
 ## Acknowledgements
 We would like to acknowdledge the authors of supporting libraries we use in this project:

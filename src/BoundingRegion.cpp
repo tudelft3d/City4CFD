@@ -49,9 +49,7 @@ void BoundingRegion::operator()(Polygon_2& poly) {
 
 void
 BoundingRegion::calc_influ_region_bpg(const DT& dt, const Point_set_3& pointCloudBuildings, Buildings& buildings) {
-#ifndef NDEBUG
     assert(boost::get<bool>(Config::get().influRegionConfig));
-#endif
     double influRegionRadius;
     //-- Find building where the point of interest lies in and define radius of interest with BPG
     bool foundBuilding = false;

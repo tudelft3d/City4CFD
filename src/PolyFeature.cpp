@@ -252,8 +252,11 @@ MinBbox& PolyFeature::get_min_bbox() {
 void PolyFeature::parse_json_poly(const nlohmann::json& poly, const bool checkSimplicity) {
     for (auto& polyEdges : poly["geometry"]["coordinates"]) {
         Polygon_2 tempPoly;
-        Point_2 prev;
-        const double minDist = 0.001;
+
+        const double minDist = 0.0001;
+        Point_2 prev((double)polyEdges.front()[0] - Config::get().pointOfInterest.x(),
+                     (double)polyEdges.front()[1] - Config::get().pointOfInterest.y());
+        prev += (Point_2(global::largnum, global::largnum) - prev);
         for (auto& coords: polyEdges) {
             Point_2 pt2((double)coords[0] - Config::get().pointOfInterest.x(),
                         (double)coords[1] - Config::get().pointOfInterest.y());
@@ -278,7 +281,7 @@ void PolyFeature::parse_json_poly(const nlohmann::json& poly, const bool checkSi
                     std::cout << "WARNING: Bad building polygon found! This might effect reconstruction quality! "
                                  "If you end up having problems, try to fix the dataset with GIS software or 'pprepair'."
                               << std::endl;
-                    std::cout << "         Alternatively, you can use the 'avoid_bad_polys' flag to skip"
+                    std::cout << "    Alternatively, you can use the 'avoid_bad_polys' flag to skip"
                                  " the import of problematic polygons.\n" << std::endl;
                 }
             }
