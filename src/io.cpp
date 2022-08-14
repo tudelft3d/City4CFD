@@ -1,8 +1,7 @@
 /*
-  Copyright (c) 2021-2022,
-  Ivan Pađen <i.paden@tudelft.nl>
-  3D Geoinformation,
-  Delft University of Technology
+  City4CFD
+ 
+  Copyright (c) 2021-2022, 3D Geoinformation Research Group, TU Delft  
 
   This file is part of City4CFD.
 
@@ -13,17 +12,29 @@
 
   City4CFD is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  along with this program. If not, see <http://www.gnu.org/licenses/>
+  along with City4CFD.  If not, see <http://www.gnu.org/licenses/>.
+
+  For any information or further details about the use of City4CFD, contact
+  Ivan Pađen
+  <i.paden@tudelft.nl>
+  3D Geoinformation Research Group
+  Delft University of Technology
 */
 
 #include "io.h"
 
-#include "config.h"
+#include "Config.h"
 #include "TopoFeature.h"
 #include "Boundary.h"
+
+#include <CGAL/Polygon_mesh_processing/IO/polygon_mesh_io.h>
+#include <CGAL/Polygon_mesh_processing/connected_components.h>
+#include <CGAL/Polygon_mesh_processing/transform.h>
+#include <CGAL/IO/read_las_points.h>
 
 //-- Input functions
 void IO::read_config(std::string& config_path) {
@@ -32,9 +43,9 @@ void IO::read_config(std::string& config_path) {
         throw std::invalid_argument(std::string("Configuration file " + config_path + " not found."));
 
     //-- Filepaths in the json file are relative to the location of the json file
-    config::workDir = fs::path(config_path).parent_path();
-    fs::current_path(config::workDir);
-    std::cout << "Work directory path: " << fs::canonical(config::workDir) << std::endl;
+    Config::get().workDir = fs::path(config_path).parent_path();
+    fs::current_path(Config::get().workDir);
+    std::cout << "Work directory: " << fs::canonical(Config::get().workDir) << std::endl;
 
     nlohmann::json j;
     try {
@@ -46,16 +57,30 @@ void IO::read_config(std::string& config_path) {
     }
 
     std::cout << "\nValidating JSON configuration file...";
-    config::validate(j);
+    Config::get().validate(j);
     std::cout <<"Configuration file is valid! \n" << std::endl;
 
-    config::set_config(j);
+    Config::get().set_config(j);
 }
 
 bool IO::read_point_cloud(std::string& file, Point_set_3& pc) {
-    //todo test CGAL 5.3 if it can read .las without external reader
     std::ifstream ifile(file, std::ios_base::binary);
-    ifile >> pc;
+    if (IO::has_substr(file, ".las") || IO::has_substr(file, ".laz")) {
+        if (!CGAL::IO::read_LAS(ifile, pc.point_back_inserter())) {
+            throw std::runtime_error("Error reading LAS point cloud!");
+        }
+    } else {
+        ifile >> pc;
+    }
+    CGAL::Aff_transformation_3<EPICK> translate(CGAL::TRANSLATION,
+                                                CGAL::Vector_3<EPICK>(-Config::get().pointOfInterest.x(),
+                                                                      -Config::get().pointOfInterest.y(),
+                                                                      0));
+    Point_set_3 transformPC;
+    for (auto it = pc.points().begin(); it != pc.points().end(); ++it) {
+        transformPC.insert(it->transform(translate));
+    }
+    pc = transformPC;
     return true;
 }
 
@@ -87,18 +112,34 @@ void IO::read_geojson_polygons(std::string& file, JsonVector& jsonPolygons) {
     }
 }
 
-void IO::read_explicit_geometries(std::string& file, JsonVector& importedBuildings,
-                                  std::vector<Point_3>& importedBuildingPts) {
+void IO::read_other_geometries(std::string& file, std::vector<Mesh>& meshes) {
+    typedef CGAL::Aff_transformation_3<EPICK> Affine_transformation_3;
+
+    Mesh mesh;
+    if(!PMP::IO::read_polygon_mesh(file, mesh)) {
+        throw std::runtime_error("Error parsing file '" + file);
+    }
+    PMP::transform(Affine_transformation_3(CGAL::Translation(),
+                                           Vector_3(-Config::get().pointOfInterest.x(),
+                                                    -Config::get().pointOfInterest.y(), 0.)),
+                   mesh);
+
+    //todo is there better way to keep connected components?
+    PMP::split_connected_components(mesh, meshes);
+}
+
+void IO::read_cityjson_geometries(std::string& file, JsonVector& importedBuildings,
+                                  Point3VectorPtr& importedBuildingPts) {
     try {
         std::ifstream ifs(file);
         nlohmann::json j = nlohmann::json::parse(ifs);
 
         //-- Add vertices
         for (auto& pt : j["vertices"]) {
-            double ptx = ((double)pt[0] * (double)j["transform"]["scale"][0]) + (double)j["transform"]["translate"][0];
-            double pty = ((double)pt[1] * (double)j["transform"]["scale"][1]) + (double)j["transform"]["translate"][1];
+            double ptx = ((double)pt[0] * (double)j["transform"]["scale"][0]) + (double)j["transform"]["translate"][0] - Config::get().pointOfInterest.x();
+            double pty = ((double)pt[1] * (double)j["transform"]["scale"][1]) + (double)j["transform"]["translate"][1] - Config::get().pointOfInterest.y();
             double ptz = ((double)pt[2] * (double)j["transform"]["scale"][2]) + (double)j["transform"]["translate"][2];
-            importedBuildingPts.emplace_back(ptx, pty, ptz);
+            importedBuildingPts->emplace_back(ptx, pty, ptz);
         }
 
         //-- Separate individual buildings
@@ -138,32 +179,34 @@ void IO::output_obj(const OutputFeatures& allFeatures) {
 
     std::vector<std::unordered_map<std::string, int>> dPts(numOutputSurfaces);
     //-- Output points
+//    int count = 0; // to output each building as a separate group
     for (auto& f : allFeatures) {
-        if (config::outputSeparately)
+        if (Config::get().outputSeparately) {
+//            if (f->get_class() == BUILDING)
+//                bs[f->get_output_layer_id()] += "\no " + std::to_string(count++);
             IO::get_obj_pts(f->get_mesh(),
                             fs[f->get_output_layer_id()],
                             bs[f->get_output_layer_id()],
                             dPts[f->get_output_layer_id()]);
-        else
+        } else {
             IO::get_obj_pts(f->get_mesh(),
                             fs[f->get_output_layer_id()],
                             bs[f->get_output_layer_id()],
                             dPts.front());
+        }
     }
-
     //-- Add class name and output to file
-    if (!config::outputSeparately) {
+    if (!Config::get().outputSeparately) {
         of.emplace_back();
-        of.back().open(config::outputFileName + ".obj");
+        of.back().open(Config::get().outputFileName + ".obj");
     }
     for (int i = 0; i < fs.size(); ++i) {
         if (bs[i].empty()) continue;
-        if (config::outputSeparately) {
+        if (Config::get().outputSeparately) {
             of.emplace_back();
-            of.back().open(config::outputFileName + "_" + config::outputSurfaces[i] + ".obj");
+            of.back().open(Config::get().outputFileName + "_" + Config::get().outputSurfaces[i] + ".obj");
         }
-
-        of.back() << fs[i] << "\ng " << config::outputSurfaces[i] << bs[i];
+        of.back() << fs[i] << "\ng " << Config::get().outputSurfaces[i] << bs[i];
     }
     for (auto& f : of) f.close();
 }
@@ -178,28 +221,25 @@ void IO::output_stl(const OutputFeatures& allFeatures) {
         if (!f->is_active()) continue;
         IO::get_stl_pts(f->get_mesh(), fs[f->get_output_layer_id()]);
     }
-
     //-- Add class name and output to file
-    if (!config::outputSeparately) {
+    if (!Config::get().outputSeparately) {
         of.emplace_back();
-        of.back().open(config::outputFileName + ".stl");
+        of.back().open(Config::get().outputFileName + ".stl");
     }
     for (int i = 0; i < fs.size(); ++i) {
         if (fs[i].empty()) continue;
-        if (config::outputSeparately) {
+        if (Config::get().outputSeparately) {
             of.emplace_back();
-            of.back().open(config::outputFileName + "_" + config::outputSurfaces[i] + ".stl");
+            of.back().open(Config::get().outputFileName + "_" + Config::get().outputSurfaces[i] + ".stl");
         }
-
-        of.back() << "\nsolid " << config::outputSurfaces[i];
+        of.back() << "\nsolid " << Config::get().outputSurfaces[i];
         of.back() << fs[i];
-        of.back() << "\nendsolid " << config::outputSurfaces[i];
+        of.back() << "\nendsolid " << Config::get().outputSurfaces[i];
     }
     for (auto& f : of) f.close();
 }
 
 void IO::output_cityjson(const OutputFeatures& allFeatures) {
-    using namespace config;
     std::ofstream of;
     nlohmann::json j;
 
@@ -241,7 +281,7 @@ void IO::output_cityjson(const OutputFeatures& allFeatures) {
         j["vertices"].push_back({std::stod(c[0], NULL), std::stod(c[1], NULL), std::stod(c[2], NULL) });
     }
 
-    of.open(outputFileName + ".json");
+    of.open(Config::get().outputFileName + ".json");
     of << j.dump() << std::endl;
 }
 
@@ -306,7 +346,7 @@ void IO::get_stl_pts(Mesh& mesh, std::string& fs) {
 void IO::get_cityjson_geom(const Mesh& mesh, nlohmann::json& g, std::unordered_map<std::string, int>& dPts,
                            std::string primitive) {
     g["type"] = primitive;
-    g["lod"] = config::lod;
+    g["lod"] = Config::get().lod;
     g["boundaries"];
     for (auto& face: mesh.faces()) {
         std::vector<int> faceIdx;
@@ -345,26 +385,27 @@ bool IO::not_small(std::vector<int> idxLst) {
 }
 
 void IO::output_log() {
-    if (!config::outputLog) return;
+    if (!Config::get().outputLog) return;
+    fs::current_path(Config::get().outputDir);
 
     //-- Output log file
-    config::logSummary <<"\n// ----------------------------------------------------------------------------------------------- //" << std::endl;
-    std::cout << "\nCreating log file '" << config::logName << "'" << std::endl;
+    Config::get().log <<"\n// ------------------------------------------------------------------------------------------------ //" << std::endl;
+    std::cout << "\nCreating log file '" << Config::get().logName << "'" << std::endl;
     std::ofstream of;
-    of.open(config::logName);
-    of << config::log.str() << config::logSummary.str();
+    of.open(Config::get().logName);
+    of << Config::get().logSummary.str() << Config::get().log.str();
     of.close();
 
     //-- Output failed reconstructions
-    if (!config::failedBuildings.empty()) {
+    if (!Config::get().failedBuildings.empty()) {
         std::cout << "Outputting failed building reconstructions to 'failedReconstructions.geojson'"
                   << std::endl;
         //- Parse again the buildings polygon
-        std::ifstream ifs(config::workDir.append(config::gisdata).string());
+        std::ifstream ifs(Config::get().workDir.append(Config::get().gisdata).string());
         nlohmann::json j = nlohmann::json::parse(ifs);
         //- Extract failed reconstructions
         nlohmann::json b;
-        for (int i: config::failedBuildings) {
+        for (int i: Config::get().failedBuildings) {
             b["features"].push_back(j["features"][i]);
         }
         b["crs"] = j["crs"];
@@ -375,6 +416,15 @@ void IO::output_log() {
         of << b.dump();
         of.close();
     }
+}
+
+bool IO::has_substr(const std::string& strMain, const std::string& subStr) {
+    auto it = std::search(
+            strMain.begin(), strMain.end(),
+            subStr.begin(),  subStr.end(),
+            [](char ch1, char ch2) { return std::toupper(ch1) == std::toupper(ch2);}
+    );
+    return (it != strMain.end());
 }
 
 std::string IO::gen_key_bucket(const Point_2 p) {

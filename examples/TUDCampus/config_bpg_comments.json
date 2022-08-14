@@ -18,7 +18,7 @@
     {
       "type": "SurfaceLayer",
       "path": "polygons/Vegetation.geojson",
-       "layer_name" : "Vegetation"           // Optional argument to choose a layer name
+      "layer_name" : "Vegetation"            // Optional argument to choose a layer name
     },
     {
       "type":       "SurfaceLayer",
@@ -41,11 +41,13 @@
 //  "bpg_domain_size": [100, 5],
 
   "buffer_region":    -20,            // Optional - buffer region size in percentage of distance to bndpoly centroid
+  "reconstruct_boundaries": true,     // Optional - reconstruct sides and top of the domain, default: false
 
   //-- Reconstruction related
   //- Terrain
   "terrain_thinning": 90,             // Optional - percentage of randomly removed terrain points
-  "smooth_terrain":         true,     // Optional - smoothing flag
+  "smooth_terrain":   true,           // Optional - smoothing flag
+  "flat_terrain":     false,          // Optional - make terrain flat
   //- Buildings
   "lod": "1.2",
   "building_percentile": 90,

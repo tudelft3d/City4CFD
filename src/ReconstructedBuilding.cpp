@@ -1,8 +1,7 @@
 /*
-  Copyright (c) 2021-2022,
-  Ivan Pađen <i.paden@tudelft.nl>
-  3D Geoinformation,
-  Delft University of Technology
+  City4CFD
+ 
+  Copyright (c) 2021-2022, 3D Geoinformation Research Group, TU Delft  
 
   This file is part of City4CFD.
 
@@ -13,10 +12,17 @@
 
   City4CFD is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  along with this program. If not, see <http://www.gnu.org/licenses/>
+  along with City4CFD.  If not, see <http://www.gnu.org/licenses/>.
+
+  For any information or further details about the use of City4CFD, contact
+  Ivan Pađen
+  <i.paden@tudelft.nl>
+  3D Geoinformation Research Group
+  Delft University of Technology
 */
 
 #include "ReconstructedBuilding.h"
@@ -26,45 +32,50 @@
 
 ReconstructedBuilding::ReconstructedBuilding()
         : Building(), _searchTree(nullptr),
-        _attributeHeight(-9999), _attributeHeightAdvantage(config::buildingHeightAttributeAdvantage) {}
+        _attributeHeight(-9999), _attributeHeightAdvantage(Config::get().buildingHeightAttrAdv) {}
 
 ReconstructedBuilding::ReconstructedBuilding(const int internalID)
         : Building(internalID), _searchTree(nullptr),
-          _attributeHeight(-9999), _attributeHeightAdvantage(config::buildingHeightAttributeAdvantage) {}
+          _attributeHeight(-9999), _attributeHeightAdvantage(Config::get().buildingHeightAttrAdv) {}
 
-
+/*
 ReconstructedBuilding::ReconstructedBuilding(const nlohmann::json& poly)
         : Building(poly), _searchTree(nullptr),
-          _attributeHeight(-9999), _attributeHeightAdvantage(config::buildingHeightAttributeAdvantage) {
-    if (!config::buildingUniqueId.empty()) {
-        _id = poly["properties"][config::buildingUniqueId].dump();
+          _attributeHeight(-9999), _attributeHeightAdvantage(Config::get().buildingHeightAttrAdv) {
+    if (!Config::get().buildingUniqueId.empty()) {
+        _id = poly["properties"][Config::get().buildingUniqueId].dump();
     }
-    if (poly["properties"].contains(config::buildingHeightAttribute)) {
-        if (poly["properties"][config::buildingHeightAttribute].is_number()) {
-            _attributeHeight = poly["properties"][config::buildingHeightAttribute];
+    if (poly["properties"].contains(Config::get().buildingHeightAttribute)) {
+        if (poly["properties"][Config::get().buildingHeightAttribute].is_number()) {
+            _attributeHeight = poly["properties"][Config::get().buildingHeightAttribute];
         }
-    } else if (poly["properties"].contains(config::floorAttribute)) {
-        _attributeHeight = (double)poly["properties"][config::floorAttribute] * config::floorHeight;
+    } else if (poly["properties"].contains(Config::get().floorAttribute)) {
+        _attributeHeight = (double)poly["properties"][Config::get().floorAttribute] * Config::get().floorHeight;
     }
 }
+*/
 
 ReconstructedBuilding::ReconstructedBuilding(const nlohmann::json& poly, const int internalID)
         : Building(poly, internalID), _searchTree(nullptr),
-          _attributeHeight(-9999), _attributeHeightAdvantage(config::buildingHeightAttributeAdvantage) {
-    //todo maybe move id to polyFeature?
-    if (!config::buildingUniqueId.empty()) {
-        _id = poly["properties"][config::buildingUniqueId].dump();
+          _attributeHeight(-9999), _attributeHeightAdvantage(Config::get().buildingHeightAttrAdv) {
+    if (!Config::get().buildingUniqueId.empty()) {
+        _id = poly["properties"][Config::get().buildingUniqueId].dump();
     } else {
         _id = std::to_string(internalID);
     }
-    if (poly["properties"].contains(config::buildingHeightAttribute)) {
-        if (poly["properties"][config::buildingHeightAttribute].is_number()) {
-            _attributeHeight = poly["properties"][config::buildingHeightAttribute];
+    if (poly["properties"].contains(Config::get().buildingHeightAttribute)) {
+        if (poly["properties"][Config::get().buildingHeightAttribute].is_number()) {
+            _attributeHeight = poly["properties"][Config::get().buildingHeightAttribute];
         }
-    } else if (poly["properties"].contains(config::floorAttribute)) {
-        if (poly["properties"][config::floorAttribute].is_number()) {
-            _attributeHeight = (double) poly["properties"][config::floorAttribute] * config::floorHeight;
+    } else if (poly["properties"].contains(Config::get().floorAttribute)) {
+        if (poly["properties"][Config::get().floorAttribute].is_number()) {
+            _attributeHeight = (double) poly["properties"][Config::get().floorAttribute] * Config::get().floorHeight;
         }
+    }
+    if (!this->is_active()) { // It can only fail if the polygon is not simple
+        Config::get().failedBuildings.push_back(internalID);
+        Config::get().log << "Failed to import building polygon ID:" << _id
+                          << ". Polygon is not simple." << std::endl;
     }
 }
 
@@ -75,6 +86,11 @@ void ReconstructedBuilding::set_search_tree(const std::shared_ptr<SearchTree>& s
 }
 
 void ReconstructedBuilding::reconstruct() {
+    _mesh.clear();
+    if (_clip_bottom) {
+        this->translate_footprint(-5);
+    }
+
     //-- Check if reconstructing from height attribute takes precedence
     if (_attributeHeightAdvantage) {
         this->reconstruct_from_attribute();
@@ -83,8 +99,8 @@ void ReconstructedBuilding::reconstruct() {
 
     //-- Take tree subset bounded by the polygon
     std::vector<Point_3> subsetPts;
-    Point_3 bbox1(_poly.bbox().xmin(), _poly.bbox().ymin(), -g_largnum);
-    Point_3 bbox2(_poly.bbox().xmax(), _poly.bbox().ymax(), g_largnum);
+    Point_3 bbox1(_poly.bbox().xmin(), _poly.bbox().ymin(), -global::largnum);
+    Point_3 bbox2(_poly.bbox().xmax(), _poly.bbox().ymax(), global::largnum);
     Fuzzy_iso_box pts_range(bbox1, bbox2);
     _searchTree->search(std::back_inserter(subsetPts), pts_range);
 
@@ -112,11 +128,28 @@ void ReconstructedBuilding::reconstruct() {
     lod12.lod12_reconstruct(_mesh);
 
     if (lod12.get_height() < _lowHeight) { // In case of a small height
-        if (this->reconstruct_again_from_attribute("Building height lower than minimum prescribed height")) {
-            return;
-        }
-        this->deactivate();
-        throw std::domain_error("Building height lower than minimum prescribed height");
+        Config::get().log << "Building height lower than minimum prescribed height, ID: " << this->get_id()
+                          << std::endl;
+        _height = _lowHeight;
+        lod12.lod12_reconstruct(_mesh, _height);
+    }
+
+    if (_clip_bottom) {
+        this->translate_footprint(5);
+    }
+}
+
+void ReconstructedBuilding::reconstruct_flat_terrain() {
+    _mesh.clear();
+    if (_clip_bottom) {
+        this->translate_footprint(-5);
+    }
+
+    LoD12 lod12HeightAttribute(_poly, _base_heights, {}, _height);
+    lod12HeightAttribute.lod12_reconstruct(_mesh);
+
+    if (_clip_bottom) {
+        this->translate_footprint(5);
     }
 }
 
@@ -171,14 +204,16 @@ void ReconstructedBuilding::reconstruct_from_attribute() {
 
     //-- Low height check
     if (lod12HeightAttribute.get_height() < _lowHeight) { // In case of a small height
-        this->deactivate();
-        throw std::domain_error("Building height attribute in geojson file lower than minimum prescribed height");
+        Config::get().log << "Building height lower than minimum prescribed height, ID: " << this->get_id()
+                          << std::endl;
+        _height = _lowHeight;
+        lod12HeightAttribute.lod12_reconstruct(_mesh, _height);
     }
 }
 
 bool ReconstructedBuilding::reconstruct_again_from_attribute(const std::string& reason) {
     if (_attributeHeight > 0) {
-        config::log << "Failed to reconstruct using point cloud building ID: " << _id
+        Config::get().log << "Failed to reconstruct using point cloud building ID: " << _id
                     << " Reason: " << reason
                     << ". Reconstructing using height attribute from JSON polygon." << std::endl;
         this->reconstruct_from_attribute();

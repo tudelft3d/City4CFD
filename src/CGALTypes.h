@@ -1,8 +1,7 @@
 /*
-  Copyright (c) 2021-2022,
-  Ivan Pađen <i.paden@tudelft.nl>
-  3D Geoinformation,
-  Delft University of Technology
+  City4CFD
+ 
+  Copyright (c) 2021-2022, 3D Geoinformation Research Group, TU Delft  
 
   This file is part of City4CFD.
 
@@ -13,10 +12,17 @@
 
   City4CFD is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  along with this program. If not, see <http://www.gnu.org/licenses/>
+  along with City4CFD.  If not, see <http://www.gnu.org/licenses/>.
+
+  For any information or further details about the use of City4CFD, contact
+  Ivan Pađen
+  <i.paden@tudelft.nl>
+  3D Geoinformation Research Group
+  Delft University of Technology
 */
 
 #ifndef CITY4CFD_CGALTYPES_H
@@ -113,6 +119,17 @@ struct Polygon_with_holes_2 {
     CGAL::Bbox_2 bbox() const {return _rings.front().bbox();}
 };
 
+//-- Minimum bbox
+struct MinBbox {
+    CGAL::Vector_2<EPICK> vec1;
+    CGAL::Vector_2<EPICK> vec2;
+
+    bool empty() const {return is_empty;};
+    void calc() {is_empty = false;};
+private:
+    bool is_empty = true;
+};
+
 /*! CGAL Polygon Processing !*/ //todo move under 'Polygon'
 #include <CGAL/Polygon_2_algorithms.h>
 #include <CGAL/Boolean_set_operations_2.h>
@@ -184,8 +201,6 @@ typedef CGAL::Delaunay_triangulation_2<CGAL::Projection_traits_xy_3<EPICK>>     
 #include <CGAL/Search_traits_2.h>
 #include <CGAL/Search_traits_3.h>
 #include <CGAL/Orthogonal_k_neighbor_search.h>
-#include <CGAL/natural_neighbor_coordinates_2.h>
-#include <CGAL/Barycentric_coordinates_2/Triangle_coordinates_2.h>
 
 typedef CGAL::Search_traits_3<EPICK>                 Traits;
 //typedef CGAL::Kd_tree<Traits>                         SearchTree;
@@ -193,5 +208,13 @@ typedef CGAL::Orthogonal_k_neighbor_search<Traits>    Neighbor_search;
 typedef Neighbor_search::Tree                         SearchTree;
 typedef CGAL::Fuzzy_iso_box<Traits>                   Fuzzy_iso_box;
 typedef CGAL::Fuzzy_sphere<Traits>                    Fuzzy_sphere;
+
+//-- Smart pointers with CGAl types
+typedef std::shared_ptr<std::vector<Point_3>> Point3VectorPtr;
+
+//-- Global constants
+namespace global {
+    const Point_2 nullPt(0, 0);
+}
 
 #endif //CITY4CFD_CGALTYPES_H

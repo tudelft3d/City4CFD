@@ -1,8 +1,7 @@
 /*
-  Copyright (c) 2021-2022,
-  Ivan Pađen <i.paden@tudelft.nl>
-  3D Geoinformation,
-  Delft University of Technology
+  City4CFD
+ 
+  Copyright (c) 2021-2022, 3D Geoinformation Research Group, TU Delft  
 
   This file is part of City4CFD.
 
@@ -13,10 +12,17 @@
 
   City4CFD is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  along with this program. If not, see <http://www.gnu.org/licenses/>
+  along with City4CFD.  If not, see <http://www.gnu.org/licenses/>.
+
+  For any information or further details about the use of City4CFD, contact
+  Ivan Pađen
+  <i.paden@tudelft.nl>
+  3D Geoinformation Research Group
+  Delft University of Technology
 */
 
 #ifndef CITY4CFD_CONFIGSCHEMA_INC
@@ -43,7 +49,6 @@ namespace jsonschema {
               "type": "string"
             }
           },
-          "required": ["ground"],
           "additionalProperties": false
         },
         "polygons": {
@@ -68,8 +73,12 @@ namespace jsonschema {
                   "properties": {
                     "height_attribute": {"type": "string"},
                     "floor_attribute": {"type": "string"},
-                    "floor_height": {"type": "number"},
-                    "height_attribute_advantage": {"type": "boolean"}
+                    "floor_height": {
+                      "type": "number",
+                      "exclusiveMinimum": 0
+                    },
+                    "height_attribute_advantage": {"type": "boolean"},
+                    "avoid_bad_polys": {"type": "boolean"}
                   },
                   "dependencies": {
                     "floor_attribute": ["floor_height"]
@@ -94,11 +103,15 @@ namespace jsonschema {
                 "then": {
                   "properties": {
                     "layer_name": {"type": "string"},
-                    "average_surface": {"type": "boolean"},
-                    "surface_percentile": {"type": "number"}
+                    "flatten_surface": {"type": "boolean"},
+                    "surface_percentile": {
+                      "type": "number",
+                      "exclusiveMinimum": 0,
+                      "maximum": 100
+                    }
                   },
                   "dependencies": {
-                    "average_surface": ["surface_percentile"]
+                    "flatten_surface": ["surface_percentile"]
                   }
                 }
               }
@@ -123,7 +136,7 @@ namespace jsonschema {
               "type": "string"
             }
           },
-          "required": ["path", "advantage", "true_height", "lod"]
+          "required": ["path", "advantage", "true_height"]
         },
         "point_of_interest": {
           "$ref": "#/$defs/point"
@@ -136,7 +149,8 @@ namespace jsonschema {
         },
         "top_height": {
           "description": "Not required when domain_bnd is null",
-          "type": "number"
+          "type": "number",
+          "exclusiveMinimum": 0
         },
         "bnd_type_bpg": {
           "enum": ["Round", "Rectangle", "Oval"]
@@ -175,6 +189,10 @@ namespace jsonschema {
           "description": "Optional: Terrain smoothing flag",
           "type": "boolean"
         },
+        "flat_terrain": {
+          "description": "Optional: Force flat terrain",
+          "type": "boolean"
+        },
         "lod": {
           "type": "string"
         },
@@ -182,6 +200,9 @@ namespace jsonschema {
           "type": "number",
           "exclusiveMinimum": 0,
           "exclusiveMaximum": 100
+        },
+        "reconstruct_boundaries": {
+          "type": "boolean"
         },
         "edge_max_len": {
           "type": "number",

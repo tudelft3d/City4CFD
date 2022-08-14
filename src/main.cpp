@@ -1,8 +1,7 @@
 /*
-  Copyright (c) 2021-2022,
-  Ivan Pađen <i.paden@tudelft.nl>
-  3D Geoinformation,
-  Delft University of Technology
+  City4CFD
+ 
+  Copyright (c) 2021-2022, 3D Geoinformation Research Group, TU Delft  
 
   This file is part of City4CFD.
 
@@ -13,18 +12,26 @@
 
   City4CFD is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  along with this program. If not, see <http://www.gnu.org/licenses/>
+  along with City4CFD.  If not, see <http://www.gnu.org/licenses/>.
+
+  For any information or further details about the use of City4CFD, contact
+  Ivan Pađen
+  <i.paden@tudelft.nl>
+  3D Geoinformation Research Group
+  Delft University of Technology
 */
 
-#include "config.h"
+#include "Config.h"
 #include "io.h"
 #include "Map3d.h"
 
+std::string CITY4CFD_VERSION = "0.1.0";
+
 void printWelcome() {
-//    printf("\e[?25l");
     auto logo{
             R"(
      #==============================================================#
@@ -48,23 +55,27 @@ void printWelcome() {
     };
 
     std::cout << logo;
-    std::cout << "City4CFD Copyright (C) 2021-2022 3D geoinformation research group, TU Delft\n" << std::endl;
+    std::cout << "City4CFD Copyright (C) 2021-2022 3D Geoinformation Research Group, TU Delft\n" << std::endl;
 }
 
 void printHelp() {
     auto helpMsg{
-R"(
-USAGE:
+R"(USAGE:
     City4CFD config_file.json OPTIONS
 
 AVAILABLE OPTIONS:
     --help            Prints out this help message
+    --version         Displays City4CFD version information
     --output_dir      Sets the directory where output files are stored
     --output_file     Overrides output file(s) name from the configuration file
 )"
     };
 
     std::cout << helpMsg;
+}
+
+void printVersion() {
+    std::cout << "Version: " << CITY4CFD_VERSION << std::endl;
 }
 
 int main(int argc, char** argv) {
@@ -87,15 +98,18 @@ int main(int argc, char** argv) {
             if (boost::iequals(argv[i], "--help")) {
                 printHelp();
                 return EXIT_SUCCESS;
+            } else if (boost::iequals(argv[i], "--version")) {
+                printVersion();
+                return EXIT_SUCCESS;
             } else if (boost::iequals(argv[i], "--output_dir")) {
                 if (i + 1 == argc) throw std::invalid_argument("Missing argument for --output_dir");
 
-                config::outputDir = fs::absolute(fs::current_path().append(argv[++i]));
-                if (!fs::exists(config::outputDir)) throw std::invalid_argument("Output directory does not exist!");
+                Config::get().outputDir = fs::absolute(fs::current_path().append(argv[++i]));
+                if (!fs::exists(Config::get().outputDir)) throw std::invalid_argument("Output directory does not exist!");
             } else if (boost::iequals(argv[i], "--output_file")) {
                 if (i + 1 == argc) throw std::invalid_argument("Missing argument for --output_file");
 
-                config::outputFileName = argv[++i];
+                Config::get().outputFileName = argv[++i];
             } else {
                 if (i > 1) throw std::invalid_argument(std::string("Unknown option " + std::string(argv[i])));
             }

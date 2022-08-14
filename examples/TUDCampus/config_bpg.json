@@ -7,12 +7,13 @@
   "polygons" : [
     {
       "type": "Building",
-      "path": "polygons/tudcampus.geojson"
+      "path": "polygons/tudcampus.geojson",
+      "unique_id": "gid"
     },
     {
       "type": "SurfaceLayer",
       "path": "polygons/Vegetation.geojson",
-       "layer_name" : "Vegetation"
+      "layer_name" : "Vegetation"
     },
     {
       "type":       "SurfaceLayer",
@@ -30,9 +31,10 @@
   "bpg_blockage_ratio": false,        
   "flow_direction":     [1, 1],
   "buffer_region":     -20,
+  "reconstruct_boundaries": true,
 
   "terrain_thinning": 80,
-  "smooth_terrain":         false,
+  "smooth_terrain":   false,
 
   "lod": "1.2",
   "building_percentile": 90,

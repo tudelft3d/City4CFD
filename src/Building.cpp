@@ -1,8 +1,7 @@
 /*
-  Copyright (c) 2021-2022,
-  Ivan Pađen <i.paden@tudelft.nl>
-  3D Geoinformation,
-  Delft University of Technology
+  City4CFD
+ 
+  Copyright (c) 2021-2022, 3D Geoinformation Research Group, TU Delft  
 
   This file is part of City4CFD.
 
@@ -13,51 +12,161 @@
 
   City4CFD is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  along with this program. If not, see <http://www.gnu.org/licenses/>
+  along with City4CFD.  If not, see <http://www.gnu.org/licenses/>.
+
+  For any information or further details about the use of City4CFD, contact
+  Ivan Pađen
+  <i.paden@tudelft.nl>
+  3D Geoinformation Research Group
+  Delft University of Technology
 */
 
 #include "Building.h"
 
 #include "geomutils.h"
 #include "LoD12.h"
+#include "Terrain.h"
+
+#include <CGAL/Polygon_mesh_processing/orientation.h>
+#include <CGAL/Polygon_mesh_processing/repair.h>
+#include <CGAL/Polygon_mesh_processing/clip.h>
+#include <CGAL/Polygon_mesh_processing/remesh.h>
+#include <CGAL/Mesh_3/dihedral_angle_3.h>
 
 Building::Building()
-        : PolyFeature(1), _height(-g_largnum) {}
+        : PolyFeature(1), _height(-global::largnum) {}
 
 Building::Building(const int internalID)
-        : PolyFeature(1, internalID), _height(-g_largnum) {}
+        : PolyFeature(1, internalID), _height(-global::largnum) {}
 
 Building::Building(const nlohmann::json& poly)
-        : PolyFeature(poly, 1), _height(-g_largnum) {}
+        : PolyFeature(poly, true, 1), _height(-global::largnum) {}
+        // 'true' here to check for polygon simplicity
 
 Building::Building(const nlohmann::json& poly, const int internalID)
-        : PolyFeature(poly, 1, internalID), _height(-g_largnum) {}
+        : PolyFeature(poly, true, 1, internalID), _height(-global::largnum) {}
+        // 'true' here to check for polygon simplicity
 
 Building::~Building() = default;
 
-void Building::check_feature_scope(const Polygon_2& otherPoly) {
-        for (auto& poly: _poly.rings()) {
-            for (auto& vert : poly) {
-                if (geomutils::point_in_poly(vert, otherPoly))
-                    return;
-            }
+void Building::clip_bottom(const Terrainptr& terrain) {
+    if (!_clip_bottom) return;
+    if (this->has_self_intersections() && !Config::get().handleSelfIntersect) throw
+                std::runtime_error(std::string("Clip error in building ID " + this->get_id() +
+                                               + ". Cannot clip if there are self intersections!"));
+    //-- Get terrain subset
+    Mesh terrainSubsetMesh = terrain->mesh_subset(_poly);
+    PMP::reverse_face_orientations(terrainSubsetMesh);
+
+    //-- Set exact point maps
+    Exact_point_map mesh1_exact_points =
+            terrainSubsetMesh.add_property_map<vertex_descriptor,EK::Point_3>("v:exact_point").first;
+    Exact_point_map mesh2_exact_points =
+            _mesh.add_property_map<vertex_descriptor,EK::Point_3>("v:exact_point").first;
+    Exact_vertex_point_map mesh1_vpm(mesh1_exact_points, terrainSubsetMesh);
+    Exact_vertex_point_map mesh2_vpm(mesh2_exact_points, _mesh);
+
+    //-- Mesh processing and clip
+    PMP::remove_degenerate_faces(_mesh);
+    PMP::remove_degenerate_edges(_mesh);
+    if (Config::get().handleSelfIntersect) geomutils::remove_self_intersections(_mesh);
+    PMP::clip(_mesh, terrainSubsetMesh, params::vertex_point_map(mesh2_vpm), params::vertex_point_map(mesh1_vpm));
+}
+
+void Building::refine() {
+    typedef Mesh::Halfedge_index           halfedge_descriptor;
+    typedef Mesh::Edge_index               edge_descriptor;
+
+    double target_edge_length = 5; //5;
+    unsigned int nb_iter =  30;   //30;
+
+    PMP::remove_degenerate_faces(_mesh);
+    /*
+    if (PMP::does_self_intersect(_mesh)) {
+        ++config::selfIntersecting;
+        PMP::remove_self_intersections(_mesh);
+    }
+     */
+
+    //-- Set the property map for constrained edges
+    Mesh::Property_map<edge_descriptor,bool> is_constrained =
+            _mesh.add_property_map<edge_descriptor,bool>("e:is_constrained",false).first;
+
+    //-- Detect sharp features
+    for (auto& e : edges(_mesh)) {
+        halfedge_descriptor hd = halfedge(e,_mesh);
+        if (!is_border(e,_mesh)) {
+            double angle = CGAL::Mesh_3::dihedral_angle(_mesh.point(source(hd,_mesh)),
+                                                        _mesh.point(target(hd,_mesh)),
+                                                        _mesh.point(target(next(hd,_mesh),_mesh)),
+                                                        _mesh.point(target(next(opposite(hd,_mesh),_mesh),_mesh)));
+            if (CGAL::abs(angle)<179.5)
+                is_constrained[e]=true;
         }
+    }
+
+    PMP::isotropic_remeshing(faces(_mesh), target_edge_length, _mesh,
+                             PMP::parameters::number_of_iterations(nb_iter)
+                                     .edge_is_constrained_map(is_constrained));
+
+//    PMP::remove_self_intersections(_mesh);
+}
+
+void Building::translate_footprint(const double h) {
+    for (auto& ring : _base_heights) {
+        for (auto& pt : ring) {
+            pt += h;
+        }
+    }
+}
+
+void Building::check_feature_scope(const Polygon_2& otherPoly) {
+    for (auto& poly: _poly.rings()) {
+        for (auto& vert : poly) {
+            if (geomutils::point_in_poly(vert, otherPoly))
+                return;
+        }
+    }
 //    std::cout << "Poly ID " << this->get_id() << " is outside the influ region. Deactivating." << std::endl;
     this->deactivate();
 }
 
-double Building::max_dim() {
-    std::vector<double> dims;
-    EPICK::Vector_2 diag(_poly.bbox().xmax() - _poly.bbox().xmin(), _poly.bbox().ymax() - _poly.bbox().ymin());
+void Building::set_clip_flag(const bool flag) {
+    _clip_bottom = flag;
+}
 
+bool Building::has_self_intersections() const {
+    return PMP::does_self_intersect(_mesh);
+}
+
+void Building::set_to_zero_terrain() {
+    //-- Get average footprint height
+    std::vector<double> avgRings;
+    for (auto& ring : _base_heights) {
+        avgRings.emplace_back(geomutils::avg(ring));
+    }
+    _height -= geomutils::avg(avgRings);
+    this->set_zero_borders();
+    this->reconstruct_flat_terrain();
+}
+
+double Building::sq_max_dim() {
+    std::vector<double> dims;
+    /*
+    EPICK::Vector_2 diag(_poly.bbox().xmax() - _poly.bbox().xmin(), _poly.bbox().ymax() - _poly.bbox().ymin());
     dims.emplace_back(diag.squared_length() * pow(cos(M_PI_4), 2));
     dims.emplace_back(diag.squared_length() * pow(sin(M_PI_4), 2));
+    */
+    MinBbox& minBbox = this->get_min_bbox();
+    dims.emplace_back(minBbox.vec1.squared_length());
+    dims.emplace_back(minBbox.vec2.squared_length());
     dims.emplace_back(_height * _height);
 
-    return sqrt(*(std::max_element(dims.begin(), dims.end())));
+    return *(std::max_element(dims.begin(), dims.end()));
 }
 
 double Building::get_height() const {

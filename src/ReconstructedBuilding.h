@@ -1,8 +1,7 @@
 /*
-  Copyright (c) 2021-2022,
-  Ivan Pađen <i.paden@tudelft.nl>
-  3D Geoinformation,
-  Delft University of Technology
+  City4CFD
+ 
+  Copyright (c) 2021-2022, 3D Geoinformation Research Group, TU Delft  
 
   This file is part of City4CFD.
 
@@ -13,10 +12,17 @@
 
   City4CFD is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  along with this program. If not, see <http://www.gnu.org/licenses/>
+  along with City4CFD.  If not, see <http://www.gnu.org/licenses/>.
+
+  For any information or further details about the use of City4CFD, contact
+  Ivan Pađen
+  <i.paden@tudelft.nl>
+  3D Geoinformation Research Group
+  Delft University of Technology
 */
 
 #ifndef CITY4CFD_RECONSTRUCTEDBUILDING_H
@@ -28,13 +34,14 @@ class ReconstructedBuilding : public Building {
 public:
     ReconstructedBuilding();
     ReconstructedBuilding(const int internalID);
-    ReconstructedBuilding(const nlohmann::json& poly);
+//    ReconstructedBuilding(const nlohmann::json& poly);
     ReconstructedBuilding(const nlohmann::json& poly, const int internalID);
     ~ReconstructedBuilding();
 
-    void   set_search_tree(const std::shared_ptr<SearchTree>& searchTree);
+    void  set_search_tree(const std::shared_ptr<SearchTree>& searchTree);
 
     virtual void  reconstruct() override;
+    virtual void  reconstruct_flat_terrain() override;
     virtual void  get_cityjson_info(nlohmann::json& b) const override;
     virtual void  get_cityjson_semantics(nlohmann::json& g) const override;
 

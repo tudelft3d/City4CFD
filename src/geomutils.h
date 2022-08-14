@@ -1,8 +1,7 @@
 /*
-  Copyright (c) 2021-2022,
-  Ivan Pađen <i.paden@tudelft.nl>
-  3D Geoinformation,
-  Delft University of Technology
+  City4CFD
+ 
+  Copyright (c) 2021-2022, 3D Geoinformation Research Group, TU Delft  
 
   This file is part of City4CFD.
 
@@ -13,16 +12,23 @@
 
   City4CFD is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  along with this program. If not, see <http://www.gnu.org/licenses/>
+  along with City4CFD.  If not, see <http://www.gnu.org/licenses/>.
+
+  For any information or further details about the use of City4CFD, contact
+  Ivan Pađen
+  <i.paden@tudelft.nl>
+  3D Geoinformation Research Group
+  Delft University of Technology
 */
 
 #ifndef CITY4CFD_GEOMUTILS_H
 #define CITY4CFD_GEOMUTILS_H
 
-#include "config.h"
+#include "Config.h"
 
 namespace geomutils {
     double  avg(const std::vector<double>& values);
@@ -33,16 +39,18 @@ namespace geomutils {
     void    mark_domains(CDT& ct, const Face_handle& start, int index,
                          std::list<CDT::Edge>& border, PolyFeatures& features);
     void    check_layer(const Face_handle& fh, int surfaceLayer);
-    void    shorten_long_poly_edges(Polygon_2& poly, double maxLen = config::edgeMaxLen);
-    Point_2 rotate_pt(Point_2& pt, const double angle, Point_2 centerPt = Point_2(0, 0));
+    void    shorten_long_poly_edges(Polygon_2& poly, double maxLen = Config::get().edgeMaxLen);
+    Point_2 rotate_pt(const Point_2& pt, const double angle, Point_2 centerPt = Point_2(0, 0));
+    Point_3 rotate_pt_xy(const Point_3& pt, const double angle, Point_2 centerPt = Point_2(0, 0));
     void    interpolate_poly_from_pc(const Polygon_2& poly, std::vector<double>& heights, const Point_set_3& pointCloud);
     bool    polygons_in_contact(const Polygon_with_holes_2& firstPoly, const Polygon_with_holes_2& secondPoly);
+    void    remove_self_intersections(Mesh& mesh);
 
     //-- Templated functions
     template <typename T> bool point_in_poly(const T& pt2, const Polygon_with_holes_2& polygon);
     template <typename T> bool point_in_poly(const T& pt2, const Polygon_2& polygon);
-    template <typename T> void make_round_poly(Point_2& centre, double radius, T& poly);
-    template <typename T> void make_round_poly(Point_2& centre, double radius1, double radius2,
+    template <typename T> void make_round_poly(const Point_2& centre, double radius, T& poly);
+    template <typename T> void make_round_poly(const Point_2& centre, double radius1, double radius2,
                                                int nPts, double angInt, double ang, T& poly);
     template <typename T, typename U> void smooth_dt (const Point_set_3& pointCloud, T& dt);
     template <typename T> Polygon_2 calc_bbox_poly(const T& inputPts);
