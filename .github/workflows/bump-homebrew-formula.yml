@@ -19,7 +19,7 @@ jobs:
           formula-name: city4cfd
           formula-path: Formula/city4cfd.rb
           homebrew-tap: tudelft3d/homebrew-software
-          base-branch: main
+          base-branch: master
           download-url: https://github.com/tudelft3d/city4cfd/archive/${{ steps.get_version.outputs.VERSION }}.tar.gz
           commit-message: |
            Bumped {{formulaName}} to {{version}}
