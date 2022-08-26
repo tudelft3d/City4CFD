@@ -1,8 +1,7 @@
 /*
-  Copyright (c) 2021-2022,
-  Ivan Pađen <i.paden@tudelft.nl>
-  3D Geoinformation,
-  Delft University of Technology
+  City4CFD
+ 
+  Copyright (c) 2021-2022, 3D Geoinformation Research Group, TU Delft  
 
   This file is part of City4CFD.
 
@@ -13,10 +12,17 @@
 
   City4CFD is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  along with this program. If not, see <http://www.gnu.org/licenses/>
+  along with City4CFD.  If not, see <http://www.gnu.org/licenses/>.
+
+  For any information or further details about the use of City4CFD, contact
+  Ivan Pađen
+  <i.paden@tudelft.nl>
+  3D Geoinformation Research Group
+  Delft University of Technology
 */
 
 #include "PointCloud.h"
@@ -30,7 +36,7 @@ PointCloud::PointCloud()  = default;
 PointCloud::~PointCloud() = default;
 
 void PointCloud::random_thin_pts() {
-    if (Config::get().terrainThinning > 0 + g_smallnum) {
+    if (Config::get().terrainThinning > 0 + global::smallnum) {
         std::cout <<"\nRandomly thinning terrain points" << std::endl;
         _pointCloudTerrain.remove(CGAL::random_simplify_point_set(_pointCloudTerrain,
                                                                   Config::get().terrainThinning),
@@ -74,9 +80,9 @@ void PointCloud::set_flat_terrain() {
     _pointCloudTerrain.add_property_map<bool> ("is_building_point", false);
 }
 
-void PointCloud::average_polygon_pts(const PolyFeatures& lsFeatures) {
-    std::cout << "\n    Averaging surfaces" << std::endl;
-    std::map<int, Point_3> averagedPts;
+void PointCloud::flatten_polygon_pts(const PolyFeatures& lsFeatures) {
+    std::cout << "\n    Flattening surfaces" << std::endl;
+    std::map<int, Point_3> flattenedPts;
 
     //-- Construct a connectivity map and remove duplicates along the way
     auto is_building_pt = _pointCloudTerrain.property_map<bool>("is_building_point").first;
@@ -100,22 +106,22 @@ void PointCloud::average_polygon_pts(const PolyFeatures& lsFeatures) {
 
     //-- Perform averaging
     for (auto& f : lsFeatures) {
-        auto it = Config::get().averageSurfaces.find(f->get_output_layer_id());
-        if (it != Config::get().averageSurfaces.end()) {
-            f->average_polygon_inner_points(_pointCloudTerrain, averagedPts, searchTree, pointCloudConnectivity);
+        auto it = Config::get().flattenSurfaces.find(f->get_output_layer_id());
+        if (it != Config::get().flattenSurfaces.end()) {
+            f->flatten_polygon_inner_points(_pointCloudTerrain, flattenedPts, searchTree, pointCloudConnectivity);
         }
     }
 
-    //-- Change points with averaged values
+    //-- Change points with flattened values
     int pcOrigSize = _pointCloudTerrain.points().size();
-    for (auto& it : averagedPts) {
+    for (auto& it : flattenedPts) {
         _pointCloudTerrain.insert(it.second);
     }
     for (int i = 0; i < pcOrigSize; ++i) {
-        auto it = averagedPts.find(i);
-        if (it != averagedPts.end()) {
+        auto it = flattenedPts.find(i);
+        if (it != flattenedPts.end()) {
             _pointCloudTerrain.remove(i);
-            averagedPts.erase(i);
+            flattenedPts.erase(i);
         }
     }
     _pointCloudTerrain.collect_garbage();

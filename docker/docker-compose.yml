@@ -1,0 +1,9 @@
+# docker-compose.yml
+
+version: '3.6'    
+services:
+  city4cfd:
+    build:
+      context: ../
+      dockerfile: ./docker/city4cfd.dockerfile
+    image: tudelft3d/city4cfd:test-container

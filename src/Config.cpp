@@ -1,8 +1,7 @@
 /*
-  Copyright (c) 2021-2022,
-  Ivan Pađen <i.paden@tudelft.nl>
-  3D Geoinformation,
-  Delft University of Technology
+  City4CFD
+ 
+  Copyright (c) 2021-2022, 3D Geoinformation Research Group, TU Delft  
 
   This file is part of City4CFD.
 
@@ -13,10 +12,17 @@
 
   City4CFD is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  along with this program. If not, see <http://www.gnu.org/licenses/>
+  along with City4CFD.  If not, see <http://www.gnu.org/licenses/>.
+
+  For any information or further details about the use of City4CFD, contact
+  Ivan Pađen
+  <i.paden@tudelft.nl>
+  3D Geoinformation Research Group
+  Delft University of Technology
 */
 
 #include "Config.h"
@@ -83,7 +89,7 @@ void Config::set_config(nlohmann::json& j) {
 
     //-- Additional geometries
     if (j.contains("import_geometries"))
-        importedBuildings = j["import_geometries"]["path"];
+        importedBuildingsPath = j["import_geometries"]["path"];
 
     //-- Domain setup
     pointOfInterest = Point_2(j["point_of_interest"][0], j["point_of_interest"][1]);
@@ -153,6 +159,8 @@ void Config::set_config(nlohmann::json& j) {
                 floorAttribute = poly["floor_attribute"];
             if (poly.contains("floor_height"))
                 floorHeight = (double)poly["floor_height"];
+            if (poly.contains("avoid_bad_polys"))
+                avoidBadPolys = poly["avoid_bad_polys"];
         }
         if (poly["type"] == "SurfaceLayer") {
             topoLayers.push_back(poly["path"]);
@@ -161,9 +169,9 @@ void Config::set_config(nlohmann::json& j) {
             } else {
                 outputSurfaces.push_back("SurfaceLayer" + std::to_string(++i));
             }
-            if (poly.contains("average_surface")) {
-                if (poly["average_surface"]) {
-                    averageSurfaces[surfLayerIdx] = poly["surface_percentile"];
+            if (poly.contains("flatten_surface")) {
+                if (poly["flatten_surface"]) {
+                    flattenSurfaces[surfLayerIdx] = poly["surface_percentile"];
                 }
             }
             ++surfLayerIdx;
@@ -205,7 +213,8 @@ void Config::set_config(nlohmann::json& j) {
     if (j.contains("import_geometries")) {
         importAdvantage  = j["import_geometries"]["advantage"];
         importTrueHeight = j["import_geometries"]["true_height"];
-        importLoD = j["import_geometries"]["lod"];
+        if (j["import_geometries"].contains("lod"))
+            importLoD = j["import_geometries"]["lod"];
     }
 
     // Boundary
@@ -236,8 +245,10 @@ void Config::set_config(nlohmann::json& j) {
         outputLog = true;
         if (j.contains("log_file")) logName = j["log_file"];
     }
-    log << "// ========================================= CITY4CFD LOG ========================================= //" << std::endl;
-    logSummary <<"\n// =========================================== SUMMARY =========================================== //" << std::endl;
+    logSummary     <<"// ========================================CITY4CFD SUMMARY ======================================= //" << std::endl;
+    log         << "\n// ========================================= CITY4CFD LOG ========================================= //" << std::endl;
+    // Add point of interest info to log
+    logSummary << "All coordinates are translated by -(" << pointOfInterest << ")"  << std::endl;
 
     //-- Experimental
     if (j.contains("experimental")) {

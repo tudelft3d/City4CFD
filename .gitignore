@@ -8,4 +8,5 @@ Mesh*.json
 *.stl
 *.swp
 *.log
-thirdparty/LAStools/bin64
+thirdparty/LAStools/bin64/*
+!/thirdparty/LAStools/bin64/serf

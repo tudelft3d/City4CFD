@@ -1,8 +1,7 @@
 /*
-  Copyright (c) 2021-2022,
-  Ivan Pađen <i.paden@tudelft.nl>
-  3D Geoinformation,
-  Delft University of Technology
+  City4CFD
+ 
+  Copyright (c) 2021-2022, 3D Geoinformation Research Group, TU Delft  
 
   This file is part of City4CFD.
 
@@ -13,10 +12,17 @@
 
   City4CFD is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  along with this program. If not, see <http://www.gnu.org/licenses/>
+  along with City4CFD.  If not, see <http://www.gnu.org/licenses/>.
+
+  For any information or further details about the use of City4CFD, contact
+  Ivan Pađen
+  <i.paden@tudelft.nl>
+  3D Geoinformation Research Group
+  Delft University of Technology
 */
 
 #ifndef CITY4CFD_EXPLICITBUILDING_H
@@ -26,8 +32,11 @@
 
 class ImportedBuilding : public Building {
 public:
+    static int noBottom;
+
     ImportedBuilding() = delete;
-    ImportedBuilding(nlohmann::json  poly, std::vector<Point_3>& importedBuildingPts, const int internalID);
+    ImportedBuilding(std::unique_ptr<nlohmann::json>& buildingJson, Point3VectorPtr& importedBuildingPts, const int internalID);
+    ImportedBuilding(Mesh& mesh, const int internalID);
     ~ImportedBuilding();
 
     virtual void  reconstruct() override;
@@ -44,7 +53,7 @@ public:
 //    virtual void  get_cityjson_semantics(nlohmann::json& g) const override;
 
 protected:
-    nlohmann::json                   _buildingJson;
+    std::unique_ptr<nlohmann::json>  _buildingJson;
     double                           _avgFootprintHeight;
     std::vector<int>                 _footprintIdxList;
     std::vector<std::vector<int>>    _footprintPtsIdxList;
@@ -52,9 +61,11 @@ protected:
     bool                             _appendToBuilding;
     bool                             _trueHeight;
     int                              _lodIdx;
-    std::vector<Point_3>&            _dPts;
+    Point3VectorPtr                  _dPts;
 
     void check_simplicity(Polygon_2& ring);
+    void polyset_to_polygon(const CGAL::Polygon_set_2<CGAL::Epeck>& polySet);
+    void set_footprint_mesh_connectivity(const std::unordered_map<std::string, int>& pointConnectivity);
 };
 
 #endif //CITY4CFD_EXPLICITBUILDING_H

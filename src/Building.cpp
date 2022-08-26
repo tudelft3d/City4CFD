@@ -1,8 +1,7 @@
 /*
-  Copyright (c) 2021-2022,
-  Ivan Pađen <i.paden@tudelft.nl>
-  3D Geoinformation,
-  Delft University of Technology
+  City4CFD
+ 
+  Copyright (c) 2021-2022, 3D Geoinformation Research Group, TU Delft  
 
   This file is part of City4CFD.
 
@@ -13,10 +12,17 @@
 
   City4CFD is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  along with this program. If not, see <http://www.gnu.org/licenses/>
+  along with City4CFD.  If not, see <http://www.gnu.org/licenses/>.
+
+  For any information or further details about the use of City4CFD, contact
+  Ivan Pađen
+  <i.paden@tudelft.nl>
+  3D Geoinformation Research Group
+  Delft University of Technology
 */
 
 #include "Building.h"
@@ -32,23 +38,25 @@
 #include <CGAL/Mesh_3/dihedral_angle_3.h>
 
 Building::Building()
-        : PolyFeature(1), _height(-g_largnum) {}
+        : PolyFeature(1), _height(-global::largnum) {}
 
 Building::Building(const int internalID)
-        : PolyFeature(1, internalID), _height(-g_largnum) {}
+        : PolyFeature(1, internalID), _height(-global::largnum) {}
 
 Building::Building(const nlohmann::json& poly)
-        : PolyFeature(poly, 1), _height(-g_largnum) {}
+        : PolyFeature(poly, true, 1), _height(-global::largnum) {}
+        // 'true' here to check for polygon simplicity
 
 Building::Building(const nlohmann::json& poly, const int internalID)
-        : PolyFeature(poly, 1, internalID), _height(-g_largnum) {}
+        : PolyFeature(poly, true, 1, internalID), _height(-global::largnum) {}
+        // 'true' here to check for polygon simplicity
 
 Building::~Building() = default;
 
 void Building::clip_bottom(const Terrainptr& terrain) {
     if (!_clip_bottom) return;
     if (this->has_self_intersections() && !Config::get().handleSelfIntersect) throw
-                std::runtime_error(std::string("Clip error in building ID " + std::to_string(this->get_internal_id())
+                std::runtime_error(std::string("Clip error in building ID " + this->get_id() +
                                                + ". Cannot clip if there are self intersections!"));
     //-- Get terrain subset
     Mesh terrainSubsetMesh = terrain->mesh_subset(_poly);
@@ -146,15 +154,19 @@ void Building::set_to_zero_terrain() {
     this->reconstruct_flat_terrain();
 }
 
-double Building::max_dim() {
+double Building::sq_max_dim() {
     std::vector<double> dims;
+    /*
     EPICK::Vector_2 diag(_poly.bbox().xmax() - _poly.bbox().xmin(), _poly.bbox().ymax() - _poly.bbox().ymin());
-
     dims.emplace_back(diag.squared_length() * pow(cos(M_PI_4), 2));
     dims.emplace_back(diag.squared_length() * pow(sin(M_PI_4), 2));
+    */
+    MinBbox& minBbox = this->get_min_bbox();
+    dims.emplace_back(minBbox.vec1.squared_length());
+    dims.emplace_back(minBbox.vec2.squared_length());
     dims.emplace_back(_height * _height);
 
-    return sqrt(*(std::max_element(dims.begin(), dims.end())));
+    return *(std::max_element(dims.begin(), dims.end()));
 }
 
 double Building::get_height() const {

@@ -1,8 +1,7 @@
 /*
-  Copyright (c) 2021-2022,
-  Ivan Pađen <i.paden@tudelft.nl>
-  3D Geoinformation,
-  Delft University of Technology
+  City4CFD
+ 
+  Copyright (c) 2021-2022, 3D Geoinformation Research Group, TU Delft  
 
   This file is part of City4CFD.
 
@@ -13,10 +12,17 @@
 
   City4CFD is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  along with this program. If not, see <http://www.gnu.org/licenses/>
+  along with City4CFD.  If not, see <http://www.gnu.org/licenses/>.
+
+  For any information or further details about the use of City4CFD, contact
+  Ivan Pađen
+  <i.paden@tudelft.nl>
+  3D Geoinformation Research Group
+  Delft University of Technology
 */
 
 #ifndef CITY4CFD_IO_H
@@ -30,7 +36,8 @@ namespace IO {
     void read_config(std::string& config_path);
     bool read_point_cloud(std::string& file, Point_set_3& pc);
     void read_geojson_polygons(std::string& file, JsonVector& jsonPolygons);
-    void read_explicit_geometries(std::string& file, JsonVector& importedBuildings, std::vector<Point_3>& importedBuildingPts);
+    void read_cityjson_geometries(std::string& file, JsonVector& importedBuildings, Point3VectorPtr& importedBuildingPts);
+    void read_other_geometries(std::string& file, std::vector<Mesh>& meshes);
 
     //-- Output functions
     void print_progress_bar(int percent);
@@ -46,6 +53,7 @@ namespace IO {
     bool not_small(std::vector<int> idxLst);
 
     void output_log();
+    bool has_substr(const std::string& strMain, const std::string& subStr);
 
     std::string gen_key_bucket(const Point_2 p);
 

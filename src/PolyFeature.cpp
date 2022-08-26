@@ -1,8 +1,7 @@
 /*
-  Copyright (c) 2021-2022,
-  Ivan Pađen <i.paden@tudelft.nl>
-  3D Geoinformation,
-  Delft University of Technology
+  City4CFD
+ 
+  Copyright (c) 2021-2022, 3D Geoinformation Research Group, TU Delft  
 
   This file is part of City4CFD.
 
@@ -13,10 +12,17 @@
 
   City4CFD is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  along with this program. If not, see <http://www.gnu.org/licenses/>
+  along with City4CFD.  If not, see <http://www.gnu.org/licenses/>.
+
+  For any information or further details about the use of City4CFD, contact
+  Ivan Pađen
+  <i.paden@tudelft.nl>
+  3D Geoinformation Research Group
+  Delft University of Technology
 */
 
 #include "PolyFeature.h"
@@ -24,36 +30,44 @@
 #include "geomutils.h"
 
 #include <CGAL/natural_neighbor_coordinates_2.h>
+#include <CGAL/min_quadrilateral_2.h>
 #ifndef NDEBUG
 #include <CGAL/Barycentric_coordinates_2/Triangle_coordinates_2.h>
 #endif
 
 PolyFeature::PolyFeature()
-    : TopoFeature(), _poly(), _base_heights(), _polyInternalID() {}
+    : TopoFeature(), _poly(), _base_heights(), _polyInternalID(), _minBbox() {}
 
 PolyFeature::PolyFeature(const int outputLayerID)
-    : TopoFeature(outputLayerID), _poly(), _base_heights(), _polyInternalID() {}
+    : TopoFeature(outputLayerID), _poly(), _base_heights(), _polyInternalID(), _minBbox() {}
 
-PolyFeature::PolyFeature(const nlohmann::json& poly)
-    : TopoFeature(), _base_heights(), _polyInternalID() {
-    this->parse_json_poly(poly);
+PolyFeature::PolyFeature(const nlohmann::json& poly, const bool checkSimplicity)
+    : TopoFeature(), _base_heights(), _polyInternalID(), _minBbox() {
+    this->parse_json_poly(poly, checkSimplicity);
 }
 
 PolyFeature::PolyFeature(const int outputLayerID, const int internalID)
     : TopoFeature(outputLayerID), _polyInternalID(internalID) {}
 
-PolyFeature::PolyFeature(const nlohmann::json& poly, const int outputLayerID)
-    : PolyFeature(poly) {
+PolyFeature::PolyFeature(const nlohmann::json& poly, const bool checkSimplicity, const int outputLayerID)
+    : PolyFeature(poly, checkSimplicity) {
     _outputLayerID = outputLayerID;
     if (_outputLayerID  >= _numOfOutputLayers) _numOfOutputLayers = _outputLayerID + 1;
 }
 
-PolyFeature::PolyFeature(const nlohmann::json& poly, const int outputLayerID, const int internalID)
-    : PolyFeature(poly) {
+PolyFeature::PolyFeature(const nlohmann::json& poly, const int outputLayerID)
+        : PolyFeature(poly, false, outputLayerID) {}
+
+PolyFeature::PolyFeature(const nlohmann::json& poly, const bool checkSimplicity,
+                         const int outputLayerID, const int internalID)
+    : PolyFeature(poly, checkSimplicity) {
     _polyInternalID = internalID;
     _outputLayerID    = outputLayerID;
     if (_outputLayerID  >= _numOfOutputLayers) _numOfOutputLayers = _outputLayerID + 1;
 }
+
+PolyFeature::PolyFeature(const nlohmann::json& poly, const int outputLayerID, const int internalID)
+        : PolyFeature(poly, false, outputLayerID, internalID) {}
 
 PolyFeature::~PolyFeature() = default;
 
@@ -82,14 +96,6 @@ void PolyFeature::calc_footprint_elevation_nni(const DT& dt) {
             ringHeights.push_back(height);
         }
         _base_heights.push_back(ringHeights);
-    }
-}
-
-void PolyFeature::set_zero_borders() {
-    for (auto& ring : _base_heights) {
-        for (auto& pt : ring) {
-            pt = 0.;
-        }
     }
 }
 
@@ -127,8 +133,20 @@ void PolyFeature::calc_footprint_elevation_linear(const DT& dt) {
 }
 #endif
 
-void PolyFeature::average_polygon_inner_points(const Point_set_3& pointCloud,
-                                               std::map<int, Point_3>& averagedPts,
+double PolyFeature::get_avg_base_elevation() {
+    if (_base_heights.empty())throw std::runtime_error("Polygon heights missing!"
+                                                       " Cannot calculate average");
+    std::vector<double> footprintElevations;
+    for (auto& ring : _base_heights) {
+        for (auto& pt : ring) {
+            footprintElevations.push_back(pt);
+        }
+    }
+    return geomutils::avg(footprintElevations);
+}
+
+void PolyFeature::flatten_polygon_inner_points(const Point_set_3& pointCloud,
+                                               std::map<int, Point_3>& flattenedPts,
                                                const SearchTree& searchTree,
                                                const std::unordered_map<Point_3, int>& pointCloudConnectivity) const {
     std::vector<int>    indices;
@@ -137,15 +155,17 @@ void PolyFeature::average_polygon_inner_points(const Point_set_3& pointCloud,
     //-- Take tree subset bounded by the polygon
     std::vector<Point_3> subsetPts;
     Polygon_2 bbox = geomutils::calc_bbox_poly(_poly.rings().front());
-    Point_3 bbox1(bbox[0].x(), bbox[0].y(), -g_largnum);
-    Point_3 bbox2(bbox[2].x(), bbox[2].y(), g_largnum);
+    Point_3 bbox1(bbox[0].x(), bbox[0].y(), -global::largnum);
+    Point_3 bbox2(bbox[2].x(), bbox[2].y(), global::largnum);
     Fuzzy_iso_box pts_range(bbox1, bbox2);
     searchTree.search(std::back_inserter(subsetPts), pts_range);
 
-    //-- Collect points that have not been already averaged
+    //-- Collect points that have not been already flattened
     for (auto& pt3 : subsetPts) {
         Point_2 pt(pt3.x(), pt3.y());
-        if (CGAL::bounded_side_2(_poly._rings.front().begin(), _poly._rings.front().end(), pt) != CGAL::ON_UNBOUNDED_SIDE) {
+        if (CGAL::bounded_side_2(_poly._rings.front().begin(),
+                                 _poly._rings.front().end(),
+                                 pt) != CGAL::ON_UNBOUNDED_SIDE) {
             auto itIdx = pointCloudConnectivity.find(pt3);
 
             auto pointSetIt = pointCloud.begin();
@@ -153,23 +173,52 @@ void PolyFeature::average_polygon_inner_points(const Point_set_3& pointCloud,
             if (is_building_pt[*pointSetIt])
                 return; //todo temp solution when having adjacent buildings
 
-            auto it = averagedPts.find(itIdx->second);
-            if (it == averagedPts.end()) {
+            auto it = flattenedPts.find(itIdx->second);
+            if (it == flattenedPts.end()) {
                 indices.push_back(itIdx->second);
                 originalHeights.push_back(pointCloud.point(itIdx->second).z());
             }
         }
     }
-    //-- Average points
+    //-- Flatten surface points
     if (indices.empty()) {
         return;
     }
-    double avgHeight = geomutils::percentile(originalHeights, Config::get().averageSurfaces[this->get_output_layer_id()] / 100);
+    double avgHeight = geomutils::percentile(originalHeights,
+                                             Config::get().flattenSurfaces[this->get_output_layer_id()] / 100);
 
     //-- Add new points to the temp map
     for (auto& i : indices) {
-        averagedPts[i] = Point_3(pointCloud.point(i).x(), pointCloud.point(i).y(), avgHeight);
+        flattenedPts[i] = Point_3(pointCloud.point(i).x(), pointCloud.point(i).y(), avgHeight);
     }
+}
+
+void PolyFeature::set_zero_borders() {
+    for (auto& ring : _base_heights) {
+        for (auto& pt : ring) {
+            pt = 0.;
+        }
+    }
+}
+
+void PolyFeature::calc_min_bbox() {
+    if (_poly.rings().front().is_empty()) throw std::runtime_error("Missing polygon!");
+    //-- Point set needs to be convex for the rotating caliper algorithm
+    std::vector<Point_2> chull;
+    CGAL::convex_hull_2(_poly.rings().front().vertices_begin(),
+                        _poly.rings().front().vertices_end(),
+                        std::back_inserter(chull));
+
+    std::vector<Point_2> obbPts; obbPts.reserve(4);
+    CGAL::min_rectangle_2(chull.begin(),
+                          chull.end(),
+                          std::back_inserter(obbPts));
+    assert(obbPts.size() == 4);
+
+    _minBbox.vec1 = obbPts[1] - obbPts[0];
+    _minBbox.vec2 = obbPts[3] - obbPts[0];
+
+    _minBbox.calc();
 }
 
 void PolyFeature::clear_feature() {
@@ -193,12 +242,28 @@ const int PolyFeature::get_internal_id() const {
     return _polyInternalID;
 }
 
-void PolyFeature::parse_json_poly(const nlohmann::json& poly) {
+MinBbox& PolyFeature::get_min_bbox() {
+    if (_minBbox.empty()) {
+        this->calc_min_bbox();
+    }
+    return _minBbox;
+}
+
+void PolyFeature::parse_json_poly(const nlohmann::json& poly, const bool checkSimplicity) {
     for (auto& polyEdges : poly["geometry"]["coordinates"]) {
         Polygon_2 tempPoly;
-        for (auto& coords : polyEdges) {
-            tempPoly.push_back(Point_2((double)coords[0] - Config::get().pointOfInterest.x(),
-                                       (double)coords[1] - Config::get().pointOfInterest.y()));
+
+        const double minDist = 0.0001;
+        Point_2 prev((double)polyEdges.front()[0] - Config::get().pointOfInterest.x(),
+                     (double)polyEdges.front()[1] - Config::get().pointOfInterest.y());
+        prev += (Point_2(global::largnum, global::largnum) - prev);
+        for (auto& coords: polyEdges) {
+            Point_2 pt2((double)coords[0] - Config::get().pointOfInterest.x(),
+                        (double)coords[1] - Config::get().pointOfInterest.y());
+            if (CGAL::squared_distance(pt2, prev) > minDist) {
+                tempPoly.push_back(pt2);
+                prev = pt2;
+            }
         }
         geomutils::pop_back_if_equal_to_front(tempPoly);
 
@@ -206,6 +271,20 @@ void PolyFeature::parse_json_poly(const nlohmann::json& poly) {
             if (tempPoly.is_clockwise_oriented()) tempPoly.reverse_orientation();
         } else {
             if (tempPoly.is_counterclockwise_oriented()) tempPoly.reverse_orientation();
+        }
+        if (checkSimplicity) {
+            if (!tempPoly.is_simple()) {
+                if (Config::get().avoidBadPolys) {
+                    this->deactivate();
+                    return;
+                } else {
+                    std::cout << "WARNING: Bad building polygon found! This might effect reconstruction quality! "
+                                 "If you end up having problems, try to fix the dataset with GIS software or 'pprepair'."
+                              << std::endl;
+                    std::cout << "    Alternatively, you can use the 'avoid_bad_polys' flag to skip"
+                                 " the import of problematic polygons.\n" << std::endl;
+                }
+            }
         }
         _poly._rings.push_back(tempPoly);
     }

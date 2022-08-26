@@ -1,8 +1,7 @@
 /*
-  Copyright (c) 2021-2022,
-  Ivan Pađen <i.paden@tudelft.nl>
-  3D Geoinformation,
-  Delft University of Technology
+  City4CFD
+ 
+  Copyright (c) 2021-2022, 3D Geoinformation Research Group, TU Delft  
 
   This file is part of City4CFD.
 
@@ -13,10 +12,17 @@
 
   City4CFD is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  along with this program. If not, see <http://www.gnu.org/licenses/>
+  along with City4CFD.  If not, see <http://www.gnu.org/licenses/>.
+
+  For any information or further details about the use of City4CFD, contact
+  Ivan Pađen
+  <i.paden@tudelft.nl>
+  3D Geoinformation Research Group
+  Delft University of Technology
 */
 
 #include "Map3d.h"
@@ -104,28 +110,46 @@ void Map3d::set_features() {
         _buildings.push_back(building);
         _lsFeatures.push_back(building);
     }
+    if (Config::get().avoidBadPolys) this->clear_inactives(); // Remove buildings that potentially couldn't be imported
     //- Imported buildings
-    if (!_importedBuildingsJson.empty())  std::cout << "Importing CityJSON geometries" << std::endl;
-    std::vector<std::shared_ptr<ImportedBuilding>> appendingBuildings;
-    internalID = 0;
-    for (auto& importedBuilding : _importedBuildingsJson) {
-        auto explicitGeom = std::make_shared<ImportedBuilding>(*importedBuilding, _importedBuildingsPts, internalID++);
-        if (!explicitGeom->is_appending()) {
-            _importedBuildings.push_back(explicitGeom);
-            _buildings.push_back(explicitGeom);
-            _lsFeatures.push_back(explicitGeom);
-        } else {
-            appendingBuildings.push_back(explicitGeom);
-        }
-    }
-    //- Check for building parts that do not have footprint and append to another instance of the same building
-    for (auto& b : appendingBuildings) {
-        for (auto& importedBuilding :  _importedBuildings) {
-            if (b->get_parent_building_id() == importedBuilding->get_parent_building_id()) {
-                importedBuilding->append_nonground_part(b);
-                break;
+    if (!_importedBuildingsJSON.empty()) {
+        std::cout << "Importing CityJSON geometries" << std::endl;
+
+        std::vector<std::shared_ptr<ImportedBuilding>> appendingBuildings;
+        internalID = 0;
+        for (auto& importedBuilding: _importedBuildingsJSON) {
+            auto explicitCityJSONGeom = std::make_shared<ImportedBuilding>(importedBuilding, _importedBuildingsPts,
+                                                                           internalID++);
+            if (!explicitCityJSONGeom->is_appending()) {
+                _importedBuildings.push_back(explicitCityJSONGeom);
+                _buildings.push_back(explicitCityJSONGeom);
+                _lsFeatures.push_back(explicitCityJSONGeom);
+            } else {
+                appendingBuildings.push_back(explicitCityJSONGeom);
             }
         }
+        //- Check for building parts that do not have footprint and append to another instance of the same building
+        for (auto& b: appendingBuildings) {
+            for (auto& importedBuilding: _importedBuildings) {
+                if (b->get_parent_building_id() == importedBuilding->get_parent_building_id()) {
+                    importedBuilding->append_nonground_part(b);
+                    break;
+                }
+            }
+        }
+        _cityjsonInput = true;
+        _importedBuildingsJSON.clear();
+    } else if (!_importedBuildingsOther.empty()) {
+        std::cout << "Importing geometries" << std::endl;
+        for (auto& mesh : _importedBuildingsOther) {
+            auto explicitOBJGeom = std::make_shared<ImportedBuilding>(mesh, internalID++);
+            _importedBuildings.push_back(explicitOBJGeom);
+            _buildings.push_back(explicitOBJGeom);
+            _lsFeatures.push_back(explicitOBJGeom);
+        }
+        Config::get().logSummary << "Number of buildings not imported due to bad surface connectivity: "
+                                 << ImportedBuilding::noBottom << std::endl;
+        _importedBuildingsOther.clear();
     }
     if (!_importedBuildings.empty()) {
         this->clear_inactives();
@@ -200,6 +224,10 @@ void Map3d::set_influ_region() {
     if (!_importedBuildings.empty()) this->solve_building_conflicts();
 
     std::cout << "    Number of building geometries in the influence region: " << _buildings.size() << std::endl;
+    if (_buildings.empty()) {
+        throw std::runtime_error("No buildings were reconstructed in the influence region!"
+                                 " If using polygons and point cloud, make sure they are aligned.");
+    }
 }
 
 void Map3d::set_bnd() {
@@ -249,7 +277,7 @@ void Map3d::reconstruct_terrain() {
     if (_terrain->get_cdt().number_of_vertices() == 0) {
         std::cout << "\nReconstructing terrain" << std::endl;
         _terrain->prep_constraints(_lsFeatures, _pointCloud.get_terrain());
-        if (!Config::get().averageSurfaces.empty()) _pointCloud.average_polygon_pts(_lsFeatures);
+        if (!Config::get().flattenSurfaces.empty()) _pointCloud.flatten_polygon_pts(_lsFeatures);
         _terrain->set_cdt(_pointCloud.get_terrain());
         _terrain->constrain_features();
     }
@@ -260,7 +288,7 @@ void Map3d::reconstruct_terrain() {
 
 void Map3d::reconstruct_buildings() {
     std::cout << "\nReconstructing buildings" << std::endl;
-    if (!_importedBuildings.empty()) {
+    if (!_importedBuildings.empty() && _cityjsonInput) {
         std::cout << "    Will try to reconstruct imported buildings in LoD: " << Config::get().importLoD
                   << ". If I cannot find a geometry with that LoD, I will reconstruct in the highest LoD available"
                   << std::endl;
@@ -289,14 +317,17 @@ void Map3d::reconstruct_buildings() {
             Config::get().log << "Failed to reconstruct building ID: " << f->get_id()
                         << " Reason: " << e.what() << std::endl;
             //-- Get JSON file ID for failed reconstructions output
-            Config::get().failedBuildings.push_back(f->get_internal_id());
+            //   For now only polygons (reconstructed buildings) are stored to GeoJSON
+            if (!f->is_imported())
+                Config::get().failedBuildings.push_back(f->get_internal_id());
         }
         std::cout << "Done reconstructing: " << reconstructed << std::endl; //todo temp
     }
-    Config::get().logSummary << "BUILDING RECONSTRUCTION SUMMARY: TOTAL FAILED RECONSTRUCTIONS: "
-                       << failed << std::endl;
-
     this->clear_inactives();
+    Config::get().logSummary << "Building reconstruction summary: successfully reconstructed buildings: "
+                             << _buildings.size() << std::endl;
+    Config::get().logSummary << "                                 num of failed reconstructions: "
+                             << failed << std::endl;
 }
 
 void Map3d::reconstruct_boundaries() {
@@ -350,7 +381,7 @@ void Map3d::clip_buildings() {
     //-- Prepare terrain with subset
     std::cout << "\nReconstructing terrain" << std::endl;
     _terrain->prep_constraints(_lsFeatures, _pointCloud.get_terrain());
-    if (!Config::get().averageSurfaces.empty()) _pointCloud.average_polygon_pts(_lsFeatures);
+    if (!Config::get().flattenSurfaces.empty()) _pointCloud.flatten_polygon_pts(_lsFeatures);
     _terrain->set_cdt(_pointCloud.get_terrain());
     _terrain->constrain_features();
     _terrain->prepare_subset();
@@ -361,13 +392,14 @@ void Map3d::clip_buildings() {
     for (auto& b : _buildings) {
         b->clip_bottom(_terrain);
 
-        IO::print_progress_bar(100 * count ++ / _buildings.size());
+        if ((count % 50) == 0) IO::print_progress_bar(100 * count / _buildings.size());
+        ++count;
     }
     IO::print_progress_bar(100); std::cout << std::endl;
     _terrain->clear_subset();
 }
 
-void Map3d::read_data() { // This will change with time
+void Map3d::read_data() {
     //-- Read point clouds
     _pointCloud.read_point_clouds();
 
@@ -377,24 +409,34 @@ void Map3d::read_data() { // This will change with time
         IO::read_geojson_polygons(Config::get().gisdata, _polygonsBuildings);
         if (_polygonsBuildings.empty()) throw std::invalid_argument("Didn't find any building polygons!");
     }
-
     //-- Read surface layer polygons
     for (auto& topoLayer: Config::get().topoLayers) {
         _polygonsSurfaceLayers.emplace_back();
         IO::read_geojson_polygons(topoLayer, _polygonsSurfaceLayers.back());
     }
-
     //-- Read imported buildings
-    if (!Config::get().importedBuildings.empty()) {
+    if (!Config::get().importedBuildingsPath.empty()) {
 //        std::cout << "Importing CityJSON geometries" << std::endl;
-        IO::read_explicit_geometries(Config::get().importedBuildings, _importedBuildingsJson, _importedBuildingsPts);
+        auto& inputfile = Config::get().importedBuildingsPath;
+        if (IO::has_substr(inputfile, ".json")) {
+            _importedBuildingsPts = std::make_shared<std::vector<Point_3>>();
+            IO::read_cityjson_geometries(inputfile, _importedBuildingsJSON, _importedBuildingsPts);
+        } else if (IO::has_substr(inputfile, ".obj") ||
+                   IO::has_substr(inputfile, ".stl") ||
+                   IO::has_substr(inputfile, ".vtp") ||
+                   IO::has_substr(inputfile, ".ply") ||
+                   IO::has_substr(inputfile, ".off")) {
+            IO::read_other_geometries(inputfile, _importedBuildingsOther);
+        } else {
+            throw std::runtime_error(std::string("File " + inputfile + "contains unknown import format."
+                                                                  " Available inputs: .obj, .stl, .vtp, "
+                                                                  ".ply. .off, or .json (CityJSON)"));
+        }
     }
 }
 
 void Map3d::output() {
-#ifndef NDEBUG
     assert(Config::get().outputSurfaces.size() == TopoFeature::get_num_output_layers());
-#endif
     fs::current_path(Config::get().outputDir);
     std::cout << "\nOutputting surface meshes "      << std::endl;
     std::cout << "    Folder: " << fs::canonical(fs::current_path()) << std::endl;
@@ -452,22 +494,31 @@ void Map3d::clear_inactives() {
             _reconstructedBuildings.erase(_reconstructedBuildings.begin() + i);
         }
     }
-    std::vector<std::string> inactiveBuildingIdxs;
-    for (auto& importedBuilding : _importedBuildings) {
-        if (!importedBuilding->is_active()) {
-            auto it = std::find(inactiveBuildingIdxs.begin(), inactiveBuildingIdxs.end(),
-                                importedBuilding->get_parent_building_id());
-            if (it == inactiveBuildingIdxs.end())
-                inactiveBuildingIdxs.push_back(importedBuilding->get_parent_building_id());
+    if (_cityjsonInput) {
+        std::vector<std::string> inactiveBuildingIdxs;
+        for (auto& importedBuilding: _importedBuildings) {
+            if (!importedBuilding->is_active()) {
+                auto it = std::find(inactiveBuildingIdxs.begin(), inactiveBuildingIdxs.end(),
+                                    importedBuilding->get_parent_building_id());
+                if (it == inactiveBuildingIdxs.end())
+                    inactiveBuildingIdxs.push_back(importedBuilding->get_parent_building_id());
+            }
         }
-    }
-    for (unsigned long i = 0; i < _importedBuildings.size();) {
-        auto it = std::find(inactiveBuildingIdxs.begin(), inactiveBuildingIdxs.end(),
-                            _importedBuildings[i]->get_parent_building_id());
-        if (it == inactiveBuildingIdxs.end()) ++i;
-        else {
-            _importedBuildings[i]->deactivate();
-            _importedBuildings.erase(_importedBuildings.begin() + i);
+        for (unsigned long i = 0; i < _importedBuildings.size();) {
+            auto it = std::find(inactiveBuildingIdxs.begin(), inactiveBuildingIdxs.end(),
+                                _importedBuildings[i]->get_parent_building_id());
+            if (it == inactiveBuildingIdxs.end()) ++i;
+            else {
+                _importedBuildings[i]->deactivate();
+                _importedBuildings.erase(_importedBuildings.begin() + i);
+            }
+        }
+    } else {
+        for (unsigned long i = 0; i < _importedBuildings.size();) {
+            if (_importedBuildings[i]->is_active()) ++i;
+            else {
+                _importedBuildings.erase(_importedBuildings.begin() + i);
+            }
         }
     }
     for (unsigned long i = 0; i < _buildings.size();) {
@@ -521,7 +572,7 @@ template void Map3d::set_footprint_elevation<Buildings>    (Buildings& feature);
 template void Map3d::set_footprint_elevation<SurfaceLayers>(SurfaceLayers& feature);
 template void Map3d::set_footprint_elevation<PolyFeatures> (PolyFeatures& feature);
 
-void Map3d::one_mesh() {
+void Map3d::one_mesh() { //todo put it somewhere else
     std::cout << "Making one mesh and doing alpha wrap" << std::endl;
     typedef EPICK::FT                 FT;
     typedef std::array<FT, 3>         Custom_point;

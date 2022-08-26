@@ -1,8 +1,7 @@
 /*
-  Copyright (c) 2021-2022,
-  Ivan Pađen <i.paden@tudelft.nl>
-  3D Geoinformation,
-  Delft University of Technology
+  City4CFD
+
+  Copyright (c) 2021-2022, 3D Geoinformation Research Group, TU Delft
 
   This file is part of City4CFD.
 
@@ -13,10 +12,17 @@
 
   City4CFD is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  along with this program. If not, see <http://www.gnu.org/licenses/>
+  along with City4CFD.  If not, see <http://www.gnu.org/licenses/>.
+
+  For any information or further details about the use of City4CFD, contact
+  Ivan Pađen
+  <i.paden@tudelft.nl>
+  3D Geoinformation Research Group
+  Delft University of Technology
 */
 
 #ifndef CITY4CFD_RECONSTRUCTEDBUILDING_H
@@ -30,6 +36,7 @@ public:
     ReconstructedBuilding(const int internalID);
     ReconstructedBuilding(const Mesh& mesh);
     ReconstructedBuilding(const nlohmann::json& poly);
+//    ReconstructedBuilding(const nlohmann::json& poly);
     ReconstructedBuilding(const nlohmann::json& poly, const int internalID);
     ~ReconstructedBuilding();
 

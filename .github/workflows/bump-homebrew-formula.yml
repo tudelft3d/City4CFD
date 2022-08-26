@@ -1,0 +1,29 @@
+name: Bump Homebrew formula
+
+on:
+  release:
+    types: [ published ]
+    
+jobs:
+  homebrew:
+    name: Bump Homebrew formula
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get the version
+        id: get_version
+        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+        
+      - name: Update homebrew tap
+        uses: mislav/bump-homebrew-formula-action@v2.1
+        with:
+          formula-name: city4cfd
+          formula-path: Formula/city4cfd.rb
+          homebrew-tap: tudelft3d/homebrew-software
+          base-branch: master
+          download-url: https://github.com/tudelft3d/city4cfd/archive/${{ steps.get_version.outputs.VERSION }}.tar.gz
+          commit-message: |
+           Bumped {{formulaName}} to {{version}}
+
+            Created by https://github.com/mislav/bump-homebrew-formula-action
+        env:
+          COMMITTER_TOKEN: ${{ secrets.COMMITTER_TOKEN }}

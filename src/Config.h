@@ -1,8 +1,7 @@
 /*
-  Copyright (c) 2021-2022,
-  Ivan Pađen <i.paden@tudelft.nl>
-  3D Geoinformation,
-  Delft University of Technology
+  City4CFD
+ 
+  Copyright (c) 2021-2022, 3D Geoinformation Research Group, TU Delft  
 
   This file is part of City4CFD.
 
@@ -13,10 +12,17 @@
 
   City4CFD is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  along with this program. If not, see <http://www.gnu.org/licenses/>
+  along with City4CFD.  If not, see <http://www.gnu.org/licenses/>.
+
+  For any information or further details about the use of City4CFD, contact
+  Ivan Pađen
+  <i.paden@tudelft.nl>
+  3D Geoinformation Research Group
+  Delft University of Technology
 */
 
 #ifndef CITY4CFD_CONFIG_H
@@ -49,11 +55,13 @@ public:
                     nlohmann::json& j);
 
     //-- Input info
-    std::string              points_xyz;         // Ground
-    std::string              buildings_xyz;      // Buildings
-    std::string              gisdata;            // Building Polygons
-    std::vector<std::string> topoLayers = {};    // Other polygons
-    std::string              importedBuildings;  // Additional pre-reconstructed buildings
+    std::string              points_xyz;             // Ground
+    std::string              buildings_xyz;          // Buildings
+    std::string              gisdata;                // Building Polygons
+    std::vector<std::string> topoLayers = {};        // Other polygons
+    std::string              importedBuildingsPath;  // Additional pre-reconstructed buildings
+
+    bool                     avoidBadPolys      = false;
 
     //-- Domain setup
     Point_2     pointOfInterest;
@@ -66,7 +74,7 @@ public:
     double                bpgBlockageRatio      = 0.03;
     Vector_2              flowDirection         = Vector_2(1,0);
     std::vector<double>   bpgDomainSize;
-    double                domainBuffer          = -g_largnum;
+    double                domainBuffer          = -global::largnum;
 
     //-- Reconstruction
     //- Terrain
@@ -77,9 +85,6 @@ public:
     std::string buildingUniqueId;
     std::string lod;
     double      buildingPercentile;
-    bool        clip                            = false;
-    bool        handleSelfIntersect             = false;
-    bool        refineBuildings                 = false;
     // Height from attributes
     std::string buildingHeightAttribute;
     std::string floorAttribute;
@@ -88,30 +93,35 @@ public:
     //- Imported buildings
     bool        importAdvantage;
     bool        importTrueHeight;
-    std::string importLoD;
+    std::string importLoD                       = "9999";
     //- Boundary
-    bool  reconstructBoundaries                = false;
+    bool  reconstructBoundaries                 = false;
 
     //-- Polygons related
     double                edgeMaxLen;
-    std::map<int, double> averageSurfaces;
+    std::map<int, double> flattenSurfaces;
 
     //-- Output
     fs::path                  workDir;
-    fs::path                  outputDir        = fs::current_path();
+    fs::path                  outputDir         = fs::current_path();
     std::string               outputFileName;
-    OutputFormat              outputFormat;
-    bool                      outputSeparately = false;
-    std::vector<std::string>  outputSurfaces   = {"Terrain", "Buildings"};
-    int                       numSides         = 1;
+    GeomFormat                outputFormat;
+    bool                      outputSeparately  = false;
+    std::vector<std::string>  outputSurfaces    = {"Terrain", "Buildings"};
+    int                       numSides          = 1;
     std::vector<int>          surfaceLayerIDs;
 
     //-- Data log
-    bool               outputLog               = false;
-    std::string        logName                 = std::string("log");
+    bool               outputLog                = false;
+    std::string        logName                  = std::string("log");
     std::ostringstream log;
     std::ostringstream logSummary;
     std::vector<int>   failedBuildings;
+
+    //-- Experimental
+    bool       clip                             = false;
+    bool       handleSelfIntersect              = false;
+    bool       refineBuildings                  = false;
 };
 
 #endif //CITY4CFD_CONFIG_H

@@ -1,8 +1,7 @@
 /*
-  Copyright (c) 2021-2022,
-  Ivan Pađen <i.paden@tudelft.nl>
-  3D Geoinformation,
-  Delft University of Technology
+  City4CFD
+
+  Copyright (c) 2021-2022, 3D Geoinformation Research Group, TU Delft
 
   This file is part of City4CFD.
 
@@ -13,10 +12,17 @@
 
   City4CFD is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  along with this program. If not, see <http://www.gnu.org/licenses/>
+  along with City4CFD.  If not, see <http://www.gnu.org/licenses/>.
+
+  For any information or further details about the use of City4CFD, contact
+  Ivan Pađen
+  <i.paden@tudelft.nl>
+  3D Geoinformation Research Group
+  Delft University of Technology
 */
 
 #include "ReconstructedBuilding.h"
@@ -37,6 +43,7 @@ ReconstructedBuilding::ReconstructedBuilding(const Mesh& mesh)
     _mesh = mesh;
 }
 
+/*
 ReconstructedBuilding::ReconstructedBuilding(const nlohmann::json& poly)
         : Building(poly), _searchTree(nullptr),
           _attributeHeight(-9999), _attributeHeightAdvantage(Config::get().buildingHeightAttrAdv) {
@@ -51,6 +58,7 @@ ReconstructedBuilding::ReconstructedBuilding(const nlohmann::json& poly)
         _attributeHeight = (double)poly["properties"][Config::get().floorAttribute] * Config::get().floorHeight;
     }
 }
+*/
 
 ReconstructedBuilding::ReconstructedBuilding(const nlohmann::json& poly, const int internalID)
         : Building(poly, internalID), _searchTree(nullptr),
@@ -68,6 +76,11 @@ ReconstructedBuilding::ReconstructedBuilding(const nlohmann::json& poly, const i
         if (poly["properties"][Config::get().floorAttribute].is_number()) {
             _attributeHeight = (double) poly["properties"][Config::get().floorAttribute] * Config::get().floorHeight;
         }
+    }
+    if (!this->is_active()) { // It can only fail if the polygon is not simple
+        Config::get().failedBuildings.push_back(internalID);
+        Config::get().log << "Failed to import building polygon ID:" << _id
+                          << ". Polygon is not simple." << std::endl;
     }
 }
 
@@ -91,8 +104,8 @@ void ReconstructedBuilding::reconstruct() {
 
     //-- Take tree subset bounded by the polygon
     std::vector<Point_3> subsetPts;
-    Point_3 bbox1(_poly.bbox().xmin(), _poly.bbox().ymin(), -g_largnum);
-    Point_3 bbox2(_poly.bbox().xmax(), _poly.bbox().ymax(), g_largnum);
+    Point_3 bbox1(_poly.bbox().xmin(), _poly.bbox().ymin(), -global::largnum);
+    Point_3 bbox2(_poly.bbox().xmax(), _poly.bbox().ymax(), global::largnum);
     Fuzzy_iso_box pts_range(bbox1, bbox2);
     _searchTree->search(std::back_inserter(subsetPts), pts_range);
 
