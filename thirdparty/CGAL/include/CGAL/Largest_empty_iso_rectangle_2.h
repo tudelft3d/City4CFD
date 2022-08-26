@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Inscribed_areas/include/CGAL/Largest_empty_iso_rectangle_2.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Inscribed_areas/include/CGAL/Largest_empty_iso_rectangle_2.h $
 // $Id: Largest_empty_iso_rectangle_2.h 0fcbaf5 2020-05-24T11:15:12+02:00 Marc Glisse
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

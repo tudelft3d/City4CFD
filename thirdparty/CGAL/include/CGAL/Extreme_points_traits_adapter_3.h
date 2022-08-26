@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Convex_hull_3/include/CGAL/Extreme_points_traits_adapter_3.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Convex_hull_3/include/CGAL/Extreme_points_traits_adapter_3.h $
 // $Id: Extreme_points_traits_adapter_3.h 263ad6b 2020-08-20T18:25:01+02:00 Dmitry Anisimov
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

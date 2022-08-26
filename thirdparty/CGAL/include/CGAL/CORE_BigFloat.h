@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Number_types/include/CGAL/CORE_BigFloat.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Number_types/include/CGAL/CORE_BigFloat.h $
 // $Id: CORE_BigFloat.h 152a084 2021-09-21T13:34:58+02:00 Sébastien Loriot
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //

@@ -7,7 +7,7 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Number_types/include/CGAL/mpq_class.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Number_types/include/CGAL/mpq_class.h $
 // $Id: mpq_class.h fa6818b 2021-04-06T19:43:42+02:00 Mael Rouxel-Labbé
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //

@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Combinatorial_map/include/CGAL/Combinatorial_map_basic_operations.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Combinatorial_map/include/CGAL/Combinatorial_map_basic_operations.h $
 // $Id: Combinatorial_map_basic_operations.h 3fb644e 2020-04-10T17:40:30+02:00 Guillaume Damiand
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //

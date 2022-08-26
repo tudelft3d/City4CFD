@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Arrangement_on_surface_2/include/CGAL/graph_traits_dual_arrangement_2.h $
-// $Id: graph_traits_dual_arrangement_2.h 254d60f 2019-10-19T15:23:19+02:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Arrangement_on_surface_2/include/CGAL/graph_traits_dual_arrangement_2.h $
+// $Id: graph_traits_dual_arrangement_2.h 6d3176e 2022-01-07T14:42:25+01:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s) : Ron Wein         <wein@post.tau.ac.il>
@@ -25,7 +25,7 @@
  */
 
 // include this to avoid a VC15 warning
-#include <CGAL/boost/graph/Named_function_parameters.h>
+#include <CGAL/Named_function_parameters.h>
 
 #include <CGAL/Arrangement_2.h>
 #include <CGAL/Arrangement_2/graph_traits_dual.h>

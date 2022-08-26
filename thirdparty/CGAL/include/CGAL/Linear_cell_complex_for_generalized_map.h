@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Linear_cell_complex/include/CGAL/Linear_cell_complex_for_generalized_map.h $
-// $Id: Linear_cell_complex_for_generalized_map.h 0308d1a 2020-03-27T18:35:15+01:00 Guillaume Damiand
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Linear_cell_complex/include/CGAL/Linear_cell_complex_for_generalized_map.h $
+// $Id: Linear_cell_complex_for_generalized_map.h 54142fd 2022-01-27T15:16:16+01:00 Guillaume Damiand
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Guillaume Damiand <guillaume.damiand@liris.cnrs.fr>
@@ -95,6 +95,9 @@ namespace CGAL {
       Linear_cell_complex_for_generalized_map(const Self & alcc) : Base(alcc)
       {}
 
+      Linear_cell_complex_for_generalized_map(Self && alcc) : Base(alcc)
+      {}
+
       template <unsigned int d2,  unsigned int ambient_dim2, class Traits2,
                 class Items2, class Alloc2,
                 template<unsigned int,class,class,class,class> class CMap2,
@@ -144,6 +147,18 @@ namespace CGAL {
       {
         Base::operator=(alcc);
         return *this;
+      }
+
+      friend std::ostream& operator<< (std::ostream& os, const Self& amap)
+      {
+        save_generalized_map(amap, os);
+        return os;
+      }
+
+      friend std::ifstream& operator>> (std::ifstream& is, Self& amap)
+      {
+        load_generalized_map(is, amap);
+        return is;
       }
     };
 

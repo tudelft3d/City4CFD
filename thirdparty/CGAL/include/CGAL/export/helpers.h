@@ -2,7 +2,7 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Installation/include/CGAL/export/helpers.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Installation/include/CGAL/export/helpers.h $
 // $Id: helpers.h e6c767d 2021-05-12T15:45:07+02:00 Maxime Gimeno
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //

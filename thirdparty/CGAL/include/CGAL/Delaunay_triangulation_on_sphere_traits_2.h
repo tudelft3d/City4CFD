@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Triangulation_on_sphere_2/include/CGAL/Delaunay_triangulation_on_sphere_traits_2.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Triangulation_on_sphere_2/include/CGAL/Delaunay_triangulation_on_sphere_traits_2.h $
 // $Id: Delaunay_triangulation_on_sphere_traits_2.h 76b6649 2021-04-29T23:22:47+02:00 Mael Rouxel-Labbé
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

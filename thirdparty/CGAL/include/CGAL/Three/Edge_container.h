@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Three/include/CGAL/Three/Edge_container.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Three/include/CGAL/Three/Edge_container.h $
 // $Id: Edge_container.h f79ec02 2021-06-28T13:11:28+02:00 Maxime Gimeno
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

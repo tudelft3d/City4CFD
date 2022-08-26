@@ -4,8 +4,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Mesh_3/include/CGAL/Polyhedral_mesh_domain_with_features_3.h $
-// $Id: Polyhedral_mesh_domain_with_features_3.h 98e4718 2021-08-26T11:33:39+02:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Mesh_3/include/CGAL/Polyhedral_mesh_domain_with_features_3.h $
+// $Id: Polyhedral_mesh_domain_with_features_3.h 1e7785b 2022-01-04T16:00:38+01:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -399,9 +399,9 @@ detect_features(FT angle_in_degree, std::vector<Polyhedron>& poly)
     nb_of_patch_plus_one += PMP::sharp_edges_segmentation(p, angle_in_degree
       , eif_map
       , pid_map
-      , PMP::parameters::first_index(nb_of_patch_plus_one)
-                        .face_index_map(get_initialized_face_index_map(p))
-                        .vertex_incident_patches_map(vip_map));
+      , CGAL::parameters::first_index(nb_of_patch_plus_one)
+                         .face_index_map(get_initialized_face_index_map(p))
+                         .vertex_incident_patches_map(vip_map));
 
     Mesh_3::internal::Is_featured_edge<Polyhedron> is_featured_edge(p);
 

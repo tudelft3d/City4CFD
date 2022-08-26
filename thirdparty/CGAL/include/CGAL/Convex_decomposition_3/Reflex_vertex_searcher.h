@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Convex_decomposition_3/include/CGAL/Convex_decomposition_3/Reflex_vertex_searcher.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Convex_decomposition_3/include/CGAL/Convex_decomposition_3/Reflex_vertex_searcher.h $
 // $Id: Reflex_vertex_searcher.h 4229fa4 2021-04-27T22:34:01+01:00 Giles Bathgate
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Arrangement_on_surface_2/include/CGAL/Arr_topology_traits/Arr_spherical_overlay_helper.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Arrangement_on_surface_2/include/CGAL/Arr_topology_traits/Arr_spherical_overlay_helper.h $
 // $Id: Arr_spherical_overlay_helper.h 9e5385d 2021-03-25T15:49:58+02:00 Efi Fogel
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

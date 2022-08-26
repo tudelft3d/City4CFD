@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Linear_cell_complex/include/CGAL/Linear_cell_complex_for_bgl_combinatorial_map_helper.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Linear_cell_complex/include/CGAL/Linear_cell_complex_for_bgl_combinatorial_map_helper.h $
 // $Id: Linear_cell_complex_for_bgl_combinatorial_map_helper.h 0779373 2020-03-26T13:31:46+01:00 Sébastien Loriot
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //

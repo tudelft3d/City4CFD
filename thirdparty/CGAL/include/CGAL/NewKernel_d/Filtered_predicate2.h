@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/NewKernel_d/include/CGAL/NewKernel_d/Filtered_predicate2.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/NewKernel_d/include/CGAL/NewKernel_d/Filtered_predicate2.h $
 // $Id: Filtered_predicate2.h 6bae0e3 2021-09-09T11:09:16+02:00 Sébastien Loriot
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //

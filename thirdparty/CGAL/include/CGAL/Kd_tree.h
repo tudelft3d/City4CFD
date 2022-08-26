@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Spatial_searching/include/CGAL/Kd_tree.h $
-// $Id: Kd_tree.h 98e4718 2021-08-26T11:33:39+02:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Spatial_searching/include/CGAL/Kd_tree.h $
+// $Id: Kd_tree.h c53ae08 2022-06-30T19:01:43+02:00 Niklas Hambüchen
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Hans Tangelder (<hanst@cs.uu.nl>),
@@ -21,6 +21,9 @@
 #include <CGAL/basic.h>
 #include <CGAL/assertions.h>
 #include <vector>
+#include <string>
+#include <unordered_map>
+#include <ostream>
 
 #include <CGAL/algorithm.h>
 #include <CGAL/Kd_tree_node.h>
@@ -327,7 +330,7 @@ public:
     dim_ = static_cast<int>(std::distance(ccci(p), ccci(p,0)));
 
     data.reserve(pts.size());
-    for(unsigned int i = 0; i < pts.size(); i++){
+    for(std::size_t i = 0; i < pts.size(); i++){
       data.push_back(&pts[i]);
     }
 
@@ -375,6 +378,39 @@ public:
   int dim() const
   {
     return dim_;
+  }
+
+  std::ostream&
+  write_graphviz(std::ostream& s) const
+  {
+    int counter = -1;
+    std::unordered_map<const Node*, int> node_to_index;
+    tree_root->get_indices(counter, node_to_index);
+
+    const auto node_name = [&](const Node* node) {
+      const int index = node_to_index.at(node);
+      std::string node_name = "default_name";
+      if (node->is_leaf()) { // leaf node
+        node_name = "L" + std::to_string(index);
+      } else {
+        if (index == 0) { // root node
+          node_name = "R" + std::to_string(index);
+        } else { // internal node
+          node_name = "N" + std::to_string(index);
+        }
+      }
+      CGAL_assertion(node_name != "default_name");
+      return node_name;
+    };
+
+    s << "graph G" << std::endl;
+    s << "{" << std::endl << std::endl;
+    s << "label=\"Graph G. Num leaves: " << tree_root->num_nodes() << ". ";
+    s << "Num items: " << tree_root->num_items() << ".\"" << std::endl;
+    s << node_name(tree_root) + " ;";
+    tree_root->print(s, node_name);
+    s << std::endl << "}" << std::endl << std::endl;
+    return s;
   }
 
 private:

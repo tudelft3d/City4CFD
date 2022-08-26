@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Point_set_processing_3/include/CGAL/hierarchy_simplify_point_set.h $
-// $Id: hierarchy_simplify_point_set.h 1f45360 2021-01-26T09:05:24+01:00 Mael Rouxel-Labbé
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Point_set_processing_3/include/CGAL/hierarchy_simplify_point_set.h $
+// $Id: hierarchy_simplify_point_set.h 11c7c56 2022-01-18T09:11:52+01:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s) : Simon Giraudot, Pierre Alliez
@@ -32,7 +32,7 @@
 #include <CGAL/Iterator_range.h>
 #include <functional>
 
-#include <CGAL/boost/graph/Named_function_parameters.h>
+#include <CGAL/Named_function_parameters.h>
 #include <CGAL/boost/graph/named_params_helper.h>
 
 namespace CGAL {
@@ -116,7 +116,7 @@ namespace CGAL {
      and returns an iterator over the first point to remove (see erase-remove idiom).
      For this reason it should not be called on sorted containers.
 
-     \pre `0 < maximum_variation < 1/3`
+     \pre `0 < maximum_variation <= 1/3`
      \pre `size > 0`
 
      \tparam PointRange is a model of `Range`. The value type of
@@ -176,24 +176,25 @@ namespace CGAL {
      \return iterator over the first point to remove.
   */
   template <typename PointRange,
-            typename NamedParameters>
+            typename NamedParameters = parameters::Default_named_parameters>
   typename PointRange::iterator
   hierarchy_simplify_point_set (PointRange& points,
-                                const NamedParameters& np)
+                                const NamedParameters& np = parameters::default_values())
   {
     using parameters::choose_parameter;
     using parameters::get_parameter;
 
     // basic geometric types
-    typedef typename CGAL::GetPointMap<PointRange, NamedParameters>::type PointMap;
-    typedef typename Point_set_processing_3::GetK<PointRange, NamedParameters>::Kernel Kernel;
+    typedef Point_set_processing_3_np_helper<PointRange, NamedParameters> NP_helper;
+    typedef typename NP_helper::Point_map PointMap;
+    typedef typename NP_helper::Geom_traits Kernel;
     typedef typename GetDiagonalizeTraits<NamedParameters, double, 3>::type DiagonalizeTraits;
 
     typedef typename Kernel::Point_3 Point;
     typedef typename Kernel::Vector_3 Vector;
     typedef typename Kernel::FT FT;
 
-    PointMap point_map = choose_parameter<PointMap>(get_parameter(np, internal_np::point_map));
+    PointMap point_map = NP_helper::get_point_map(points, np);
     unsigned int size = choose_parameter(get_parameter(np, internal_np::size), 10);
     double var_max = choose_parameter(get_parameter(np, internal_np::maximum_variation), 1./3.);
     const std::function<bool(double)>& callback = choose_parameter(get_parameter(np, internal_np::callback),
@@ -371,18 +372,6 @@ namespace CGAL {
     return first_point_to_remove;
 
   }
-
-
-  /// \cond SKIP_IN_MANUAL
-  // variant with default NP
-  template <typename PointRange>
-  typename PointRange::iterator
-  hierarchy_simplify_point_set (PointRange& points)
-  {
-    return hierarchy_simplify_point_set
-      (points, CGAL::Point_set_processing_3::parameters::all_default(points));
-  }
-  /// \endcond
 
 } // namespace CGAL
 

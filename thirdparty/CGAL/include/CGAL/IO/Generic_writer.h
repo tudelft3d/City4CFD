@@ -7,8 +7,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Stream_support/include/CGAL/IO/Generic_writer.h $
-// $Id: Generic_writer.h 4eb1464 2021-11-09T11:21:24+01:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Stream_support/include/CGAL/IO/Generic_writer.h $
+// $Id: Generic_writer.h 75b03e6 2022-01-10T15:33:04+01:00 Sébastien Loriot
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -17,7 +17,7 @@
 #ifndef CGAL_IO_GENERIC_WRITER_H
 #define CGAL_IO_GENERIC_WRITER_H
 
-#include <CGAL/boost/graph/Named_function_parameters.h>
+#include <CGAL/Named_function_parameters.h>
 #include <CGAL/boost/graph/named_params_helper.h>
 
 #include <iostream>
@@ -36,7 +36,7 @@ public:
   template <typename PointRange, typename PolygonRange, typename NamedParameters>
   bool operator()(const PointRange& points,
                   const PolygonRange& polygons,
-                  const NamedParameters& np)
+                  const NamedParameters& np = parameters::default_values())
   {
     typedef typename boost::range_value<PolygonRange>::type                   Poly;
 
@@ -72,13 +72,6 @@ public:
     m_writer.write_footer();
 
     return m_os.good();
-  }
-
-  template <typename PointRange, typename PolygonRange, typename NamedParameters>
-  bool operator()(const PointRange& points,
-                  const PolygonRange& polygons)
-  {
-    return this->operator()(points, polygons, parameters::all_default());
   }
 
 protected:

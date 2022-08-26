@@ -2,7 +2,7 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/STL_Extension/include/CGAL/Container_helper.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/STL_Extension/include/CGAL/Container_helper.h $
 // $Id: Container_helper.h 8bb22d5 2020-03-26T14:23:37+01:00 Sébastien Loriot
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //

@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Bounding_volumes/include/CGAL/minimum_enclosing_quadrilateral_2.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Bounding_volumes/include/CGAL/minimum_enclosing_quadrilateral_2.h $
 // $Id: minimum_enclosing_quadrilateral_2.h 98e4718 2021-08-26T11:33:39+02:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Arrangement_on_surface_2/include/CGAL/Curved_kernel_via_analysis_2/Sweep_curves_adapter_2.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Arrangement_on_surface_2/include/CGAL/Curved_kernel_via_analysis_2/Sweep_curves_adapter_2.h $
 // $Id: Sweep_curves_adapter_2.h 2aa0c9c 2020-07-02T19:11:30+03:00 Efi Fogel
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //

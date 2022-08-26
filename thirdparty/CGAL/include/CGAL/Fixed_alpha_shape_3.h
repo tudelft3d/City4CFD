@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Alpha_shapes_3/include/CGAL/Fixed_alpha_shape_3.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Alpha_shapes_3/include/CGAL/Fixed_alpha_shape_3.h $
 // $Id: Fixed_alpha_shape_3.h 115fa5a 2021-12-14T14:01:21+00:00 Andreas Fabri
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

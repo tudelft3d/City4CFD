@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Arrangement_on_surface_2/include/CGAL/Arr_tracing_traits_2.h $
-// $Id: Arr_tracing_traits_2.h 12a85a9 2021-03-01T15:39:36+02:00 Efi Fogel
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Arrangement_on_surface_2/include/CGAL/Arr_tracing_traits_2.h $
+// $Id: Arr_tracing_traits_2.h 97b35b7 2022-03-13T11:52:42+02:00 Efi Fogel
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s): Efi Fogel    <efif@post.tau.ac.il>
@@ -535,12 +535,12 @@ public:
 
       size_t i = 0;
       for (auto it = container.begin(); it != container.end(); ++it) {
-        if (const auto* xcv = boost::get<X_monotone_curve_2>(*it)) {
+        if (const auto* xcv = boost::get<X_monotone_curve_2>(&*it)) {
           std::cout << "  result[" << i++ << "]: xcv: " << *xcv << std::endl;
           continue;
         }
 
-        if (const Point_2* p = boost::get<Point_2>(*it)) {
+        if (const auto* p = boost::get<Point_2>(&*it)) {
           std::cout << "  result[" << i++ << "]: p: " << *p << std::endl;
           continue;
         }

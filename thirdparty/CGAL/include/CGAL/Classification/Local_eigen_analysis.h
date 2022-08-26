@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Classification/include/CGAL/Classification/Local_eigen_analysis.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Classification/include/CGAL/Classification/Local_eigen_analysis.h $
 // $Id: Local_eigen_analysis.h 350b917 2021-04-11T14:50:44+02:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

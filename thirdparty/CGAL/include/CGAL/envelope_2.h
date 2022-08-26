@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Envelope_2/include/CGAL/envelope_2.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Envelope_2/include/CGAL/envelope_2.h $
 // $Id: envelope_2.h a46398d 2020-08-25T13:43:49+02:00 Ahmed Essam
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

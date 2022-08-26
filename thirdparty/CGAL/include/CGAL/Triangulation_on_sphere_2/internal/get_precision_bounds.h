@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Triangulation_on_sphere_2/include/CGAL/Triangulation_on_sphere_2/internal/get_precision_bounds.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Triangulation_on_sphere_2/include/CGAL/Triangulation_on_sphere_2/internal/get_precision_bounds.h $
 // $Id: get_precision_bounds.h bd5a54e 2021-03-24T13:30:58+01:00 Mael Rouxel-Labbé
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

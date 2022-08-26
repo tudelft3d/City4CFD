@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Linear_cell_complex/include/CGAL/Linear_cell_complex_operations.h $
-// $Id: Linear_cell_complex_operations.h 0779373 2020-03-26T13:31:46+01:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Linear_cell_complex/include/CGAL/Linear_cell_complex_operations.h $
+// $Id: Linear_cell_complex_operations.h 440a8df 2022-02-03T08:41:04+00:00 Andreas Fabri
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Guillaume Damiand <guillaume.damiand@liris.cnrs.fr>
@@ -15,6 +15,7 @@
 #include <CGAL/Cell_iterators.h>
 #include <CGAL/Cell_const_iterators.h>
 #include <CGAL/Origin.h>
+#include <CGAL/assertions.h>
 
 namespace CGAL {
 
@@ -82,7 +83,7 @@ namespace CGAL {
     }
     while(adart!=start);
 
-    assert(nb>0);
+    CGAL_assertion(nb>0);
     return (typename LCC::Traits::Construct_scaled_vector()(normal, 1.0/nb));
     //  return normal / std::sqrt(normal * normal);
   }
@@ -201,7 +202,7 @@ namespace CGAL {
       }
       while(adart!=start);
 
-      assert(nb>1);
+      CGAL_assertion(nb>1);
       return typename LCC::Traits::Construct_translated_point()
         (CGAL::ORIGIN, typename LCC::Traits::Construct_scaled_vector()
          (vec, 1.0/nb));

@@ -2,8 +2,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/HalfedgeDS/include/CGAL/boost/graph/graph_traits_HalfedgeDS_default.h $
-// $Id: graph_traits_HalfedgeDS_default.h 620dfa4 2020-03-27T08:37:32+01:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/HalfedgeDS/include/CGAL/boost/graph/graph_traits_HalfedgeDS_default.h $
+// $Id: graph_traits_HalfedgeDS_default.h fd20bee 2022-05-03T15:09:05+01:00 Andreas Fabri
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -170,6 +170,14 @@ out_edges( typename boost::graph_traits< HalfedgeDS_default<T,I,A> const>::verte
 {
   typedef typename boost::graph_traits< HalfedgeDS_default<T,I,A> const>::out_edge_iterator Iter;
   return make_range(Iter(halfedge(u,p),p), Iter(halfedge(u,p),p,1));
+}
+
+template<class T, class I, class A>
+inline Iterator_range<typename boost::graph_traits< HalfedgeDS_default<T,I,A> const>::adjacency_iterator>
+adjacent_vertices( typename boost::graph_traits< HalfedgeDS_default<T,I,A> const>::vertex_descriptor u
+                   , const HalfedgeDS_default<T,I,A>& p)
+{
+  return CGAL::vertices_around_target(u,p);
 }
 
 //

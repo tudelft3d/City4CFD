@@ -2,8 +2,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Point_set_3/include/CGAL/Point_set_3/IO/OFF.h $
-// $Id: OFF.h a34debc 2021-06-23T22:56:35+02:00 Mael Rouxel-Labbé
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Point_set_3/include/CGAL/Point_set_3/IO/OFF.h $
+// $Id: OFF.h 10b0af3 2022-01-13T14:43:34+01:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Simon Giraudot
@@ -13,7 +13,7 @@
 
 #include <CGAL/license/Point_set_3.h>
 
-#include <CGAL/boost/graph/Named_function_parameters.h>
+#include <CGAL/Named_function_parameters.h>
 #include <CGAL/boost/graph/named_params_helper.h>
 #include <CGAL/IO/helpers.h>
 #include <CGAL/IO/read_off_points.h>
@@ -21,12 +21,6 @@
 
 #include <fstream>
 #include <string>
-
-#ifdef DOXYGEN_RUNNING
-#define CGAL_BGL_NP_TEMPLATE_PARAMETERS NamedParameters
-#define CGAL_BGL_NP_CLASS NamedParameters
-#define CGAL_DEPRECATED
-#endif
 
 namespace CGAL {
 
@@ -146,10 +140,10 @@ namespace IO {
 
   \return `true` if the writing was successful, `false` otherwise.
  */
-template <typename Point, typename Vector, typename CGAL_BGL_NP_TEMPLATE_PARAMETERS>
+template <typename Point, typename Vector, typename CGAL_NP_TEMPLATE_PARAMETERS>
 bool write_OFF(std::ostream& os,
                const CGAL::Point_set_3<Point, Vector>& point_set,
-               const CGAL_BGL_NP_CLASS& np)
+               const CGAL_NP_CLASS& np = parameters::default_values())
 {
   if(point_set.has_normal_map())
     return Point_set_processing_3::internal::write_OFF_PSP(os, point_set,
@@ -159,16 +153,6 @@ bool write_OFF(std::ostream& os,
   return Point_set_processing_3::internal::write_OFF_PSP(os, point_set,
                                                          np.point_map(point_set.point_map()));
 }
-
-/// \cond SKIP_IN_MANUAL
-
-template <typename Point, typename Vector>
-bool write_OFF(std::ostream& os, const CGAL::Point_set_3<Point, Vector>& point_set)
-{
-  return write_OFF(os, point_set, parameters::all_default());
-}
-
-/// \endcond
 
 /*!
   \ingroup PkgPointSet3IOOFF
@@ -195,23 +179,12 @@ bool write_OFF(std::ostream& os, const CGAL::Point_set_3<Point, Vector>& point_s
 
   \return `true` if the writing was successful, `false` otherwise.
 */
-template <typename Point, typename Vector, typename CGAL_BGL_NP_TEMPLATE_PARAMETERS>
-bool write_OFF(const std::string& fname, const CGAL::Point_set_3<Point, Vector>& point_set, const CGAL_BGL_NP_CLASS& np)
+template <typename Point, typename Vector, typename CGAL_NP_TEMPLATE_PARAMETERS>
+bool write_OFF(const std::string& fname, const CGAL::Point_set_3<Point, Vector>& point_set, const CGAL_NP_CLASS& np = parameters::default_values())
 {
   std::ofstream os(fname);
   return write_OFF(os, point_set, np);
 }
-
-/// \cond SKIP_IN_MANUAL
-
-template <typename Point, typename Vector>
-bool write_OFF(const std::string& fname, const CGAL::Point_set_3<Point, Vector>& point_set)
-{
-  std::ofstream os(fname);
-  return write_OFF(os, point_set, parameters::all_default());
-}
-
-/// \endcond
 
 } // namespace IO
 

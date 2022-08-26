@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Convex_hull_3/include/CGAL/Convex_hull_3/dual/halfspace_intersection_with_constructions_3.h $
-// $Id: halfspace_intersection_with_constructions_3.h 98e4718 2021-08-26T11:33:39+02:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Convex_hull_3/include/CGAL/Convex_hull_3/dual/halfspace_intersection_with_constructions_3.h $
+// $Id: halfspace_intersection_with_constructions_3.h 4ffc949 2022-02-03T17:11:20+01:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -26,7 +26,7 @@
 #include <CGAL/Convex_hull_3/dual/halfspace_intersection_interior_point_3.h>
 #include <CGAL/Number_types/internal/Exact_type_selector.h>
 
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 #include <list>
 #include <vector>
 
@@ -51,7 +51,7 @@ namespace CGAL
         typename boost::property_map<Polyhedron, vertex_point_t>::type vpm_dual = get(CGAL::vertex_point, dual);
         // compute coordinates of extreme vertices in the dual polyhedron
         // from primal faces
-        boost::unordered_map<face_descriptor, vertex_descriptor> extreme_points;
+        std::unordered_map<face_descriptor, vertex_descriptor> extreme_points;
 
         for(face_descriptor fd : faces( primal)){
           halfedge_descriptor h = halfedge(fd,primal);

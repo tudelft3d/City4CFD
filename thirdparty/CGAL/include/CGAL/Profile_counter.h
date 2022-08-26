@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Profiling_tools/include/CGAL/Profile_counter.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Profiling_tools/include/CGAL/Profile_counter.h $
 // $Id: Profile_counter.h a885f9b 2021-08-25T13:02:11+02:00 Jane Tournois
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //

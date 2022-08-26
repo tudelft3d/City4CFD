@@ -2,7 +2,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Scale_space_reconstruction_3/include/CGAL/Scale_space_reconstruction_3/internal/Auto_count.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Scale_space_reconstruction_3/include/CGAL/Scale_space_reconstruction_3/internal/Auto_count.h $
 // $Id: Auto_count.h e893ac1 2020-08-18T10:06:51+02:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

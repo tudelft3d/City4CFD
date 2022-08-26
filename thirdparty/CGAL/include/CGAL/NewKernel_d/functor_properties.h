@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/NewKernel_d/include/CGAL/NewKernel_d/functor_properties.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/NewKernel_d/include/CGAL/NewKernel_d/functor_properties.h $
 // $Id: functor_properties.h 634fe39 2020-12-30T19:56:58+01:00 Marc Glisse
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //

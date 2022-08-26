@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Minkowski_sum_2/include/CGAL/minkowski_sum_2.h $
-// $Id: minkowski_sum_2.h 254d60f 2019-10-19T15:23:19+02:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Minkowski_sum_2/include/CGAL/minkowski_sum_2.h $
+// $Id: minkowski_sum_2.h 4e48b0b 2021-11-03T15:10:16+02:00 Efi Fogel
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s) : Ron Wein   <wein_r@yahoo.com>
@@ -761,10 +761,10 @@ minkowski_sum_by_decomposition_2
  const Decomposition_& decomp,
  const Gps_segment_traits_2<Kernel_, Container_>& traits)
 {
-  typedef Kernel_                               Kernel;
-  typedef Container_                            Container;
-  typedef Decomposition_                        Decomposition;
-  typedef Polygon_nop_decomposition_2<Kernel>   Nop_decomposition;
+  typedef Kernel_                                         Kernel;
+  typedef Container_                                      Container;
+  typedef Decomposition_                                  Decomposition;
+  typedef Polygon_nop_decomposition_2<Kernel, Container>  Nop_decomposition;
 
   if (pgn1.is_convex()) {
     Nop_decomposition decomp_nop;
@@ -839,11 +839,11 @@ minkowski_sum_by_decomposition_2
  const WithHolesDecomposition_& decomp_with_holes,
  const Gps_segment_traits_2<Kernel_, Container_>& traits)
 {
-  typedef Kernel_                               Kernel;
-  typedef Container_                            Container;
-  typedef NoHolesDecomposition_                 No_holes_decomposition;
-  typedef WithHolesDecomposition_               With_holes_decomposition;
-  typedef Polygon_nop_decomposition_2<Kernel>   Nop_decomposition;
+  typedef Kernel_                                         Kernel;
+  typedef Container_                                      Container;
+  typedef NoHolesDecomposition_                           No_holes_decomposition;
+  typedef WithHolesDecomposition_                         With_holes_decomposition;
+  typedef Polygon_nop_decomposition_2<Kernel, Container>  Nop_decomposition;
 
   Hole_filter_2<Kernel, Container> hole_filter;
   Polygon_with_holes_2<Kernel, Container> filtered_pgn1;
@@ -982,11 +982,11 @@ minkowski_sum_by_decomposition_2
  const WithHolesDecomposition_& decomp_with_holes,
  const Gps_segment_traits_2<Kernel_, Container_>& traits)
 {
-  typedef Kernel_                               Kernel;
-  typedef Container_                            Container;
-  typedef NoHolesDecomposition_                 No_holes_decomposition;
-  typedef WithHolesDecomposition_               With_holes_decomposition;
-  typedef Polygon_nop_decomposition_2<Kernel>   Nop_decomposition;
+  typedef Kernel_                                         Kernel;
+  typedef Container_                                      Container;
+  typedef NoHolesDecomposition_                           No_holes_decomposition;
+  typedef WithHolesDecomposition_                         With_holes_decomposition;
+  typedef Polygon_nop_decomposition_2<Kernel, Container>  Nop_decomposition;
 
   Hole_filter_2<Kernel, Container> hole_filter;
   Polygon_with_holes_2<Kernel,Container> filtered_pgn2;

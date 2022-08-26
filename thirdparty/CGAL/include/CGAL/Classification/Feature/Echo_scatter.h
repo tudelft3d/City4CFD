@@ -4,7 +4,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Classification/include/CGAL/Classification/Feature/Echo_scatter.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Classification/include/CGAL/Classification/Feature/Echo_scatter.h $
 // $Id: Echo_scatter.h 0e934b1 2020-08-04T13:16:13+02:00 Simon Giraudot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

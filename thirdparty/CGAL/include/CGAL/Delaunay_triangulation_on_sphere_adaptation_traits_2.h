@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Voronoi_diagram_2/include/CGAL/Delaunay_triangulation_on_sphere_adaptation_traits_2.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Voronoi_diagram_2/include/CGAL/Delaunay_triangulation_on_sphere_adaptation_traits_2.h $
 // $Id: Delaunay_triangulation_on_sphere_adaptation_traits_2.h 942d461 2021-05-05T16:59:22+02:00 Mael Rouxel-Labbé
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

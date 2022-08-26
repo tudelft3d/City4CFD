@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Shape_regularization/include/CGAL/Shape_regularization/Contours/User_defined_directions_2.h $
-// $Id: User_defined_directions_2.h 9acece5 2021-08-12T17:11:09+02:00 Dmitry Anisimov
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Shape_regularization/include/CGAL/Shape_regularization/Contours/User_defined_directions_2.h $
+// $Id: User_defined_directions_2.h 75b03e6 2022-01-10T15:33:04+01:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -108,12 +108,12 @@ namespace Contours {
     */
     template<
     typename DirectionRange,
-    typename NamedParameters>
+    typename NamedParameters = parameters::Default_named_parameters>
     User_defined_directions_2(
       const InputRange& input_range,
       const bool is_closed,
       const DirectionRange& direction_range,
-      const NamedParameters& np) :
+      const NamedParameters& np = parameters::default_values()) :
     m_input_range(input_range),
     m_point_map(parameters::choose_parameter(parameters::get_parameter(
       np, internal_np::point_map), PointMap())),
@@ -138,17 +138,6 @@ namespace Contours {
         std::cout << std::endl;
       }
     }
-
-    /// \cond SKIP_IN_MANUAL
-    template<typename DirectionRange>
-    User_defined_directions_2(
-      const InputRange& input_range,
-      const bool is_closed,
-      const DirectionRange& direction_range) :
-    User_defined_directions_2(
-      input_range, is_closed, direction_range, CGAL::parameters::all_default())
-    { }
-    /// \endcond
 
     /// @}
 

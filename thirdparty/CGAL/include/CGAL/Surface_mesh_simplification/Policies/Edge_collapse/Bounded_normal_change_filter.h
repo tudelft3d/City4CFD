@@ -2,7 +2,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Surface_mesh_simplification/include/CGAL/Surface_mesh_simplification/Policies/Edge_collapse/Bounded_normal_change_filter.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Surface_mesh_simplification/include/CGAL/Surface_mesh_simplification/Policies/Edge_collapse/Bounded_normal_change_filter.h $
 // $Id: Bounded_normal_change_filter.h e1c1e1f 2020-11-04T11:28:02+00:00 Andreas Fabri
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

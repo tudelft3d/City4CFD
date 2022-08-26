@@ -8,8 +8,8 @@
 // https://www.boost.org/LICENSE_1_0.txt)
 //=======================================================================
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/STL_Extension/include/CGAL/STL_Extension/internal/boost/mutable_queue.hpp $
-// $Id: mutable_queue.hpp 4ea7b65 2021-08-26T11:42:01+02:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/STL_Extension/include/CGAL/STL_Extension/internal/boost/mutable_queue.hpp $
+// $Id: mutable_queue.hpp e674e5f 2021-11-30T14:16:30+01:00 Sébastien Loriot
 // SPDX-License-Identifier: BSL-1.0
 //
 // NOTE: this file have been taken from boost 1.46.1 for using
@@ -65,14 +65,10 @@ namespace boost_ {
     typedef Compare value_compare;
     typedef ID id_generator;
 
-    mutable_queue(size_type n, const Comp& x, const ID& _id)
-      : index_array(n), comp(x), id(_id) {
-      c.reserve(n);
-    }
-//SL: added this constructor so that index_array is filled with
+//SL: updated this constructor so that index_array is filled with
 //    indices equals to n. Maintaining this property in pop allows
 //    to have a method to detect if an element is in the queue
-    mutable_queue(size_type n, const Comp& x, const ID& _id,bool)
+    mutable_queue(size_type n, const Comp& x, const ID& _id)
       : index_array(n,n), comp(x), id(_id) {
       c.reserve(n);
     }
@@ -134,6 +130,24 @@ namespace boost_ {
 
     void clear() { c.clear(); }
 
+//SL: added remove and contains functions
+//    (historically in CGAL::internal::mutable_queue_with_remove with no good
+//     reason now that the present file is shipped with CGAL)
+    void remove(const IndexedType& x){
+      //first place element at the top
+      size_type current_pos = index_array[ get(id, x) ];
+      c[current_pos] = x;
+
+      Node node(c.begin(), c.end(), c.begin()+current_pos, id);
+      while (node.has_parent())
+        node.swap(node.parent(), index_array);
+      //then pop it
+      pop();
+    }
+
+    bool contains(const IndexedType& x) const {
+      return index_array[ get(id, x) ] != index_array.size();
+    }
 #if 0
         // dwa 2003/7/11 - I don't know what compiler is supposed to
         // be able to compile this, but is_heap is not standard!!

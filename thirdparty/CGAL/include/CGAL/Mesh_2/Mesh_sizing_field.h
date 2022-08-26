@@ -4,7 +4,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Mesh_2/include/CGAL/Mesh_2/Mesh_sizing_field.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Mesh_2/include/CGAL/Mesh_2/Mesh_sizing_field.h $
 // $Id: Mesh_sizing_field.h 0ac4bf6 2021-09-10T11:28:13+02:00 Jane Tournois
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Installation/include/CGAL/atomic.h $
-// $Id: atomic.h 6481cb2 2021-08-13T16:44:53+02:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Installation/include/CGAL/atomic.h $
+// $Id: atomic.h 429c764 2022-06-20T09:37:10+02:00 Laurent Rineau
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 
 #ifndef CGAL_ATOMIC_H
@@ -33,7 +33,7 @@ using std::memory_order_seq_cst;
 using std::atomic_thread_fence;
 } }
 #else
-#  define CGAL_NO_ATOMIC "No atomic because CGAL_NO_THREADS is defined."
+#  define CGAL_NO_ATOMIC "No atomic because CGAL_HAS_NO_THREADS is defined."
 #endif // CGAL_HAS_THREADS
 
 #endif // CGAL_ATOMIC_H

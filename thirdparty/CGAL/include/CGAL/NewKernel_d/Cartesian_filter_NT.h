@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/NewKernel_d/include/CGAL/NewKernel_d/Cartesian_filter_NT.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/NewKernel_d/include/CGAL/NewKernel_d/Cartesian_filter_NT.h $
 // $Id: Cartesian_filter_NT.h 74c029c 2021-09-09T11:44:36+02:00 Sébastien Loriot
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //

@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Polytope_distance_d/include/CGAL/Width_3.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Polytope_distance_d/include/CGAL/Width_3.h $
 // $Id: Width_3.h 521c72d 2021-10-04T13:22:00+02:00 Mael Rouxel-Labbé
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

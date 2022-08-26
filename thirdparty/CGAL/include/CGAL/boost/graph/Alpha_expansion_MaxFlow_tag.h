@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Surface_mesh_segmentation/include/CGAL/boost/graph/Alpha_expansion_MaxFlow_tag.h $
-// $Id: Alpha_expansion_MaxFlow_tag.h 5945e48 2021-09-17T08:14:06+02:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Surface_mesh_segmentation/include/CGAL/boost/graph/Alpha_expansion_MaxFlow_tag.h $
+// $Id: Alpha_expansion_MaxFlow_tag.h b45e788 2022-06-23T16:25:21+01:00 Andreas Fabri
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Ilker O. Yaz, Simon Giraudot
@@ -47,7 +47,7 @@ public:
 
   void clear_graph()
   {
-    graph = MaxFlow::Graph();
+    graph.clear();
   }
 
   Vertex_descriptor add_vertex()

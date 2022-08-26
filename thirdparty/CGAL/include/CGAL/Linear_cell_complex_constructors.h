@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Linear_cell_complex/include/CGAL/Linear_cell_complex_constructors.h $
-// $Id: Linear_cell_complex_constructors.h 4e519a3 2021-05-05T13:15:37+02:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Linear_cell_complex/include/CGAL/Linear_cell_complex_constructors.h $
+// $Id: Linear_cell_complex_constructors.h 440a8df 2022-02-03T08:41:04+00:00 Andreas Fabri
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Guillaume Damiand <guillaume.damiand@liris.cnrs.fr>
@@ -14,6 +14,7 @@
 
 #include <CGAL/IO/OFF.h>
 #include <CGAL/Linear_cell_complex_incremental_builder.h>
+#include <CGAL/assertions.h>
 
 #include <algorithm>
 #include <iostream>
@@ -204,9 +205,7 @@ namespace CGAL {
     m_file_header = scanner;  // Remember file header after return.
 
     Linear_cell_complex_incremental_builder_3<LCC> B(alcc);
-    B.begin_surface(scanner.size_of_vertices(),
-                    scanner.size_of_facets(),
-                    scanner.size_of_halfedges());
+    B.begin_surface();
 
     typedef typename LCC::Point Point;
 
@@ -247,7 +246,7 @@ namespace CGAL {
          } */
       for (std::size_t j=0; j<no; j++)
       {
-        std::size_t index;
+        std::size_t index=0;
         scanner.scan_facet_vertex_index(index, j+1, i);
         if(! in){
           return false;
@@ -343,7 +342,7 @@ namespace CGAL {
         do
         {
           ++n;
-          assert(alcc.is_next_exist(cur));
+          CGAL_assertion(alcc.is_next_exist(cur));
           cur=alcc.next(cur);
         }
         while(cur!=itall);
@@ -358,7 +357,7 @@ namespace CGAL {
           writer.write_facet_vertex_index(index[VCI(alcc.vertex_attribute(cur))]);
           alcc.mark(cur, m);
           alcc.mark(alcc.other_orientation(cur), m); // for GMap only, for CMap
-          assert(alcc.is_next_exist(cur));           // marks the same dart twice
+          CGAL_assertion(alcc.is_next_exist(cur));           // marks the same dart twice
           cur=alcc.next(cur);
         }
         while(cur!=itall);

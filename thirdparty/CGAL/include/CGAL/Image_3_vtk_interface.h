@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/CGAL_ImageIO/include/CGAL/Image_3_vtk_interface.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/CGAL_ImageIO/include/CGAL/Image_3_vtk_interface.h $
 // $Id: Image_3_vtk_interface.h 91d6635 2021-06-16T15:04:45+02:00 Laurent Rineau
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //

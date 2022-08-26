@@ -6,7 +6,7 @@
  This file is part of a fork of the QGLViewer library version 2.7.0.
 
 *****************************************************************************/
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/GraphicsView/include/CGAL/Qt/frame.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/GraphicsView/include/CGAL/Qt/frame.h $
 // $Id: frame.h 9cd0d45 2021-02-09T11:31:34+01:00 Maxime Gimeno
 // SPDX-License-Identifier: GPL-3.0-only
 #ifndef QGLVIEWER_FRAME_H

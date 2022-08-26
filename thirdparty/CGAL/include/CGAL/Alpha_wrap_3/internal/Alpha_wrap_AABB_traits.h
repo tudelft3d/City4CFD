@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL$
-// $Id$
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Alpha_wrap_3/include/CGAL/Alpha_wrap_3/internal/Alpha_wrap_AABB_traits.h $
+// $Id: Alpha_wrap_AABB_traits.h 3a64952 2022-05-24T14:31:00+02:00 Mael Rouxel-Labbé
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Pierre Alliez
@@ -267,7 +267,11 @@ public:
 
       for(int i=0; i<4; ++i)
       {
-        if(!q.m_b.test(i) && do_overlap(q.m_tbox[i], bb) && Base::operator()(q.m_triangles[i], bb))
+        // this overload of do_intersect() must not filter based on q.m_b because
+        // it is called from the AABB_tree's traversal with a node's bounding box,
+        // and the fact that a facet is incident to an outside cell is irrelevant
+        // for the hierarchy of bounding boxes of the primitives.
+        if(do_overlap(q.m_tbox[i], bb) && Base::operator()(q.m_triangles[i], bb))
           return true;
       }
 

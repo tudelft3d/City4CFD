@@ -7,7 +7,7 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Algebraic_foundations/include/CGAL/number_utils.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Algebraic_foundations/include/CGAL/number_utils.h $
 // $Id: number_utils.h e222e77 2021-05-18T18:16:44+02:00 Laurent Rineau
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //

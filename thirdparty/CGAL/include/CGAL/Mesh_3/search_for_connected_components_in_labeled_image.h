@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Mesh_3/include/CGAL/Mesh_3/search_for_connected_components_in_labeled_image.h $
-// $Id: search_for_connected_components_in_labeled_image.h 0779373 2020-03-26T13:31:46+01:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Mesh_3/include/CGAL/Mesh_3/search_for_connected_components_in_labeled_image.h $
+// $Id: search_for_connected_components_in_labeled_image.h c32e2b1 2022-07-11T10:17:19+02:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -73,8 +73,7 @@ search_for_connected_components_in_labeled_image(const CGAL::Image_3& image,
       for(uint i=0; i<nx; i++)
       {
         using CGAL::IMAGEIO::static_evaluate;
-
-        if(visited[voxel_index] | second_pass[voxel_index]) {
+        if(visited[voxel_index] || second_pass[voxel_index]) {
           ++voxel_index;
           continue;
         }

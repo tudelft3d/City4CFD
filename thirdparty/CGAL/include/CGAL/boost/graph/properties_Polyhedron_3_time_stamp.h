@@ -2,7 +2,7 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Polyhedron/include/CGAL/boost/graph/properties_Polyhedron_3_time_stamp.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Polyhedron/include/CGAL/boost/graph/properties_Polyhedron_3_time_stamp.h $
 // $Id: properties_Polyhedron_3_time_stamp.h df56098 2021-10-08T12:13:43+02:00 Mael Rouxel-Labbé
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //

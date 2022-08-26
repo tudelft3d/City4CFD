@@ -6,8 +6,8 @@
  This file is part of a fork of the QGLViewer library version 2.7.0.
 
 *****************************************************************************/
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/GraphicsView/include/CGAL/Qt/qglviewer.h $
-// $Id: qglviewer.h 3640099 2021-09-28T15:36:51+02:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/GraphicsView/include/CGAL/Qt/qglviewer.h $
+// $Id: qglviewer.h 37390bb 2022-06-08T12:03:25+02:00 Mael Rouxel-Labbé
 // SPDX-License-Identifier: GPL-3.0-only
 
 #ifndef QGLVIEWER_QGLVIEWER_H
@@ -562,6 +562,21 @@ public:
    * Prompt a configuration dialog and takes a snapshot.
    */
   void saveSnapshot();
+
+  /*!
+   * Takes a snapshot without any dialog
+   */
+  void saveSnapshot(const QString& fileName,
+                    const qreal finalWidth,
+                    const qreal finalHeight,
+                    const bool expand = false,
+                    const double oversampling = 1.,
+                    qglviewer::SnapShotBackground background_color = qglviewer::CURRENT_BACKGROUND);
+
+  void saveSnapshot(const QString& fileName)
+  {
+    return saveSnapshot(fileName, this->width(), this->height());
+  }
 
 public:
 Q_SIGNALS:

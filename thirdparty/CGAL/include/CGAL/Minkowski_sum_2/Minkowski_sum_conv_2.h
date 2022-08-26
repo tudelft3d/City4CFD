@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Minkowski_sum_2/include/CGAL/Minkowski_sum_2/Minkowski_sum_conv_2.h $
-// $Id: Minkowski_sum_conv_2.h 254d60f 2019-10-19T15:23:19+02:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Minkowski_sum_2/include/CGAL/Minkowski_sum_2/Minkowski_sum_conv_2.h $
+// $Id: Minkowski_sum_conv_2.h 414103f 2022-02-21T17:17:34+02:00 Efi Fogel
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s) : Ron Wein   <wein_r@yahoo.com>
@@ -117,11 +117,33 @@ private:
   Ccw_in_between_2        f_ccw_in_between;
 
 public:
+  // The pointer to the kernel and the flag that indicate ownership should be
+  // replaced with a smart pointer. Meanwhile, the copy constructor and
+  // copy assignment prevent double delition. Notice that once a copy
+  // constructor (assignment) is present, the move constructor (assignment)
+  // is implicitly not generated anyway.
+
   /*! Default constructor. */
   Minkowski_sum_by_convolution_2() :
     m_kernel(new Kernel),
     m_own_kernel(true)
   { init(); }
+
+  /*! Copy constructor. */
+  Minkowski_sum_by_convolution_2
+  (const Minkowski_sum_by_convolution_2& other) :
+    m_kernel((other.m_own_kernel) ? new Kernel : other.m_kernel),
+    m_own_kernel(other.m_own_kernel)
+  { init(); }
+
+  /*! Copy assignment. */
+  Minkowski_sum_by_convolution_2&
+  operator=(const Minkowski_sum_by_convolution_2& other) {
+    m_kernel = (other.m_own_kernel) ? new Kernel : other.m_kernel;
+    m_own_kernel = other.m_own_kernel;
+    init();
+    return *this;
+  }
 
   /*! Constructor. */
   Minkowski_sum_by_convolution_2(const Kernel& kernel) :

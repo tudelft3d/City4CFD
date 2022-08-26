@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Three/include/CGAL/Three/Scene_interface.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Three/include/CGAL/Three/Scene_interface.h $
 // $Id: Scene_interface.h 7bfa33f 2021-06-04T14:01:47+02:00 albert-github
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

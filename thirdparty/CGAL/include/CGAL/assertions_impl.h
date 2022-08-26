@@ -7,7 +7,7 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/STL_Extension/include/CGAL/assertions_impl.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/STL_Extension/include/CGAL/assertions_impl.h $
 // $Id: assertions_impl.h bca05c8 2021-09-24T11:14:01+02:00 Jane Tournois
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //

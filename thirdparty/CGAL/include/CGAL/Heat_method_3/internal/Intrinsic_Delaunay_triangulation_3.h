@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Heat_method_3/include/CGAL/Heat_method_3/internal/Intrinsic_Delaunay_triangulation_3.h $
-// $Id: Intrinsic_Delaunay_triangulation_3.h f60d0c2 2021-12-14T18:07:55+01:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Heat_method_3/include/CGAL/Heat_method_3/internal/Intrinsic_Delaunay_triangulation_3.h $
+// $Id: Intrinsic_Delaunay_triangulation_3.h 58d759b 2022-02-04T09:44:36+01:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -32,11 +32,12 @@
 
 
 #include <boost/iterator/transform_iterator.hpp>
-#include <boost/unordered_map.hpp>
 
+#include <unordered_map>
 #include <set>
 #include <stack>
 #include <cmath>
+#include <list>
 
 #ifndef DOXYGEN_RUNNING
 
@@ -485,7 +486,7 @@ private:
   std::vector<int> mark_edges;
 public:
 
-  boost::unordered_map<vertex_descriptor,vertex_descriptor> v2v, vtov;
+  std::unordered_map<vertex_descriptor,vertex_descriptor> v2v, vtov;
 };
 
 } // namespace Heat_method_3

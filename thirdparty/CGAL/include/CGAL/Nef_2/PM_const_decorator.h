@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Nef_2/include/CGAL/Nef_2/PM_const_decorator.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Nef_2/include/CGAL/Nef_2/PM_const_decorator.h $
 // $Id: PM_const_decorator.h 4e519a3 2021-05-05T13:15:37+02:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

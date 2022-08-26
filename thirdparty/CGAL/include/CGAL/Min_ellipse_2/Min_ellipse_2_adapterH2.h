@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Bounding_volumes/include/CGAL/Min_ellipse_2/Min_ellipse_2_adapterH2.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Bounding_volumes/include/CGAL/Min_ellipse_2/Min_ellipse_2_adapterH2.h $
 // $Id: Min_ellipse_2_adapterH2.h 78ff918 2021-06-23T23:34:14+02:00 Mael Rouxel-Labbé
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

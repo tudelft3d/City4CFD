@@ -2,7 +2,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Classification/include/CGAL/Classification/ETHZ/internal/random-forest/node-gini.hpp $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Classification/include/CGAL/Classification/ETHZ/internal/random-forest/node-gini.hpp $
 // $Id: node-gini.hpp 7cfe6df 2020-04-07T11:02:16+02:00 Simon Giraudot
 // SPDX-License-Identifier: LicenseRef-RFL
 // License notice in Installation/LICENSE.RFL

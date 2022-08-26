@@ -7,8 +7,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Kernel_23/include/CGAL/Segment_3.h $
-// $Id: Segment_3.h 8fa0f55 2021-05-27T10:27:38+02:00 Laurent Rineau
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Kernel_23/include/CGAL/Segment_3.h $
+// $Id: Segment_3.h d39c774 2022-03-17T12:14:43+01:00 Andreas Fabri
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -136,10 +136,8 @@ public:
   }
 
   bool has_on(const Point_3 &p) const
-  { // TODO : use one predicate.
-    return R_().are_ordered_along_line_3_object()(source(),
-                                                 p,
-                                                 target());
+  {
+    return R().has_on_3_object()(*this, p);
   }
 
   Segment_3 opposite() const
@@ -149,8 +147,7 @@ public:
 
   Direction_3 direction() const
   {
-    typename R::Construct_vector_3 construct_vector;
-    return Direction_3( construct_vector( source(), target()));
+    return R().construct_direction_3_object()(*this);
   }
 
   bool is_degenerate() const

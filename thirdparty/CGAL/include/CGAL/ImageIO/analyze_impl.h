@@ -3,7 +3,7 @@
 //
 // This file is part of the ImageIO Library, and as been adapted for CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/CGAL_ImageIO/include/CGAL/ImageIO/analyze_impl.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/CGAL_ImageIO/include/CGAL/ImageIO/analyze_impl.h $
 // $Id: analyze_impl.h 6acef1b 2020-10-20T14:18:12+02:00 Raphael Grimm
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //

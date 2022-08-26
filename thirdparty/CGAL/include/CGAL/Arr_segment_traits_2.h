@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Arrangement_on_surface_2/include/CGAL/Arr_segment_traits_2.h $
-// $Id: Arr_segment_traits_2.h c596073 2020-11-05T10:43:47+02:00 Efi Fogel
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Arrangement_on_surface_2/include/CGAL/Arr_segment_traits_2.h $
+// $Id: Arr_segment_traits_2.h c0838c5 2021-12-16T16:33:43+02:00 Efi Fogel
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s): Ron Wein          <wein@post.tau.ac.il>
@@ -900,6 +900,7 @@ public:
   /*! Obtain an Approximate_2 functor object. */
   Approximate_2 approximate_2_object() const { return Approximate_2(); }
 
+  //! Functor
   class Construct_x_monotone_curve_2 {
   protected:
     typedef Arr_segment_traits_2<Kernel>        Traits;
@@ -991,6 +992,17 @@ public:
 
   /*! Obtain a Construct_x_monotone_curve_2 functor object. */
   Construct_x_monotone_curve_2 construct_x_monotone_curve_2_object() const
+  { return Construct_x_monotone_curve_2(*this); }
+  //@}
+
+  /// \name Functor definitions for polylines.
+  //@{
+
+  //! Functor
+  typedef Construct_x_monotone_curve_2  Construct_curve_2;
+
+  /*! Obtain a Construct_curve_2 functor object. */
+  Construct_curve_2 construct_curve_2_object() const
   { return Construct_x_monotone_curve_2(*this); }
   //@}
 

@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Polyhedron/include/CGAL/Polyhedron_incremental_builder_3.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Polyhedron/include/CGAL/Polyhedron_incremental_builder_3.h $
 // $Id: Polyhedron_incremental_builder_3.h 2c4a5db 2021-05-18T18:14:14+02:00 Laurent Rineau
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

@@ -90,8 +90,8 @@ void Map3d::reconstruct() {
     //-- Constrain features, generate terrain mesh from CDT
     this->reconstruct_terrain();
 
-    //-- Testing new features
-    this->one_mesh();
+    //-- Alpha wrap
+    this->one_mesh(); //todo make it option
 
     //-- Generate side and top boundaries
     if (Config::get().reconstructBoundaries) this->reconstruct_boundaries();
@@ -297,10 +297,8 @@ void Map3d::reconstruct_buildings() {
     std::shared_ptr<SearchTree> searchTree = _pointCloud.make_search_tree_buildings();
     for (auto& building : _reconstructedBuildings) building->set_search_tree(searchTree);
 
-    int reconstructed = 0; // todo temp
     int failed = 0;
     for (auto& f : _buildings) {
-        std::cout << "Reconstructing..." << std::endl; // todo temp
         if (!f->is_active()) continue;
         try {
             f->reconstruct();
@@ -310,7 +308,6 @@ void Map3d::reconstruct_buildings() {
                 f->reconstruct();
             }
             if (Config::get().refineBuildings) f->refine();
-            ++reconstructed; // todo temp
         } catch (std::exception& e) {
             ++failed;
             //-- Add information to log file
@@ -321,7 +318,6 @@ void Map3d::reconstruct_buildings() {
             if (!f->is_imported())
                 Config::get().failedBuildings.push_back(f->get_internal_id());
         }
-        std::cout << "Done reconstructing: " << reconstructed << std::endl; //todo temp
     }
     this->clear_inactives();
     Config::get().logSummary << "Building reconstruction summary: successfully reconstructed buildings: "
@@ -573,7 +569,7 @@ template void Map3d::set_footprint_elevation<SurfaceLayers>(SurfaceLayers& featu
 template void Map3d::set_footprint_elevation<PolyFeatures> (PolyFeatures& feature);
 
 void Map3d::one_mesh() { //todo put it somewhere else
-    std::cout << "Making one mesh and doing alpha wrap" << std::endl;
+    std::cout << "\nAlpha wrapping all buildings" << std::endl;
     typedef EPICK::FT                 FT;
     typedef std::array<FT, 3>         Custom_point;
     typedef std::vector<std::size_t>  CGAL_Polygon;
@@ -635,12 +631,15 @@ void Map3d::one_mesh() { //todo put it somewhere else
     const double alpha = diag_length / relative_alpha;
     const double offset = diag_length / relative_offset;
 //    CGAL::alpha_wrap_3(newMesh, alpha, offset, wrap);
-    CGAL::alpha_wrap_3(newMesh, 0.7, 0.03, newMesh);
+
+//    CGAL::alpha_wrap_3(newMesh, 2, 0.01, newMesh);   // 'coarse'
+    CGAL::alpha_wrap_3(newMesh, 1.5, 0.03, newMesh); // 'medium'
+//    CGAL::alpha_wrap_3(newMesh, 0.7, 0.03, newMesh); // 'fine'
+
 //    CGAL::alpha_wrap_3(newMesh, 0.3, 0.03, newMesh); // that one takes long time
 //    CGAL::alpha_wrap_3(points, polygons, 0.1, 0.001, newMesh);
 //    newMesh = wrap;
 
-//    PMP::experimental::remove_self_intersections(newMesh);
 //    PMP::experimental::autorefine(newMesh);
 //    PMP::experimental::autorefine_and_remove_self_intersections(newMesh);
 
@@ -648,6 +647,6 @@ void Map3d::one_mesh() { //todo put it somewhere else
     for (auto& b : _buildings) b->deactivate();
     this->clear_inactives();
     _buildings.push_back(std::make_shared<ReconstructedBuilding>(newMesh));
-    _buildings.front()->refine(); // Beware - this introduces self-intersections
+//    _buildings.front()->refine(); // Beware - this introduces self-intersections
 //    std::cout << "Buildings size: " << _buildings.size() << std::endl;
 }

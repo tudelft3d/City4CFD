@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Barycentric_coordinates_2/include/CGAL/Barycentric_coordinates_2/Wachspress_2.h $
-// $Id: Wachspress_2.h 92434bf 2021-09-21T17:10:58+02:00 Dmitry Anisimov
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Barycentric_coordinates_2/include/CGAL/Barycentric_coordinates_2/Wachspress_2.h $
+// $Id: Wachspress_2.h be147c5 2022-04-28T07:58:57+01:00 Andreas Fabri
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -211,6 +211,7 @@ private:
 
         CGAL_precondition( A[n-2] != FT(0) && A[n-1] != FT(0) );
         *output = C[n-1] / (A[n-2] * A[n-1]);
+        ++output;
 
         // Return weights.
         return boost::optional<OutputIterator>(output);
@@ -261,6 +262,7 @@ private:
             ++output;
         }
         *output = weight[n-1] * inverted_wp_denominator;
+        ++output;
 
         // Return coordinates.
         return boost::optional<OutputIterator>(output);
@@ -314,6 +316,7 @@ private:
             ++output;
         }
         *output = weight[n-1] * inverted_wp_denominator;
+        ++output;
 
         // Return coordinates.
         return boost::optional<OutputIterator>(output);

@@ -7,7 +7,7 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Stream_support/include/CGAL/IO/OFF/File_header_OFF_impl.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Stream_support/include/CGAL/IO/OFF/File_header_OFF_impl.h $
 // $Id: File_header_OFF_impl.h ab49226 2021-04-09T13:13:56+02:00 Maxime Gimeno
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //

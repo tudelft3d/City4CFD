@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Three/include/CGAL/Three/Polyhedron_demo_plugin_helper.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Three/include/CGAL/Three/Polyhedron_demo_plugin_helper.h $
 // $Id: Polyhedron_demo_plugin_helper.h 26355e2 2020-06-25T12:31:21+02:00 Mael Rouxel-Labbé
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Circular_kernel_2/include/CGAL/Exact_circular_kernel_2.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Circular_kernel_2/include/CGAL/Exact_circular_kernel_2.h $
 // $Id: Exact_circular_kernel_2.h e813d9f 2021-05-28T11:25:01+02:00 Andreas Fabri
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

@@ -20,7 +20,7 @@
  * WWW URL: http://cs.nyu.edu/exact/
  * Email: exact@cs.nyu.edu
  *
- * $URL: https://github.com/CGAL/cgal/blob/v5.4/CGAL_Core/include/CGAL/CORE/CoreDefs.h $
+ * $URL: https://github.com/CGAL/cgal/blob/v5.5/CGAL_Core/include/CGAL/CORE/CoreDefs.h $
  * $Id: CoreDefs.h 3e03d50 2021-05-05T15:32:22+02:00 Maxime Gimeno
  * SPDX-License-Identifier: LGPL-3.0-or-later
  ***************************************************************************/

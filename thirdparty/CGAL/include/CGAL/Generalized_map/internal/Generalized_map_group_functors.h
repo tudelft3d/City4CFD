@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Generalized_map/include/CGAL/Generalized_map/internal/Generalized_map_group_functors.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Generalized_map/include/CGAL/Generalized_map/internal/Generalized_map_group_functors.h $
 // $Id: Generalized_map_group_functors.h 98e4718 2021-08-26T11:33:39+02:00 Sébastien Loriot
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //

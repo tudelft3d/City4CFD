@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Triangulation_on_sphere_2/include/CGAL/Triangulation_sphere_line_face_circulator_2.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Triangulation_on_sphere_2/include/CGAL/Triangulation_sphere_line_face_circulator_2.h $
 // $Id: Triangulation_sphere_line_face_circulator_2.h 23658a0 2021-03-20T19:56:10+01:00 Mael Rouxel-Labbé
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

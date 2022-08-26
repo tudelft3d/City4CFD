@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Shape_detection/include/CGAL/Shape_detection/Efficient_RANSAC/Shape_base.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Shape_detection/include/CGAL/Shape_detection/Efficient_RANSAC/Shape_base.h $
 // $Id: Shape_base.h ae8ec55 2021-01-19T09:54:58+01:00 Simon Giraudot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

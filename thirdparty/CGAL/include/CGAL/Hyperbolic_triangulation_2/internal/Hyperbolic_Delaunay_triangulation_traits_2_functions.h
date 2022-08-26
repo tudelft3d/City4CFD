@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Hyperbolic_triangulation_2/include/CGAL/Hyperbolic_triangulation_2/internal/Hyperbolic_Delaunay_triangulation_traits_2_functions.h $
-// $Id: Hyperbolic_Delaunay_triangulation_traits_2_functions.h 98e4718 2021-08-26T11:33:39+02:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Hyperbolic_triangulation_2/include/CGAL/Hyperbolic_triangulation_2/internal/Hyperbolic_Delaunay_triangulation_traits_2_functions.h $
+// $Id: Hyperbolic_Delaunay_triangulation_traits_2_functions.h 440a8df 2022-02-03T08:41:04+00:00 Andreas Fabri
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Mikhail Bogdanov
@@ -17,6 +17,7 @@
 
 #include <CGAL/Origin.h>
 #include <CGAL/enum.h>
+#include <CGAL/assertions.h>
 
 namespace CGAL {
 
@@ -123,7 +124,7 @@ public:
 
     Circle_2 circle = _gt.construct_circle_2_object()(center, sq_radius);
     // uncomment!!!
-    //assert(circle.has_on_boundary(p) && circle.has_on_boundary(q));
+    // CGAL_assertion(circle.has_on_boundary(p) && circle.has_on_boundary(q));
 
     if(_gt.orientation_2_object()(p, q, center) == LEFT_TURN)
       return Circular_arc_2(circle, p, q);

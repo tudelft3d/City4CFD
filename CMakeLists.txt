@@ -15,7 +15,7 @@ set(CMAKE_BUILD_TYPE "Release")
 
 #==============================
 # Alpha wrap support
-set(ALPHA_WRAP_SUPPORT OFF)
+set(ALPHA_WRAP_SUPPORT ON)
 #==============================
 
 # BOOST

@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Minkowski_sum_2/include/CGAL/Minkowski_sum_2/Minkowski_sum_decomp_2.h $
-// $Id: Minkowski_sum_decomp_2.h 254d60f 2019-10-19T15:23:19+02:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Minkowski_sum_2/include/CGAL/Minkowski_sum_2/Minkowski_sum_decomp_2.h $
+// $Id: Minkowski_sum_decomp_2.h 414103f 2022-02-21T17:17:34+02:00 Efi Fogel
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Ron Wein   <wein_r@yahoo.com>
@@ -90,6 +90,12 @@ private:
   Compare_xy_2            f_compare_xy;
 
 public:
+  // The pointers and the corresponding flags that indicate ownerships should
+  // be replaced with smart pointers. Meanwhile, the copy constructor and
+  // copy assignment prevent double delition. Notice that once a copy
+  // constructor (assignment) is present, the move constructor (assignment)
+  // is implicitly not generated anyway.
+
   //! Default constructor.
   Minkowski_sum_by_decomposition_2() :
     m_decomposition_strategy1(nullptr),
@@ -99,6 +105,36 @@ public:
     m_traits(nullptr),
     m_own_traits(false)
   { init(); }
+
+  //! Copy constructor.
+  Minkowski_sum_by_decomposition_2
+  (const Minkowski_sum_by_decomposition_2& other) :
+    m_decomposition_strategy1((other.m_own_strategy1) ?
+                              new Decomposition_strategy1 :
+                              other.m_decomposition_strategy1),
+    m_decomposition_strategy2((other.m_own_strategy2) ?
+                              new Decomposition_strategy2 :
+                              other.m_decomposition_strategy2),
+    m_own_strategy1(other.m_own_strategy1),
+    m_own_strategy2(other.m_own_strategy2),
+    m_traits((other.m_own_traits) ? new Traits_2 : other.m_traits),
+    m_own_traits(other.m_own_traits)
+  { init(); }
+
+  //! Copy assignment.
+  Minkowski_sum_by_decomposition_2&
+  operator=(const Minkowski_sum_by_decomposition_2& other) {
+    m_decomposition_strategy1 = (other.m_own_strategy1) ?
+      new Decomposition_strategy1 : other.m_decomposition_strategy1;
+    m_decomposition_strategy2 = (other.m_own_strategy2) ?
+      new Decomposition_strategy2 : other.m_decomposition_strategy2;
+    m_own_strategy1 = other.m_own_strategy1;
+    m_own_strategy2 = other.m_own_strategy2;
+    m_traits = (other.m_own_traits) ? new Traits_2 : other.m_traits;
+    m_own_traits = other.m_own_traits;
+    init();
+    return *this;
+  }
 
   //! Constructor.
   Minkowski_sum_by_decomposition_2(const Decomposition_strategy1& strategy1,

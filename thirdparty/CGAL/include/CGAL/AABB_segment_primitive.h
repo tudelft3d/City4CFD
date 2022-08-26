@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/AABB_tree/include/CGAL/AABB_segment_primitive.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/AABB_tree/include/CGAL/AABB_segment_primitive.h $
 // $Id: AABB_segment_primitive.h 3127190 2020-12-08T12:48:04+01:00 Dmitry Anisimov
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

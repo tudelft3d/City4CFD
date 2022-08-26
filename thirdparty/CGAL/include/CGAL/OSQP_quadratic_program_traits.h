@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Solver_interface/include/CGAL/OSQP_quadratic_program_traits.h $
-// $Id: OSQP_quadratic_program_traits.h 072c1bf 2021-08-03T18:17:14+02:00 Dmitry Anisimov
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Solver_interface/include/CGAL/OSQP_quadratic_program_traits.h $
+// $Id: OSQP_quadratic_program_traits.h 599d7b3 2022-04-26T09:53:42+02:00 albert-github
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Dmitry Anisimov
@@ -46,7 +46,7 @@ namespace CGAL {
   \note The `FT` type is provided for convenience. Internally, this FT type is converted
   to `c_float` type that can be set either to `float` or `double`. By default, the `double`
   type is used. After the optimization is complete, the `c_float` type is converted back to `FT`.
-  See more about `c_float` <a href="https://osqp.org/docs/interfaces/cc++#data-types">here</a>.
+  See more about `c_float` <a href="https://osqp.org/docs/interfaces/C.html#data-types">here</a>.
 
   \cgalModels `QuadraticProgramTraits`
 */
