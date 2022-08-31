@@ -248,13 +248,13 @@ void Map3d::set_bnd() {
         Boundary::set_bnd_poly(bndPoly, pcBndPoly, startBufferPoly);
 
     //-- Deactivate point cloud points that are out of bounds
-    Boundary::set_bounds_to_terrain(_pointCloud.get_terrain(),
-                                    bndPoly, pcBndPoly, startBufferPoly);
-    Boundary::set_bounds_to_pc(_pointCloud.get_buildings(), startBufferPoly);
+    Boundary::set_bounds_to_terrain_pc(_pointCloud.get_terrain(),
+                                       bndPoly, pcBndPoly, startBufferPoly);
+    Boundary::set_bounds_to_buildings_pc(_pointCloud.get_buildings(), startBufferPoly);
 
     //-- Check feature scope for surface layers now that the full domain is known
     for (auto& f: _surfaceLayers) {
-        f->check_feature_scope(pcBndPoly);
+        f->check_feature_scope(bndPoly);
     }
     this->clear_inactives();
 }

@@ -37,9 +37,9 @@ public:
     virtual ~Boundary();
 
     static void set_bnd_poly(Polygon_2& bndPoly, Polygon_2& pcBndPoly, Polygon_2& startBufferPoly);
-    static void set_bounds_to_pc(Point_set_3& pointCloud, const Polygon_2& pcBndPoly);
-    static void set_bounds_to_terrain(Point_set_3& pointCloud, const Polygon_2& bndPoly,
-                                      const Polygon_2& pcBndPoly, const Polygon_2& startBufferPoly);
+    static void set_bounds_to_buildings_pc(Point_set_3& pointCloud, const Polygon_2& pcBndPoly);
+    static void set_bounds_to_terrain_pc(Point_set_3& pointCloud, const Polygon_2& bndPoly,
+                                         const Polygon_2& pcBndPoly, const Polygon_2& startBufferPoly);
     static std::vector<double> get_domain_bbox();
 
     virtual void reconstruct() = 0;
