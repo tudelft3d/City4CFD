@@ -36,9 +36,6 @@
 #include "Sides.h"
 #include "Top.h"
 
-#include <CGAL/alpha_wrap_3.h>
-#include <CGAL/Mesh_3/dihedral_angle_3.h>
-
 Map3d::Map3d() = default;
 Map3d::~Map3d() = default;
 
@@ -90,8 +87,9 @@ void Map3d::reconstruct() {
     //-- Constrain features, generate terrain mesh from CDT
     this->reconstruct_terrain();
 
-    //-- Alpha wrap
-    this->one_mesh(); //todo make it option
+    //-- Geometry wrap
+//    if (Config::get().wrap) this->wrap();
+    this->wrap(); //todo make it option
 
     //-- Generate side and top boundaries
     if (Config::get().reconstructBoundaries) this->reconstruct_boundaries();
@@ -395,6 +393,24 @@ void Map3d::clip_buildings() {
     _terrain->clear_subset();
 }
 
+void Map3d::wrap() {
+    std::cout << "\nAlpha wrapping all buildings..." << std::flush;
+
+    //-- New mesh that will be output of wrapping
+    Mesh newMesh;
+
+    //-- Perform alpha wrapping
+    Building::alpha_wrap(_buildings, newMesh);
+
+    //-- Deactivate all individual buildings and add the new mesh
+    for (auto& b : _buildings) b->deactivate();
+    this->clear_inactives();
+    _buildings.push_back(std::make_shared<ReconstructedBuilding>(newMesh));
+//    _buildings.front()->refine(); // Beware - this introduces self-intersections
+
+    std::cout << "\rAlpha wrapping all buildings" << std::endl;
+}
+
 void Map3d::read_data() {
     //-- Read point clouds
     _pointCloud.read_point_clouds();
@@ -567,86 +583,3 @@ void Map3d::set_footprint_elevation(T& features) {
 template void Map3d::set_footprint_elevation<Buildings>    (Buildings& feature);
 template void Map3d::set_footprint_elevation<SurfaceLayers>(SurfaceLayers& feature);
 template void Map3d::set_footprint_elevation<PolyFeatures> (PolyFeatures& feature);
-
-void Map3d::one_mesh() { //todo put it somewhere else
-    std::cout << "\nAlpha wrapping all buildings" << std::endl;
-    typedef EPICK::FT                 FT;
-    typedef std::array<FT, 3>         Custom_point;
-    typedef std::vector<std::size_t>  CGAL_Polygon;
-
-    std::vector<std::array<FT, 3>> points;
-    std::vector<CGAL_Polygon> polygons;
-    for (auto& b : _buildings) {
-        auto& mesh = b->get_mesh();
-        for (auto& face: mesh.faces()) {
-            CGAL_Polygon p;
-            auto vertices = mesh.vertices_around_face(mesh.halfedge(face));
-            for (auto vertex = vertices.begin(); vertex != vertices.end(); ++vertex) {
-                points.push_back(CGAL::make_array<FT>(mesh.point(*vertex).x(),
-                                                      mesh.point(*vertex).y(),
-                                                      mesh.point(*vertex).z()));
-                p.push_back(points.size() - 1);
-            }
-            polygons.push_back(p);
-        }
-    }
-
-    Mesh newMesh;
-    PMP::repair_polygon_soup(points, polygons, CGAL::parameters::geom_traits(geomutils::Array_traits()));
-    PMP::orient_polygon_soup(points, polygons);
-    PMP::polygon_soup_to_polygon_mesh(points, polygons, newMesh);
-    PMP::triangulate_faces(newMesh);
-
-    /*
-    typedef Mesh::Halfedge_index           halfedge_descriptor;
-    typedef Mesh::Edge_index               edge_descriptor;
-    //-- Set the property map for constrained edges
-    Mesh::Property_map<edge_descriptor,bool> is_constrained =
-            newMesh.add_property_map<edge_descriptor,bool>("e:is_constrained",false).first;
-
-    //-- Detect sharp features
-    for (auto& e : edges(newMesh)) {
-        halfedge_descriptor hd = halfedge(e,newMesh);
-        if (!is_border(e,newMesh)) {
-            double angle = CGAL::Mesh_3::dihedral_angle(newMesh.point(source(hd,newMesh)),
-                                                        newMesh.point(target(hd,newMesh)),
-                                                        newMesh.point(target(next(hd,newMesh),newMesh)),
-                                                        newMesh.point(target(next(opposite(hd,newMesh),newMesh),newMesh)));
-            if (CGAL::abs(angle)<179.5)
-                is_constrained[e]=true;
-        }
-    }
-
-    Mesh wrap;
-    CGAL::alpha_wrap_3(newMesh, 0.1, 0.01, wrap,
-                             CGAL::parameters::edge_is_constrained_map(is_constrained));
-    */
-
-    const double relative_alpha = 900.;
-    const double relative_offset = 15000.;
-    CGAL::Bbox_3 bbox = CGAL::Polygon_mesh_processing::bbox(newMesh);
-    const double diag_length = std::sqrt(CGAL::square(bbox.xmax() - bbox.xmin()) +
-                                         CGAL::square(bbox.ymax() - bbox.ymin()) +
-                                         CGAL::square(bbox.zmax() - bbox.zmin()));
-    const double alpha = diag_length / relative_alpha;
-    const double offset = diag_length / relative_offset;
-//    CGAL::alpha_wrap_3(newMesh, alpha, offset, wrap);
-
-//    CGAL::alpha_wrap_3(newMesh, 2, 0.01, newMesh);   // 'coarse'
-    CGAL::alpha_wrap_3(newMesh, 1.5, 0.03, newMesh); // 'medium'
-//    CGAL::alpha_wrap_3(newMesh, 0.7, 0.03, newMesh); // 'fine'
-
-//    CGAL::alpha_wrap_3(newMesh, 0.3, 0.03, newMesh); // that one takes long time
-//    CGAL::alpha_wrap_3(points, polygons, 0.1, 0.001, newMesh);
-//    newMesh = wrap;
-
-//    PMP::experimental::autorefine(newMesh);
-//    PMP::experimental::autorefine_and_remove_self_intersections(newMesh);
-
-    //-- Deactivate all buildings and add the new mesh
-    for (auto& b : _buildings) b->deactivate();
-    this->clear_inactives();
-    _buildings.push_back(std::make_shared<ReconstructedBuilding>(newMesh));
-//    _buildings.front()->refine(); // Beware - this introduces self-intersections
-//    std::cout << "Buildings size: " << _buildings.size() << std::endl;
-}

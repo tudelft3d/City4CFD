@@ -78,6 +78,7 @@ private:
     void reconstruct_with_flat_terrain();
     void solve_building_conflicts();
     void clip_buildings();
+    void wrap();
 
     void prep_feature_output();
     void prep_cityjson_output();
@@ -87,9 +88,6 @@ private:
     //-- Templated functions
     template<typename T> void shorten_polygons(T& features);
     template<typename T> void set_footprint_elevation(T& features);
-
-    // Testing
-    void one_mesh();
 };
 
 #endif //CITY4CFD_MAP3D_H
