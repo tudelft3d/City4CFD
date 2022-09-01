@@ -87,9 +87,8 @@ void Map3d::reconstruct() {
     //-- Constrain features, generate terrain mesh from CDT
     this->reconstruct_terrain();
 
-    //-- Geometry wrap
-//    if (Config::get().wrap) this->wrap();
-    this->wrap(); //todo make it option
+    //-- Geometry wrap (experimental)
+    if (Config::get().alphaWrap) this->wrap();
 
     //-- Generate side and top boundaries
     if (Config::get().reconstructBoundaries) this->reconstruct_boundaries();
@@ -406,9 +405,6 @@ void Map3d::wrap() {
     for (auto& b : _buildings) b->deactivate();
     this->clear_inactives();
     _buildings.push_back(std::make_shared<ReconstructedBuilding>(newMesh));
-//    _buildings.front()->refine(); // Beware - this introduces self-intersections
-
-    std::cout << "\rAlpha wrapping all buildings" << std::endl;
 }
 
 void Map3d::read_data() {

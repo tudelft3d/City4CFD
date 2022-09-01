@@ -13,21 +13,16 @@ set(CMAKE_BUILD_TYPE "Release")
 #    cmake_policy(SET CMP0003 NEW)
 #endif()
 
-#==============================
-# Alpha wrap support
-set(ALPHA_WRAP_SUPPORT ON)
-#==============================
-
 # BOOST
 find_package(Boost 1.66 REQUIRED COMPONENTS filesystem)
 
 # CGAL
 find_package(CGAL REQUIRED QUIET COMPONENTS)
 if (CGAL_FOUND)
-    if (CGAL_VERSION VERSION_GREATER_EQUAL "5.3")
+    if (CGAL_VERSION VERSION_GREATER_EQUAL "5.5")
         message(STATUS "Found CGAL ${CGAL_VERSION}")
     elseif (CGAL_VERSION VERSION_GREATER_EQUAL "5.0")
-        message(STATUS "Found CGAL version greater than 5.0, but less than 5.3. "
+        message(STATUS "Found CGAL version greater than 5.0, but less than 5.5. "
                 "Proceeding to compile with included CGAL headers.")
         include_directories(${CMAKE_SOURCE_DIR}/thirdparty/CGAL/include)
         set(CGAL_USE_INCLUDED_HEADERS ON)
@@ -37,10 +32,6 @@ if (CGAL_FOUND)
         return()
     endif ()
 endif ()
-if (NOT CGAL_USE_INCLUDED_HEADERS AND ALPHA_WRAP_SUPPORT)
-    message(STATUS "Requested alpha wrap support. Compiling with included CGAL headers.")
-    include_directories( ${CMAKE_SOURCE_DIR}/thirdparty/CGAL/include )
-endif()
 
 # Third-party
 add_subdirectory(${CMAKE_SOURCE_DIR}/thirdparty/LAStools)

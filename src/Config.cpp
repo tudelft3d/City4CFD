@@ -258,6 +258,8 @@ void Config::set_config(nlohmann::json& j) {
             handleSelfIntersect = j["experimental"]["handle_self_intersections"];
         if (j["experimental"].contains("refine_buildings"))
             refineBuildings = j["experimental"]["refine_buildings"];
+        if (j["experimental"].contains("alpha_wrap"))
+            alphaWrap = j["experimental"]["alpha_wrap"];
     }
 }
 

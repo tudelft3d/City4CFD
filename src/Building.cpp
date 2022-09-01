@@ -124,9 +124,6 @@ void Building::alpha_wrap(const Buildings& buildings, Mesh& newMesh) {
 //    CGAL::alpha_wrap_3(newMesh, 0.3, 0.03, newMesh); // that one takes long time
 //    CGAL::alpha_wrap_3(points, polygons, 0.1, 0.001, newMesh);
 //    newMesh = wrap;
-
-//    PMP::experimental::autorefine(newMesh);
-//    PMP::experimental::autorefine_and_remove_self_intersections(newMesh);
 }
 
 void Building::clip_bottom(const Terrainptr& terrain) {
