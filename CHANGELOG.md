@@ -3,6 +3,7 @@
 
 ## [Unreleased]
 ### Fixed
+- Bad triangles at surface edges
 - Polygons close to the boundary are defined as 'out of bounds'
 
 
