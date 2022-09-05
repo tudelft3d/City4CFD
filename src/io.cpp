@@ -310,6 +310,7 @@ void IO::get_obj_pts(const Mesh& mesh,
                 faceIdx.push_back(it->second);
             }
         }
+        bs += "\nf" + bsTemp;
     }
 }
 
@@ -358,6 +359,7 @@ void IO::get_cityjson_geom(const Mesh& mesh, nlohmann::json& g, std::unordered_m
                 tempPoly.push_back(it->second);
             }
         }
+        g["boundaries"].push_back({tempPoly});
     }
 }
 
