@@ -59,7 +59,7 @@ void Boundary::set_bnd_poly(Polygon_2& bndPoly, Polygon_2& pcBndPoly, Polygon_2&
         }
 
         for (auto& pt : startBufferPoly)
-            pcBndPoly.push_back(pt - (pt - center) * 0.05 * std::abs(bufferLen));
+            pcBndPoly.push_back(pt - (pt - center) * 0.001 * std::abs(bufferLen));
     } else {
         startBufferPoly = bndPoly;
         pcBndPoly = startBufferPoly;
@@ -67,7 +67,7 @@ void Boundary::set_bnd_poly(Polygon_2& bndPoly, Polygon_2& pcBndPoly, Polygon_2&
 }
 
 //-- Deactivate point cloud points that are out of bounds
-void Boundary::set_bounds_to_pc(Point_set_3& pointCloud, const Polygon_2& pcBndPoly) {
+void Boundary::set_bounds_to_buildings_pc(Point_set_3& pointCloud, const Polygon_2& pcBndPoly) {
     //-- Remove points out of the boundary region
     auto it = pointCloud.points().begin();
     int count = 0;
@@ -82,10 +82,10 @@ void Boundary::set_bounds_to_pc(Point_set_3& pointCloud, const Polygon_2& pcBndP
     pointCloud.collect_garbage(); // Free removed points from the memory
 }
 
-void Boundary::set_bounds_to_terrain(Point_set_3& pointCloud, const Polygon_2& bndPoly,
-                                     const Polygon_2& pcBndPoly, const Polygon_2& startBufferPoly) {
+void Boundary::set_bounds_to_terrain_pc(Point_set_3& pointCloud, const Polygon_2& bndPoly,
+                                        const Polygon_2& pcBndPoly, const Polygon_2& startBufferPoly) {
     //-- Remove points out of the boundary region
-    Boundary::set_bounds_to_pc(pointCloud, pcBndPoly);
+    Boundary::set_bounds_to_buildings_pc(pointCloud, pcBndPoly);
 
     //-- Add outer points to match the domain size to prescribed one
     SearchTree searchTree(pointCloud.points().begin(),pointCloud.points().end());

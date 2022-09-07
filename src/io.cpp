@@ -291,6 +291,7 @@ void IO::get_obj_pts(const Mesh& mesh,
                      std::unordered_map<std::string, int>& dPts)
 {
     for (auto& face : mesh.faces()) {
+        if (IO::is_degen(mesh, face)) continue;
         std::vector<int> faceIdx; faceIdx.reserve(3);
         std::string fsTemp;
         std::string bsTemp;
@@ -309,13 +310,7 @@ void IO::get_obj_pts(const Mesh& mesh,
                 faceIdx.push_back(it->second);
             }
         }
-
-        if (IO::not_small(faceIdx)) {
-            bs += "\nf";
-            bs += bsTemp;
-//        } else {
-//            std::cerr << "Found duplicates!" << std::endl;
-        }
+        bs += "\nf" + bsTemp;
     }
 }
 
@@ -324,15 +319,11 @@ void IO::get_stl_pts(Mesh& mesh, std::string& fs) {
     auto fnormals = mesh.add_property_map<face_descriptor, Vector_3>("f:normals", CGAL::NULL_VECTOR).first;
     PMP::compute_normals(mesh, vnormals, fnormals);
     for (auto& face : mesh.faces()) {
+        if (IO::is_degen(mesh, face)) continue;
         std::vector<std::string> outputPts;
         for (auto index: CGAL::vertices_around_face(mesh.halfedge(face), mesh)) {
             outputPts.push_back(gen_key_bucket(mesh.point(index)));
         }
-        //-- Check for round off of small triangles
-        if (outputPts[0] == outputPts[1]
-         || outputPts[0] == outputPts[2]
-         || outputPts[1] == outputPts[2]) continue;
-
         fs += "\nfacet normal " + gen_key_bucket(fnormals[face]);
         fs += "\n    outer loop";
         for (auto pt: outputPts) {
@@ -349,6 +340,7 @@ void IO::get_cityjson_geom(const Mesh& mesh, nlohmann::json& g, std::unordered_m
     g["lod"] = Config::get().lod;
     g["boundaries"];
     for (auto& face: mesh.faces()) {
+        if (IO::is_degen(mesh, face)) continue;
         std::vector<int> faceIdx;
         faceIdx.reserve(3);
         std::vector<int> tempPoly;
@@ -367,21 +359,32 @@ void IO::get_cityjson_geom(const Mesh& mesh, nlohmann::json& g, std::unordered_m
                 tempPoly.push_back(it->second);
             }
         }
-
-        if (IO::not_small(faceIdx)) {
-            g["boundaries"].push_back({tempPoly});
-//        } else {
-//            std::cerr << "Found duplicates!" << std::endl;
-        }
+        g["boundaries"].push_back({tempPoly});
     }
 }
 
-//-- Check for round off of small triangles
-bool IO::not_small(std::vector<int> idxLst) {
+bool IO::not_same(std::vector<int> idxLst) {
     std::sort(idxLst.begin(), idxLst.end());
     auto it = std::unique(idxLst.begin(), idxLst.end());
 
     return (it == idxLst.end());
+}
+
+bool IO::is_degen(const Mesh& mesh, Mesh::Face_index face) {
+    std::vector<Point_3> pts; pts.reserve(3);
+    for (auto index: CGAL::vertices_around_face(mesh.halfedge(face), mesh)) {
+        pts.push_back(mesh.point(index));
+    }
+    //-- Precondition - check that the points are not the same
+    if (CGAL::squared_distance(pts[0], pts[1]) < 1e-3 ||
+        CGAL::squared_distance(pts[0], pts[2]) < 1e-3 ||
+        CGAL::squared_distance(pts[1], pts[2]) < 1e-3) {
+        return true;
+    }
+    if (sin(CGAL::approximate_angle(pts[0], pts[1], pts[2]) * M_PI / 180) < 0.00174) {
+        return true;
+    }
+    return false;
 }
 
 void IO::output_log() {
@@ -429,7 +432,7 @@ bool IO::has_substr(const std::string& strMain, const std::string& subStr) {
 
 std::string IO::gen_key_bucket(const Point_2 p) {
     std::stringstream ss;
-    ss << std::fixed << std::setprecision(3) << p.x() << " " << p.y();
+    ss << std::fixed << std::setprecision(6) << p.x() << " " << p.y();
     return ss.str();
 }
 
@@ -437,7 +440,7 @@ std::string IO::gen_key_bucket(const Point_2 p) {
 template<typename T>
 std::string IO::gen_key_bucket(const T& p) {
     std::stringstream ss;
-    ss << std::fixed << std::setprecision(3) << p.x() << " " << p.y() << " " << p.z();
+    ss << std::fixed << std::setprecision(6) << p.x() << " " << p.y() << " " << p.z();
     return ss.str();
 }
 //- Explicit template instantiation
