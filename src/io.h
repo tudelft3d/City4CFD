@@ -50,7 +50,8 @@ namespace IO {
     void get_stl_pts(Mesh& mesh, std::string& fs);
     void get_cityjson_geom(const Mesh& mesh, nlohmann::json& g, std::unordered_map<std::string, int>& dPts, std::string primitive);
 
-    bool not_small(std::vector<int> idxLst);
+    bool not_same(std::vector<int> idxLst);
+    bool is_degen(const Mesh& mesh, Mesh::Face_index face);
 
     void output_log();
     bool has_substr(const std::string& strMain, const std::string& subStr);
