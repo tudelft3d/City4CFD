@@ -44,6 +44,13 @@ typedef std::vector<std::shared_ptr<PolyFeature>>              PolyFeatures;
 typedef std::vector<std::shared_ptr<SurfaceLayer>>             SurfaceLayers;
 typedef std::vector<std::unique_ptr<nlohmann::json>>           JsonVector;
 
+//-- LAS input
+typedef struct PointFile {
+    std::string filename;
+    std::vector<int> lasomits;
+    int thinning = 1;
+} PointFile;
+
 //-- TopoClasses
 typedef enum { // temp
     TERRAIN          = 0,

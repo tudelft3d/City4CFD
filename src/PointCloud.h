@@ -31,6 +31,8 @@
 #include "types.h"
 #include "CGALTypes.h"
 
+#include "lasreader.hpp"
+
 typedef std::shared_ptr<SearchTree> SearchTreePtr;
 
 class PointCloud {
@@ -45,6 +47,8 @@ public:
     void flatten_polygon_pts(const PolyFeatures& lsFeatures);
     SearchTreePtr make_search_tree_buildings();
     void read_point_clouds();
+    void add_elevation_point(const LASpoint& laspt, const CGAL::Aff_transformation_3<EPICK>& translate);
+//    bool check_bounds(const double xmin, const double xmax, const double ymin, const double ymax);
 
     Point_set_3& get_terrain();
     Point_set_3& get_buildings();

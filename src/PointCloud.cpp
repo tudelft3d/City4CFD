@@ -32,11 +32,13 @@
 #include "Config.h"
 #include "PolyFeature.h"
 
+#include <boost/locale.hpp>
+
 PointCloud::PointCloud()  = default;
 PointCloud::~PointCloud() = default;
 
 void PointCloud::random_thin_pts() {
-    if (Config::get().terrainThinning > 0 + global::smallnum) {
+    if (Config::get().terrainThinning > 0 + global::smallnum && Config::get().las_files.empty()) {
         std::cout <<"\nRandomly thinning terrain points" << std::endl;
         _pointCloudTerrain.remove(CGAL::random_simplify_point_set(_pointCloudTerrain,
                                                                   Config::get().terrainThinning),
@@ -133,28 +135,143 @@ SearchTreePtr PointCloud::make_search_tree_buildings() {
 }
 
 void PointCloud::read_point_clouds() {
+    //-- Translation matrix in relation to the point of interest
+    CGAL::Aff_transformation_3<EPICK> translate(CGAL::TRANSLATION,
+                                                CGAL::Vector_3<EPICK>(-Config::get().pointOfInterest.x(),
+                                                                      -Config::get().pointOfInterest.y(),
+                                                                      0));
     //-- Read ground points
-    if (!Config::get().points_xyz.empty()) {
-        std::cout << "Reading ground points" << std::endl;
-        IO::read_point_cloud(Config::get().points_xyz, _pointCloudTerrain);
-        _pointCloudTerrain.add_property_map<bool> ("is_building_point", false);
+    if (!Config::get().las_files.empty()) { // add check for las/laz from config file
+        for (auto& pointFile: Config::get().las_files) {
+            std::clog << "Reading LAS/LAZ file: " << pointFile.filename << std::endl;
 
-        std::cout << "    Points read: " << _pointCloudTerrain.size() << std::endl;
+            LASreadOpener lasreadopener;
+            lasreadopener.set_file_name(pointFile.filename.c_str());
+            //-- set to compute bounding box
+            lasreadopener.set_populate_header(true);
+            LASreader* lasreader = lasreadopener.open();
+
+            try {
+                //-- check if file is open
+                if (lasreader == nullptr) {
+                    std::cerr << "\tERROR: could not open file: " << pointFile.filename << std::endl;
+                    throw(std::string("\tERROR: could not open file: " + pointFile.filename));
+                }
+                LASheader header = lasreader->header;
+
+//                if (this->check_bounds(header.min_x, header.max_x, header.min_y, header.max_y)) {
+                //-- LAS classes to omit
+                std::vector<int> lasomits;
+                for (int i : pointFile.lasomits) {
+                    lasomits.push_back(i);
+                }
+
+                //-- read each point 1-by-1
+                uint32_t pointCount = header.number_of_point_records;
+
+                //== IP: these are just info messages here==//
+                //todo adapt thinning for this implementation
+                std::clog << "\t(" << boost::locale::as::number << pointCount << " points in the file)\n";
+                if ((pointFile.thinning > 1)) {
+                    std::clog << "\t(skipping every " << pointFile.thinning << "th points, thus ";
+                    std::clog << boost::locale::as::number << (pointCount / pointFile.thinning) << " are used)\n";
+                }
+                else
+                    std::clog << "\t(all points used, no skipping)\n";
+
+                if (!pointFile.lasomits.empty()) {
+                    std::clog << "\t(omitting LAS classes: ";
+                    for (int i : pointFile.lasomits)
+                        std::clog << i << " ";
+                    std::clog << ")\n";
+                }
+                //== IP: info messages up to here
+
+                IO::print_progress_bar(0);
+                int i = 0;
+                //-- need if statement to make sure whether points go terrain or building
+                //todo
+                if (true) { //todo gotta include CSF somewhere here
+                    while (lasreader->read_point()) {
+                        LASpoint const& p = lasreader->point;
+                        //-- set the thinning filter
+                        if (i % pointFile.thinning == 0) {
+                            //-- set the classification filter
+                            if (std::find(lasomits.begin(), lasomits.end(), (int) p.classification) == lasomits.end()) {
+                                //-- set the bounds filter
+//                            if (this->check_bounds(p.X, p.X, p.Y, p.Y)) {
+                                this->add_elevation_point(p, translate);
+//                            }
+                            }
+                        }
+                        if (i % (pointCount / 500) == 0)
+                            IO::print_progress_bar(100 * (i / double(pointCount)));
+                        i++;
+                    }
+                } else {
+
+                }
+                IO::print_progress_bar(100);
+                std::clog << std::endl;
+//                }
+//                else {
+//                    std::clog << "\tskipping file, bounds do not intersect polygon extent\n";
+//                }
+                _pointCloudTerrain.add_property_map<bool>("is_building_point", false);
+                lasreader->close();
+            }
+            catch (std::exception& e) {
+                lasreader->close();
+                std::cerr << std::endl << e.what() << std::endl;
+                throw (e.what());
+            }
+        }
     } else {
-        std::cout << "INFO: Did not find any ground points! Will calculate ground as a flat surface." << std::endl;
-        std::cout << "WARNING: Ground height of buildings can only be approximated. "
-                  << "If you are using point cloud to reconstruct buildings, building height estimation can be wrong.\n" << std::endl;
-    }
+        std::cout << "Explicitly reading ground and/or building points" << std::endl;
+        if (!Config::get().points_xyz.empty()) {
+            std::cout << "Reading ground points" << std::endl;
+            IO::read_point_cloud(Config::get().points_xyz, _pointCloudTerrain);
+            _pointCloudTerrain.add_property_map<bool>("is_building_point", false);
 
-    //-- Read building points
-    if (!Config::get().buildings_xyz.empty()) {
-        std::cout << "Reading building points" << std::endl;
-        IO::read_point_cloud(Config::get().buildings_xyz, _pointCloudBuildings);
-        if (_pointCloudBuildings.empty()) throw std::invalid_argument("Didn't find any building points!");
+            std::cout << "    Points read: " << _pointCloudTerrain.size() << std::endl;
+        } else {
+            std::cout << "INFO: Did not find any ground points! Will calculate ground as a flat surface." << std::endl;
+            std::cout << "WARNING: Ground height of buildings can only be approximated. "
+                      << "If you are using point cloud to reconstruct buildings, building height estimation can be wrong.\n"
+                      << std::endl;
+        }
 
-        std::cout << "    Points read: " << _pointCloudBuildings.size() << std::endl;
+        //-- Read building points
+        if (!Config::get().buildings_xyz.empty()) {
+            std::cout << "Reading building points" << std::endl;
+            IO::read_point_cloud(Config::get().buildings_xyz, _pointCloudBuildings);
+            if (_pointCloudBuildings.empty()) throw std::invalid_argument("Didn't find any building points!");
+
+            std::cout << "    Points read: " << _pointCloudBuildings.size() << std::endl;
+        }
     }
 }
+
+void PointCloud::add_elevation_point(const LASpoint& laspt, const CGAL::Aff_transformation_3<EPICK>& translate) {
+    Point_set_3 transformPC;
+    Point_3 pt(laspt.get_x(), laspt.get_y(), laspt.get_z());
+    if (true) {//todo check if class belongs to the terrain
+        _pointCloudTerrain.insert(pt.transform(translate));
+    }
+    if (true) {// todo check if the class belong to building
+        _pointCloudBuildings.insert(pt.transform(translate));
+    }
+}
+
+/*
+bool PointCloud::check_bounds(const double xmin, const double xmax, const double ymin, const double ymax) {
+    if ((xmin < _maxxradius || xmax > _minxradius) &&
+        (ymin < _maxyradius || ymax > _minyradius)) {
+        return true;
+    }
+    return false;
+}
+*/
 
 Point_set_3& PointCloud::get_terrain() {
     return _pointCloudTerrain;

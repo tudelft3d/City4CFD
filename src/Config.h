@@ -55,8 +55,9 @@ public:
                     nlohmann::json& j);
 
     //-- Input info
-    std::string              points_xyz;             // Ground
-    std::string              buildings_xyz;          // Buildings
+    std::vector<PointFile>   las_files;              // LAS point cloud
+    std::string              points_xyz;             // Ground explicit
+    std::string              buildings_xyz;          // Buildings explicit
     std::string              gisdata;                // Building Polygons
     std::vector<std::string> topoLayers = {};        // Other polygons
     std::string              importedBuildingsPath;  // Additional pre-reconstructed buildings

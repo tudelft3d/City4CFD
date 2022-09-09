@@ -19,7 +19,7 @@ set(ALPHA_WRAP_SUPPORT OFF)
 #==============================
 
 # BOOST
-find_package(Boost 1.66 REQUIRED COMPONENTS filesystem)
+find_package(Boost 1.66 REQUIRED COMPONENTS filesystem locale)
 
 # CGAL
 find_package(CGAL REQUIRED QUIET COMPONENTS)
@@ -61,6 +61,7 @@ target_link_libraries(city4cfd
         ${CGAL_3RD_PARTY_LIBRARIES}
         ${Boost_SYSTEM_LIBRARY}
         ${Boost_FILESYSTEM_LIBRARY}
+        ${Boost_LOCALE_LIBRARY}
         LASlib
         )
 
