@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Algebraic_kernel_d/include/CGAL/Algebraic_kernel_d/refine_zero_against.h $
-// $Id: refine_zero_against.h 0779373 2020-03-26T13:31:46+01:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Algebraic_kernel_d/include/CGAL/Algebraic_kernel_d/refine_zero_against.h $
+// $Id: refine_zero_against.h 3f8b32d 2022-03-16T14:53:06+01:00 Andreas Fabri
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -100,7 +100,7 @@ bool refine_zero_against(Field& low, Field& high, Polynomial p, Polynomial q) {
     if (CGAL::degree(q) == 0) return false;
 
     CGAL::Sign sign_p_low  = p.sign_at(low);
-    CGAL::Sign sign_p_high = p.sign_at(high);
+    CGAL_assertion_code(CGAL::Sign sign_p_high = p.sign_at(high));
     CGAL_precondition(sign_p_low  != CGAL::ZERO);
     CGAL_precondition(sign_p_high != CGAL::ZERO);
     CGAL_precondition(sign_p_high != sign_p_low);
@@ -148,9 +148,9 @@ bool refine_zero_against(Field& low, Field& high, Polynomial p, Polynomial q) {
             low = mid;
             sign_p_low = s;
         } else {
-            CGAL_postcondition(s == sign_p_high);
+            CGAL_assertion(s == sign_p_high);
             high = mid;
-            sign_p_high = s;
+            CGAL_assertion_code(sign_p_high = s);
         }
     }
 }
@@ -168,7 +168,7 @@ static bool strong_refine_zero_against(Field& low, Field& high,
     std::cout << "done, " << has_common_root << std::endl;
 
     CGAL::Sign sign_p_low = p.sign_at(low);
-    CGAL::Sign sign_p_high = p.sign_at(high);
+    CGAL_assertion_code(CGAL::Sign sign_p_high = p.sign_at(high));
 
     Field mid;
     CGAL::Sign s;
@@ -191,7 +191,7 @@ static bool strong_refine_zero_against(Field& low, Field& high,
         else {
             CGAL_assertion(s == sign_p_high);
             high = mid;
-            sign_p_high = s; //bogus?
+            CGAL_assertion_code(sign_p_high = s); //bogus?
         }
     }
 

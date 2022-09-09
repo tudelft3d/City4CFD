@@ -4,7 +4,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Classification/include/CGAL/Classification/Feature/Height_below.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Classification/include/CGAL/Classification/Feature/Height_below.h $
 // $Id: Height_below.h 19004a7 2020-08-04T13:41:48+02:00 Simon Giraudot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Bounding_volumes/include/CGAL/Rectangular_p_center_traits_2.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Bounding_volumes/include/CGAL/Rectangular_p_center_traits_2.h $
 // $Id: Rectangular_p_center_traits_2.h 5da7e84 2021-02-02T10:58:31+01:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

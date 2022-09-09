@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/CGAL_ImageIO/include/CGAL/SEP_header.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/CGAL_ImageIO/include/CGAL/SEP_header.h $
 // $Id: SEP_header.h ef59128 2021-12-27T11:08:34+01:00 Sébastien Loriot
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //

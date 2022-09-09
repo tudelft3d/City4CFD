@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Matrix_search/include/CGAL/Cartesian_matrix.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Matrix_search/include/CGAL/Cartesian_matrix.h $
 // $Id: Cartesian_matrix.h 557cf7f 2021-01-29T10:36:59+00:00 Andreas Fabri
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

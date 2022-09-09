@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Surface_sweep_2/include/CGAL/Surface_sweep_2/Curve_comparer.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Surface_sweep_2/include/CGAL/Surface_sweep_2/Curve_comparer.h $
 // $Id: Curve_comparer.h 2a3fbc0 2019-11-19T09:47:44+02:00 Efi Fogel
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

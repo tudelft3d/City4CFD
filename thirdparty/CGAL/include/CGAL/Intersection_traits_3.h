@@ -9,8 +9,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Intersections_3/include/CGAL/Intersection_traits_3.h $
-// $Id: Intersection_traits_3.h c2d1adf 2021-06-23T17:34:48+02:00 Mael Rouxel-Labbé
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Intersections_3/include/CGAL/Intersection_traits_3.h $
+// $Id: Intersection_traits_3.h 1491983 2022-01-18T11:36:56+01:00 Sébastien Loriot
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -20,6 +20,7 @@
 #define CGAL_INTERSECTION_TRAITS_3_H
 
 #include <CGAL/Intersection_traits.h>
+#include <CGAL/Bbox_3.h>
 
 #include <boost/optional.hpp>
 #include <boost/variant.hpp>

@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Generalized_map/include/CGAL/Generalized_map_save_load.h $
-// $Id: Generalized_map_save_load.h 0779373 2020-03-26T13:31:46+01:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Generalized_map/include/CGAL/Generalized_map_save_load.h $
+// $Id: Generalized_map_save_load.h 5c57f83 2021-10-14T17:19:33+02:00 Guillaume Damiand
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Guillaume Damiand <guillaume.damiand@liris.cnrs.fr>
@@ -21,7 +21,7 @@
 #include <CGAL/Combinatorial_map_save_load.h>
 
 #include <algorithm>
-#include <map>
+#include <unordered_map>
 #include <vector>
 #include <cstdlib>
 #include <iostream>
@@ -70,12 +70,12 @@ namespace CGAL {
   template < class GMap >
   boost::property_tree::ptree gmap_save_darts
   (const GMap& amap,
-   std::map<typename GMap::Dart_const_handle,
+   std::unordered_map<typename GMap::Dart_const_handle,
               typename GMap::size_type>& myDarts)
   {
     CGAL_assertion( myDarts.empty() );
 
-    // First we numbered each dart by using the std::map.
+    // First we numbered each dart by using the unordered_map.
     typename GMap::Dart_range::const_iterator it(amap.darts().begin());
     for(typename GMap::size_type num=1; num<=amap.number_of_darts();
         ++num, ++it)
@@ -119,7 +119,7 @@ namespace CGAL {
     ptree tree;
 
     // map dart => number
-    std::map<typename GMap::Dart_const_handle, typename GMap::size_type> myDarts;
+    std::unordered_map<typename GMap::Dart_const_handle, typename GMap::size_type> myDarts;
 
     // Save darts
     ptree pt_darts=gmap_save_darts(amap, myDarts);

@@ -7,7 +7,7 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Polygon/include/CGAL/Polygon_2/Polygon_2_simplicity.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Polygon/include/CGAL/Polygon_2/Polygon_2_simplicity.h $
 // $Id: Polygon_2_simplicity.h 6b4ba80 2021-03-31T15:58:09+02:00 Mael Rouxel-Labbé
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //

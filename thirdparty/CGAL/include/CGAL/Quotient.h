@@ -7,8 +7,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Number_types/include/CGAL/Quotient.h $
-// $Id: Quotient.h 8d32692 2021-09-09T15:48:59+02:00 Jane Tournois
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Number_types/include/CGAL/Quotient.h $
+// $Id: Quotient.h a037ca1 2021-10-04T17:01:41+02:00 Dmitry Anisimov
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -33,6 +33,9 @@
 #include <CGAL/Kernel/mpl.h>
 
 #include <boost/operators.hpp>
+#ifdef CGAL_USE_BOOST_MP
+#include <boost/multiprecision/cpp_int.hpp>
+#endif // CGAL_USE_BOOST_MP
 
 namespace CGAL {
 
@@ -45,6 +48,15 @@ namespace CGAL {
 template < typename NT >
 inline void
 simplify_quotient(NT &, NT &) {}
+
+#ifdef CGAL_USE_BOOST_MP
+inline void
+simplify_quotient(boost::multiprecision::cpp_int & a, boost::multiprecision::cpp_int & b) {
+  const boost::multiprecision::cpp_int r = boost::multiprecision::gcd(a, b);
+  a /= r;
+  b /= r;
+}
+#endif // CGAL_USE_BOOST_MP
 
 // This one should be replaced by some functor or tag.
 // Meanwhile, the class is specialized for Gmpz, mpz_class, leda_integer.
@@ -687,7 +699,7 @@ template < class NT > class Real_embeddable_traits_quotient_base< Quotient<NT> >
       : public CGAL::cpp98::unary_function< Type, std::pair< double, double > > {
       public:
         std::pair<double, double> operator()( const Type& x ) const {
-          Interval_nt<> quot =
+          const Interval_nt<> quot =
                           Interval_nt<>(CGAL_NTS to_interval(x.numerator())) /
                           Interval_nt<>(CGAL_NTS to_interval(x.denominator()));
           return std::make_pair(quot.inf(), quot.sup());

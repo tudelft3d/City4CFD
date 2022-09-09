@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Skin_surface_3/include/CGAL/Compute_anchor_3.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Skin_surface_3/include/CGAL/Compute_anchor_3.h $
 // $Id: Compute_anchor_3.h 254d60f 2019-10-19T15:23:19+02:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

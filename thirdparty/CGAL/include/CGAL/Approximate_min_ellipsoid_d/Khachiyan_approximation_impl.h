@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Bounding_volumes/include/CGAL/Approximate_min_ellipsoid_d/Khachiyan_approximation_impl.h $
-// $Id: Khachiyan_approximation_impl.h 0779373 2020-03-26T13:31:46+01:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Bounding_volumes/include/CGAL/Approximate_min_ellipsoid_d/Khachiyan_approximation_impl.h $
+// $Id: Khachiyan_approximation_impl.h 54529af 2022-06-01T10:53:10+01:00 Andreas Fabri
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -482,10 +482,16 @@ namespace CGAL {
     // check whether eps is negative (which under exact arithmetic is
     // not possible, and which we will take as a sign that the input
     // points are degenerate):
-    if (CGAL::is_negative(eps_e)) {
-      CGAL_APPEL_LOG("appel", "Negative Exact epsilon -> degenerate!" << "\n");
-      is_deg = true;
-    }
+    // BG: the following check is wrong and has been commented out.
+    // If the ellipsoid happens to be optimal (valid with eps=0),
+    // a slightly negative eps_e is a legit outcome due to roundoff:
+    // while eps_e is computed with exact arithmetic, it is based on
+    // the inexact inverse M(x)^{-1}.
+    //
+    // if (CGAL::is_negative(eps_e)) {
+    //   CGAL_APPEL_LOG("appel", "Negative Exact epsilon -> degenerate!" << "\n");
+    //  is_deg = true;
+    // }
 
     is_exact_eps_uptodate = true;
     return eps_exact;

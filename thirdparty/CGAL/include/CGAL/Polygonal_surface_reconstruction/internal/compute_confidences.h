@@ -2,7 +2,7 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Polygonal_surface_reconstruction/include/CGAL/Polygonal_surface_reconstruction/internal/compute_confidences.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Polygonal_surface_reconstruction/include/CGAL/Polygonal_surface_reconstruction/internal/compute_confidences.h $
 // $Id: compute_confidences.h facabca 2021-09-10T17:47:17+02:00 Sébastien Loriot
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //

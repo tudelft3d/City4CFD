@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Shape_regularization/include/CGAL/Shape_regularization/internal/Open_contour_2.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Shape_regularization/include/CGAL/Shape_regularization/internal/Open_contour_2.h $
 // $Id: Open_contour_2.h 614f536 2021-08-06T10:50:42+02:00 Dmitry Anisimov
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

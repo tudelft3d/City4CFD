@@ -3,7 +3,7 @@
 //
 // This file is part of the ImageIO Library, and as been adapted for CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/CGAL_ImageIO/include/CGAL/ImageIO/gis_impl.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/CGAL_ImageIO/include/CGAL/ImageIO/gis_impl.h $
 // $Id: gis_impl.h 78ff918 2021-06-23T23:34:14+02:00 Mael Rouxel-Labbé
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //

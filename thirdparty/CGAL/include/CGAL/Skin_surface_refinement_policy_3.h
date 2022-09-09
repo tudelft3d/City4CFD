@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Skin_surface_3/include/CGAL/Skin_surface_refinement_policy_3.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Skin_surface_3/include/CGAL/Skin_surface_refinement_policy_3.h $
 // $Id: Skin_surface_refinement_policy_3.h 0d28171 2021-06-23T17:40:25+02:00 Mael Rouxel-Labbé
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

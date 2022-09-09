@@ -3,14 +3,14 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Arithmetic_kernel/include/CGAL/BOOST_MP_arithmetic_kernel.h $
-// $Id: BOOST_MP_arithmetic_kernel.h 52164b1 2019-10-19T15:34:59+02:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Arithmetic_kernel/include/CGAL/BOOST_MP_arithmetic_kernel.h $
+// $Id: BOOST_MP_arithmetic_kernel.h ed79fea 2021-09-23T13:02:58+02:00 Dmitry Anisimov
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author: Marc Glisse <marc.glisse@inria.fr>
 
-#ifndef CGAL_GMPXX_ARITHMETIC_KERNEL_H
-#define CGAL_GMPXX_ARITHMETIC_KERNEL_H
+#ifndef CGAL_BOOST_MP_ARITHMETIC_KERNEL_H
+#define CGAL_BOOST_MP_ARITHMETIC_KERNEL_H
 
 #include <CGAL/Arithmetic_kernel/Arithmetic_kernel_base.h>
 #include <CGAL/Get_arithmetic_kernel.h>

@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Combinatorial_map/include/CGAL/Combinatorial_map_operations.h $
-// $Id: Combinatorial_map_operations.h 98e4718 2021-08-26T11:33:39+02:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Combinatorial_map/include/CGAL/Combinatorial_map_operations.h $
+// $Id: Combinatorial_map_operations.h 46f5325 2022-01-27T10:36:22+01:00 Guillaume Damiand
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Guillaume Damiand <guillaume.damiand@liris.cnrs.fr>
@@ -62,18 +62,6 @@ namespace CGAL
     static bool run(const CMap&, typename CMap::Dart_const_handle)
     { return true; }
   };
-  /** Test if an i-cell can be removed.
-   *  An i-cell can be removed if i==CMap::dimension or i==CMap::dimension-1,
-   *     or if there are at most two (i+1)-cell incident to it.
-   * @param adart a dart of the i-cell.
-   * @return true iff the i-cell can be removed.
-   */
-#ifndef CGAL_NO_DEPRECATED_CODE
-  template < class CMap, unsigned int i >
-  CGAL_DEPRECATED bool is_removable(const CMap& amap,
-                                    typename CMap::Dart_const_handle adart)
-  { return CGAL::Is_removable_functor<CMap, i>::run(amap,adart); }
-#endif // CGAL_NO_DEPRECATED_CODE
 
   /** Remove an i-cell, 0<i<dimension, and merge eventually both incident
    *  (i+1)-cells.
@@ -455,22 +443,6 @@ namespace CGAL
     }
   };
 
-  /** Remove an i-cell, 0<=i<=dimension.
-   * @param amap the used combinatorial map.
-   * @param adart a dart of the i-cell to remove.
-   * @param update_attributes a boolean to update the enabled attributes
-   * @return the number of deleted darts.
-   */
-#ifndef CGAL_NO_DEPRECATED_CODE
-  template < class CMap, unsigned int i >
-  CGAL_DEPRECATED size_t remove_cell(CMap& amap, typename CMap::Dart_handle adart,
-                                     bool update_attributes = true)
-  {
-    return CGAL::Remove_cell_functor<CMap,i,CMap::dimension-i>::
-      run(amap,adart,update_attributes);
-  }
-#endif // CGAL_NO_DEPRECATED_CODE
-
   /** Test if an i-cell can be contracted.
    *  An i-cell can be contracted if i==1
    *     or if there are at most two (i-1)-cell incident to it.
@@ -508,17 +480,6 @@ namespace CGAL
     static bool run(const CMap&, typename CMap::Dart_const_handle)
     { return true; }
   };
-  /** Test if an i-cell can be contracted.
-   *  An i-cell can be contracted if i==1
-   *     or if there are at most two (i-1)-cell incident to it.
-   * @param adart a dart of the i-cell.
-   * @return true iff the i-cell can be contracted.
-   */
-#ifndef CGAL_NO_DEPRECATED_CODE
-  template < class CMap, unsigned int i >
-  CGAL_DEPRECATED bool is_contractible(const CMap& amap, typename CMap::Dart_const_handle adart)
-  { return CGAL::Is_contractible_functor<CMap, i>::run(amap,adart); }
-#endif // CGAL_NO_DEPRECATED_CODE
 
   /** Contract an i-cell, 1<i<=dimension, and merge eventually both incident
    *  (i-1)-cells.
@@ -794,18 +755,6 @@ namespace CGAL
       return res;
     }
   };
-
-  /** Contract an i-cell, 1<=i<=dimension.
-   * @param amap the used combinatorial map.
-   * @param adart a dart of the i-cell to remove.
-   * @return the number of deleted darts.
-   */
-#ifndef CGAL_NO_DEPRECATED_CODE
-  template < class CMap, unsigned int i >
-  CGAL_DEPRECATED size_t contract_cell(CMap& amap, typename CMap::Dart_handle adart,
-                                       bool update_attributes)
-  { return CGAL::Contract_cell_functor<CMap,i>::run(amap,adart, update_attributes); }
-#endif // CGAL_NO_DEPRECATED_CODE
 
 } // namespace CGAL
 

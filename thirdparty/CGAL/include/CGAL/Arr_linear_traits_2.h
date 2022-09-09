@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Arrangement_on_surface_2/include/CGAL/Arr_linear_traits_2.h $
-// $Id: Arr_linear_traits_2.h bfc5b7e 2021-08-10T10:49:11+03:00 Efi Fogel
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Arrangement_on_surface_2/include/CGAL/Arr_linear_traits_2.h $
+// $Id: Arr_linear_traits_2.h c0838c5 2021-12-16T16:33:43+02:00 Efi Fogel
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -1535,6 +1535,7 @@ public:
   /*! Obtain an Approximate_2 functor object. */
   Approximate_2 approximate_2_object() const { return Approximate_2(); }
 
+  //! Functor
   class Construct_x_monotone_curve_2 {
   public:
     /*! Obtain an x-monotone curve connecting the two given endpoints.
@@ -1555,6 +1556,17 @@ public:
   /*! Obtain a Construct_x_monotone_curve_2 functor object. */
   Construct_x_monotone_curve_2 construct_x_monotone_curve_2_object() const
   { return Construct_x_monotone_curve_2(); }
+  //@}
+
+  /// \name Functor definitions for polylines.
+  //@{
+
+  //! Functor
+  typedef Construct_x_monotone_curve_2  Construct_curve_2;
+
+  /*! Obtain a Construct_curve_2 functor object. */
+  Construct_curve_2 construct_curve_2_object() const
+  { return Construct_x_monotone_curve_2(*this); }
   //@}
 };
 

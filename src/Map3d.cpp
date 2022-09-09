@@ -87,6 +87,9 @@ void Map3d::reconstruct() {
     //-- Constrain features, generate terrain mesh from CDT
     this->reconstruct_terrain();
 
+    //-- Geometry wrap (experimental)
+    if (Config::get().alphaWrap) this->wrap();
+
     //-- Generate side and top boundaries
     if (Config::get().reconstructBoundaries) this->reconstruct_boundaries();
 }
@@ -240,7 +243,7 @@ void Map3d::set_bnd() {
     //-- Prepare the outer boundary polygon for sides and top, and polygon for feature scope
     Polygon_2 bndPoly, pcBndPoly, startBufferPoly; // Depends on the buffer region
     bndPoly = _domainBnd.get_bounding_region();
-    if (_boundaries.size() > 2) { 
+    if (_boundaries.size() > 2) {
         geomutils::shorten_long_poly_edges(bndPoly, 20 * Config::get().edgeMaxLen); // Outer poly edge size is hardcoded atm
         Boundary::set_bnd_poly(bndPoly, pcBndPoly, startBufferPoly);
     } else
@@ -387,6 +390,21 @@ void Map3d::clip_buildings() {
     }
     IO::print_progress_bar(100); std::cout << std::endl;
     _terrain->clear_subset();
+}
+
+void Map3d::wrap() {
+    std::cout << "\nAlpha wrapping all buildings..." << std::flush;
+
+    //-- New mesh that will be output of wrapping
+    Mesh newMesh;
+
+    //-- Perform alpha wrapping
+    Building::alpha_wrap(_buildings, newMesh);
+
+    //-- Deactivate all individual buildings and add the new mesh
+    for (auto& b : _buildings) b->deactivate();
+    this->clear_inactives();
+    _buildings.push_back(std::make_shared<ReconstructedBuilding>(newMesh));
 }
 
 void Map3d::read_data() {

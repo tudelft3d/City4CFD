@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Point_set_processing_3/include/CGAL/IO/write_points.h $
-// $Id: write_points.h 78ff918 2021-06-23T23:34:14+02:00 Mael Rouxel-Labbé
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Point_set_processing_3/include/CGAL/IO/write_points.h $
+// $Id: write_points.h 10b0af3 2022-01-13T14:43:34+01:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s) : Maxime Gimeno
@@ -25,11 +25,6 @@
 
 #include <iostream>
 #include <fstream>
-
-#ifdef DOXYGEN_RUNNING
-#define CGAL_BGL_NP_TEMPLATE_PARAMETERS NamedParameters
-#define CGAL_BGL_NP_CLASS NamedParameters
-#endif
 
 namespace CGAL {
 
@@ -93,10 +88,10 @@ namespace IO {
 
   \returns `true` if writing was successful, `false` otherwise.
 */
-template <typename PointRange, typename CGAL_BGL_NP_TEMPLATE_PARAMETERS>
+template <typename PointRange, typename CGAL_NP_TEMPLATE_PARAMETERS>
 bool write_points(const std::string& fname,
                   const PointRange& points,
-                  const CGAL_BGL_NP_CLASS& np,
+                  const CGAL_NP_CLASS& np = parameters::default_values(),
 #ifndef DOXYGEN_RUNNING
                   typename boost::enable_if<internal::is_Range<PointRange> >::type* = nullptr
 #endif
@@ -117,17 +112,6 @@ bool write_points(const std::string& fname,
 #endif
   return false;
 }
-
-/// \cond SKIP_IN_MANUAL
-
-template <typename PointRange>
-bool write_points(const std::string& fname,const PointRange& points,
-                  typename boost::enable_if<internal::is_Range<PointRange> >::type* = nullptr)
-{
-  return write_points(fname, points, parameters::all_default());
-}
-
-/// \endcond
 
 } } // namespace CGAL::IO
 

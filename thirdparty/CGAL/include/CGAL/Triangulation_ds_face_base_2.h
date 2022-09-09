@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/TDS_2/include/CGAL/Triangulation_ds_face_base_2.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/TDS_2/include/CGAL/Triangulation_ds_face_base_2.h $
 // $Id: Triangulation_ds_face_base_2.h cff3cdb 2021-08-12T10:23:57+02:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

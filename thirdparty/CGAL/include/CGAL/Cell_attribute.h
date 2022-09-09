@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Combinatorial_map/include/CGAL/Cell_attribute.h $
-// $Id: Cell_attribute.h d6306be 2020-10-22T10:30:38+02:00 Guillaume Damiand
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Combinatorial_map/include/CGAL/Cell_attribute.h $
+// $Id: Cell_attribute.h 84ca88f 2021-10-19T20:16:43+02:00 Guillaume Damiand
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Guillaume Damiand <guillaume.damiand@liris.cnrs.fr>
@@ -14,6 +14,7 @@
 
 #include <CGAL/tags.h>
 #include <CGAL/assertions.h>
+#include <cstddef>
 
 namespace CGAL {
 
@@ -88,8 +89,7 @@ namespace CGAL {
     { m_id=id; }
 
   protected:
-    /// id of the cell
-    std::size_t m_id;
+    std::size_t m_id; ///< id of the cell
   };
 
   /// If the tag WithId is false, we do not add id to cells.

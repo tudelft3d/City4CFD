@@ -4,8 +4,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Mesh_3/include/CGAL/Polyhedral_complex_mesh_domain_3.h $
-// $Id: Polyhedral_complex_mesh_domain_3.h e6bacfb 2021-11-12T10:44:41+01:00 Jane Tournois
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Mesh_3/include/CGAL/Polyhedral_complex_mesh_domain_3.h $
+// $Id: Polyhedral_complex_mesh_domain_3.h c169c41 2022-01-12T13:33:49+01:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -768,10 +768,10 @@ detect_features(FT angle_in_degree,
     nb_of_patch_plus_one +=PMP::sharp_edges_segmentation(p, angle_in_degree
       , eif
       , pid_map
-      , PMP::parameters::first_index(nb_of_patch_plus_one)
-                        .face_index_map(get_initialized_face_index_map(p))
-                        .vertex_incident_patches_map(vip_map)
-                        .vertex_feature_degree_map(vertex_feature_degree_map));
+      , CGAL::parameters::first_index(nb_of_patch_plus_one)
+                         .face_index_map(get_initialized_face_index_map(p))
+                         .vertex_incident_patches_map(vip_map)
+                         .vertex_feature_degree_map(vertex_feature_degree_map));
 
     Mesh_3::internal::Is_featured_edge<Polyhedron_type> is_featured_edge(p);
 

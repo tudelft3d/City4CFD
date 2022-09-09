@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Interpolation/include/CGAL/interpolation_functions.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Interpolation/include/CGAL/interpolation_functions.h $
 // $Id: interpolation_functions.h d7224e5 2020-05-24T11:08:44+02:00 Marc Glisse
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

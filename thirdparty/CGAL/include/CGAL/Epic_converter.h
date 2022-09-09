@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Filtered_kernel/include/CGAL/Epic_converter.h $
-// $Id: Epic_converter.h 0779373 2020-03-26T13:31:46+01:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Filtered_kernel/include/CGAL/Epic_converter.h $
+// $Id: Epic_converter.h c4b8c37 2022-03-11T10:21:51+00:00 Andreas Fabri
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -49,7 +49,15 @@ class Epic_converter {
   typedef typename IK::FT IK_FT;
 public:
 
+  std::pair<Origin, bool> operator()(Origin o) const
+  {
+    return std::make_pair(o, true);
+  }
 
+  std::pair<Null_vector, bool> operator()(Null_vector n) const
+  {
+    return std::make_pair(n, true);
+  }
 
   std::pair<double,bool> operator()(const typename IK::FT n) const
   {

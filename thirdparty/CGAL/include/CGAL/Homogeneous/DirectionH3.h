@@ -7,8 +7,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Homogeneous_kernel/include/CGAL/Homogeneous/DirectionH3.h $
-// $Id: DirectionH3.h 0779373 2020-03-26T13:31:46+01:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Homogeneous_kernel/include/CGAL/Homogeneous/DirectionH3.h $
+// $Id: DirectionH3.h d39c774 2022-03-17T12:14:43+01:00 Andreas Fabri
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -49,16 +49,16 @@ public:
     //: base(p) {}
 
   DirectionH3(const Vector_3 & v )
-  { *this = v.direction(); }
+  { *this = v.rep().direction(); }
 
   DirectionH3(const Line_3 & l )
   { *this = l.rep().direction(); }
 
   DirectionH3(const Ray_3 & r )
-  { *this = r.direction(); }
+  { *this = r.rep().direction(); }
 
   DirectionH3(const Segment_3 & s )
-  { *this = s.direction(); }
+  { *this = s.rep().direction(); }
 
   // the fourth argument is not documented.  Should go away ?
   DirectionH3(const RT& x, const RT& y,

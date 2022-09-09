@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Shape_regularization/include/CGAL/Shape_regularization/internal/utils.h $
-// $Id: utils.h 542f67b 2021-06-11T12:59:00+02:00 Dmitry Anisimov
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Shape_regularization/include/CGAL/Shape_regularization/internal/utils.h $
+// $Id: utils.h 6d3176e 2022-01-07T14:42:25+01:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -41,7 +41,7 @@
 #include <CGAL/assertions.h>
 
 // Named parameters.
-#include <CGAL/boost/graph/Named_function_parameters.h>
+#include <CGAL/Named_function_parameters.h>
 #include <CGAL/boost/graph/named_params_helper.h>
 
 namespace CGAL {

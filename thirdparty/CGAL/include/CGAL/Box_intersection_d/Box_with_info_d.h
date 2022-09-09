@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Box_intersection_d/include/CGAL/Box_intersection_d/Box_with_info_d.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Box_intersection_d/include/CGAL/Box_intersection_d/Box_with_info_d.h $
 // $Id: Box_with_info_d.h 8bb22d5 2020-03-26T14:23:37+01:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

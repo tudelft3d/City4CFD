@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Surface_mesh_deformation/include/CGAL/Deformation_Eigen_closest_rotation_traits_3.h $
-// $Id: Deformation_Eigen_closest_rotation_traits_3.h 52164b1 2019-10-19T15:34:59+02:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Surface_mesh_deformation/include/CGAL/Deformation_Eigen_closest_rotation_traits_3.h $
+// $Id: Deformation_Eigen_closest_rotation_traits_3.h a98b548 2022-05-12T16:03:53+02:00 Sven Oesau
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Gael Guennebaud and Ilker O. Yaz
@@ -80,8 +80,13 @@ public:
   /// Computes the closest rotation to `m` and places it into `R`
   void compute_close_rotation(const Matrix& m, Matrix& R)
   {
+#if EIGEN_VERSION_AT_LEAST(3,4,90)
+    Eigen::JacobiSVD<Eigen::Matrix3d, Eigen::ComputeFullU | Eigen::ComputeFullV> solver;
+    solver.compute(m);
+#else
     Eigen::JacobiSVD<Eigen::Matrix3d> solver;
-    solver.compute( m, Eigen::ComputeFullU | Eigen::ComputeFullV );
+    solver.compute(m, Eigen::ComputeFullU | Eigen::ComputeFullV);
+#endif
 
     const Matrix& u = solver.matrixU(); const Matrix& v = solver.matrixV();
     R = v * u.transpose();

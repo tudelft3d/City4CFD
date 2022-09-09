@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Surface_mesh_shortest_path/include/CGAL/Surface_mesh_shortest_path/function_objects.h $
-// $Id: function_objects.h 263ad6b 2020-08-20T18:25:01+02:00 Dmitry Anisimov
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Surface_mesh_shortest_path/include/CGAL/Surface_mesh_shortest_path/function_objects.h $
+// $Id: function_objects.h 64b9bbd 2022-06-28T15:48:56+02:00 Mael Rouxel-Labbé
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Stephen Kiazyk
@@ -493,7 +493,7 @@ public:
     // In the case of multiple rays reaching the same target, we want to know their respective position
     // so that pruning of branches can be done according to the "one angle one split" idiom.
     // However, the orientation predicate is evaluated in the unfolded 2D plane, which is obtained
-    // via square roots; inconsisnties will exist. We don't want to prune in case it might be wrong,
+    // via square roots; inconsistencies will exist. We don't want to prune in case it might be wrong,
     // so we add a little bit of tolerance on the evaluation of the predicate. If it's almost collinear,
     // return 'collinear' (EQUAL).
     const FT eps = (FT(100) * std::numeric_limits<FT>::epsilon());

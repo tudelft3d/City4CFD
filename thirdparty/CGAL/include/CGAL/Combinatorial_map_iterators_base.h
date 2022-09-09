@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Combinatorial_map/include/CGAL/Combinatorial_map_iterators_base.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Combinatorial_map/include/CGAL/Combinatorial_map_iterators_base.h $
 // $Id: Combinatorial_map_iterators_base.h 5ecd852 2021-04-26T21:37:02+01:00 Giles Bathgate
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //

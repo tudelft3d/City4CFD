@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Voronoi_diagram_2/include/CGAL/Voronoi_diagram_2/Delaunay_triangulation_on_sphere_degeneracy_testers.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Voronoi_diagram_2/include/CGAL/Voronoi_diagram_2/Delaunay_triangulation_on_sphere_degeneracy_testers.h $
 // $Id: Delaunay_triangulation_on_sphere_degeneracy_testers.h 326a055 2021-07-06T10:11:49+02:00 Mael Rouxel-Labbé
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

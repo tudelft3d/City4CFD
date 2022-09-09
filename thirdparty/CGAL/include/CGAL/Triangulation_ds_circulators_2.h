@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/TDS_2/include/CGAL/Triangulation_ds_circulators_2.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/TDS_2/include/CGAL/Triangulation_ds_circulators_2.h $
 // $Id: Triangulation_ds_circulators_2.h 74d8922 2020-04-20T15:25:40+02:00 Guillaume Damiand
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

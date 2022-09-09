@@ -39,6 +39,8 @@ public:
     Building(const nlohmann::json& poly, const int internalID);
     ~Building();
 
+    static void alpha_wrap(const Buildings& buildings, Mesh& newMesh);
+
     virtual void reconstruct() = 0;
     virtual void reconstruct_flat_terrain() = 0;
 

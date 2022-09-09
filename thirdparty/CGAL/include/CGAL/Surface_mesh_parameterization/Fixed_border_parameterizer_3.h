@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Surface_mesh_parameterization/include/CGAL/Surface_mesh_parameterization/Fixed_border_parameterizer_3.h $
-// $Id: Fixed_border_parameterizer_3.h 752c07e 2021-06-04T11:23:16+02:00 Dmitry Anisimov
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Surface_mesh_parameterization/include/CGAL/Surface_mesh_parameterization/Fixed_border_parameterizer_3.h $
+// $Id: Fixed_border_parameterizer_3.h 4ffc949 2022-02-03T17:11:20+01:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Laurent Saboret, Pierre Alliez, Bruno Levy
@@ -33,7 +33,8 @@
 
 #include <boost/iterator/function_output_iterator.hpp>
 #include <boost/type_traits/is_same.hpp>
-#include <boost/unordered_set.hpp>
+
+#include <unordered_set>
 
 /// \file Fixed_border_parameterizer_3.h
 
@@ -212,7 +213,7 @@ public:
 
     Error_code status = OK;
 
-    typedef boost::unordered_set<vertex_descriptor> Vertex_set;
+    typedef std::unordered_set<vertex_descriptor> Vertex_set;
     Vertex_set vertices;
 
     internal::Containers_filler<Triangle_mesh> fc(mesh, vertices);
@@ -248,7 +249,7 @@ public:
 
     // Fill the matrix for the inner vertices v_i: compute A's coefficient
     // w_ij for each neighbor j; then w_ii = - sum of w_ijs
-    boost::unordered_set<vertex_descriptor> main_border;
+    std::unordered_set<vertex_descriptor> main_border;
 
     for(vertex_descriptor v : vertices_around_face(bhd,mesh)){
       main_border.insert(v);

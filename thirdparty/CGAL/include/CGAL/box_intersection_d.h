@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Box_intersection_d/include/CGAL/box_intersection_d.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Box_intersection_d/include/CGAL/box_intersection_d.h $
 // $Id: box_intersection_d.h 8773cee 2020-02-05T10:54:11+01:00 Mael Rouxel-Labbé
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

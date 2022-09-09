@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Spatial_sorting/include/CGAL/Spatial_sort_traits_adapter_3.h $
-// $Id: Spatial_sort_traits_adapter_3.h 7870a02 2021-03-20T02:53:09+01:00 Mael Rouxel-Labbé
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Spatial_sorting/include/CGAL/Spatial_sort_traits_adapter_3.h $
+// $Id: Spatial_sort_traits_adapter_3.h 8a252f1 2022-03-31T07:07:01+02:00 Sébastien Loriot
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Sebastien Loriot
@@ -42,7 +42,7 @@ public:
     Compute_x_3(const PointPropertyMap& ppmap, const typename Base_traits::Compute_x_3& base):
       Base_traits::Compute_x_3(base), ppmap_(ppmap){}
     const PointPropertyMap& ppmap_;
-    bool operator()(Arg_type p) const {
+    typename Gt::FT operator()(Arg_type p) const {
       return static_cast<const typename Base_traits::Compute_x_3*>(this)->operator()(get(ppmap_,p));
     }
   };
@@ -53,7 +53,7 @@ public:
     Compute_y_3(const PointPropertyMap& ppmap, const typename Base_traits::Compute_y_3& base):
       Base_traits::Compute_y_3(base), ppmap_(ppmap){}
     const PointPropertyMap& ppmap_;
-    bool operator()(Arg_type p) const {
+    typename Gt::FT operator()(Arg_type p) const {
       return static_cast<const typename Base_traits::Compute_y_3*>(this)->operator()(get(ppmap_,p));
     }
   };
@@ -64,7 +64,7 @@ public:
     Compute_z_3(const PointPropertyMap& ppmap, const typename Base_traits::Compute_z_3& base):
       Base_traits::Compute_z_3(base), ppmap_(ppmap){}
     const PointPropertyMap& ppmap_;
-    bool operator()(Arg_type p) const {
+    typename Gt::FT operator()(Arg_type p) const {
       return static_cast<const typename Base_traits::Compute_z_3*>(this)->operator()(get(ppmap_,p));
     }
   };

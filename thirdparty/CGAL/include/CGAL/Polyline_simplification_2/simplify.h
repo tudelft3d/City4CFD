@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Polyline_simplification_2/include/CGAL/Polyline_simplification_2/simplify.h $
-// $Id: simplify.h b7e688c 2021-10-12T09:05:42+02:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Polyline_simplification_2/include/CGAL/Polyline_simplification_2/simplify.h $
+// $Id: simplify.h c61fdb8 2021-11-30T13:49:39+01:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Andreas Fabri
@@ -335,7 +335,7 @@ operator()()
       } else {
         (*u)->set_cost(*dist);
         if(mpq->contains(*u)){
-          mpq->update(*u, true);
+          mpq->update(*u);
         }
         else{
           mpq->push(*u);
@@ -353,7 +353,7 @@ operator()()
       } else {
         (*w)->set_cost(*dist);
         if(mpq->contains(*w)){
-          mpq->update(*w, true);
+          mpq->update(*w);
         }
         else{
           mpq->push(*w);

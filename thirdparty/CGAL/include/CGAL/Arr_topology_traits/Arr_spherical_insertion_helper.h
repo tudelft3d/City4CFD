@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Arrangement_on_surface_2/include/CGAL/Arr_topology_traits/Arr_spherical_insertion_helper.h $
-// $Id: Arr_spherical_insertion_helper.h 6e1fc8a 2021-09-02T16:53:07+02:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Arrangement_on_surface_2/include/CGAL/Arr_topology_traits/Arr_spherical_insertion_helper.h $
+// $Id: Arr_spherical_insertion_helper.h 295e9b9 2022-02-02T15:44:48+02:00 Efi Fogel
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -143,7 +143,7 @@ before_handle_event(Event* event)
  */
 template <typename Tr, typename Arr, typename Evnt, typename Sbcv>
 void Arr_spherical_insertion_helper<Tr, Arr, Evnt, Sbcv>::
-before_handle_event_imp(Event* event, Arr_all_sides_oblivious_tag)
+before_handle_event_imp(Event* /* event */, Arr_all_sides_oblivious_tag)
 { return; }
 
 /* A notification invoked before the surface-sweep starts handling a given

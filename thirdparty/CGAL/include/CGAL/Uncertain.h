@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/STL_Extension/include/CGAL/Uncertain.h $
-// $Id: Uncertain.h 358420e 2021-08-30T18:57:55+02:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/STL_Extension/include/CGAL/Uncertain.h $
+// $Id: Uncertain.h 6acb3a1 2022-07-11T10:35:09+02:00 Sébastien Loriot
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Sylvain Pion
@@ -289,6 +289,11 @@ Uncertain<bool> operator!(Uncertain<bool> a)
   return Uncertain<bool>(!a.sup(), !a.inf());
 }
 
+#ifdef __clang__
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wunknown-warning-option"
+#  pragma GCC diagnostic ignored "-Wbitwise-instead-of-logical"
+#endif
 inline
 Uncertain<bool> operator|(Uncertain<bool> a, Uncertain<bool> b)
 {
@@ -324,7 +329,9 @@ Uncertain<bool> operator&(Uncertain<bool> a, bool b)
 {
   return Uncertain<bool>(a.inf() & b, a.sup() & b);
 }
-
+#ifdef __clang__
+#  pragma GCC diagnostic pop
+#endif
 
 // Equality operators
 

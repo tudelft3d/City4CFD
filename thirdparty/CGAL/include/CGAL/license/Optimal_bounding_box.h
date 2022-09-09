@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Installation/include/CGAL/license/Optimal_bounding_box.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Installation/include/CGAL/license/Optimal_bounding_box.h $
 // $Id: Optimal_bounding_box.h 844cd55 2019-12-09T15:43:30+01:00 Mael Rouxel-Labbé
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //

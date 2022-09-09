@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Poisson_surface_reconstruction_3/include/CGAL/Poisson_reconstruction_function.h $
-// $Id: Poisson_reconstruction_function.h 3b7754f 2021-09-20T12:44:38+01:00 Andreas Fabri
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Poisson_surface_reconstruction_3/include/CGAL/Poisson_reconstruction_function.h $
+// $Id: Poisson_reconstruction_function.h 4968d21 2022-05-17T10:31:07+01:00 Andreas Fabri
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Laurent Saboret, Pierre Alliez
@@ -39,7 +39,7 @@
 #include <CGAL/property_map.h>
 #include <CGAL/surface_reconstruction_points_assertions.h>
 #include <CGAL/poisson_refine_triangulation.h>
-#include <CGAL/Robust_circumcenter_filtered_traits_3.h>
+#include <CGAL/Robust_weighted_circumcenter_filtered_traits_3.h>
 #include <CGAL/compute_average_spacing.h>
 #include <CGAL/Timer.h>
 
@@ -763,8 +763,7 @@ private:
   /// Poisson reconstruction.
   /// Returns false on error.
   ///
-  /// @commentheading Template parameters:
-  /// @param SparseLinearAlgebraTraits_d Symmetric definite positive sparse linear solver.
+  /// @tparam SparseLinearAlgebraTraits_d Symmetric definite positive sparse linear solver.
   template <class SparseLinearAlgebraTraits_d>
   bool solve_poisson(
     SparseLinearAlgebraTraits_d solver, ///< sparse linear solver
@@ -1203,8 +1202,7 @@ private:
 
   /// Assemble vi's row of the linear system A*X=B
   ///
-  /// @commentheading Template parameters:
-  /// @param SparseLinearAlgebraTraits_d Symmetric definite positive sparse linear solver.
+  /// @tparam SparseLinearAlgebraTraits_d Symmetric definite positive sparse linear solver.
   template <class SparseLinearAlgebraTraits_d>
   void assemble_poisson_row(typename SparseLinearAlgebraTraits_d::Matrix& A,
                             Vertex_handle vi,

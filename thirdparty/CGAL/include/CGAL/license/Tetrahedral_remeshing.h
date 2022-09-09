@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Installation/include/CGAL/license/Tetrahedral_remeshing.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Installation/include/CGAL/license/Tetrahedral_remeshing.h $
 // $Id: Tetrahedral_remeshing.h 825f77b 2020-04-10T14:14:30+02:00 Sébastien Loriot
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //

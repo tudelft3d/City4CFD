@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Apollonius_graph_2/include/CGAL/more_functions_on_signs.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Apollonius_graph_2/include/CGAL/more_functions_on_signs.h $
 // $Id: more_functions_on_signs.h 0779373 2020-03-26T13:31:46+01:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

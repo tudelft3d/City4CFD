@@ -7,7 +7,7 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Kernel_23/include/CGAL/Kernel/interface_macros.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Kernel_23/include/CGAL/Kernel/interface_macros.h $
 // $Id: interface_macros.h d0ed658 2021-11-03T17:39:21+01:00 Andreas Fabri
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //

@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Nef_2/include/CGAL/Nef_polyhedron_2.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Nef_2/include/CGAL/Nef_polyhedron_2.h $
 // $Id: Nef_polyhedron_2.h 618b409 2021-01-18T15:40:40+01:00 Maxime Gimeno
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

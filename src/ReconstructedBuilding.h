@@ -1,7 +1,7 @@
 /*
   City4CFD
- 
-  Copyright (c) 2021-2022, 3D Geoinformation Research Group, TU Delft  
+
+  Copyright (c) 2021-2022, 3D Geoinformation Research Group, TU Delft
 
   This file is part of City4CFD.
 
@@ -34,6 +34,8 @@ class ReconstructedBuilding : public Building {
 public:
     ReconstructedBuilding();
     ReconstructedBuilding(const int internalID);
+    ReconstructedBuilding(const Mesh& mesh);
+    ReconstructedBuilding(const nlohmann::json& poly);
 //    ReconstructedBuilding(const nlohmann::json& poly);
     ReconstructedBuilding(const nlohmann::json& poly, const int internalID);
     ~ReconstructedBuilding();

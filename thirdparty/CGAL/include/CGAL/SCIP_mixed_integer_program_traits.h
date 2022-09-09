@@ -2,7 +2,7 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Solver_interface/include/CGAL/SCIP_mixed_integer_program_traits.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Solver_interface/include/CGAL/SCIP_mixed_integer_program_traits.h $
 // $Id: SCIP_mixed_integer_program_traits.h 267a641 2021-05-31T14:01:08+02:00 Dmitry Anisimov
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //

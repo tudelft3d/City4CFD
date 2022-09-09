@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Spatial_searching/include/CGAL/Kd_tree_node.h $
-// $Id: Kd_tree_node.h 98e4718 2021-08-26T11:33:39+02:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Spatial_searching/include/CGAL/Kd_tree_node.h $
+// $Id: Kd_tree_node.h c4e816e 2021-11-23T14:17:39+01:00 Dmitry Anisimov
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -15,7 +15,8 @@
 
 #include <CGAL/license/Spatial_searching.h>
 
-
+#include <unordered_map>
+#include <ostream>
 
 #include <CGAL/Splitters.h>
 #include <CGAL/Compact_container.h>
@@ -57,6 +58,55 @@ namespace CGAL {
     Kd_tree_node(bool leaf) : leaf(leaf) { }
 
     bool is_leaf() const { return leaf; }
+
+    void
+    get_indices(int& index, std::unordered_map<const Kd_tree_node*, int>& node_to_index) const
+    {
+      if (is_leaf()) {
+        Leaf_node_const_handle node =
+          static_cast<Leaf_node_const_handle>(this);
+        ++index;
+        node_to_index[node] = index;
+      } else {
+        Internal_node_const_handle node =
+          static_cast<Internal_node_const_handle>(this);
+        ++index;
+        node_to_index[node] = index;
+        node->lower()->get_indices(index, node_to_index);
+        node->upper()->get_indices(index, node_to_index);
+      }
+    }
+
+    template<typename Node_name>
+    void
+    print(std::ostream& s, const Node_name& node_name) const
+    {
+      if (is_leaf()) { // draw leaf nodes
+
+        Leaf_node_const_handle node =
+          static_cast<Leaf_node_const_handle>(this);
+
+        s << std::endl;
+        if (node->size() > 0) {
+          s << node_name(node) << " [label=\"" << node_name(node) << ", Size: "
+          << node->size() << "\"] ;" << std::endl;
+        } else {
+          CGAL_assertion_msg(false, "ERROR: NODE SIZE IS ZERO!");
+        }
+
+      } else { // draw internal nodes
+
+        Internal_node_const_handle node =
+          static_cast<Internal_node_const_handle>(this);
+
+        s << std::endl;
+        s << node_name(node) << " [label=\"" << node_name(node) << "\"] ;" << std::endl;
+        s << node_name(node) << " -- " << node_name(node->lower()) << " ;";
+        node->lower()->print(s, node_name);
+        s << node_name(node) << " -- " << node_name(node->upper()) << " ;";
+        node->upper()->print(s, node_name);
+      }
+    }
 
     std::size_t
     num_items() const

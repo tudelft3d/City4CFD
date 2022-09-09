@@ -17,7 +17,7 @@
  * WWW URL: http://cs.nyu.edu/exact/
  * Email: exact@cs.nyu.edu
  *
- * $URL: https://github.com/CGAL/cgal/blob/v5.4/CGAL_Core/include/CGAL/CORE/BigFloatRep.h $
+ * $URL: https://github.com/CGAL/cgal/blob/v5.5/CGAL_Core/include/CGAL/CORE/BigFloatRep.h $
  * $Id: BigFloatRep.h 6680a6e 2021-11-09T16:20:48+01:00 Sébastien Loriot
  * SPDX-License-Identifier: LGPL-3.0-or-later
  ***************************************************************************/

@@ -2,8 +2,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/BGL/include/CGAL/boost/graph/internal/initialized_index_maps_helpers.h $
-// $Id: initialized_index_maps_helpers.h 87bb4d1 2020-07-07T16:04:09+02:00 Mael Rouxel-Labbé
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/BGL/include/CGAL/boost/graph/internal/initialized_index_maps_helpers.h $
+// $Id: initialized_index_maps_helpers.h 6d3176e 2022-01-07T14:42:25+01:00 Sébastien Loriot
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s) : Mael Rouxel-Labbé
@@ -13,7 +13,7 @@
 #define CGAL_BOOST_GRAPH_INITIALIZED_INTERNAL_INDEX_MAPS_HELPERS
 
 #include <CGAL/assertions.h>
-#include <CGAL/boost/graph/Named_function_parameters.h>
+#include <CGAL/Named_function_parameters.h>
 #include <CGAL/boost/graph/properties.h>
 #include <CGAL/Dynamic_property_map.h>
 #include <CGAL/use.h>
@@ -271,7 +271,7 @@ get_initialized_index_map(CGAL::internal_np::Param_not_found,
 
 template <typename PropertyTag, typename Tag, typename DynamicTag,
           typename Graph,
-          typename NamedParameters = Named_function_parameters<bool, internal_np::all_default_t> >
+          typename NamedParameters = parameters::Default_named_parameters >
 class GetInitializedIndexMap
 {
 public:

@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Nef_3/include/CGAL/Nef_3/SNC_decorator.h $
-// $Id: SNC_decorator.h 142fac6 2021-06-25T09:47:59+02:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Nef_3/include/CGAL/Nef_3/SNC_decorator.h $
+// $Id: SNC_decorator.h 1009acb 2022-03-10T18:24:07+00:00 Giles Bathgate
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -280,6 +280,7 @@ class SNC_decorator : public SNC_const_decorator<Map> {
     SFace_map linked;
     Shell_volume_setter(const SNCD_& Di)
       : D(Di), linked(false) {}
+    void reserve(Size_type n) { linked.reserve(n); }
     void visit(SFace_handle h) {
       CGAL_NEF_TRACEN(h->center_vertex()->point());
       D.set_volume(h, c);

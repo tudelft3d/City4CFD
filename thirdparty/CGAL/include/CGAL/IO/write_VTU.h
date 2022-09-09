@@ -5,7 +5,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Mesh_2/include/CGAL/IO/write_VTU.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Mesh_2/include/CGAL/IO/write_VTU.h $
 // $Id: write_VTU.h e0a4dd0 2021-05-18T17:31:40+02:00 Laurent Rineau
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

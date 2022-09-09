@@ -7,7 +7,7 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Kernel_23/include/CGAL/Sphere_3.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Kernel_23/include/CGAL/Sphere_3.h $
 // $Id: Sphere_3.h e7357ac 2021-07-19T14:53:27+02:00 Marc Glisse
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //

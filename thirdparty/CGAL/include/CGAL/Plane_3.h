@@ -7,8 +7,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Kernel_23/include/CGAL/Plane_3.h $
-// $Id: Plane_3.h e7357ac 2021-07-19T14:53:27+02:00 Marc Glisse
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Kernel_23/include/CGAL/Plane_3.h $
+// $Id: Plane_3.h 71bba3e 2022-03-17T22:35:09+01:00 Andreas Fabri
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -77,6 +77,9 @@ public:
 
   Plane_3(const Point_3& p, const Vector_3& v)
     : Rep(typename R::Construct_plane_3()(Return_base_tag(), p, v)) {}
+
+  Plane_3(Origin o, const Vector_3& v)
+    : Rep(typename R::Construct_plane_3()(Return_base_tag(), o, v)) {}
 
   Plane_3(const RT& a, const RT& b, const RT& c, const RT& d)
     : Rep(typename R::Construct_plane_3()(Return_base_tag(), a, b, c, d)) {}

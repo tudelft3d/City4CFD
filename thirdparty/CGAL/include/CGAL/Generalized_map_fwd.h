@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Generalized_map/include/CGAL/Generalized_map_fwd.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Generalized_map/include/CGAL/Generalized_map_fwd.h $
 // $Id: Generalized_map_fwd.h d6306be 2020-10-22T10:30:38+02:00 Guillaume Damiand
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //

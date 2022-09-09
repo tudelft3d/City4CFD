@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/STL_Extension/include/CGAL/Skiplist.h $
-// $Id: Skiplist.h 0779373 2020-03-26T13:31:46+01:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/STL_Extension/include/CGAL/Skiplist.h $
+// $Id: Skiplist.h 34ad804 2022-06-16T14:46:36+01:00 Andreas Fabri
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Philipp Moeller
@@ -234,8 +234,8 @@ public:
 
   void pop_back()
   {
-    all_.pop_back();
     skip_.pop_back();
+    all_.pop_back_and_dispose(Node_disposer());
   }
 
   /// Insert \c t before \c pos in the all_view. \t will not be inserted into the skip view.

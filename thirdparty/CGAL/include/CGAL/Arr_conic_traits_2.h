@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Arrangement_on_surface_2/include/CGAL/Arr_conic_traits_2.h $
-// $Id: Arr_conic_traits_2.h 59a0da4 2021-05-19T17:23:53+02:00 Laurent Rineau
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Arrangement_on_surface_2/include/CGAL/Arr_conic_traits_2.h $
+// $Id: Arr_conic_traits_2.h c0838c5 2021-12-16T16:33:43+02:00 Efi Fogel
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -723,29 +723,39 @@ public:
     return Approximate_2();
   }
 
-  class Construct_x_monotone_curve_2
-  {
+  //! Functor
+  class Construct_x_monotone_curve_2 {
   public:
-
-    /*!
-     * Return an x-monotone curve connecting the two given endpoints.
+    /*! Return an x-monotone curve connecting the two given endpoints.
      * \param p The first point.
      * \param q The second point.
      * \pre p and q must not be the same.
      * \return A segment connecting p and q.
      */
-    X_monotone_curve_2 operator() (const Point_2& p,
-                                   const Point_2& q) const
-    {
-      return (X_monotone_curve_2 (p, q));
-    }
+    X_monotone_curve_2 operator()(const Point_2& p, const Point_2& q) const
+    { return (X_monotone_curve_2(p, q)); }
   };
 
   /*! Get a Construct_x_monotone_curve_2 functor object. */
   Construct_x_monotone_curve_2 construct_x_monotone_curve_2_object () const
-  {
-    return Construct_x_monotone_curve_2();
-  }
+  { return Construct_x_monotone_curve_2(); }
+
+  //! Functor
+  class Construct_curve_2 {
+  public:
+    /*! Return a curve connecting the two given endpoints.
+     * \param p The first point.
+     * \param q The second point.
+     * \pre p and q must not be the same.
+     * \return A segment connecting p and q.
+     */
+    Curve_2 operator()(const Point_2& p, const Point_2& q) const
+    { return (Curve_2(p, q)); }
+  };
+
+  /*! Get a Construct_curve_2 functor object. */
+  Construct_curve_2 construct_curve_2_object () const
+  { return Construct_curve_2(); }
   //@}
 
   /// \name Functor definitions for the Boolean set-operation traits.

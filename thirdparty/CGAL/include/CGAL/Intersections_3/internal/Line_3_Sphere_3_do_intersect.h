@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Intersections_3/include/CGAL/Intersections_3/internal/Line_3_Sphere_3_do_intersect.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Intersections_3/include/CGAL/Intersections_3/internal/Line_3_Sphere_3_do_intersect.h $
 // $Id: Line_3_Sphere_3_do_intersect.h 9f32bd1 2021-09-02T17:36:44+02:00 Mael Rouxel-Labbé
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //

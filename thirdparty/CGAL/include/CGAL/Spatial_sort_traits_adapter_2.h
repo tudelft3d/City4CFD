@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Spatial_sorting/include/CGAL/Spatial_sort_traits_adapter_2.h $
-// $Id: Spatial_sort_traits_adapter_2.h 5c41b10 2020-01-02T10:26:44+01:00 Mael Rouxel-Labbé
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Spatial_sorting/include/CGAL/Spatial_sort_traits_adapter_2.h $
+// $Id: Spatial_sort_traits_adapter_2.h 8a252f1 2022-03-31T07:07:01+02:00 Sébastien Loriot
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Sebastien Loriot
@@ -37,6 +37,28 @@ public:
   typedef typename boost::property_traits<PointPropertyMap>::key_type Point_2;
   typedef typename boost::call_traits<Point_2>::param_type Arg_type;
 
+  struct Compute_x_2
+    : public Base_traits::Compute_x_2
+  {
+    Compute_x_2(const PointPropertyMap& ppmap, const typename Base_traits::Compute_x_2& base):
+      Base_traits::Compute_x_2(base), ppmap_(ppmap){}
+    const PointPropertyMap& ppmap_;
+    typename Gt::FT operator()(Arg_type p) const {
+      return static_cast<const typename Base_traits::Compute_x_2*>(this)->operator()(get(ppmap_,p));
+    }
+  };
+
+  struct Compute_y_2
+    : public Base_traits::Compute_y_2
+  {
+    Compute_y_2(const PointPropertyMap& ppmap, const typename Base_traits::Compute_y_2& base):
+      Base_traits::Compute_y_2(base), ppmap_(ppmap){}
+    const PointPropertyMap& ppmap_;
+    typename Gt::FT operator()(Arg_type p) const {
+      return static_cast<const typename Base_traits::Compute_y_2*>(this)->operator()(get(ppmap_,p));
+    }
+  };
+
   struct Less_x_2
     : public Base_traits::Less_x_2
   {
@@ -61,6 +83,8 @@ public:
 
   Less_x_2 less_x_2_object () const {return Less_x_2(ppmap_, static_cast<const Gt*>(this)->less_x_2_object() );}
   Less_y_2 less_y_2_object () const {return Less_y_2(ppmap_, static_cast<const Gt*>(this)->less_y_2_object() );}
+  Compute_x_2 compute_x_2_object () const {return Compute_x_2(ppmap_, static_cast<const Gt*>(this)->compute_x_2_object() );}
+  Compute_y_2 compute_y_2_object () const {return Compute_y_2(ppmap_, static_cast<const Gt*>(this)->compute_y_2_object() );}
 
   const PointPropertyMap& point_property_map() const {return ppmap_;}
 };

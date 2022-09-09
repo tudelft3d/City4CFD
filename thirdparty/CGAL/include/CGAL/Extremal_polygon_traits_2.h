@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Inscribed_areas/include/CGAL/Extremal_polygon_traits_2.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Inscribed_areas/include/CGAL/Extremal_polygon_traits_2.h $
 // $Id: Extremal_polygon_traits_2.h d8d5f1d 2021-01-05T18:41:11+01:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

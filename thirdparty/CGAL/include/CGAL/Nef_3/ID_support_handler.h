@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Nef_3/include/CGAL/Nef_3/ID_support_handler.h $
-// $Id: ID_support_handler.h 5213cd3 2021-04-01T18:11:42+01:00 Andreas Fabri
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Nef_3/include/CGAL/Nef_3/ID_support_handler.h $
+// $Id: ID_support_handler.h 2a5fcdc 2022-04-13T12:59:21+01:00 Andreas Fabri
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -56,11 +56,27 @@ class ID_support_handler<SNC_indexed_items, Decorator> {
     }
   };
   std::unordered_map<Halffacet_pair, int, Handle_pair_hash_function> f2m;
-  std::map<int, int> hash;
+  std::unordered_map<int, int> hash;
 
  public:
   ID_support_handler() {}
 
+  void reserve(std::size_t n) {
+    hash.reserve(n);
+  }
+
+  /*
+     The method get_hash implements a
+     two-pass union find algorithm
+        __    __           _______
+       /  \  /  \         /  _____\
+      _|__|__|__|_      _/__/__/__|_
+     | |  v  |  v |    | |  |  |  v |
+     | O  O  O  O | => | O  O  O  O |
+     |____|__^____|    |____________|
+          |  | root
+          \_/
+  */
   int get_hash(int i) {
     int root(i);
     while(hash[root] != root)
@@ -78,12 +94,13 @@ class ID_support_handler<SNC_indexed_items, Decorator> {
     hash[get_hash(i)] = parent;
   }
 
+  void initialize_hash(int i) {
+    hash[i] = i;
+  }
+
   template<typename Handle>
   void initialize_hash(Handle h) {
-    hash[h->get_index()] = h->get_index();
-  }
-  void initialize_hash(int i) {
-        hash[i] = i;
+    initialize_hash(h->get_index());
   }
 
   void hash_facet_pair(SVertex_handle sv,

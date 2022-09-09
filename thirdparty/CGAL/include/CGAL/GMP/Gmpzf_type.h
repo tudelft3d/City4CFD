@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Number_types/include/CGAL/GMP/Gmpzf_type.h $
-// $Id: Gmpzf_type.h 0779373 2020-03-26T13:31:46+01:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Number_types/include/CGAL/GMP/Gmpzf_type.h $
+// $Id: Gmpzf_type.h 45b5fd4 2022-07-06T12:58:49+02:00 Sébastien Loriot
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -157,7 +157,7 @@ public:
       return;
     }
     const int p = std::numeric_limits<double>::digits;
-    CGAL_assertion(CGAL_NTS is_finite(d) & is_valid(d));
+    CGAL_assertion(CGAL_NTS is_finite(d) && is_valid(d));
     int exp;
     double x = std::frexp(d, &exp); // x in [1/2, 1], x*2^exp = d
     mpz_init_set_d (man(), // to the following integer:

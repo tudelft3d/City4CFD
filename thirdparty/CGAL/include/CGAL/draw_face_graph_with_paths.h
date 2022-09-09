@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Surface_mesh_topology/include/CGAL/draw_face_graph_with_paths.h $
-// $Id: draw_face_graph_with_paths.h ee11c85 2021-11-10T09:59:48+01:00 Guillaume Damiand
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Surface_mesh_topology/include/CGAL/draw_face_graph_with_paths.h $
+// $Id: draw_face_graph_with_paths.h 440a8df 2022-02-03T08:41:04+00:00 Andreas Fabri
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Guillaume Damiand <guillaume.damiand@liris.cnrs.fr>
@@ -18,6 +18,7 @@
 #include <initializer_list>
 #include <CGAL/draw_linear_cell_complex.h>
 #include <CGAL/Path_on_surface.h>
+#include <CGAL/assertions.h>
 
 #ifdef CGAL_USE_BASIC_VIEWER
 
@@ -52,7 +53,7 @@ struct LCC_geom_utils<CGAL::Face_graph_wrapper<Mesh>, Local_kernel, 3>
     }
     while(adart!=dh);
 
-    assert(nb>0);
+    CGAL_assertion(nb>0);
     return typename Get_traits<Mesh>::Kernel::Construct_scaled_vector_3()
       (normal, 1.0/nb);
   }

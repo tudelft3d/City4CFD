@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Spatial_sorting/include/CGAL/Spatial_sort_traits_adapter_d.h $
-// $Id: Spatial_sort_traits_adapter_d.h 5c41b10 2020-01-02T10:26:44+01:00 Mael Rouxel-Labbé
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Spatial_sorting/include/CGAL/Spatial_sort_traits_adapter_d.h $
+// $Id: Spatial_sort_traits_adapter_d.h 8a252f1 2022-03-31T07:07:01+02:00 Sébastien Loriot
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Sebastien Loriot
@@ -64,7 +64,7 @@ public:
     Compute_coordinate_d(const PointPropertyMap& ppmap, const typename Base_traits::Compute_coordinate_d& base):
       Base_traits::Compute_coordinate_d(base), ppmap_(ppmap){}
     const PointPropertyMap& ppmap_;
-    bool operator()(Arg_type p, int i) const {
+    typename Gt::FT operator()(Arg_type p, int i) const {
       return static_cast<const typename Base_traits::Compute_coordinate_d*>(this)->operator()(get(ppmap_,p), i);
     }
   };

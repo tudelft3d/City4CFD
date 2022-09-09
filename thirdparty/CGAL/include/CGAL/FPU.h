@@ -7,8 +7,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Number_types/include/CGAL/FPU.h $
-// $Id: FPU.h c9f5620 2021-09-20T11:20:07+01:00 Andreas Fabri
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Number_types/include/CGAL/FPU.h $
+// $Id: FPU.h 6486844 2022-05-10T11:30:39+02:00 Sébastien Loriot
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -278,7 +278,7 @@ inline __m128d swap_m128d(__m128d x){
 # ifdef __llvm__
   return __builtin_shufflevector(x, x, 1, 0);
 # elif defined __GNUC__ && !defined __INTEL_COMPILER
-  return __builtin_shuffle(x, (__m128i){ 1, 0 });
+  return __extension__ __builtin_shuffle(x, (__m128i){ 1, 0 });
 # else
   return _mm_shuffle_pd(x, x, 1);
 # endif

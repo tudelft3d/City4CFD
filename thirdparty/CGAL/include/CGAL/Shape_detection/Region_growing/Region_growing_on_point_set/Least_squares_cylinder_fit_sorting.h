@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Shape_detection/include/CGAL/Shape_detection/Region_growing/Region_growing_on_point_set/Least_squares_cylinder_fit_sorting.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Shape_detection/include/CGAL/Shape_detection/Region_growing/Region_growing_on_point_set/Least_squares_cylinder_fit_sorting.h $
 // $Id: Least_squares_cylinder_fit_sorting.h 6fbc190 2021-05-04T11:06:48+02:00 Simon Giraudot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

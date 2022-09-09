@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Surface_sweep_2/include/CGAL/Surface_sweep_2/Surface_sweep_2_debug.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Surface_sweep_2/include/CGAL/Surface_sweep_2/Surface_sweep_2_debug.h $
 // $Id: Surface_sweep_2_debug.h 63e52b0 2021-03-25T15:42:47+02:00 Efi Fogel
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

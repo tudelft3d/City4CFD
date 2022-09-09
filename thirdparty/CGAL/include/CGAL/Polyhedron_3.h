@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Polyhedron/include/CGAL/Polyhedron_3.h $
-// $Id: Polyhedron_3.h cff3cdb 2021-08-12T10:23:57+02:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Polyhedron/include/CGAL/Polyhedron_3.h $
+// $Id: Polyhedron_3.h 3ad94a7 2022-05-17T12:04:52+01:00 Andreas Fabri
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -1448,10 +1448,10 @@ public:
 
     /// Erases the small connected components and the isolated vertices.
     ///
-    /// @commentheading Preconditions:
-    /// supports vertices, halfedges, and removal operation.
     ///
-    /// @commentheading Template Parameters:
+    /// \pre supports vertices, halfedges, and removal operation.
+    ///
+    /// *Parameters*
     /// @param nb_components_to_keep the number of large connected components to keep.
     ///
     /// @return the number of connected components erased (ignoring isolated vertices).

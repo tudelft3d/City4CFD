@@ -2,8 +2,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Straight_skeleton_2/include/CGAL/constructions/Straight_skeleton_cons_ftC2.h $
-// $Id: Straight_skeleton_cons_ftC2.h 7d311d3 2020-11-27T13:54:22+01:00 Mael Rouxel-Labbé
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Straight_skeleton_2/include/CGAL/constructions/Straight_skeleton_cons_ftC2.h $
+// $Id: Straight_skeleton_cons_ftC2.h 45b5fd4 2022-07-06T12:58:49+02:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Fernando Cacciola <fernando_cacciola@ciudad.com.ar>
@@ -45,7 +45,7 @@ bool are_parallel_edges_equally_oriented( Segment_2_with_ID<K> const& e0, Segmen
 template<class K>
 bool are_edges_orderly_collinear( Segment_2_with_ID<K> const& e0, Segment_2_with_ID<K> const& e1 )
 {
-  return are_edges_collinear(e0,e1) & are_parallel_edges_equally_oriented(e0,e1);
+  return are_edges_collinear(e0,e1) && are_parallel_edges_equally_oriented(e0,e1);
 }
 
 

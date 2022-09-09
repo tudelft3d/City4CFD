@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Skin_surface_3/include/CGAL/make_skin_surface_mesh_3.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Skin_surface_3/include/CGAL/make_skin_surface_mesh_3.h $
 // $Id: make_skin_surface_mesh_3.h 2d37774 2021-04-26T11:30:25+02:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

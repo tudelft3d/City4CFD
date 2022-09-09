@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Surface_mesh_topology/include/CGAL/Surface_mesh_topology/internal/Path_on_surface_with_rle.h $
-// $Id: Path_on_surface_with_rle.h 7f63f3d 2021-10-04T15:53:36+02:00 Mael
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Surface_mesh_topology/include/CGAL/Surface_mesh_topology/internal/Path_on_surface_with_rle.h $
+// $Id: Path_on_surface_with_rle.h c5c6098 2022-01-27T11:02:17+01:00 Guillaume Damiand
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Guillaume Damiand <guillaume.damiand@liris.cnrs.fr>
@@ -185,7 +185,7 @@ public:
                                 (positive_flat?(static_cast<int>(apath.length()-1)):
                                  -(static_cast<int>(apath.length()-1)))));
           m_length=apath.length();
-          CGAL_assertion(is_valid());
+          CGAL_expensive_assertion(is_valid());
           return;
         }
       }
@@ -201,7 +201,7 @@ public:
     }
     while(i<apath.length() && i!=starti);
 
-    CGAL_assertion(is_valid(true));
+    CGAL_expensive_assertion(is_valid(true));
   }
 
   void swap(Self& p2)
@@ -1487,7 +1487,7 @@ public:
   /// Canonize the path
   void canonize()
   {
-    CGAL_assertion(is_valid());
+    CGAL_expensive_assertion(is_valid());
 
     if (is_empty()) { return; }
 
@@ -1507,7 +1507,7 @@ public:
 
      CGAL_assertion(remove_brackets()==false);
      CGAL_assertion(remove_spurs()==false);
-     CGAL_assertion(is_valid());
+     CGAL_expensive_assertion(is_valid());
   }
 
   void display_positive_turns()

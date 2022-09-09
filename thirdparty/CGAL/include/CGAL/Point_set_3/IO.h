@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Point_set_3/include/CGAL/Point_set_3/IO.h $
-// $Id: IO.h ad79d37 2021-09-29T11:46:30+02:00 Laurent Rineau
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Point_set_3/include/CGAL/Point_set_3/IO.h $
+// $Id: IO.h 10b0af3 2022-01-13T14:43:34+01:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -23,11 +23,6 @@
 
 #include <fstream>
 #include <string>
-
-#ifdef DOXYGEN_RUNNING
-#define CGAL_BGL_NP_TEMPLATE_PARAMETERS NamedParameters
-#define CGAL_BGL_NP_CLASS NamedParameters
-#endif
 
 namespace CGAL {
 
@@ -123,10 +118,10 @@ namespace IO {
 
   \return `true` if the reading was successful, `false` otherwise.
  */
-template <typename Point, typename Vector, typename CGAL_BGL_NP_TEMPLATE_PARAMETERS>
+template <typename Point, typename Vector, typename CGAL_NP_TEMPLATE_PARAMETERS>
 bool read_point_set(const std::string& fname,
                     CGAL::Point_set_3<Point, Vector>& ps,
-                    const CGAL_BGL_NP_CLASS& np)
+                    const CGAL_NP_CLASS& np = parameters::default_values())
 {
   const std::string ext = internal::get_file_extension(fname);
 
@@ -143,15 +138,6 @@ bool read_point_set(const std::string& fname,
 
   return false;
 }
-
-/// \cond SKIP_IN_MANUAL
-
-template <typename Point, typename Vector>
-bool read_point_set(const std::string& fname, CGAL::Point_set_3<Point, Vector>& ps)
-{
-  return read_point_set(fname, ps, parameters::all_default());
-}
-/// \endcond
 
 } // namespace IO
 
@@ -225,10 +211,10 @@ namespace IO {
 
   \return `true` if the writing was successful, `false` otherwise.
 */
-template <typename Point, typename Vector, typename CGAL_BGL_NP_TEMPLATE_PARAMETERS>
+template <typename Point, typename Vector, typename CGAL_NP_TEMPLATE_PARAMETERS>
 bool write_point_set(const std::string& fname,
                      CGAL::Point_set_3<Point, Vector>& ps,
-                     const CGAL_BGL_NP_CLASS& np)
+                     const CGAL_NP_CLASS& np = parameters::default_values())
 {
   const std::string ext = internal::get_file_extension(fname);
 
@@ -245,16 +231,6 @@ bool write_point_set(const std::string& fname,
 
   return false;
 }
-
-/// \cond SKIP_IN_MANUAL
-
-template <typename Point, typename Vector>
-bool write_point_set(const std::string& fname, CGAL::Point_set_3<Point, Vector>& ps)
-{
-  return write_point_set(fname, ps, parameters::all_default());
-}
-
-/// \endcond
 
 } // namespace IO
 

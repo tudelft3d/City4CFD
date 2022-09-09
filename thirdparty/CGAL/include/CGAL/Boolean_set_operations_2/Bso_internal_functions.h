@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Boolean_set_operations_2/include/CGAL/Boolean_set_operations_2/Bso_internal_functions.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Boolean_set_operations_2/include/CGAL/Boolean_set_operations_2/Bso_internal_functions.h $
 // $Id: Bso_internal_functions.h d968a9e 2021-09-28T16:39:10+01:00 Andreas Fabri
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

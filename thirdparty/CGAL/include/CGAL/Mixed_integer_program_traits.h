@@ -2,8 +2,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Solver_interface/include/CGAL/Mixed_integer_program_traits.h $
-// $Id: Mixed_integer_program_traits.h 94b7580 2021-06-18T10:02:11+02:00 Dmitry Anisimov
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Solver_interface/include/CGAL/Mixed_integer_program_traits.h $
+// $Id: Mixed_integer_program_traits.h a5b03d5 2022-04-30T14:09:18+02:00 albert-github
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s) : Liangliang Nan
@@ -273,7 +273,7 @@ namespace CGAL {
         ///       classes, i.e., `CGAL::GLPK_mixed_integer_program_traits` or
         ///                  `CGAL::SCIP_mixed_integer_program_traits`. Alternatively, use
         ///       `CGAL::Mixed_integer_program_traits` as a base to derive a new model
-        ///       (using e.g., <a href = "https://projects.coin-or.org/Cbc"> CBC </a>,
+        ///       (using e.g., <a href = "https://github.com/coin-or/Cbc"> CBC </a>,
         ///       <a href = "https://www.gurobi.com/"> Gurobi </a> for better
         ///       performance).
         ///

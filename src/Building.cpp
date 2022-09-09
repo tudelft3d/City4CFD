@@ -36,6 +36,7 @@
 #include <CGAL/Polygon_mesh_processing/clip.h>
 #include <CGAL/Polygon_mesh_processing/remesh.h>
 #include <CGAL/Mesh_3/dihedral_angle_3.h>
+#include <CGAL/alpha_wrap_3.h>
 
 Building::Building()
         : PolyFeature(1), _height(-global::largnum) {}
@@ -52,6 +53,78 @@ Building::Building(const nlohmann::json& poly, const int internalID)
         // 'true' here to check for polygon simplicity
 
 Building::~Building() = default;
+
+void Building::alpha_wrap(const Buildings& buildings, Mesh& newMesh) {
+    typedef EPICK::FT                 FT;
+    typedef std::array<FT, 3>         Custom_point;
+    typedef std::vector<std::size_t>  CGAL_Polygon;
+
+    //-- Make a single mesh out of all individual buildings
+    std::vector<std::array<FT, 3>> points;
+    std::vector<CGAL_Polygon> polygons;
+    for (auto& b : buildings) {
+        auto& mesh = b->get_mesh();
+        for (auto& face: mesh.faces()) {
+            CGAL_Polygon p;
+            auto vertices = mesh.vertices_around_face(mesh.halfedge(face));
+            for (auto vertex = vertices.begin(); vertex != vertices.end(); ++vertex) {
+                points.push_back(CGAL::make_array<FT>(mesh.point(*vertex).x(),
+                                                      mesh.point(*vertex).y(),
+                                                      mesh.point(*vertex).z()));
+                p.push_back(points.size() - 1);
+            }
+            polygons.push_back(p);
+        }
+    }
+    PMP::repair_polygon_soup(points, polygons, CGAL::parameters::geom_traits(geomutils::Array_traits()));
+    PMP::orient_polygon_soup(points, polygons);
+    PMP::polygon_soup_to_polygon_mesh(points, polygons, newMesh);
+    PMP::triangulate_faces(newMesh);
+
+    /*
+    typedef Mesh::Halfedge_index           halfedge_descriptor;
+    typedef Mesh::Edge_index               edge_descriptor;
+    //-- Set the property map for constrained edges
+    Mesh::Property_map<edge_descriptor,bool> is_constrained =
+            newMesh.add_property_map<edge_descriptor,bool>("e:is_constrained",false).first;
+
+    //-- Detect sharp features
+    for (auto& e : edges(newMesh)) {
+        halfedge_descriptor hd = halfedge(e,newMesh);
+        if (!is_border(e,newMesh)) {
+            double angle = CGAL::Mesh_3::dihedral_angle(newMesh.point(source(hd,newMesh)),
+                                                        newMesh.point(target(hd,newMesh)),
+                                                        newMesh.point(target(next(hd,newMesh),newMesh)),
+                                                        newMesh.point(target(next(opposite(hd,newMesh),newMesh),newMesh)));
+            if (CGAL::abs(angle)<179.5)
+                is_constrained[e]=true;
+        }
+    }
+
+    Mesh wrap;
+    CGAL::alpha_wrap_3(newMesh, 0.1, 0.01, wrap,
+                             CGAL::parameters::edge_is_constrained_map(is_constrained));
+    */
+
+    //-- Perform CGAL's alpha wrapping
+    const double relative_alpha = 900.;
+    const double relative_offset = 15000.;
+    CGAL::Bbox_3 bbox = CGAL::Polygon_mesh_processing::bbox(newMesh);
+    const double diag_length = std::sqrt(CGAL::square(bbox.xmax() - bbox.xmin()) +
+                                         CGAL::square(bbox.ymax() - bbox.ymin()) +
+                                         CGAL::square(bbox.zmax() - bbox.zmin()));
+    const double alpha = diag_length / relative_alpha;
+    const double offset = diag_length / relative_offset;
+//    CGAL::alpha_wrap_3(newMesh, alpha, offset, wrap);
+
+//    CGAL::alpha_wrap_3(newMesh, 2, 0.01, newMesh);   // 'coarse'
+    CGAL::alpha_wrap_3(newMesh, 1.5, 0.03, newMesh); // 'medium'
+//    CGAL::alpha_wrap_3(newMesh, 0.7, 0.03, newMesh); // 'fine'
+
+//    CGAL::alpha_wrap_3(newMesh, 0.3, 0.03, newMesh); // that one takes long time
+//    CGAL::alpha_wrap_3(points, polygons, 0.1, 0.001, newMesh);
+//    newMesh = wrap;
+}
 
 void Building::clip_bottom(const Terrainptr& terrain) {
     if (!_clip_bottom) return;
@@ -81,8 +154,8 @@ void Building::refine() {
     typedef Mesh::Halfedge_index           halfedge_descriptor;
     typedef Mesh::Edge_index               edge_descriptor;
 
-    double target_edge_length = 5; //5;
-    unsigned int nb_iter =  30;   //30;
+    const double target_edge_length = 5; //5;
+    const unsigned int nb_iter =  30;   //30;
 
     PMP::remove_degenerate_faces(_mesh);
     /*
@@ -90,7 +163,7 @@ void Building::refine() {
         ++config::selfIntersecting;
         PMP::remove_self_intersections(_mesh);
     }
-     */
+    */
 
     //-- Set the property map for constrained edges
     Mesh::Property_map<edge_descriptor,bool> is_constrained =
