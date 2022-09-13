@@ -7,7 +7,7 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Generator/include/CGAL/random_polygon_2.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Generator/include/CGAL/random_polygon_2.h $
 // $Id: random_polygon_2.h f243467 2021-03-29T15:24:10+02:00 Mael Rouxel-Labbé
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //

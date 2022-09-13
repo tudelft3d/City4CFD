@@ -7,7 +7,7 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/STL_Extension/include/CGAL/Handle_for_virtual.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/STL_Extension/include/CGAL/Handle_for_virtual.h $
 // $Id: Handle_for_virtual.h 2ceedcf 2021-01-08T19:44:01+00:00 Giles Bathgate
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //

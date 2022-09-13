@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Tetrahedral_remeshing/include/CGAL/Tetrahedral_remeshing/internal/FMLS.h $
-// $Id: FMLS.h ba695b9 2021-04-12T16:43:30+02:00 Jane Tournois
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Tetrahedral_remeshing/include/CGAL/Tetrahedral_remeshing/internal/FMLS.h $
+// $Id: FMLS.h 4ffc949 2022-02-03T17:11:20+01:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -562,7 +562,7 @@ void createMLSSurfaces(Subdomain__FMLS& subdomain_FMLS,
   subdomain_FMLS.clear();
   subdomain_FMLS_indices.clear();
 
-  typedef boost::unordered_map<Surface_index, std::size_t> SurfaceIndexMap;
+  typedef std::unordered_map<Surface_index, std::size_t, boost::hash<Surface_index>> SurfaceIndexMap;
 
   SurfaceIndexMap current_subdomain_FMLS_indices;
   SurfaceIndexMap subdomain_sample_numbers;

@@ -29,7 +29,7 @@
 #include "io.h"
 #include "Map3d.h"
 
-std::string CITY4CFD_VERSION = "0.1.1+dev";
+std::string CITY4CFD_VERSION = "0.1.2+dev";
 
 void printWelcome() {
     auto logo{

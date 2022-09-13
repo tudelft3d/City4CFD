@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Nef_S2/include/CGAL/Nef_S2/sphere_predicates.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Nef_S2/include/CGAL/Nef_S2/sphere_predicates.h $
 // $Id: sphere_predicates.h 31e4638 2020-11-11T18:47:25+00:00 Giles Bathgate
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

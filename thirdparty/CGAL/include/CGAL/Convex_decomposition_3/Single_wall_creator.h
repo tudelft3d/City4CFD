@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Convex_decomposition_3/include/CGAL/Convex_decomposition_3/Single_wall_creator.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Convex_decomposition_3/include/CGAL/Convex_decomposition_3/Single_wall_creator.h $
 // $Id: Single_wall_creator.h 6831403 2021-09-29T11:47:08+02:00 Laurent Rineau
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

@@ -125,6 +125,7 @@ public:
     bool       clip                             = false;
     bool       handleSelfIntersect              = false;
     bool       refineBuildings                  = false;
+    bool       alphaWrap                        = false;
 };
 
 #endif //CITY4CFD_CONFIG_H

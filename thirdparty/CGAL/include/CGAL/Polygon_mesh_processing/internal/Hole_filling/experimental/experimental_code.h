@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Polygon_mesh_processing/include/CGAL/Polygon_mesh_processing/internal/Hole_filling/experimental/experimental_code.h $
-// $Id: experimental_code.h 0779373 2020-03-26T13:31:46+01:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Polygon_mesh_processing/include/CGAL/Polygon_mesh_processing/internal/Hole_filling/experimental/experimental_code.h $
+// $Id: experimental_code.h 77e5bee 2021-12-27T14:33:34+01:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -121,7 +121,7 @@ triangulate_hole_polyline_incomplete(InputIterator pbegin, InputIterator pend,
   typedef Weight_incomplete<Weight_min_max_dihedral_and_area>      Weight;
   typedef Weight_calculator<Weight, Is_valid_degenerate_triangle>  WC;
 
-  typedef std::vector<boost::tuple<int, int, int> >                   Facet_vector; /* deliberately not OutputIteratorValueType*/
+  typedef std::vector<std::tuple<int, int, int> >                     Facet_vector; /* deliberately not OutputIteratorValueType*/
   typedef std::back_insert_iterator<Facet_vector>                     OutIt;
   typedef Tracer_polyline_incomplete<Facet_vector::value_type, OutIt> Tracer;
   typedef std::pair<int, int> Range;

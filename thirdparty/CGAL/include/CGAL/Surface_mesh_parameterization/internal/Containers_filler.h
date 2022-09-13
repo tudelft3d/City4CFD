@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Surface_mesh_parameterization/include/CGAL/Surface_mesh_parameterization/internal/Containers_filler.h $
-// $Id: Containers_filler.h c9279b6 2020-07-07T16:04:47+02:00 Mael Rouxel-Labbé
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Surface_mesh_parameterization/include/CGAL/Surface_mesh_parameterization/internal/Containers_filler.h $
+// $Id: Containers_filler.h 4ffc949 2022-02-03T17:11:20+01:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Mael Rouxel-Labbé
@@ -18,9 +18,9 @@
 #include <CGAL/Polygon_mesh_processing/connected_components.h>
 
 #include <boost/tuple/tuple.hpp>
-#include <boost/unordered_set.hpp>
 #include <boost/graph/graph_traits.hpp>
 
+#include <unordered_set>
 #include <vector>
 
 namespace CGAL {
@@ -32,7 +32,7 @@ namespace internal {
 // Custom output iterator that fills 'faces' and 'vertices' containers from a mesh
 template<typename TriangleMesh,
          typename Vertex_set =
-             boost::unordered_set<typename boost::graph_traits<TriangleMesh>::vertex_descriptor>,
+             std::unordered_set<typename boost::graph_traits<TriangleMesh>::vertex_descriptor>,
          typename Face_vector =
              std::vector<typename boost::graph_traits<TriangleMesh>::face_descriptor> >
 class Containers_filler

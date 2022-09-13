@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Periodic_3_mesh_3/include/CGAL/Periodic_3_mesh_3/IO/File_medit.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Periodic_3_mesh_3/include/CGAL/Periodic_3_mesh_3/IO/File_medit.h $
 // $Id: File_medit.h fb6f703 2021-05-04T14:07:49+02:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

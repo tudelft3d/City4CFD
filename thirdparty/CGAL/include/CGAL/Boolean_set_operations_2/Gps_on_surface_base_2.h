@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Boolean_set_operations_2/include/CGAL/Boolean_set_operations_2/Gps_on_surface_base_2.h $
-// $Id: Gps_on_surface_base_2.h 254d60f 2019-10-19T15:23:19+02:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Boolean_set_operations_2/include/CGAL/Boolean_set_operations_2/Gps_on_surface_base_2.h $
+// $Id: Gps_on_surface_base_2.h 4dbf509 2021-11-03T16:47:12+02:00 Efi Fogel
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Baruch Zukerman <baruchzu@post.tau.ac.il>
@@ -1467,7 +1467,7 @@ protected:
   bool _is_plane(const Polygon_with_holes_2& pgn) const
   {
     //typedef typename  Traits_2::Is_unbounded  Is_unbounded;
-    bool unbounded = m_traits->construct_is_unbounded_object()(pgn);
+    bool unbounded = m_traits->is_unbounded_object()(pgn);
     std::pair<GP_Holes_const_iterator,
       GP_Holes_const_iterator> pair =
       m_traits->construct_holes_object()(pgn);

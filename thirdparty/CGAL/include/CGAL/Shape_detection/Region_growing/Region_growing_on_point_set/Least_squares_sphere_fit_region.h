@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Shape_detection/include/CGAL/Shape_detection/Region_growing/Region_growing_on_point_set/Least_squares_sphere_fit_region.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Shape_detection/include/CGAL/Shape_detection/Region_growing/Region_growing_on_point_set/Least_squares_sphere_fit_region.h $
 // $Id: Least_squares_sphere_fit_region.h d82ca43 2021-08-20T11:19:22+02:00 Dmitry Anisimov
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Polygon_mesh_processing/include/CGAL/polygon_mesh_processing.h $
-// $Id: polygon_mesh_processing.h 489869c 2020-03-31T17:49:29+02:00 Mael Rouxel-Labbé
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Polygon_mesh_processing/include/CGAL/polygon_mesh_processing.h $
+// $Id: polygon_mesh_processing.h 75b03e6 2022-01-10T15:33:04+01:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -57,6 +57,7 @@ namespace Polygon_mesh_processing {
 namespace parameters {
 
 /*! \ingroup namedparameters
+\deprecated This function is deprecated and `default_values()` should be used instead.
 This function can be used to indicate that all optional named parameters
 to be used are the default ones. This is particularly useful when a function
 requires more than one sequence of named parameters and default values is

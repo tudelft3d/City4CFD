@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Principal_component_analysis/include/CGAL/PCA_util.h $
-// $Id: PCA_util.h 0779373 2020-03-26T13:31:46+01:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Principal_component_analysis/include/CGAL/PCA_util.h $
+// $Id: PCA_util.h 39df599 2022-04-22T15:36:38+02:00 Sven Oesau
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s) : Pierre Alliez and Sylvain Pion and Ankit Gupta
@@ -723,7 +723,11 @@ fitting_plane_3(typename DiagonalizeTraits::Covariance_matrix& covariance, // co
                   eigen_vectors[1],
                   eigen_vectors[2]);
     plane = Plane(c,normal);
-    return FT(1) - eigen_values[0] / eigen_values[1];
+
+    if (eigen_values[1] == 0)
+        return FT(0); // line case
+    else
+        return FT(1) - eigen_values[0] / eigen_values[1]; // regular case
   } // end regular case
 }
 

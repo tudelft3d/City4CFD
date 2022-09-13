@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL$
-// $Id$
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Alpha_wrap_3/include/CGAL/Alpha_wrap_3/internal/gate_priority_queue.h $
+// $Id: gate_priority_queue.h 57cf9e0 2022-04-19T14:55:15+02:00 Mael Rouxel-Labbé
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Pierre Alliez

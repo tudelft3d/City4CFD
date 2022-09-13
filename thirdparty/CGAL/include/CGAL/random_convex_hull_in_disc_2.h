@@ -7,8 +7,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Generator/include/CGAL/random_convex_hull_in_disc_2.h $
-// $Id: random_convex_hull_in_disc_2.h 393ae7d 2021-05-12T15:03:53+02:00 Maxime Gimeno
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Generator/include/CGAL/random_convex_hull_in_disc_2.h $
+// $Id: random_convex_hull_in_disc_2.h bb82c70 2022-03-16T08:31:30+01:00 Andreas Fabri
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -154,7 +154,6 @@ void random_convex_hull_in_disc_2(std::size_t n, double radius, std::list<typena
   typedef typename Traits::Point_2 P;
   typedef typename Traits::FT FT;
   std::size_t simulated_points = 0;
-  std::size_t generated_points = 0;
   P zero(0, 0);
   FT squared_radius = radius * radius;
   typedef typename Traits::Compare_y_2 Compare_y_2;
@@ -170,7 +169,6 @@ void random_convex_hull_in_disc_2(std::size_t n, double radius, std::list<typena
                             gen);
 
     simulated_points += init;
-    generated_points += init;
 
     Graham_without_sort_2(l, traits);
   } while ((bounded_side_2(l.begin(), l.end(), zero, traits) !=
@@ -232,7 +230,6 @@ void random_convex_hull_in_disc_2(std::size_t n, double radius, std::list<typena
                                       std::sqrt(to_double(squared_small_radius)), radius,
                                       m, gen);
     l.merge(m, compare_points_angle<P, Traits>());
-    generated_points += nb - k_disc;
     simulated_points += nb - k_disc;
     m.clear();
     Graham_without_sort_2(l, traits);

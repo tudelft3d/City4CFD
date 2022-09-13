@@ -7,7 +7,7 @@
 //
 // This file is part of CGAL (www.cgal.org);
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Stream_support/include/CGAL/IO/VRML/VRML_2_ostream.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Stream_support/include/CGAL/IO/VRML/VRML_2_ostream.h $
 // $Id: VRML_2_ostream.h 5ecd852 2021-04-26T21:37:02+01:00 Giles Bathgate
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //

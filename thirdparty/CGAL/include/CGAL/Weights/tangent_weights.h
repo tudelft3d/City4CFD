@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Weights/include/CGAL/Weights/tangent_weights.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Weights/include/CGAL/Weights/tangent_weights.h $
 // $Id: tangent_weights.h 12bf0e9 2021-10-18T17:31:59+02:00 Sébastien Loriot
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //

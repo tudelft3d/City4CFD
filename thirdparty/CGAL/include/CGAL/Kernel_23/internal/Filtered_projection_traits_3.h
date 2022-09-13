@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Kernel_23/include/CGAL/Kernel_23/internal/Filtered_projection_traits_3.h $
-// $Id: Filtered_projection_traits_3.h dacbd18 2021-08-30T12:35:34+02:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Kernel_23/include/CGAL/Kernel_23/internal/Filtered_projection_traits_3.h $
+// $Id: Filtered_projection_traits_3.h 561cc66 2022-06-29T12:30:35+02:00 Laurent Rineau
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -27,12 +27,12 @@ class Filtered_projection_traits_3
   typedef Filtered_projection_traits_3<K> Self;
   typedef Projection_traits_base_3<K> Base;
 
+public:
   typedef typename K::Exact_kernel Exact_kernel;
   typedef typename K::Approximate_kernel Approximate_kernel;
   typedef typename K::C2E C2E;
   typedef typename K::C2F C2F;
 
-public:
   typedef Projection_traits_base_3<Exact_kernel> Exact_traits;
   typedef Projection_traits_base_3<Approximate_kernel> Filtering_traits;
 

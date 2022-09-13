@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Optimal_transportation_reconstruction_2/include/CGAL/OTR_2/Reconstruction_vertex_base_2.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Optimal_transportation_reconstruction_2/include/CGAL/OTR_2/Reconstruction_vertex_base_2.h $
 // $Id: Reconstruction_vertex_base_2.h 254d60f 2019-10-19T15:23:19+02:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

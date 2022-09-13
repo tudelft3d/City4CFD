@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/CGAL_ipelets/include/CGAL/CGAL_Ipelet_base.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/CGAL_ipelets/include/CGAL/CGAL_Ipelet_base.h $
 // $Id: CGAL_Ipelet_base.h 01374de 2021-01-25T13:39:36+01:00 Maxime Gimeno
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //

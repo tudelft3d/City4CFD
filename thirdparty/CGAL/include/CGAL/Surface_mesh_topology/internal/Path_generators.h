@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Surface_mesh_topology/include/CGAL/Surface_mesh_topology/internal/Path_generators.h $
-// $Id: Path_generators.h 8bb22d5 2020-03-26T14:23:37+01:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Surface_mesh_topology/include/CGAL/Surface_mesh_topology/internal/Path_generators.h $
+// $Id: Path_generators.h 440a8df 2022-02-03T08:41:04+00:00 Andreas Fabri
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Guillaume Damiand <guillaume.damiand@liris.cnrs.fr>
@@ -13,6 +13,7 @@
 #define CGAL_PATH_GENERATORS_H 1
 
 #include <CGAL/license/Surface_mesh_topology.h>
+#include <CGAL/assertions.h>
 
 #include <CGAL/Random.h>
 #include <unordered_set>
@@ -174,7 +175,7 @@ generate_random_connected_set_of_faces(const LCC& lcc, std::size_t nb,
     { return NULL; }
   }
 
-  assert (border_faces.size()!=0);
+  CGAL_assertion(border_faces.size()!=0);
   typename LCC::Dart_const_handle dhres=border_faces[0];
   while(lcc.template is_free<2>(dhres) ||
         lcc.is_marked(lcc.template beta<2>(dhres), amark))

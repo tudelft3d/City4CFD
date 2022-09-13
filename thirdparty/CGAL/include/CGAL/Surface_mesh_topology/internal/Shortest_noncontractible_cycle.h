@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Surface_mesh_topology/include/CGAL/Surface_mesh_topology/internal/Shortest_noncontractible_cycle.h $
-// $Id: Shortest_noncontractible_cycle.h 52186a0 2020-05-14T11:38:15+02:00 Guillaume Damiand
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Surface_mesh_topology/include/CGAL/Surface_mesh_topology/internal/Shortest_noncontractible_cycle.h $
+// $Id: Shortest_noncontractible_cycle.h 2f5841e 2021-10-14T17:53:01+02:00 Guillaume Damiand
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Thien Hoang <thienvhoang99@gmail.com>
@@ -65,8 +65,8 @@ public:
   using Path          =CGAL::Surface_mesh_topology::Path_on_surface<Mesh>;
 
   // Associations between original darts and their copy.
-  using Origin_to_copy=boost::unordered_map<Original_dart_const_handle, Dart_handle>;
-  using Copy_to_origin=boost::unordered_map<Dart_handle, Original_dart_const_handle>;
+  using Origin_to_copy=std::unordered_map<Original_dart_const_handle, Dart_handle>;
+  using Copy_to_origin=std::unordered_map<Dart_handle, Original_dart_const_handle>;
 
   /// @return the local map
   const Local_map& get_local_map() const

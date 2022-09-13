@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Spatial_sorting/include/CGAL/Hilbert_sort_middle_d.h $
-// $Id: Hilbert_sort_middle_d.h 0779373 2020-03-26T13:31:46+01:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Spatial_sorting/include/CGAL/Hilbert_sort_middle_d.h $
+// $Id: Hilbert_sort_middle_d.h f60dfa8 2022-04-04T10:00:16+02:00 Sébastien Loriot
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     :  Olivier Devillers
@@ -32,7 +32,7 @@ namespace internal {
         int axe;
         bool orient;
         double value;
-        Fixed_hilbert_cmp_d (int a, bool o, double v, const K &_k = K())
+        Fixed_hilbert_cmp_d (int a, bool o, double v, const K &_k)
           :  k(_k), axe(a), orient(o), value(v) {}
         bool operator() (const Point &p) const
         {
@@ -64,7 +64,7 @@ private:
         : internal::Fixed_hilbert_cmp_d<Kernel> (a,dir,v,k) {} };
 
 public:
-    Hilbert_sort_middle_d (const Kernel &k = Kernel(), std::ptrdiff_t limit = 1)
+    Hilbert_sort_middle_d (const Kernel &k, std::ptrdiff_t limit = 1)
         : _k(k), _limit (limit)
     {}
 

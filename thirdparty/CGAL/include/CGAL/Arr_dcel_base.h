@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Arrangement_on_surface_2/include/CGAL/Arr_dcel_base.h $
-// $Id: Arr_dcel_base.h e683686 2021-11-18T12:31:39+01:00 Laurent Rineau
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Arrangement_on_surface_2/include/CGAL/Arr_dcel_base.h $
+// $Id: Arr_dcel_base.h 4ea5251 2022-06-10T16:44:17+02:00 Laurent Rineau
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -33,8 +33,6 @@
 #include <CGAL/Iterator_project.h>
 #include <CGAL/Arrangement_2/Arrangement_2_iterators.h>
 #include <CGAL/assertions.h>
-
-#include <boost/pool/pool_alloc.hpp>
 
 namespace CGAL {
 
@@ -964,7 +962,7 @@ public:
  * The arrangement DCEL class.
  */
 template <class V, class H, class F,
-          class Allocator = boost::fast_pool_allocator<int> >
+          class Allocator = CGAL_ALLOCATOR(int) >
 class Arr_dcel_base {
 public:
   // Define the vertex, halfedge and face types.

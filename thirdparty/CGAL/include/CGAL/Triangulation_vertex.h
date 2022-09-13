@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Triangulation/include/CGAL/Triangulation_vertex.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Triangulation/include/CGAL/Triangulation_vertex.h $
 // $Id: Triangulation_vertex.h 2d18b6e 2020-08-26T11:30:59+02:00 Marc Glisse
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

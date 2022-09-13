@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Circular_kernel_3/include/CGAL/Line_arc_3.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Circular_kernel_3/include/CGAL/Line_arc_3.h $
 // $Id: Line_arc_3.h acdf4c6 2020-07-22T15:23:09+02:00 Dmitry Anisimov
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

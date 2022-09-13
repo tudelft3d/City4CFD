@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Surface_mesh_topology/include/CGAL/Face_graph_wrapper.h $
-// $Id: Face_graph_wrapper.h 98e4718 2021-08-26T11:33:39+02:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Surface_mesh_topology/include/CGAL/Face_graph_wrapper.h $
+// $Id: Face_graph_wrapper.h 440a8df 2022-02-03T08:41:04+00:00 Andreas Fabri
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Guillaume Damiand <guillaume.damiand@liris.cnrs.fr>
@@ -13,6 +13,7 @@
 #define CGAL_FACE_GRAPH_WRAPPER_H 1
 
 #include <CGAL/license/Surface_mesh_topology.h>
+#include <CGAL/assertions.h>
 
 #include <CGAL/Surface_mesh_topology/internal/Functors_for_face_graph_wrapper.h>
 #include <CGAL/Surface_mesh_topology/internal/Iterators_for_face_graph_wrapper.h>
@@ -23,6 +24,7 @@
 #include <CGAL/Generalized_map_fwd.h>
 #include <CGAL/Linear_cell_complex_fwd.h>
 #include <CGAL/Polygonal_schema_fwd.h>
+
 #include <bitset>
 
 namespace CGAL
@@ -614,7 +616,7 @@ public:
       if (marks[acells[i]]==INVALID_MARK )
       {
         marks[acells[i]]=get_new_mark();
-        assert(is_whole_map_unmarked(marks[acells[i]]));
+        CGAL_assertion(is_whole_map_unmarked(marks[acells[i]]));
       }
     }
 

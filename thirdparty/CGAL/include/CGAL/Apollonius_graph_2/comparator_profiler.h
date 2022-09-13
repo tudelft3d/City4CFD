@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Apollonius_graph_2/include/CGAL/Apollonius_graph_2/comparator_profiler.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Apollonius_graph_2/include/CGAL/Apollonius_graph_2/comparator_profiler.h $
 // $Id: comparator_profiler.h 3e03d50 2021-05-05T15:32:22+02:00 Maxime Gimeno
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

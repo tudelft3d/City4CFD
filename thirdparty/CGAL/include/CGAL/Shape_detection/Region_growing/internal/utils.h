@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Shape_detection/include/CGAL/Shape_detection/Region_growing/internal/utils.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Shape_detection/include/CGAL/Shape_detection/Region_growing/internal/utils.h $
 // $Id: utils.h f2d9066 2021-08-19T12:05:30+02:00 Dmitry Anisimov
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

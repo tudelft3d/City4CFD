@@ -7,8 +7,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/STL_Extension/include/CGAL/utility.h $
-// $Id: utility.h 0779373 2020-03-26T13:31:46+01:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/STL_Extension/include/CGAL/utility.h $
+// $Id: utility.h 4ffc949 2022-02-03T17:11:20+01:00 Sébastien Loriot
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -324,5 +324,29 @@ inline P make_sorted_pair(T1&& t1, T2&& t2, Compare comp = Compare())
 }
 
 } //namespace CGAL
+
+namespace std {
+
+#if defined(BOOST_MSVC)
+#  pragma warning(push)
+#  pragma warning(disable:4099) // For VC10 it is class hash
+#endif
+
+#ifndef CGAL_CFG_NO_STD_HASH
+template <class T1, class T2, class T3>
+struct hash<CGAL::Triple<T1,T2,T3>>
+{
+  std::size_t operator()(const CGAL::Triple<T1,T2,T3>& t) const
+  {
+    return hash_value(t);
+  }
+};
+#endif // CGAL_CFG_NO_STD_HASH
+
+#if defined(BOOST_MSVC)
+#  pragma warning(pop)
+#endif
+
+} // std namespace
 
 #endif // CGAL_UTILITY_H

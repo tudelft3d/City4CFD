@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Polytope_distance_d/include/CGAL/all_furthest_neighbors_2.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Polytope_distance_d/include/CGAL/all_furthest_neighbors_2.h $
 // $Id: all_furthest_neighbors_2.h 2b61a99 2021-01-05T18:38:16+01:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

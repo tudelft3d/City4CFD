@@ -7,8 +7,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Kernel_23/include/CGAL/Exact_kernel_selector.h $
-// $Id: Exact_kernel_selector.h 98e4718 2021-08-26T11:33:39+02:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Kernel_23/include/CGAL/Exact_kernel_selector.h $
+// $Id: Exact_kernel_selector.h 561cc66 2022-06-29T12:30:35+02:00 Laurent Rineau
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Sylvain Pion,
@@ -31,7 +31,7 @@
 
 namespace CGAL {
 
-template <class CK, class Rep = typename CK::Rep_tag /* Cartesian_tag */>
+template <class CK, class Rep = typename CK::Rep_tag /* (Cartesian_tag) */>
 struct Exact_kernel_selector
 {
   typedef typename internal::Exact_field_selector<typename CK::RT>::Type  Exact_nt;

@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Nef_S2/include/CGAL/Nef_S2/SM_point_locator.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Nef_S2/include/CGAL/Nef_S2/SM_point_locator.h $
 // $Id: SM_point_locator.h 2334ec5 2021-03-10T18:40:03+00:00 Andreas Fabri
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

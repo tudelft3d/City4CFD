@@ -2,7 +2,7 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Subdivision_method_3/include/CGAL/Subdivision_method_3/subdivision_masks_3.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Subdivision_method_3/include/CGAL/Subdivision_method_3/subdivision_masks_3.h $
 // $Id: subdivision_masks_3.h 45696cd 2021-10-30T13:35:17+03:00 Dimitris Papavasiliou
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //

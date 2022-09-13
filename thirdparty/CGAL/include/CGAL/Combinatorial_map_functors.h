@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Combinatorial_map/include/CGAL/Combinatorial_map_functors.h $
-// $Id: Combinatorial_map_functors.h 98e4718 2021-08-26T11:33:39+02:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Combinatorial_map/include/CGAL/Combinatorial_map_functors.h $
+// $Id: Combinatorial_map_functors.h d909084 2022-01-18T14:30:21+01:00 Guillaume Damiand
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Guillaume Damiand <guillaume.damiand@liris.cnrs.fr>
@@ -92,7 +92,7 @@ struct Test_is_valid_attribute_functor
     size_type mark=amap.get_new_mark();
     bool res = true;
     CGAL::internal::Test_is_valid_attribute_functor<CMap>::
-        run<i>(amap, adart, mark, &res);
+        template run<i>(amap, adart, mark, &res);
 
     amap.negate_mark(mark);
     if ( !amap.is_whole_map_marked(mark) )

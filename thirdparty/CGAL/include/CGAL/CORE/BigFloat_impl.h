@@ -26,7 +26,7 @@
  * WWW URL: http://cs.nyu.edu/exact/
  * Email: exact@cs.nyu.edu
  *
- * $URL: https://github.com/CGAL/cgal/blob/v5.4/CGAL_Core/include/CGAL/CORE/BigFloat_impl.h $
+ * $URL: https://github.com/CGAL/cgal/blob/v5.5/CGAL_Core/include/CGAL/CORE/BigFloat_impl.h $
  * $Id: BigFloat_impl.h b6e2656 2021-09-15T11:36:00+01:00 Andreas Fabri
  * SPDX-License-Identifier: LGPL-3.0-or-later
  ***************************************************************************/

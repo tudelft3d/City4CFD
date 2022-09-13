@@ -7,7 +7,7 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Polygon/include/CGAL/Polygon_2/Polygon_2_edge_iterator.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Polygon/include/CGAL/Polygon_2/Polygon_2_edge_iterator.h $
 // $Id: Polygon_2_edge_iterator.h f7e2c03 2020-08-13T15:37:10+02:00 Simon Giraudot
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //

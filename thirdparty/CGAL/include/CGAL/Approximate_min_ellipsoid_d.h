@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Bounding_volumes/include/CGAL/Approximate_min_ellipsoid_d.h $
-// $Id: Approximate_min_ellipsoid_d.h 0779373 2020-03-26T13:31:46+01:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Bounding_volumes/include/CGAL/Approximate_min_ellipsoid_d.h $
+// $Id: Approximate_min_ellipsoid_d.h 2b31362 2022-06-22T07:53:20+01:00 Andreas Fabri
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -294,10 +294,13 @@ namespace CGAL {
       double tmp = sum;
       for (int i=0; i<d; ++i)
         tmp *= sum;
-      const double eps = std::sqrt(tmp)-1.0;
+      double eps = std::sqrt(tmp)-1.0;
       FPU_set_cw(old);                                   // restore
 
-      CGAL_APPEL_ASSERT(eps >= 0.0);
+      if (CGAL::is_negative(eps)) {
+        CGAL_APPEL_LOG("appel", "Clamp negative approximate eps to zero" << "\n");
+        eps = 0;
+      }
       return eps;
     }
 
@@ -362,7 +365,7 @@ namespace CGAL {
     // the computed ellipsoid's axes. The d lengths are floating-point
     // approximations to the exact axes-lengths of the computed ellipsoid; no
     // guarantee is given w.r.t. the involved relative error. (See also method
-    // axes_direction_cartesian_begin().)  The elements of the iterator are
+    // `axis_direction_cartesian_begin()`.)  The elements of the iterator are
     // sorted descending.
     //
     // Precondition: !is_degenerate() && (d==2 || d==3)

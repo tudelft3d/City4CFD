@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Surface_mesh_topology/include/CGAL/Surface_mesh_topology/internal/Generic_map_selector.h $
-// $Id: Generic_map_selector.h e6536aa 2020-06-09T20:15:16+02:00 Laurent Rineau
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Surface_mesh_topology/include/CGAL/Surface_mesh_topology/internal/Generic_map_selector.h $
+// $Id: Generic_map_selector.h faadbaa 2022-02-09T09:37:41+01:00 Guillaume Damiand
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Thien Hoang <thienvhoang99@gmail.com>
@@ -44,9 +44,9 @@ namespace internal {
     using Mesh_original              = Mesh_;
     using Generic_map                = CGAL::Generalized_map<2, Items_>;
     using Dart_const_handle_original = typename Mesh_original::Dart_const_handle;
-    using Copy_to_origin_map         = boost::unordered_map<typename Generic_map::Dart_handle,
+    using Copy_to_origin_map         = std::unordered_map<typename Generic_map::Dart_handle,
                                                             Dart_const_handle_original>;
-    using Origin_to_copy_map         = boost::unordered_map<Dart_const_handle_original,
+    using Origin_to_copy_map         = std::unordered_map<Dart_const_handle_original,
                                                             typename Generic_map::Dart_handle>;
 
     static void copy(Generic_map& target, const Mesh_original& source,
@@ -54,7 +54,7 @@ namespace internal {
                      Copy_to_origin_map& copy_to_origin,
                      typename Generic_map::size_type mark_perforated)
     {
-      target.copy_from_const(source, &origin_to_copy, &copy_to_origin, true, mark_perforated);
+      target.copy_from_const(source, &origin_to_copy, &copy_to_origin, false, true, mark_perforated);
     }
   };
 
@@ -64,16 +64,16 @@ namespace internal {
     using Mesh_original              = Mesh_;
     using Generic_map                = CGAL::Combinatorial_map<2, Items_>;
     using Dart_const_handle_original = typename Mesh_original::Dart_const_handle;
-    using Copy_to_origin_map         = boost::unordered_map<typename Generic_map::Dart_handle,
+    using Copy_to_origin_map         = std::unordered_map<typename Generic_map::Dart_handle,
                                                             Dart_const_handle_original>;
-    using Origin_to_copy_map         = boost::unordered_map<Dart_const_handle_original,
+    using Origin_to_copy_map         = std::unordered_map<Dart_const_handle_original,
                                                             typename Generic_map::Dart_handle>;
 
     static void copy(Generic_map& target, const Mesh_original& source,
                      Origin_to_copy_map& origin_to_copy, Copy_to_origin_map& copy_to_origin,
                      typename Generic_map::size_type mark_perforated)
     {
-      target.copy_from_const(source, &origin_to_copy, &copy_to_origin, true, mark_perforated);
+      target.copy_from_const(source, &origin_to_copy, &copy_to_origin, false, true, mark_perforated);
     }
   };
 
@@ -83,9 +83,9 @@ namespace internal {
     using Mesh_original              = Mesh_;
     using Generic_map                = CGAL::Combinatorial_map<2, Items_>;
     using Dart_const_handle_original = typename boost::graph_traits<Mesh_original>::halfedge_descriptor;
-    using Copy_to_origin_map         = boost::unordered_map<typename Generic_map::Dart_handle,
+    using Copy_to_origin_map         = std::unordered_map<typename Generic_map::Dart_handle,
                                                             Dart_const_handle_original>;
-    using Origin_to_copy_map         = boost::unordered_map<Dart_const_handle_original,
+    using Origin_to_copy_map         = std::unordered_map<Dart_const_handle_original,
                                                             typename Generic_map::Dart_handle>;
 
     static void copy(Generic_map& target, const Mesh_original& source,

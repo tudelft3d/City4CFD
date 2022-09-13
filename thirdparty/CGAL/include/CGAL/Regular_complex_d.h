@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Convex_hull_d/include/CGAL/Regular_complex_d.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Convex_hull_d/include/CGAL/Regular_complex_d.h $
 // $Id: Regular_complex_d.h 98e4718 2021-08-26T11:33:39+02:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Polyhedron/include/CGAL/Polyhedron_3_to_lcc.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Polyhedron/include/CGAL/Polyhedron_3_to_lcc.h $
 // $Id: Polyhedron_3_to_lcc.h 9a50c0f 2019-11-26T13:22:03+01:00 Guillaume Damiand
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //

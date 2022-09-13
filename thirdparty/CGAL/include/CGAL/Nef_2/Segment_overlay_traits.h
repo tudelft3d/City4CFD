@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Nef_2/include/CGAL/Nef_2/Segment_overlay_traits.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Nef_2/include/CGAL/Nef_2/Segment_overlay_traits.h $
 // $Id: Segment_overlay_traits.h f3f6beb 2021-05-12T07:37:49+01:00 Giles Bathgate
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

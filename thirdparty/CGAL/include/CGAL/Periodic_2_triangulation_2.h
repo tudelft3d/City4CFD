@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Periodic_2_triangulation_2/include/CGAL/Periodic_2_triangulation_2.h $
-// $Id: Periodic_2_triangulation_2.h 4e519a3 2021-05-05T13:15:37+02:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Periodic_2_triangulation_2/include/CGAL/Periodic_2_triangulation_2.h $
+// $Id: Periodic_2_triangulation_2.h cdbf0d7 2022-03-09T11:34:12+00:00 Andreas Fabri
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Nico Kruithof <Nico@nghk.nl>
@@ -4164,7 +4164,7 @@ Periodic_2_triangulation_2<Gt, Tds>::save(std::ostream& os) const
     return os;
 
   // write the vertices
-  Unique_hash_map<Vertex_handle, std::size_t > V;
+  Unique_hash_map<Vertex_handle, std::size_t > V(0, number_of_vertices());
   std::size_t i = 0;
   if (is_1_cover())
     {
@@ -4208,7 +4208,7 @@ Periodic_2_triangulation_2<Gt, Tds>::save(std::ostream& os) const
     }
   CGAL_triangulation_postcondition(i == _cover[0]*_cover[1]*n);
 
-  Unique_hash_map<Face_handle, std::size_t> F;
+  Unique_hash_map<Face_handle, std::size_t> F(0,  _tds.number_of_faces());
   int inum = 0;
   // asks the tds for the combinatorial information
   // vertices of the faces

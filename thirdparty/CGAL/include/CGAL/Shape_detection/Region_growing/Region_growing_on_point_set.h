@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Shape_detection/include/CGAL/Shape_detection/Region_growing/Region_growing_on_point_set.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Shape_detection/include/CGAL/Shape_detection/Region_growing/Region_growing_on_point_set.h $
 // $Id: Region_growing_on_point_set.h ad17c0b 2021-05-04T08:47:08+02:00 Simon Giraudot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

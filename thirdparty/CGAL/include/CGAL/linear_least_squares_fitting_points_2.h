@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Principal_component_analysis/include/CGAL/linear_least_squares_fitting_points_2.h $
-// $Id: linear_least_squares_fitting_points_2.h 0779373 2020-03-26T13:31:46+01:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Principal_component_analysis/include/CGAL/linear_least_squares_fitting_points_2.h $
+// $Id: linear_least_squares_fitting_points_2.h e07672a 2022-01-26T21:04:59+05:30 G Yuvan Shankar
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s) : Pierre Alliez and Sylvain Pion and Ankit Gupta
@@ -69,9 +69,9 @@ linear_least_squares_fitting_2(InputIterator first,
   {
     const Point& p = *it;
     Vector d = p - c; // centered data point
-    covariance[0] += d.x() * d.x();
+    covariance[0] += CGAL::square(d.x());
     covariance[1] += d.x() * d.y();
-    covariance[2] += d.y() * d.y();
+    covariance[2] += CGAL::square(d.y());
   }
 
   // solve for eigenvalues and eigenvectors.

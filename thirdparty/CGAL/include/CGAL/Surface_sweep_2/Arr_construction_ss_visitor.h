@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Arrangement_on_surface_2/include/CGAL/Surface_sweep_2/Arr_construction_ss_visitor.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Arrangement_on_surface_2/include/CGAL/Surface_sweep_2/Arr_construction_ss_visitor.h $
 // $Id: Arr_construction_ss_visitor.h 6e1fc8a 2021-09-02T16:53:07+02:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

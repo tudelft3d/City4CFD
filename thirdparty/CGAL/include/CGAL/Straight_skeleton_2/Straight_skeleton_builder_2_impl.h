@@ -2,8 +2,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Straight_skeleton_2/include/CGAL/Straight_skeleton_2/Straight_skeleton_builder_2_impl.h $
-// $Id: Straight_skeleton_builder_2_impl.h 393ae7d 2021-05-12T15:03:53+02:00 Maxime Gimeno
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Straight_skeleton_2/include/CGAL/Straight_skeleton_2/Straight_skeleton_builder_2_impl.h $
+// $Id: Straight_skeleton_builder_2_impl.h 2a513a0 2022-03-09T13:23:07+00:00 Andreas Fabri
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Fernando Cacciola <fernando_cacciola@ciudad.com.ar>
@@ -15,7 +15,6 @@
 
 #include <CGAL/number_type_config.h>
 #include <CGAL/Real_timer.h>
-#include <CGAL/Unique_hash_map.h>
 
 #include <boost/utility.hpp>
 #include <boost/version.hpp>

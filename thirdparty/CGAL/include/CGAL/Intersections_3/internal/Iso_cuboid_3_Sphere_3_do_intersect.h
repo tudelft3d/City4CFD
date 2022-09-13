@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Intersections_3/include/CGAL/Intersections_3/internal/Iso_cuboid_3_Sphere_3_do_intersect.h $
-// $Id: Iso_cuboid_3_Sphere_3_do_intersect.h 9c6456f 2021-07-29T14:23:40+02:00 Mael Rouxel-Labbé
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Intersections_3/include/CGAL/Intersections_3/internal/Iso_cuboid_3_Sphere_3_do_intersect.h $
+// $Id: Iso_cuboid_3_Sphere_3_do_intersect.h a7ff075 2022-02-03T13:21:11+00:00 Andreas Fabri
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -28,7 +28,7 @@ bool do_intersect_sphere_box_3(const typename K::Sphere_3& sphere,
                                const K&)
 {
   typedef typename K::FT SFT;
-  typedef typename Coercion_traits<double, SFT>::Type FT;
+  typedef typename Coercion_traits<SFT, BFT>::Type FT;
   typedef typename K::Point_3 Point;
 
   typename Coercion_traits<SFT, BFT>::Cast to_FT;

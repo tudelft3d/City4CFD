@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Interpolation/include/CGAL/regular_neighbor_coordinates_2.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Interpolation/include/CGAL/regular_neighbor_coordinates_2.h $
 // $Id: regular_neighbor_coordinates_2.h ce98cd4 2021-09-03T09:15:26+02:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

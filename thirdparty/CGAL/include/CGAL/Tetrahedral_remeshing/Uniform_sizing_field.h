@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Tetrahedral_remeshing/include/CGAL/Tetrahedral_remeshing/Uniform_sizing_field.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Tetrahedral_remeshing/include/CGAL/Tetrahedral_remeshing/Uniform_sizing_field.h $
 // $Id: Uniform_sizing_field.h ab05dde 2020-06-12T08:08:56+02:00 Jane Tournois
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Polyhedron/include/CGAL/IO/Polyhedron_VRML_2_ostream.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Polyhedron/include/CGAL/IO/Polyhedron_VRML_2_ostream.h $
 // $Id: Polyhedron_VRML_2_ostream.h 135595c 2020-01-24T23:17:20+01:00 Mael Rouxel-Labbé
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

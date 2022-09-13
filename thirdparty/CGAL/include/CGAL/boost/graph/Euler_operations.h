@@ -2,8 +2,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/BGL/include/CGAL/boost/graph/Euler_operations.h $
-// $Id: Euler_operations.h e25669c 2021-11-25T17:28:07+01:00 Laurent Rineau
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/BGL/include/CGAL/boost/graph/Euler_operations.h $
+// $Id: Euler_operations.h 29b3fb1 2022-06-20T18:03:15+02:00 Sébastien Loriot
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -265,10 +265,7 @@ join_face(typename boost::graph_traits<Graph>::halfedge_descriptor h,
 /**
  * splits the face incident to `h1` and `h2`.  Creates the opposite
  * halfedges `h3` and `h4`, such that `next(h1,g) == h3` and `next(h2,g) == h4`.
- * Performs the inverse operation to `join_face()`.
- *
- * If `Graph` is a model of `MutableFaceGraph` and if the update of faces is not disabled
- * a new face incident to `h4` is added.
+ * Performs the inverse operation to `join_face()`. The new face is incident to `h4`.
  *
  * \image html split_face.svg
  *

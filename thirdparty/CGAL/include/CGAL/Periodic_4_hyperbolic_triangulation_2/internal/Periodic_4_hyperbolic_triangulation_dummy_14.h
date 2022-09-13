@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Periodic_4_hyperbolic_triangulation_2/include/CGAL/Periodic_4_hyperbolic_triangulation_2/internal/Periodic_4_hyperbolic_triangulation_dummy_14.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Periodic_4_hyperbolic_triangulation_2/include/CGAL/Periodic_4_hyperbolic_triangulation_2/internal/Periodic_4_hyperbolic_triangulation_dummy_14.h $
 // $Id: Periodic_4_hyperbolic_triangulation_dummy_14.h 98e4718 2021-08-26T11:33:39+02:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

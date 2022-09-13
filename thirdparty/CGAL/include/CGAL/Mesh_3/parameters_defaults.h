@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Mesh_3/include/CGAL/Mesh_3/parameters_defaults.h $
-// $Id: parameters_defaults.h 0779373 2020-03-26T13:31:46+01:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Mesh_3/include/CGAL/Mesh_3/parameters_defaults.h $
+// $Id: parameters_defaults.h 1c3e09f 2022-01-10T15:32:38+01:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -24,7 +24,7 @@
 #include <CGAL/Mesh_3/sliver_criteria.h>
 
 namespace CGAL {
-namespace parameters { namespace default_values {
+namespace parameters { namespace default_values_for_mesh_3 {
 
 // exude_mesh_3
 const double exude_sliver_bound = 0.;
@@ -51,7 +51,7 @@ const double lloyd_convergence_ratio = 0.02;
 const double odt_freeze_ratio = 0.01;
 const double odt_convergence_ratio = 0.02;
 
-} } // end namespace parameters::default_values
+} } // end namespace parameters::default_values_for_mesh_3
 } // end namespace CGAL
 
 #endif // CGAL_MESH_3_PARAMETERS_DEFAULTS_H

@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Installation/include/CGAL/license/Three.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Installation/include/CGAL/license/Three.h $
 // $Id: Three.h 3edff7b 2021-06-17T10:49:45+02:00 Dmitry Anisimov
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //

@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Surface_mesh_parameterization/include/CGAL/Surface_mesh_parameterization/orbifold_shortest_path.h $
-// $Id: orbifold_shortest_path.h 752c07e 2021-06-04T11:23:16+02:00 Dmitry Anisimov
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Surface_mesh_parameterization/include/CGAL/Surface_mesh_parameterization/orbifold_shortest_path.h $
+// $Id: orbifold_shortest_path.h 7c20752 2022-05-04T17:38:32+01:00 Andreas Fabri
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Mael Rouxel-Labbé
@@ -18,10 +18,10 @@
 
 #include <CGAL/assertions.h>
 
-#include <boost/graph/dijkstra_shortest_paths.hpp>
+#include <CGAL/boost/graph/dijkstra_shortest_paths.h>
 #include <boost/graph/graph_traits.hpp>
-#include <boost/unordered_map.hpp>
 
+#include <unordered_map>
 #include <exception>
 #include <list>
 #include <utility>
@@ -54,7 +54,7 @@ void output_shortest_paths_to_selection_file(const TriangleMesh& mesh,
   typedef typename boost::graph_traits<TriangleMesh>::vertex_descriptor vertex_descriptor;
   typedef typename boost::graph_traits<TriangleMesh>::edge_descriptor   edge_descriptor;
 
-  boost::unordered_map<vertex_descriptor, int> index_map;
+  std::unordered_map<vertex_descriptor, int> index_map;
 
   int counter = 0;
   for(vertex_descriptor vd : vertices(mesh)) {
@@ -133,7 +133,7 @@ void compute_shortest_paths_between_two_cones(const TriangleMesh& mesh,
 
   typedef internal::Stop_at_target_Dijkstra_visitor<TriangleMesh>        Stop_visitor;
 
-  typedef boost::unordered_map<vertex_descriptor, vertex_descriptor>     Pred_umap;
+  typedef std::unordered_map<vertex_descriptor, vertex_descriptor>       Pred_umap;
   typedef boost::associative_property_map<Pred_umap>                     Pred_pmap;
 
   Pred_umap predecessor;

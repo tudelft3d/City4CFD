@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Polygon_mesh_processing/include/CGAL/Polygon_mesh_processing/transform.h $
-// $Id: transform.h c253679 2020-04-18T16:27:58+02:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Polygon_mesh_processing/include/CGAL/Polygon_mesh_processing/transform.h $
+// $Id: transform.h 75b03e6 2022-01-10T15:33:04+01:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -13,7 +13,7 @@
 #define CGAL_POLYGON_MESH_PROCESSING_TRANSFORM_H
 #include <CGAL/license/Polygon_mesh_processing/core.h>
 
-#include <CGAL/Polygon_mesh_processing/internal/named_function_params.h>
+#include <CGAL/Named_function_parameters.h>
 #include <CGAL/Polygon_mesh_processing/internal/named_params_helper.h>
 
 namespace CGAL{
@@ -44,10 +44,10 @@ namespace Polygon_mesh_processing{
  * \cgalNamedParamsEnd
  *
  */
-template<class Transformation, class PolygonMesh,class NamedParameters>
+template<class Transformation, class PolygonMesh,class NamedParameters = parameters::Default_named_parameters>
 void transform(const Transformation& transformation,
                PolygonMesh& mesh,
-               const NamedParameters& np)
+               const NamedParameters& np = parameters::default_values())
 {
   typedef typename GetVertexPointMap<PolygonMesh, NamedParameters>::type VPMap;
   VPMap vpm = parameters::choose_parameter(parameters::get_parameter(np, internal_np::vertex_point),
@@ -59,14 +59,6 @@ void transform(const Transformation& transformation,
   }
 }
 
-/// \cond SKIP_IN_MANUAL
-template<class Transformation, class PolygonMesh>
-void transform(const Transformation& transformation,
-               PolygonMesh& mesh)
-{
-  transform(transformation, mesh, parameters::all_default());
-}
-/// \endcond
 }
 }
 

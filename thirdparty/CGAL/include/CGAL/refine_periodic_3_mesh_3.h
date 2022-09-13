@@ -4,7 +4,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Periodic_3_mesh_3/include/CGAL/refine_periodic_3_mesh_3.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Periodic_3_mesh_3/include/CGAL/refine_periodic_3_mesh_3.h $
 // $Id: refine_periodic_3_mesh_3.h 53d4c9b 2019-10-28T11:29:08+01:00 Mael Rouxel-Labbé
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
