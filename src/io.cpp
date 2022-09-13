@@ -376,12 +376,12 @@ bool IO::is_degen(const Mesh& mesh, Mesh::Face_index face) {
         pts.push_back(mesh.point(index));
     }
     //-- Precondition - check that the points are not the same
-    if (CGAL::squared_distance(pts[0], pts[1]) < 1e-3 ||
-        CGAL::squared_distance(pts[0], pts[2]) < 1e-3 ||
-        CGAL::squared_distance(pts[1], pts[2]) < 1e-3) {
+    if (CGAL::squared_distance(pts[0], pts[1]) < 1e-6 ||
+        CGAL::squared_distance(pts[0], pts[2]) < 1e-6 ||
+        CGAL::squared_distance(pts[1], pts[2]) < 1e-6) {
         return true;
     }
-    if (sin(CGAL::approximate_angle(pts[0], pts[1], pts[2]) * M_PI / 180) < 0.00174) {
+    if (sin(CGAL::approximate_angle(pts[0], pts[1], pts[2]) * M_PI / 180) < 0.000174) {
         return true;
     }
     return false;
