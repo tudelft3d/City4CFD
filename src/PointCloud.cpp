@@ -140,97 +140,119 @@ void PointCloud::read_point_clouds() {
                                                 CGAL::Vector_3<EPICK>(-Config::get().pointOfInterest.x(),
                                                                       -Config::get().pointOfInterest.y(),
                                                                       0));
-    //-- Read ground points
-    if (!Config::get().las_files.empty()) { // add check for las/laz from config file
+    //-- Automatic input using LAS files or manually defining ground and buildings
+    if (!Config::get().las_files.empty()) {
+        //-- Add all used LAS classes to one vector
+        std::vector<int> usedClasses;
+        usedClasses.reserve(Config::get().las_classes_building.size() + Config::get().las_classes_ground.size());
+        for (auto classif : Config::get().las_classes_ground)   usedClasses.push_back(classif);
+        for (auto classif : Config::get().las_classes_building) usedClasses.push_back(classif);
+
+        int readPts = 0;
         for (auto& pointFile: Config::get().las_files) {
-            std::clog << "Reading LAS/LAZ file: " << pointFile.filename << std::endl;
+            std::cout << "Reading LAS/LAZ file: " << pointFile << "\n";
 
             LASreadOpener lasreadopener;
-            lasreadopener.set_file_name(pointFile.filename.c_str());
+            lasreadopener.set_file_name(pointFile.c_str());
             //-- set to compute bounding box
             lasreadopener.set_populate_header(true);
             LASreader* lasreader = lasreadopener.open();
 
             try {
                 //-- check if file is open
-                if (lasreader == nullptr) {
-                    std::cerr << "\tERROR: could not open file: " << pointFile.filename << std::endl;
-                    throw(std::string("\tERROR: could not open file: " + pointFile.filename));
-                }
-                LASheader header = lasreader->header;
+                if (lasreader == nullptr)
+                    throw(std::runtime_error(std::string("Error reading LAS/LAZ file.")));
 
-//                if (this->check_bounds(header.min_x, header.max_x, header.min_y, header.max_y)) {
-                //-- LAS classes to omit
-                std::vector<int> lasomits;
-                for (int i : pointFile.lasomits) {
-                    lasomits.push_back(i);
-                }
+                LASheader header = lasreader->header;
 
                 //-- read each point 1-by-1
                 uint32_t pointCount = header.number_of_point_records;
 
-                //== IP: these are just info messages here==//
-                //todo adapt thinning for this implementation
-                std::clog << "\t(" << boost::locale::as::number << pointCount << " points in the file)\n";
-                if ((pointFile.thinning > 1)) {
-                    std::clog << "\t(skipping every " << pointFile.thinning << "th points, thus ";
-                    std::clog << boost::locale::as::number << (pointCount / pointFile.thinning) << " are used)\n";
+                std::cout << "    " << boost::locale::as::number << pointCount << " points in the file\n";
+                double percentLeft = 1 - (Config::get().terrainThinning / 100);
+                if (Config::get().terrainThinning > 0) {
+                    std::cout << "    Skipping " << Config::get().terrainThinning << "% points" << std::endl;
                 }
-                else
-                    std::clog << "\t(all points used, no skipping)\n";
-
-                if (!pointFile.lasomits.empty()) {
-                    std::clog << "\t(omitting LAS classes: ";
-                    for (int i : pointFile.lasomits)
-                        std::clog << i << " ";
-                    std::clog << ")\n";
+                else {
+                    std::cout << "    all points used, no skipping" << std::endl;
                 }
-                //== IP: info messages up to here
 
-                IO::print_progress_bar(0);
-                int i = 0;
-                //-- need if statement to make sure whether points go terrain or building
-                //todo
-                if (true) { //todo gotta include CSF somewhere here
+                //-- Read defined classes or use CSF to determine ground from non-ground
+                if (!Config::get().las_classes_ground.empty() ||
+                    !Config::get().las_classes_building.empty()) {
+                    std::cout << "    Reading LAS classes: ";
+                    for (int i : Config::get().las_classes_ground) {
+                        std::cout << i << " ";
+                    }
+                    std::cout << "(ground) and ";
+                    for (int i : Config::get().las_classes_building) {
+                        std::cout << i << " ";
+                    }
+                    std::cout << "(buildings)" << std::endl;
+
+                    int i = 0;
+                    double currPercent = 0.;
+                    IO::print_progress_bar(0);
                     while (lasreader->read_point()) {
                         LASpoint const& p = lasreader->point;
                         //-- set the thinning filter
-                        if (i % pointFile.thinning == 0) {
+                        if (currPercent >= 1.) {
                             //-- set the classification filter
-                            if (std::find(lasomits.begin(), lasomits.end(), (int) p.classification) == lasomits.end()) {
+                            if (std::find(usedClasses.begin(), usedClasses.end(), (int) p.classification)
+                                != usedClasses.end()) {
+                                this->add_elevation_point(p, translate);
+                                ++readPts;
+                            }
+                            currPercent -= 1.;
+                        } else {
+                            currPercent += percentLeft;
+                        }
+                        if (i % (pointCount / 200) == 0) {
+                            IO::print_progress_bar(100 * (i / double(pointCount)));
+                        }
+                        i++;
+                    }
+                } else { //todo implement CSF here
+                    while (lasreader->read_point()) {
+                        LASpoint const& p = lasreader->point;
+                        //-- set the thinning filter
+                        //todo this commented part replace with CSF implementation
+                        /*
+                        if (i % pointFile.thinning == 0) {//todo sort out thinning
+                            //-- set the classification filter
+                            if (std::find(usedClasses.begin(), usedClasses.end(), (int) p.classification)
+                                != usedClasses.end()) {
                                 //-- set the bounds filter
 //                            if (this->check_bounds(p.X, p.X, p.Y, p.Y)) {
                                 this->add_elevation_point(p, translate);
 //                            }
                             }
                         }
-                        if (i % (pointCount / 500) == 0)
+                        if (i % (pointCount / 200) == 0)
                             IO::print_progress_bar(100 * (i / double(pointCount)));
                         i++;
+                         */
                     }
-                } else {
-
                 }
                 IO::print_progress_bar(100);
                 std::clog << std::endl;
-//                }
-//                else {
-//                    std::clog << "\tskipping file, bounds do not intersect polygon extent\n";
-//                }
+
                 _pointCloudTerrain.add_property_map<bool>("is_building_point", false);
                 lasreader->close();
             }
             catch (std::exception& e) {
-                lasreader->close();
-                std::cerr << std::endl << e.what() << std::endl;
-                throw (e.what());
+                if (lasreader != nullptr) lasreader->close();
+                throw;
             }
         }
+        std::clog << "Points read: " << readPts << "\n" << std::endl;
     } else {
-        std::cout << "Explicitly reading ground and/or building points" << std::endl;
-        if (!Config::get().points_xyz.empty()) {
+        //-- Second input option is to explicitly define ground and/or building points
+        //- Read explicitly defined ground points
+        std::cout << "Reading explicitly defined ground and/or building points" << std::endl;
+        if (!Config::get().ground_xyz.empty()) {
             std::cout << "Reading ground points" << std::endl;
-            IO::read_point_cloud(Config::get().points_xyz, _pointCloudTerrain);
+            IO::read_point_cloud(Config::get().ground_xyz, _pointCloudTerrain);
             _pointCloudTerrain.add_property_map<bool>("is_building_point", false);
 
             std::cout << "    Points read: " << _pointCloudTerrain.size() << std::endl;
@@ -241,7 +263,7 @@ void PointCloud::read_point_clouds() {
                       << std::endl;
         }
 
-        //-- Read building points
+        //- Read explicitly defined building points
         if (!Config::get().buildings_xyz.empty()) {
             std::cout << "Reading building points" << std::endl;
             IO::read_point_cloud(Config::get().buildings_xyz, _pointCloudBuildings);
@@ -253,12 +275,16 @@ void PointCloud::read_point_clouds() {
 }
 
 void PointCloud::add_elevation_point(const LASpoint& laspt, const CGAL::Aff_transformation_3<EPICK>& translate) {
-    Point_set_3 transformPC;
+    int classID = laspt.classification;
     Point_3 pt(laspt.get_x(), laspt.get_y(), laspt.get_z());
-    if (true) {//todo check if class belongs to the terrain
+    std::vector<int> classList = Config::get().las_classes_ground;
+    if (std::find(classList.begin(), classList.end(), classID)
+                  != classList.end()) {
         _pointCloudTerrain.insert(pt.transform(translate));
     }
-    if (true) {// todo check if the class belong to building
+    classList = Config::get().las_classes_building;
+    if (std::find(classList.begin(), classList.end(), classID)
+        != classList.end()) {
         _pointCloudBuildings.insert(pt.transform(translate));
     }
 }
