@@ -178,7 +178,7 @@ void PointCloud::read_point_clouds() {
                 }
 
                 //-- Read defined classes or use CSF to determine ground from non-ground
-                if (!Config::get().las_classes_ground.empty() ||
+                if (!Config::get().las_classes_ground.empty() &&
                     !Config::get().las_classes_building.empty()) {
                     std::cout << "    Reading LAS classes: ";
                     for (int i : Config::get().las_classes_ground) {
@@ -212,40 +212,75 @@ void PointCloud::read_point_clouds() {
                         }
                         i++;
                     }
+                    IO::print_progress_bar(100);
+                    std::clog << std::endl;
+
+                    lasreader->close();
                 } else { //todo implement CSF here
+                    std::cout << "    No point cloud classification information given. "
+                            << "Will filter ground using the Cloth Simulation Filter" << std::endl;
+                    CSF csf;
+                    //todo csf params setting
+                    csf.params.bSloopSmooth = true;
+                    csf.params.class_threshold = 0.5;
+                    csf.params.cloth_resolution = 2;
+                    csf.params.interations = 500;
+                    csf.params.rigidness = 3;
+                    csf.params.time_step = 0.65;
+                    //-- Read the data
+                    int i = 0;
+                    double currPercent = 0.;
+                    IO::print_progress_bar(0);
                     while (lasreader->read_point()) {
                         LASpoint const& p = lasreader->point;
                         //-- set the thinning filter
-                        //todo this commented part replace with CSF implementation
-                        /*
-                        if (i % pointFile.thinning == 0) {//todo sort out thinning
+                        if (currPercent >= 1.) {
                             //-- set the classification filter
-                            if (std::find(usedClasses.begin(), usedClasses.end(), (int) p.classification)
-                                != usedClasses.end()) {
-                                //-- set the bounds filter
-//                            if (this->check_bounds(p.X, p.X, p.Y, p.Y)) {
-                                this->add_elevation_point(p, translate);
-//                            }
-                            }
+                            this->add_elevation_point_to_csf(p, translate, csf);
+
+                            ++readPts;
+                            currPercent -= 1.;
+                        } else {
+                            currPercent += percentLeft;
                         }
-                        if (i % (pointCount / 200) == 0)
+                        if (i % (pointCount / 200) == 0) {
                             IO::print_progress_bar(100 * (i / double(pointCount)));
+                        }
                         i++;
-                         */
+                    }
+                    IO::print_progress_bar(100);
+                    std::clog << std::endl;
+                    std::clog << "DEBUG: Points read: " << readPts << "\n" << std::endl;
+
+                    lasreader->close();
+
+                    //-- Perform CS filtering
+                    std::cout << "    Applying CSF to the point cloud" << std::endl;
+                    std::vector<int> groundIndices, offGroundIndices;
+                    csf.do_filtering(groundIndices, offGroundIndices, false);
+
+                    //-- Add points to point clouds
+                    for (auto idx : groundIndices) {
+                        Point_3 pt(csf.getPointCloud().at(idx).x,
+                                   csf.getPointCloud().at(idx).z,
+                                   -csf.getPointCloud().at(idx).y);
+                        _pointCloudTerrain.insert(pt);
+                    }
+                    for (auto idx : offGroundIndices) {
+                        Point_3 pt(csf.getPointCloud().at(idx).x,
+                                   csf.getPointCloud().at(idx).z,
+                                   -csf.getPointCloud().at(idx).y);
+                        _pointCloudBuildings.insert(pt);
                     }
                 }
-                IO::print_progress_bar(100);
-                std::clog << std::endl;
-
+                std::clog << "Points read: " << readPts << "\n" << std::endl;
                 _pointCloudTerrain.add_property_map<bool>("is_building_point", false);
-                lasreader->close();
             }
             catch (std::exception& e) {
                 if (lasreader != nullptr) lasreader->close();
                 throw;
             }
         }
-        std::clog << "Points read: " << readPts << "\n" << std::endl;
     } else {
         //-- Second input option is to explicitly define ground and/or building points
         //- Read explicitly defined ground points
@@ -287,6 +322,14 @@ void PointCloud::add_elevation_point(const LASpoint& laspt, const CGAL::Aff_tran
         != classList.end()) {
         _pointCloudBuildings.insert(pt.transform(translate));
     }
+}
+
+void PointCloud::add_elevation_point_to_csf(const LASpoint& laspt,
+                                            const CGAL::Aff_transformation_3<EPICK>& translate,
+                                            CSF& csf) {
+    Point_3 pt(laspt.get_x(), laspt.get_y(), laspt.get_z());
+    pt = pt.transform(translate);
+    csf.addPoint(pt.x(), pt.y(), pt.z());
 }
 
 /*
