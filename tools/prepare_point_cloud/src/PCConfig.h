@@ -137,22 +137,23 @@ public:
     };
 
     void set_config(nlohmann::json& j) {
-        if (j.contains("point_clouds")) {//todo schema for all of this stuff
-            if (j["point_clouds"].contains("las_datasets")) {
-                for (std::string filename : j["point_clouds"]["las_datasets"]["files"]) {
-                    las_files.push_back(filename);
-                }
-                if (j["point_clouds"]["las_datasets"].contains("ground_classes")) {
-                    for (int classID: j["point_clouds"]["las_datasets"]["ground_classes"]) {
-                        las_classes_ground.push_back(classID);
-                    }
-                }
-                if (j["point_clouds"]["las_datasets"].contains("building_classes")) {
-                    for (int classID: j["point_clouds"]["las_datasets"]["building_classes"]) {
-                        las_classes_building.push_back(classID);
-                    }
-                }
+        if (j.contains("las_files")) {
+            for (std::string filename: j["las_files"]) {
+                las_files.push_back(filename);
             }
+        }
+        if (j.contains("ground_classes")) {
+            for (int classID: j["ground_classes"]) {
+                las_classes_ground.push_back(classID);
+            }
+        }
+        if (j.contains("building_classes")) {
+            for (int classID: j["building_classes"]) {
+                las_classes_building.push_back(classID);
+            }
+        }
+        if (j.contains("thinning")) {
+            pointCloudThinning = j["thinning"];
         }
     };
 };

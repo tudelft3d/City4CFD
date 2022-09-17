@@ -34,7 +34,7 @@ if (CGAL_FOUND)
 endif ()
 
 # OpenMP
-find_package(OpenMP)
+#find_package(OpenMP)
 
 # Third-party
 add_subdirectory(${CMAKE_SOURCE_DIR}/thirdparty/LAStools)
@@ -42,6 +42,9 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/thirdparty/CSF/src)
 include_directories(${CMAKE_SOURCE_DIR}/thirdparty)
 include_directories(${CMAKE_SOURCE_DIR}/thirdparty/valijson)
 include_directories(${Boost_INCLUDE_DIR})
+
+# Tools
+add_subdirectory(${CMAKE_SOURCE_DIR}/tools/prepare_point_cloud)
 
 # Creating entries for target: City4CFD
 FILE(GLOB SRC_FILES "src/*.cpp")
@@ -59,7 +62,6 @@ target_link_libraries(city4cfd
         ${Boost_LOCALE_LIBRARY}
         LASlib
         CSF
-        OpenMP::OpenMP_CXX
         )
 
 install(TARGETS city4cfd DESTINATION bin)

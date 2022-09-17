@@ -46,12 +46,16 @@
 #include <math.h>
 #include <vector>
 #include <iostream>
-#include <omp.h>
 #include <sstream>
 #include <list>
 #include <cmath>
 #include <string>
 #include <queue>
+#ifdef _OPENMP
+  #include <omp.h>
+#else
+  #define omp_get_thread_num() 0
+#endif
 
 #include "Vec3.h"
 #include "Particle.h"

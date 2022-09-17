@@ -250,7 +250,6 @@ void PointCloud::read_point_clouds() {
                     }
                     IO::print_progress_bar(100);
                     std::clog << std::endl;
-                    std::clog << "DEBUG: Points read: " << readPts << "\n" << std::endl;
 
                     lasreader->close();
 

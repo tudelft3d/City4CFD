@@ -7,18 +7,14 @@ set(CMAKE_BUILD_TYPE "Release")
 #    cmake_policy(SET CMP0003 NEW)
 #endif()
 
-# OpenMP
-find_package(OpenMP)
-
 # Creating entries for target: City4CFD
-add_executable(city4cfd_prepare_point_cloud src/city4cfd_prepare_point_cloud.cpp)
+add_executable(city4cfd_pcprep src/city4cfd_pcprep.cpp)
 
-target_link_libraries(city4cfd_prepare_point_cloud
+target_link_libraries(city4cfd_pcprep
         LASlib
         CSF
-        OpenMP::OpenMP_CXX
         ${Boost_FILESYSTEM_LIBRARY}
         ${Boost_LOCALE_LIBRARY}
         )
 
-install(TARGETS city4cfd_prepare_point_cloud DESTINATION bin)
+install(TARGETS city4cfd_pcprep DESTINATION bin)
