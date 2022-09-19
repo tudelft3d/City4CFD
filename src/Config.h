@@ -55,11 +55,8 @@ public:
                     nlohmann::json& j);
 
     //-- Input info
-    std::vector<std::string> las_files;              // LAS point cloud
-    std::vector<int>         las_classes_ground;     // LAS classes used by terrain
-    std::vector<int>         las_classes_building;   // LAS classes used by buildings
-    std::string              ground_xyz;             // Ground explicit
-    std::string              buildings_xyz;          // Buildings explicit
+    std::string              ground_xyz;             // Ground points
+    std::string              buildings_xyz;          // Building points
     std::string              gisdata;                // Building Polygons
     std::vector<std::string> topoLayers = {};        // Other polygons
     std::string              importedBuildingsPath;  // Additional pre-reconstructed buildings

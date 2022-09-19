@@ -33,9 +33,6 @@ if (CGAL_FOUND)
     endif ()
 endif ()
 
-# OpenMP
-#find_package(OpenMP)
-
 # Third-party
 add_subdirectory(${CMAKE_SOURCE_DIR}/thirdparty/LAStools)
 add_subdirectory(${CMAKE_SOURCE_DIR}/thirdparty/CSF/src)
@@ -61,7 +58,6 @@ target_link_libraries(city4cfd
         ${Boost_FILESYSTEM_LIBRARY}
         ${Boost_LOCALE_LIBRARY}
         LASlib
-        CSF
         )
 
 install(TARGETS city4cfd DESTINATION bin)

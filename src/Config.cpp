@@ -81,25 +81,9 @@ void Config::validate(nlohmann::json& j) {
 
 void Config::set_config(nlohmann::json& j) {
     //-- Point cloud configuration
-    if (j.contains("point_clouds")) {//todo schema for all of this stuff
-        if (j["point_clouds"].contains("las_datasets")) {
-            for (std::string filename : j["point_clouds"]["las_datasets"]["files"]) {
-                las_files.push_back(filename);
-            }
-            if (j["point_clouds"]["las_datasets"].contains("ground_classes")) {
-                for (int classID: j["point_clouds"]["las_datasets"]["ground_classes"]) {
-                    las_classes_ground.push_back(classID);
-                }
-            }
-            if (j["point_clouds"]["las_datasets"].contains("building_classes")) {
-                for (int classID: j["point_clouds"]["las_datasets"]["building_classes"]) {
-                    las_classes_building.push_back(classID);
-                }
-            }
-        } else {
-            if (j["point_clouds"].contains("ground")) ground_xyz = j["point_clouds"]["ground"];
-            if (j["point_clouds"].contains("buildings")) buildings_xyz = j["point_clouds"]["buildings"];
-        }
+    if (j.contains("point_clouds")) {
+        if (j["point_clouds"].contains("ground")) ground_xyz = j["point_clouds"]["ground"];
+        if (j["point_clouds"].contains("buildings")) buildings_xyz = j["point_clouds"]["buildings"];
     }
 
     //-- Additional geometries

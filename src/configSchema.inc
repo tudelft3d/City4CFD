@@ -44,6 +44,7 @@ namespace jsonschema {
           "properties": {
             "las_datasets": {
               "description": "Schema that deals with import of LAS/LAZ tiles",
+              "description": "Depreciated, but keeping the schema for now",
               "type": "object",
               "properties": {
                 "files": {

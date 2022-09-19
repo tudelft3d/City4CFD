@@ -34,6 +34,7 @@
 
 //todo: LAS/LAZ output?
 //      Outlier and vegetation filter
+//      Add BBOX
 
 #include <iostream>
 #include <chrono>
@@ -229,7 +230,7 @@ int main(int argc, char** argv) {
                 std::cout << "    No point cloud classification information given. "
                           << "Will filter ground using the Cloth Simulation Filter" << std::endl;
                 CSF csf;
-                //todo csf params setting
+                //-- Hardcoded CSF parameters
                 csf.params.bSloopSmooth = true;
                 csf.params.class_threshold = 0.5;
                 csf.params.cloth_resolution = 2;

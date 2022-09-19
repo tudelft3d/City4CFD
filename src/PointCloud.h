@@ -48,9 +48,6 @@ public:
     void flatten_polygon_pts(const PolyFeatures& lsFeatures);
     SearchTreePtr make_search_tree_buildings();
     void read_point_clouds();
-    void add_elevation_point(const LASpoint& laspt, const CGAL::Aff_transformation_3<EPICK>& translate);
-    void add_elevation_point_to_csf(const LASpoint& laspt, const CGAL::Aff_transformation_3<EPICK>& translate, CSF& csf);
-//    bool check_bounds(const double xmin, const double xmax, const double ymin, const double ymax);
 
     Point_set_3& get_terrain();
     Point_set_3& get_buildings();
