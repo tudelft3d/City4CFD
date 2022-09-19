@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+### Added
+- Point cloud preparation tool city4cfd_prep
+### Removed
+- Previous point cloud preparation script
+
 ## [0.1.2] - 2022-09-13
 ### Improved
 - Bad triangles handling
