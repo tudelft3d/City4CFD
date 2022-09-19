@@ -28,6 +28,10 @@
 #ifndef CITY4CFD_PCCONFIG_H
 #define CITY4CFD_PCCONFIG_H
 
+#include <iostream>
+#include <fstream>
+#include <string>
+
 #include "boost/filesystem.hpp"
 
 #include "valijson/adapters/nlohmann_json_adapter.hpp"

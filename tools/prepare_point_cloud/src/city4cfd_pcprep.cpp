@@ -36,7 +36,6 @@
 //      Outlier and vegetation filter
 //      Add BBOX
 
-#include <iostream>
 #include <chrono>
 #include <boost/locale.hpp>
 
