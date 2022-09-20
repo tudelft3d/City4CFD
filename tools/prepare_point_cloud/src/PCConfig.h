@@ -60,16 +60,21 @@ protected:
 
 public:
     //-- Input 
-    std::vector<std::string> las_files;              // LAS point cloud
-    std::vector<int>         las_classes_ground;     // LAS classes used by terrain
-    std::vector<int>         las_classes_building;   // LAS classes used by buildings
-    
+    std::vector<std::string> las_files;                  // LAS point cloud
+    std::vector<int>         las_classes_ground;         // LAS classes used by terrain
+    std::vector<int>         las_classes_building;       // LAS classes used by buildings
+    double                   xmin                 = 0.;
+    double                   xmax                 = 0.;
+    double                   ymin                 = 0.;
+    double                   ymax                 = 0.;
+    double                   pointCloudThinning   = 0.;
+
     //-- Output
     fs::path                  workDir;
-    fs::path                  outputDir         = fs::current_path();
+    fs::path                  outputDir           = fs::current_path();
 
     //-- Other settings
-    double    pointCloudThinning                   = 0.;
+    bool checkBbox                                = false;
 
     //== Public functions
     void read_config(std::string& config_path) {
@@ -155,6 +160,13 @@ public:
             for (int classID: j["building_classes"]) {
                 las_classes_building.push_back(classID);
             }
+        }
+        if (j.contains("bbox")) {
+            xmin = j["bbox"][0];
+            ymin = j["bbox"][1];
+            xmax = j["bbox"][2];
+            ymax = j["bbox"][3];
+            checkBbox = true;
         }
         if (j.contains("thinning")) {
             pointCloudThinning = j["thinning"];

@@ -34,10 +34,10 @@
 
 //todo: LAS/LAZ output?
 //      Outlier and vegetation filter
-//      Add BBOX
 
 #include <chrono>
 #include <boost/locale.hpp>
+#include <iomanip>
 
 #include "lasreader.hpp"
 #include "CSF/src/CSF.h"
@@ -112,14 +112,23 @@ void print_progress_bar(int percent) {
     std::clog << percent << "%     " << std::flush;
 }
 
+bool inBbox(const LASpoint& pt) {
+    double ptx = pt.get_x();
+    double pty = pt.get_y();
+    if (ptx > Config::get().xmin && ptx < Config::get().xmax &&
+        pty > Config::get().ymin && pty < Config::get().ymax) {
+        return true;
+    }
+    return false;
+}
+
 void outputPts(const std::vector<Point>& pts, const std::string& filename) {
-    //todo set precision
     std::cout << "Outputting " << filename << std::endl;
 
     std::ofstream of;
     of.open(filename.c_str());
     for (auto& pt : pts) {
-        of << pt[0] << " " << pt[1] << " " << pt[2] << std::endl;
+        of << pt[0] << " " << pt[1] << " " << pt[2] << std::setprecision(16) << std::endl;
     }
     of.close();
 }
@@ -188,12 +197,18 @@ int main(int argc, char** argv) {
                 }
                 std::cout << "(buildings)" << std::endl;
 
-                int i = 0;
-                double currPercent = 0.;
+                int i = -1;
+                double currPercent = 1.01;
                 print_progress_bar(0);
                 while (lasreader->read_point()) {
+                    if (++i % (pointCount / 200) == 0) {
+                        print_progress_bar(100 * (i / double(pointCount)));
+                    }
+
                     LASpoint const& p = lasreader->point;
                     if (p.return_number != p.number_of_returns) continue;
+                    if (Config::get().checkBbox)
+                        if (!inBbox(p)) continue;
                     //-- set the thinning filter
                     if (currPercent >= 1.) {
                         //-- add the point to the point cloud
@@ -213,13 +228,8 @@ int main(int argc, char** argv) {
                         }
                         if (isRead) ++readPts;
                         currPercent -= 1.;
-                    } else {
-                        currPercent += percentLeft;
                     }
-                    if (i % (pointCount / 200) == 0) {
-                        print_progress_bar(100 * (i / double(pointCount)));
-                    }
-                    i++;
+                    currPercent += percentLeft;
                 }
                 print_progress_bar(100);
                 std::clog << std::endl;
@@ -243,12 +253,18 @@ int main(int argc, char** argv) {
                                      (header.max_z + header.min_z / 2)};
 
                 //-- Read the data
-                int i = 0;
+                int i = -1;
                 double currPercent = 0.;
                 print_progress_bar(0);
                 while (lasreader->read_point()) {
+                    if (++i % (pointCount / 200) == 0) {
+                        print_progress_bar(100 * (i / double(pointCount)));
+                    }
+
                     LASpoint const& p = lasreader->point;
                     if (p.return_number != p.number_of_returns) continue;
+                    if (Config::get().checkBbox)
+                        if (!inBbox(p)) continue;
                     //-- set the thinning filter
                     if (currPercent >= 1.) {
                         //-- Add directly to CSF's data structure
@@ -258,13 +274,8 @@ int main(int argc, char** argv) {
 
                         ++readPts;
                         currPercent -= 1.;
-                    } else {
-                        currPercent += percentLeft;
                     }
-                    if (i % (pointCount / 200) == 0) {
-                        print_progress_bar(100 * (i / double(pointCount)));
-                    }
-                    i++;
+                    currPercent += percentLeft;
                 }
                 print_progress_bar(100);
                 std::clog << std::endl;
@@ -288,8 +299,8 @@ int main(int argc, char** argv) {
                                           -csf.getPointCloud().at(idx).y + translatePt[2]});
                 }
             }
-            std::clog << "\nPoints read: " << readPts << "\n" << std::endl;
         }
+        std::clog << "\nPoints read: " << readPts << "\n" << std::endl;
 
         //-- Output points to respective files
         //- Output ground

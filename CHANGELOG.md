@@ -2,7 +2,7 @@
 
 ## [Unreleased]
 ### Added
-- Point cloud preparation tool city4cfd_prep
+- Point cloud preparation tool city4cfd_pcprep
 ### Removed
 - Previous point cloud preparation script
 

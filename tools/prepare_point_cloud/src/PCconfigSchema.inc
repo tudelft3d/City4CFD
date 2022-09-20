@@ -55,6 +55,21 @@ namespace jsonschema {
           "items": {
             "type": "number"
           }
+        },
+        "bbox": {
+          "description": "Optional: set the bounding box",
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {
+            "type": "number"
+          }
+        },
+        "thinning": {
+          "description": "Optional: Random thinning",
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMaximum": 100
         }
       },
       "required": [ "las_files" ]
