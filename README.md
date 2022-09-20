@@ -41,7 +41,22 @@ The following libraries are required to build the project:
 - [CGAL](https://www.cgal.org/) version 5
 - Boost >= 1.66
 
-Both dependencies are generally available in Linux distributions (Debian/Ubuntu/Mint) as *libcgal-dev* and *libboost-dev*, and in macOS with Homebrew as *cgal* and *boost*.
+*OpenMP* is an optional dependency.
+
+All dependencies are generally available in Linux distributions, e.g. in Debian/Ubuntu/Mint:
+```
+sudo apt-get install libcgal-dev libboost-all-dev libomp-dev
+```
+
+In macOS you can install dependencies with Homebrew:
+
+```
+brew install cmake
+brew install boost
+brew install cgal
+brew install libomp
+```
+
 The project uses CMake to generate makefiles, so make sure it is also installed.
 
 To build City4CFD, do the following:
