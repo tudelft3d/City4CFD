@@ -51,10 +51,7 @@ sudo apt-get install libcgal-dev libboost-all-dev libomp-dev
 In macOS you can install dependencies with Homebrew:
 
 ```
-brew install cmake
-brew install boost
-brew install cgal
-brew install libomp
+brew install cmake boost cgal libomp
 ```
 
 The project uses CMake to generate makefiles, so make sure it is also installed.
