@@ -66,7 +66,7 @@ make
 You can speed up compilation by typing *make -j $numcores* where *$numcores* is the number of threads you can spare for compilation.
 
 ### Docker
-We offer built [Docker](https://www.docker.com/) images for every release, available at the [Docker Hub](https://hub.docker.com/r/tudelft3d/city4cfd). Running the docker script for the first time will pull the docker image from the Docker Hub repository.
+We offer built [Docker](https://www.docker.com/) images for every release, available at the [Docker Hub](https://hub.docker.com/r/tudelft3d/city4cfd). Running [the docker script](https://github.com/tudelft3d/City4CFD/tree/main/docker/run) for the first time will pull the docker image from the Docker Hub repository.
 
 ### macOS
 Mac users can install City4CFD through Homebrew:
