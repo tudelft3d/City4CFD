@@ -11,4 +11,5 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential    \
     cmake              \
     libboost-all-dev   \
-    libcgal-dev  
+    libcgal-dev        \
+    libomp-dev

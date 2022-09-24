@@ -32,6 +32,8 @@
 #include "Config.h"
 #include "PolyFeature.h"
 
+#include <boost/locale.hpp>
+
 PointCloud::PointCloud()  = default;
 PointCloud::~PointCloud() = default;
 
@@ -133,20 +135,21 @@ SearchTreePtr PointCloud::make_search_tree_buildings() {
 }
 
 void PointCloud::read_point_clouds() {
-    //-- Read ground points
-    if (!Config::get().points_xyz.empty()) {
+    //- Read ground points
+    if (!Config::get().ground_xyz.empty()) {
         std::cout << "Reading ground points" << std::endl;
-        IO::read_point_cloud(Config::get().points_xyz, _pointCloudTerrain);
-        _pointCloudTerrain.add_property_map<bool> ("is_building_point", false);
+        IO::read_point_cloud(Config::get().ground_xyz, _pointCloudTerrain);
+        _pointCloudTerrain.add_property_map<bool>("is_building_point", false);
 
         std::cout << "    Points read: " << _pointCloudTerrain.size() << std::endl;
     } else {
         std::cout << "INFO: Did not find any ground points! Will calculate ground as a flat surface." << std::endl;
         std::cout << "WARNING: Ground height of buildings can only be approximated. "
-                  << "If you are using point cloud to reconstruct buildings, building height estimation can be wrong.\n" << std::endl;
+                  << "If you are using point cloud to reconstruct buildings, building height estimation can be wrong.\n"
+                  << std::endl;
     }
 
-    //-- Read building points
+    //- Read building points
     if (!Config::get().buildings_xyz.empty()) {
         std::cout << "Reading building points" << std::endl;
         IO::read_point_cloud(Config::get().buildings_xyz, _pointCloudBuildings);

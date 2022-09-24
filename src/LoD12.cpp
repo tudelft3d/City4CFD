@@ -43,7 +43,7 @@ LoD12::LoD12(const Polygon_with_holes_2& poly,
 void LoD12::lod12_calc_height(double& height) {
     _height = geomutils::percentile(_buildingPts, Config::get().buildingPercentile);
     //-- In case of flat terrain
-    if (Config::get().points_xyz.empty()) {
+    if (Config::get().ground_xyz.empty()) {
         double baseHeight = geomutils::percentile(_buildingPts, 0);
         _height -= baseHeight;
     }

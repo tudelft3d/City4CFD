@@ -1,0 +1,9 @@
+{
+  "las_files":
+  [
+      "points_transferred.laz"
+  ],
+  "ground_classes": [2, 9],
+  "building_classes": [6],
+  "thinning": 99
+}

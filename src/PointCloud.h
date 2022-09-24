@@ -31,6 +31,9 @@
 #include "types.h"
 #include "CGALTypes.h"
 
+#include "lasreader.hpp"
+#include "CSF/src/CSF.h"
+
 typedef std::shared_ptr<SearchTree> SearchTreePtr;
 
 class PointCloud {

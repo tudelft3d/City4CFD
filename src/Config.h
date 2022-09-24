@@ -55,8 +55,8 @@ public:
                     nlohmann::json& j);
 
     //-- Input info
-    std::string              points_xyz;             // Ground
-    std::string              buildings_xyz;          // Buildings
+    std::string              ground_xyz;             // Ground points
+    std::string              buildings_xyz;          // Building points
     std::string              gisdata;                // Building Polygons
     std::vector<std::string> topoLayers = {};        // Other polygons
     std::string              importedBuildingsPath;  // Additional pre-reconstructed buildings

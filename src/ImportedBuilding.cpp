@@ -253,7 +253,7 @@ void ImportedBuilding::reconstruct() {
         this->translate_footprint(-5);
     }
     //-- Adjust building height points
-    if (!_trueHeight || Config::get().points_xyz.empty()) {
+    if (!_trueHeight || Config::get().ground_xyz.empty()) {
         Vector_3 movePt(0, 0, _avgFootprintHeight);
         std::vector<int> checkedPt;
         for (auto& faces : geometry["boundaries"].front()) {

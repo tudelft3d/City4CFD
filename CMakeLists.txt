@@ -14,7 +14,7 @@ set(CMAKE_BUILD_TYPE "Release")
 #endif()
 
 # BOOST
-find_package(Boost 1.66 REQUIRED COMPONENTS filesystem)
+find_package(Boost 1.66 REQUIRED COMPONENTS filesystem locale)
 
 # CGAL
 find_package(CGAL REQUIRED QUIET COMPONENTS)
@@ -35,9 +35,13 @@ endif ()
 
 # Third-party
 add_subdirectory(${CMAKE_SOURCE_DIR}/thirdparty/LAStools)
+add_subdirectory(${CMAKE_SOURCE_DIR}/thirdparty/CSF/src)
 include_directories(${CMAKE_SOURCE_DIR}/thirdparty)
 include_directories(${CMAKE_SOURCE_DIR}/thirdparty/valijson)
 include_directories(${Boost_INCLUDE_DIR})
+
+# Tools
+add_subdirectory(${CMAKE_SOURCE_DIR}/tools/prepare_point_cloud)
 
 # Creating entries for target: City4CFD
 FILE(GLOB SRC_FILES "src/*.cpp")
@@ -52,6 +56,7 @@ target_link_libraries(city4cfd
         ${CGAL_3RD_PARTY_LIBRARIES}
         ${Boost_SYSTEM_LIBRARY}
         ${Boost_FILESYSTEM_LIBRARY}
+        ${Boost_LOCALE_LIBRARY}
         LASlib
         )
 

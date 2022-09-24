@@ -80,10 +80,9 @@ void Config::validate(nlohmann::json& j) {
 }
 
 void Config::set_config(nlohmann::json& j) {
-    //-- Schema validation
-    //-- Path to point cloud(s)
+    //-- Point cloud configuration
     if (j.contains("point_clouds")) {
-        if (j["point_clouds"].contains("ground")) points_xyz = j["point_clouds"]["ground"];
+        if (j["point_clouds"].contains("ground")) ground_xyz = j["point_clouds"]["ground"];
         if (j["point_clouds"].contains("buildings")) buildings_xyz = j["point_clouds"]["buildings"];
     }
 
@@ -143,7 +142,7 @@ void Config::set_config(nlohmann::json& j) {
     }
     outputSurfaces.emplace_back("Top");
 
-    //-- Path to polygons
+    //-- Polygon configuration
     int i = 0;
     int surfLayerIdx = outputSurfaces.size(); // 0 - terrain, 1 - buildings, surface layers start from 2
     for (auto& poly : j["polygons"]) {
