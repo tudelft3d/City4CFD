@@ -25,7 +25,7 @@ If you happen to use it, feedback is very much appreciated.
 City4CFD is developed by the [3D Geoinformation Research Group](https://3d.bk.tudelft.nl/) at the Delft University of Technology.
 
 ## Data formats
-**Point clouds** can be imported in LAS/LAZ, XYZ, or PLY format. We ask separately for ground and building points. While some datasets contain building-ground classification, some do not. Our [point cloud preparation tool](https://github.com/ipadjen/City4CFD_doc/wiki/Point-clouds#automatic-preparation) can extract ground and building points from user-defined classes, or use the [Cloth Simulation Filter](http://ramm.bnu.edu.cn/projects/CSF/) to separate the ground and non-ground points. If you would like to check your points, see if they are classified or even conduct the filtering and classification yourself, we suggest you use [CloudCompare](https://www.danielgm.net/cc/).
+**Point clouds** can be imported in LAS/LAZ, TXT/XYZ, or PLY format. We ask separately for ground and building points. While some datasets contain building-ground classification, some do not. Our [point cloud preparation tool](https://github.com/ipadjen/City4CFD_doc/wiki/Point-clouds#automatic-preparation) can extract ground and building points from user-defined classes, or use the [Cloth Simulation Filter](http://ramm.bnu.edu.cn/projects/CSF/) to separate the ground and non-ground points. If you would like to check your points, see if they are classified or even conduct the filtering and classification yourself, we suggest you use [CloudCompare](https://www.danielgm.net/cc/).
 
 **2D data** (polygons) are imported in GeoJSON format. For all pre-processing related to polygons, including conversion to GeoJSON, you can use [QGIS](https://qgis.org/en/site/).
 
@@ -41,7 +41,19 @@ The following libraries are required to build the project:
 - [CGAL](https://www.cgal.org/) version 5
 - Boost >= 1.66
 
-Both dependencies are generally available in Linux distributions (Debian/Ubuntu/Mint) as *libcgal-dev* and *libboost-dev*, and in macOS with Homebrew as *cgal* and *boost*.
+*OpenMP* is an optional dependency.
+
+All dependencies are generally available in Linux distributions, e.g. in Debian/Ubuntu/Mint:
+```
+sudo apt-get install libcgal-dev libboost-all-dev libomp-dev
+```
+
+In macOS you can install dependencies with Homebrew:
+
+```
+brew install cmake boost cgal libomp
+```
+
 The project uses CMake to generate makefiles, so make sure it is also installed.
 
 To build City4CFD, do the following:
@@ -54,7 +66,7 @@ make
 You can speed up compilation by typing *make -j $numcores* where *$numcores* is the number of threads you can spare for compilation.
 
 ### Docker
-We offer built [Docker](https://www.docker.com/) images for every release, available at the [Docker Hub](https://hub.docker.com/r/tudelft3d/city4cfd). Running the docker script for the first time will pull the docker image from the Docker Hub repository.
+We offer built [Docker](https://www.docker.com/) images for every release, available at the [Docker Hub](https://hub.docker.com/r/tudelft3d/city4cfd). Running [the docker script](https://github.com/tudelft3d/City4CFD/tree/main/docker/run) for the first time will pull the docker image from the Docker Hub repository.
 
 ### macOS
 Mac users can install City4CFD through Homebrew:
