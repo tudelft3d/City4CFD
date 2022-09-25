@@ -40,18 +40,19 @@ You can directly compile City4CFD on your system using cmake, run it through a D
 The following libraries are required to build the project:
 - [CGAL](https://www.cgal.org/) version 5
 - Boost >= 1.66
+- Eigen >= 3.2
 
 *OpenMP* is an optional dependency.
 
 All dependencies are generally available in Linux distributions, e.g. in Debian/Ubuntu/Mint:
 ```
-sudo apt-get install libcgal-dev libboost-all-dev libomp-dev
+sudo apt-get install libcgal-dev libboost-all-dev libeigen3-dev libomp-dev
 ```
 
 In macOS you can install dependencies with Homebrew:
 
 ```
-brew install cmake boost cgal libomp
+brew install cmake boost cgal eigen libomp
 ```
 
 The project uses CMake to generate makefiles, so make sure it is also installed.

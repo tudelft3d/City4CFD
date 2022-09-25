@@ -33,6 +33,9 @@
 #include "PolyFeature.h"
 
 #include <boost/locale.hpp>
+#include <CGAL/Polygon_mesh_processing/remesh.h>
+#include <CGAL/Polygon_mesh_processing/repair.h>
+#include <CGAL/Polygon_mesh_processing/smooth_shape.h>
 
 PointCloud::PointCloud()  = default;
 PointCloud::~PointCloud() = default;
@@ -46,6 +49,40 @@ void PointCloud::random_thin_pts() {
         _pointCloudTerrain.collect_garbage();
         std::cout << "    Terrain points after thinning: " << _pointCloudTerrain.size() << std::endl;
     }
+}
+
+void PointCloud::prep_terrain() {
+    //-- Create CDT of current terrain pts
+    DT dt;
+    dt.insert(_pointCloudTerrain.points().begin(), _pointCloudTerrain.points().end());
+
+    //-- Make a mesh out of DT
+    Mesh mesh;
+    geomutils::dt_to_mesh(dt, mesh);
+
+    //-- Isotropic remeshing
+    const double target_edge_length = 0; //5;
+    const unsigned int nb_iter =  10;   //30;
+
+    PMP::remove_degenerate_faces(mesh);
+    PMP::isotropic_remeshing(faces(mesh), target_edge_length, mesh,
+                             PMP::parameters::number_of_iterations(nb_iter)
+                                     );
+
+    //-- Smoothing
+    const unsigned int nb_iterations =  100; //100
+    const double time = 0.1;  //0.1
+    PMP::smooth_shape(mesh, time, CGAL::parameters::number_of_iterations(nb_iterations));
+//    PMP::isotropic_remeshing(faces(mesh), target_edge_length, mesh,
+//                             PMP::parameters::number_of_iterations(nb_iter)
+//                                     );
+
+    //-- Mesh back to points
+    _pointCloudTerrain.clear();
+    for (auto& pt : mesh.points()) {
+        _pointCloudTerrain.insert(pt);
+    }
+    _pointCloudTerrain.add_property_map<bool> ("is_building_point", false);
 }
 
 void PointCloud::smooth_terrain() {

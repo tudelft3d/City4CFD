@@ -33,6 +33,10 @@ if (CGAL_FOUND)
     endif ()
 endif ()
 
+# Eigen
+find_package(Eigen3 3.2.0) #(requires 3.2.0 or greater)
+include(${CMAKE_SOURCE_DIR}/thirdparty/CGAL/cmake/CGAL_Eigen3_support.cmake)
+
 # Third-party
 add_subdirectory(${CMAKE_SOURCE_DIR}/thirdparty/LAStools)
 add_subdirectory(${CMAKE_SOURCE_DIR}/thirdparty/CSF/src)
@@ -58,6 +62,7 @@ target_link_libraries(city4cfd
         ${Boost_FILESYSTEM_LIBRARY}
         ${Boost_LOCALE_LIBRARY}
         LASlib
+        CGAL::Eigen3_support
         )
 
 install(TARGETS city4cfd DESTINATION bin)
