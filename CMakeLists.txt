@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.1)
 
 project(city4cfd)
 
-#set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/Modules/" ${CMAKE_MODULE_PATH})
 #set( CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS true )
 
 set(CMAKE_CXX_FLAGS "-O3")

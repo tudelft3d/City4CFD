@@ -56,7 +56,7 @@ void Terrain::set_cdt(const Point_set_3& pointCloud) {
     IO::print_progress_bar(100); std::clog << std::endl;
     std::cout << "    Triangulating..." << std::flush;
     _cdt.insert(pts.begin(), pts.end());
-    std::cout << "\r    Triangulating   " << std::endl;
+    std::cout << "\r    Triangulating...done" << std::endl;
 
     /*
     //-- Smoothing

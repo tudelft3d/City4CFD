@@ -187,7 +187,6 @@ void Map3d::set_features() {
 //        geomutils::smooth_dt<DT, EPICK>(_pointCloud.get_terrain(), _dt);
 //        _pointCloud.smooth_terrain();
     }
-    std::cout << "Prepping terrain" << std::endl;
     _pointCloud.prep_terrain();
     //-- Make a DT with inexact constructions for fast interpolation
     _dt.insert(_pointCloud.get_terrain().points().begin(),
