@@ -12,4 +12,5 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     cmake              \
     libboost-all-dev   \
     libcgal-dev        \
+    libeigen3-dev      \
     libomp-dev
