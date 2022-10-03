@@ -181,13 +181,9 @@ void Map3d::set_features() {
     if (Config::get().influRegionConfig.type() == typeid(bool)) _influRegionBPG = true;
     if (Config::get().domainBndConfig.type() == typeid(bool))   _bndBPG = true;
 
-    //! temp
-    //-- Smooth terrain
     if (Config::get().smoothTerrain) {
-//        geomutils::smooth_dt<DT, EPICK>(_pointCloud.get_terrain(), _dt);
-//        _pointCloud.smooth_terrain();
+        _pointCloud.smooth_terrain();
     }
-    _pointCloud.prep_terrain();
     //-- Make a DT with inexact constructions for fast interpolation
     _dt.insert(_pointCloud.get_terrain().points().begin(),
                _pointCloud.get_terrain().points().end());

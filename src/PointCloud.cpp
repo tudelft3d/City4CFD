@@ -51,16 +51,15 @@ void PointCloud::random_thin_pts() {
     }
 }
 
-void PointCloud::prep_terrain() {
+void PointCloud::smooth_terrain() {
     typedef CGAL::Parallel_if_available_tag Concurrency_tag;
 
-    std::cout << "Prepping terrain" << std::endl;// will become smoothing eventually
+    std::cout << "Smoothing terrain" << std::endl;
 
-    //-- WLOP
-    //todo parameter or hardcoded, max number of points should be limited before smoothing
+    //-- WLOP simplification and regularization
     double retain_percentage = 100;
-    const int maxTerrainPts = 250000; // hardcoded for now for efficiency, should be a parameter too
-    if (_pointCloudTerrain.size() > maxTerrainPts) {
+    int& maxTerrainPts = Config::get().maxSmoothPts;
+    if (maxTerrainPts > 0 && _pointCloudTerrain.size() > maxTerrainPts) {
         retain_percentage = (double)maxTerrainPts / (double)_pointCloudTerrain.size() * 100.;
         std::cout << "    Performing additional (optimized) terrain thinning to " << maxTerrainPts << " points" << std::endl;
     }
@@ -96,9 +95,8 @@ void PointCloud::prep_terrain() {
 
     //-- Smoothing
     std::cout << "\r    Smoothing terrain 3/3..." << std::flush;
-    const unsigned int nb_iterations =  1; // 1-10 //todo this could/should be a parameter
-    const double time = 1;  // 0.1
-    PMP::smooth_shape(mesh, time, CGAL::parameters::number_of_iterations(nb_iterations));
+    const double time = 1;
+    PMP::smooth_shape(mesh, time, CGAL::parameters::number_of_iterations(Config::get().nSmoothIterations));
 
     std::cout << "\r    Smoothing terrain...done" << std::endl;
 
@@ -108,11 +106,9 @@ void PointCloud::prep_terrain() {
         _pointCloudTerrain.insert(pt);
     }
     _pointCloudTerrain.add_property_map<bool> ("is_building_point", false);
-
-//    //todo temp check
-//    std::cout << "Number of new pts: " << _pointCloudTerrain.size() << std::endl;
 }
 
+/* depreciated
 void PointCloud::smooth_terrain() {
     std::cout << "\nSmoothing terrain" << std::endl;
     DT dt(_pointCloudTerrain.points().begin(), _pointCloudTerrain.points().end());
@@ -123,6 +119,7 @@ void PointCloud::smooth_terrain() {
     for (auto& pt : dt.points()) _pointCloudTerrain.insert(pt);
     _pointCloudTerrain.add_property_map<bool> ("is_building_point", false);
 }
+*/
 
 void PointCloud::create_flat_terrain(const PolyFeatures& lsFeatures) {
     std::cout << "\nCreating flat terrain" << std::endl;

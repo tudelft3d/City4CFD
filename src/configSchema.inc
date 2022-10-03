@@ -212,7 +212,17 @@ namespace jsonschema {
         },
         "smooth_terrain": {
           "description": "Optional: Terrain smoothing flag",
-          "type": "boolean"
+          "type": "object",
+          "properties": {
+            "iterations": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "max_pts": {
+              "type": "integer",
+              "exclusiveMinimum": 0
+            }
+          }
         },
         "flat_terrain": {
           "description": "Optional: Force flat terrain",
