@@ -25,7 +25,7 @@ If you happen to use it, feedback is very much appreciated.
 City4CFD is developed by the [3D Geoinformation Research Group](https://3d.bk.tudelft.nl/) at the Delft University of Technology.
 
 ## Data formats
-**Point clouds** can be imported in LAS/LAZ, TXT/XYZ, or PLY format. We ask separately for ground and building points. While some datasets contain building-ground classification, some do not. Our [point cloud preparation tool](https://github.com/ipadjen/City4CFD_doc/wiki/Point-clouds#automatic-preparation) can extract ground and building points from user-defined classes, or use the [Cloth Simulation Filter](http://ramm.bnu.edu.cn/projects/CSF/) to separate the ground and non-ground points. If you would like to check your points, see if they are classified or even conduct the filtering and classification yourself, we suggest you use [CloudCompare](https://www.danielgm.net/cc/).
+**Point clouds** can be imported in LAS/LAZ, TXT/XYZ, or PLY format. We ask separately for ground and building points. While some datasets contain building-ground classification, some do not. Our [point cloud preparation tool](https://github.com/ipadjen/City4CFD_doc/wiki/Point-clouds#automatic-preparation) can extract ground and building points from user-defined classes, or use the [Cloth Simulation Filter](http://ramm.bnu.edu.cn/projects/CSF/) to separate the ground and non-ground points. If you would like to check your points, see if they are classified, or even conduct the filtering and classification yourself, we suggest you use [CloudCompare](https://www.danielgm.net/cc/).
 
 **2D data** (polygons) are imported in GeoJSON format. For all pre-processing related to polygons, including conversion to GeoJSON, you can use [QGIS](https://qgis.org/en/site/).
 
@@ -34,7 +34,7 @@ City4CFD is developed by the [3D Geoinformation Research Group](https://3d.bk.tu
 **Output** is in the following formats: OBJ, STL, and CityJSON. The ID of each polygon is preserved, and there is a 1-to-1 mapping between the input and the output.
 
 ## Installation
-You can directly compile City4CFD on your system using cmake, run it through a Docker container, or install using Homebrew in case of macOS.
+You can directly compile City4CFD on your system using cmake, run it through a Docker container, or install using Homebrew in the case of macOS.
 
 ### Build from source
 The following libraries are required to build the project:
@@ -105,5 +105,5 @@ If you use City4CFD in a scientific context, please cite the following paper:
 Pađen, Ivan, García-Sánchez, Clara and Ledoux, Hugo (2022). Towards Automatic Reconstruction of 3D City Models Tailored for Urban Flow Simulations. *Frontiers in Built Environment*, 8, 2022 [[DOI](https://www.frontiersin.org/articles/10.3389/fbuil.2022.899332)][[BibTeX](https://github.com/tudelft3d/City4CFD/blob/master/CITATION.bib)]
 
 ## Acknowledgements
-We would like to acknowdledge the authors of supporting libraries we use in this project:
+We would like to acknowledge the authors of the supporting libraries we use in this project:
 [CGAL](https://github.com/CGAL/cgal), [CSF](https://github.com/jianboqi/CSF), [nlohmann/json](https://github.com/nlohmann/json), [LAStools](https://github.com/LAStools), [valijson](https://github.com/tristanpenman/valijson)
