@@ -56,15 +56,7 @@ void Terrain::set_cdt(const Point_set_3& pointCloud) {
     IO::print_progress_bar(100); std::clog << std::endl;
     std::cout << "    Triangulating..." << std::flush;
     _cdt.insert(pts.begin(), pts.end());
-    std::cout << "\r    Triangulating   " << std::endl;
-
-    /*
-    //-- Smoothing
-    if (Config::get().smoothTerrain) {
-        std::cout << "\n    Smoothing" << std::endl;
-        geomutils::smooth_dt<CDT, EPECK>(pointCloud, _cdt);
-    }
-   */
+    std::cout << "\r    Triangulating...done" << std::endl;
 }
 
 void Terrain::prep_constraints(const PolyFeatures& features, Point_set_3& pointCloud) {

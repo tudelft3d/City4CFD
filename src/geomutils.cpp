@@ -79,6 +79,26 @@ void geomutils::cdt_to_mesh(CDT& cdt, Mesh& mesh, const int surfaceLayerID) {
         mesh.add_face(mesh_vertex[v1], mesh_vertex[v2], mesh_vertex[v3]);
     }
 }
+
+void geomutils::dt_to_mesh(DT& dt, Mesh& mesh) {
+    std::map<DT::Vertex_handle, int> indices;
+    std::vector<Mesh::vertex_index> mesh_vertex;
+    std::vector<Mesh::face_index> face_index;
+    mesh_vertex.reserve(dt.number_of_vertices());
+    int counter = 0;
+    for (const auto& it : dt.finite_vertex_handles()) {
+        mesh_vertex.emplace_back(mesh.add_vertex(it->point()));
+        //        outstream << it->point() << std::endl;
+        indices.insert(std::pair<DT::Vertex_handle, int>(it, counter++));
+    }
+    for (const auto& it : dt.finite_face_handles()) {
+        int v1 = indices[it->vertex(0)];
+        int v2 = indices[it->vertex(1)];
+        int v3 = indices[it->vertex(2)];
+        mesh.add_face(mesh_vertex[v1], mesh_vertex[v2], mesh_vertex[v3]);
+    }
+}
+
 //-- CGAL's constrained domain marker expanded to mark different polygon types
 void geomutils::mark_domains(CDT& ct,
                              const Face_handle& start,

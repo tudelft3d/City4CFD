@@ -199,8 +199,17 @@ void Config::set_config(nlohmann::json& j) {
     // Terrain
     if (j.contains("terrain_thinning"))
         terrainThinning = j["terrain_thinning"];
-    if (j.contains("smooth_terrain"))
-        smoothTerrain = j["smooth_terrain"];
+    if (j.contains("smooth_terrain")) {
+        if (j["smooth_terrain"].contains("iterations")) {
+            smoothTerrain = true;
+            if ((int)j["smooth_terrain"]["iterations"] > 0) {
+                nSmoothIterations = (int)j["smooth_terrain"]["iterations"];
+            } else { smoothTerrain = false; }
+        }
+        if (j["smooth_terrain"].contains("max_pts")) {
+            maxSmoothPts = (int)j["smooth_terrain"]["max_pts"];
+        } else { smoothTerrain = false; }
+    }
     if (j.contains("flat_terrain"))
         flatTerrain = j["flat_terrain"];
 

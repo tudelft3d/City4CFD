@@ -33,6 +33,9 @@
 #include "PolyFeature.h"
 
 #include <boost/locale.hpp>
+#include <CGAL/Polygon_mesh_processing/remesh.h>
+#include <CGAL/Polygon_mesh_processing/smooth_shape.h>
+#include <CGAL/wlop_simplify_and_regularize_point_set.h>
 
 PointCloud::PointCloud()  = default;
 PointCloud::~PointCloud() = default;
@@ -49,6 +52,64 @@ void PointCloud::random_thin_pts() {
 }
 
 void PointCloud::smooth_terrain() {
+    typedef CGAL::Parallel_if_available_tag Concurrency_tag;
+
+    std::cout << "Smoothing terrain" << std::endl;
+
+    //-- WLOP simplification and regularization
+    double retain_percentage = 100;
+    int& maxTerrainPts = Config::get().maxSmoothPts;
+    if (maxTerrainPts > 0 && _pointCloudTerrain.size() > maxTerrainPts) {
+        retain_percentage = (double)maxTerrainPts / (double)_pointCloudTerrain.size() * 100.;
+        std::cout << "    Performing additional (optimized) terrain thinning to " << maxTerrainPts << " points" << std::endl;
+    }
+
+    std::cout << "    Smoothing terrain 1/3..." << std::flush;
+    const double neighbor_radius = 0.5;   // neighbors size.
+    Point_set_3 simplPts;
+    CGAL::wlop_simplify_and_regularize_point_set<Concurrency_tag>
+            (_pointCloudTerrain, simplPts.point_back_inserter(),
+             CGAL::parameters::select_percentage(retain_percentage).
+                     neighbor_radius (neighbor_radius));
+    _pointCloudTerrain.clear();
+
+    std::cout << "\r    Smoothing terrain 2/3..." << std::flush;
+
+    //-- Create CDT of current terrain pts
+    DT dt;
+    dt.insert(simplPts.points().begin(), simplPts.points().end());
+    simplPts.clear(); // end of scope for simplePts
+
+    //-- Make a mesh out of DT
+    Mesh mesh;
+    geomutils::dt_to_mesh(dt, mesh);
+    dt.clear(); // end of scope for the dt
+
+    //-- Isotropic remeshing
+    const double target_edge_length = 0;
+    const unsigned int nb_iter =  10;
+    PMP::remove_degenerate_faces(mesh);
+    PMP::isotropic_remeshing(faces(mesh), target_edge_length, mesh,
+                             PMP::parameters::number_of_iterations(nb_iter)
+                                     );
+
+    //-- Smoothing
+    std::cout << "\r    Smoothing terrain 3/3..." << std::flush;
+    const double time = 1;
+    PMP::smooth_shape(mesh, time, CGAL::parameters::number_of_iterations(Config::get().nSmoothIterations));
+
+    std::cout << "\r    Smoothing terrain...done" << std::endl;
+
+    //-- Mesh back to points
+//    _pointCloudTerrain.clear();
+    for (auto& pt : mesh.points()) {
+        _pointCloudTerrain.insert(pt);
+    }
+    _pointCloudTerrain.add_property_map<bool> ("is_building_point", false);
+}
+
+/* depreciated
+void PointCloud::smooth_terrain() {
     std::cout << "\nSmoothing terrain" << std::endl;
     DT dt(_pointCloudTerrain.points().begin(), _pointCloudTerrain.points().end());
     geomutils::smooth_dt<DT, EPICK>(_pointCloudTerrain, dt);
@@ -58,6 +119,7 @@ void PointCloud::smooth_terrain() {
     for (auto& pt : dt.points()) _pointCloudTerrain.insert(pt);
     _pointCloudTerrain.add_property_map<bool> ("is_building_point", false);
 }
+*/
 
 void PointCloud::create_flat_terrain(const PolyFeatures& lsFeatures) {
     std::cout << "\nCreating flat terrain" << std::endl;

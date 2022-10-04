@@ -80,6 +80,8 @@ public:
     //- Terrain
     double    terrainThinning                   = 0.;
     bool      smoothTerrain                     = false;
+    int       nSmoothIterations                 = 0;
+    int       maxSmoothPts                      = -9999;
     bool      flatTerrain                       = false;
     //- Buildings
     std::string buildingUniqueId;
