@@ -73,8 +73,7 @@ We offer built [Docker](https://www.docker.com/) images for every release, avail
 Mac users can install City4CFD through Homebrew:
 
 ```
-brew tap tudelft3d/software
-brew install city4cfd
+brew install tudelft3d/software/city4cfd
 ```
 
 ## Getting started
