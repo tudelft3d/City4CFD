@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [0.2.0] - 2022-10-07
 ### Added
 - Point cloud preparation tool city4cfd_pcprep
 ### Changed
