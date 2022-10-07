@@ -5,6 +5,8 @@
 - Point cloud preparation tool city4cfd_pcprep
 ### Changed
 - (breaking) Terrain smoothing overhaul
+### Fixed
+- Minor bugfixes
 ### Removed
 - Previous point cloud preparation script
 

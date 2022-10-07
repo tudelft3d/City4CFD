@@ -100,7 +100,7 @@ public:
     bool  reconstructBoundaries                 = false;
 
     //-- Polygons related
-    double                edgeMaxLen;
+    double                edgeMaxLen            = -9999;
     std::map<int, double> flattenSurfaces;
 
     //-- Output

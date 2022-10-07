@@ -36,6 +36,10 @@
 #include <CGAL/Polygon_mesh_processing/remesh.h>
 #include <CGAL/Polygon_mesh_processing/smooth_shape.h>
 #include <CGAL/wlop_simplify_and_regularize_point_set.h>
+#include <CGAL/create_offset_polygons_2.h>
+#include <CGAL/Polygon_2_algorithms.h>
+#include <CGAL/Straight_skeleton_builder_2.h>
+#include <CGAL/compute_outer_frame_margin.h>
 
 PointCloud::PointCloud()  = default;
 PointCloud::~PointCloud() = default;
@@ -144,6 +148,123 @@ void PointCloud::set_flat_terrain() {
     _pointCloudTerrain.add_property_map<bool> ("is_building_point", false);
 }
 
+void PointCloud::prep_flattening(const PolyFeatures& lsFeatures, CDT& cdt) {
+    std::cout << "\n    Prepping flattening surfaces" << std::endl;
+
+    //-- Perform averaging
+    PolyFeatures avgFeatures;
+    for (auto& f : lsFeatures) {
+        auto it = Config::get().flattenSurfaces.find(f->get_output_layer_id());
+        if (it != Config::get().flattenSurfaces.end()) {
+            avgFeatures.push_back(f);
+        }
+    }
+
+    //-- Add buffer around flattened polygons todo temp
+    typedef CGAL::Straight_skeleton_builder_traits_2<EPICK>                  SsBuilderTraits;
+    typedef CGAL::Straight_skeleton_2<EPICK>                                 Ss;
+    typedef CGAL::Straight_skeleton_builder_2<SsBuilderTraits,Ss>            SsBuilder;
+    typedef CGAL::Polygon_offset_builder_traits_2<EPICK>                     OffsetBuilderTraits;
+    typedef CGAL::Polygon_offset_builder_2<Ss,OffsetBuilderTraits,Polygon_2> OffsetBuilder;
+
+    typedef boost::shared_ptr<Polygon_2> ContourPtr;
+    typedef std::vector<ContourPtr>      ContourSequence ;
+    // get info using the original point cloud
+    std::vector<Polygon_2> offsetPolys;
+//    std::vector<double> offsets{0.01, 0.5};
+    std::vector<double> offsets{0.001};
+    std::vector<std::vector<double>> heights;
+    for (auto& f : avgFeatures) {
+        auto& poly = f->get_poly().outer_boundary();
+        // set the frame
+        boost::optional<double> margin = CGAL::compute_outer_frame_margin(poly.begin(), poly.end(), offsets.back());
+        CGAL::Bbox_2 bbox = CGAL::bbox_2(poly.begin(),poly.end());
+        // Compute the boundaries of the frame
+        double fxmin = bbox.xmin() - *margin ;
+        double fxmax = bbox.xmax() + *margin ;
+        double fymin = bbox.ymin() - *margin ;
+        double fymax = bbox.ymax() + *margin ;
+        // Create the rectangular frame
+        Point_2 frame[4]= { Point_2(fxmin,fymin)
+                , Point_2(fxmax,fymin)
+                , Point_2(fxmax,fymax)
+                , Point_2(fxmin,fymax)
+        } ;
+
+        // Instantiate the skeleton builder
+        SsBuilder ssb ;
+        // Enter the frame
+        ssb.enter_contour(frame,frame+4);
+        // Enter the polygon as a hole of the frame (NOTE: as it is a hole we insert it in the opposite orientation)
+        poly.reverse_orientation();
+        ssb.enter_contour(poly.begin(), poly.end());
+        // Construct the skeleton
+        boost::shared_ptr<Ss> ss = ssb.construct_skeleton();
+        // Proceed only if the skeleton was correctly constructed.
+        if ( ss )
+        {
+            for (auto& offset : offsets) {
+                // Instantiate the container of offsetSmall contours
+                ContourSequence offset_contours;
+                // Instantiate the offsetSmall builder with the skeleton
+                OffsetBuilder ob(*ss);
+                // Obtain the offsetSmall contours
+                ob.construct_offset_contours(offset, std::back_inserter(offset_contours));
+                // Locate the offsetSmall contour that corresponds to the frame
+                // That must be the outmost offsetSmall contour, which in turn must be the one
+                // with the largetst unsigned area.
+                auto f = offset_contours.end();
+                double lLargestArea = 0.0;
+                for (auto i = offset_contours.begin(); i != offset_contours.end(); ++i) {
+                    double lArea = CGAL_NTS abs((*i)->area()); //Take abs() as  Polygon_2::area() is signed.
+                    if (lArea > lLargestArea) {
+                        f = i;
+                        lLargestArea = lArea;
+                    }
+                }
+                // Remove the offsetSmall contour that corresponds to the frame.
+                offset_contours.erase(f);
+
+                if (offset_contours.size() != 1) {
+                    std::cout << "SOMETHING WRONG WITH SKELETON, NUMBER OF POLYS: " << offset_contours.size() << std::endl;
+                }
+                geomutils::shorten_long_poly_edges(*(offset_contours.back()), Config::get().edgeMaxLen/5);
+                offsetPolys.push_back(*(offset_contours.back()));
+            }
+        }
+
+
+//        std::vector<boost::shared_ptr<Polygon_2>> offsetPoly = CGAL::create_interior_skeleton_and_offset_polygons_2(0.2, f->get_poly().outer_boundary());
+//        if (offsetPoly.size() != 1) std::cout << "YOYOYO SOMETHING WRONG HERE!!!!" << std::endl; //todo tempstd
+
+        std::vector<double> height;
+        auto itPoly = offsetPolys.begin();
+        std::advance(itPoly, offsetPolys.size() - offsets.size());
+        geomutils::interpolate_poly_from_pc(*itPoly, height, _pointCloudTerrain);
+        heights.push_back(height);
+        height.clear();
+
+//        std::next(itPoly);
+//        geomutils::interpolate_poly_from_pc(*itPoly, height, _pointCloudTerrain);
+//        heights.push_back(height);
+    }
+
+    // then add new points after the whole thing has been done
+    // here or after averaging? we'll see
+    for (auto i = 0; i < offsetPolys.size(); ++i) {
+        Polygon_2& poly = offsetPolys[i];
+        std::vector<double>& height = heights[i];
+        for (auto j = 0; j < poly.size(); ++j) {
+            //maybe add directly as a constraint?
+            auto k = (j + 1) % poly.size();
+            ePoint_3 pt1(poly[j].x(), poly[j].y(), height[j]);
+            ePoint_3 pt2(poly[k].x(), poly[k].y(), height[k]);
+            cdt.insert_constraint(pt1, pt2);
+//            _pointCloudTerrain.insert(Point_3(poly[j].x(), poly[j].y(), height[j]));
+        }
+    }
+}
+
 void PointCloud::flatten_polygon_pts(const PolyFeatures& lsFeatures) {
     std::cout << "\n    Flattening surfaces" << std::endl;
     std::map<int, Point_3> flattenedPts;
@@ -169,12 +290,116 @@ void PointCloud::flatten_polygon_pts(const PolyFeatures& lsFeatures) {
     SearchTree searchTree(_pointCloudTerrain.points().begin(), _pointCloudTerrain.points().end());
 
     //-- Perform averaging
+    PolyFeatures avgFeatures;
     for (auto& f : lsFeatures) {
         auto it = Config::get().flattenSurfaces.find(f->get_output_layer_id());
         if (it != Config::get().flattenSurfaces.end()) {
             f->flatten_polygon_inner_points(_pointCloudTerrain, flattenedPts, searchTree, pointCloudConnectivity);
+            avgFeatures.push_back(f);
         }
     }
+
+    /*
+    //-- Add buffer around flattened polygons todo temp
+    typedef CGAL::Straight_skeleton_builder_traits_2<EPICK>                  SsBuilderTraits;
+    typedef CGAL::Straight_skeleton_2<EPICK>                                 Ss;
+    typedef CGAL::Straight_skeleton_builder_2<SsBuilderTraits,Ss>            SsBuilder;
+    typedef CGAL::Polygon_offset_builder_traits_2<EPICK>                     OffsetBuilderTraits;
+    typedef CGAL::Polygon_offset_builder_2<Ss,OffsetBuilderTraits,Polygon_2> OffsetBuilder;
+
+    typedef boost::shared_ptr<Polygon_2> ContourPtr;
+    typedef std::vector<ContourPtr>      ContourSequence ;
+    // get info using the original point cloud
+    std::vector<Polygon_2> offsetPolys;
+//    std::vector<double> offsets{0.01, 0.5};
+    std::vector<double> offsets{0.0001, 0.1};
+    std::vector<std::vector<double>> heights;
+    for (auto& f : avgFeatures) {
+        auto& poly = f->get_poly().outer_boundary();
+        // set the frame
+        boost::optional<double> margin = CGAL::compute_outer_frame_margin(poly.begin(), poly.end(), offsets.back());
+        CGAL::Bbox_2 bbox = CGAL::bbox_2(poly.begin(),poly.end());
+        // Compute the boundaries of the frame
+        double fxmin = bbox.xmin() - *margin ;
+        double fxmax = bbox.xmax() + *margin ;
+        double fymin = bbox.ymin() - *margin ;
+        double fymax = bbox.ymax() + *margin ;
+        // Create the rectangular frame
+        Point_2 frame[4]= { Point_2(fxmin,fymin)
+                , Point_2(fxmax,fymin)
+                , Point_2(fxmax,fymax)
+                , Point_2(fxmin,fymax)
+        } ;
+
+        // Instantiate the skeleton builder
+        SsBuilder ssb ;
+        // Enter the frame
+        ssb.enter_contour(frame,frame+4);
+        // Enter the polygon as a hole of the frame (NOTE: as it is a hole we insert it in the opposite orientation)
+        poly.reverse_orientation();
+        ssb.enter_contour(poly.begin(), poly.end());
+        // Construct the skeleton
+        boost::shared_ptr<Ss> ss = ssb.construct_skeleton();
+        // Proceed only if the skeleton was correctly constructed.
+        if ( ss )
+        {
+            for (auto& offset : offsets) {
+                // Instantiate the container of offsetSmall contours
+                ContourSequence offset_contours;
+                // Instantiate the offsetSmall builder with the skeleton
+                OffsetBuilder ob(*ss);
+                // Obtain the offsetSmall contours
+                ob.construct_offset_contours(offset, std::back_inserter(offset_contours));
+                // Locate the offsetSmall contour that corresponds to the frame
+                // That must be the outmost offsetSmall contour, which in turn must be the one
+                // with the largetst unsigned area.
+                auto f = offset_contours.end();
+                double lLargestArea = 0.0;
+                for (auto i = offset_contours.begin(); i != offset_contours.end(); ++i) {
+                    double lArea = CGAL_NTS abs((*i)->area()); //Take abs() as  Polygon_2::area() is signed.
+                    if (lArea > lLargestArea) {
+                        f = i;
+                        lLargestArea = lArea;
+                    }
+                }
+                // Remove the offsetSmall contour that corresponds to the frame.
+                offset_contours.erase(f);
+
+                if (offset_contours.size() != 1) {
+                    std::cout << "SOMETHING WRONG WITH SKELETON, NUMBER OF POLYS: " << offset_contours.size() << std::endl;
+                }
+//                geomutils::shorten_long_poly_edges(*(offset_contours.back()), Config::get().edgeMaxLen/5);
+                offsetPolys.push_back(*(offset_contours.back()));
+            }
+        }
+
+
+//        std::vector<boost::shared_ptr<Polygon_2>> offsetPoly = CGAL::create_interior_skeleton_and_offset_polygons_2(0.2, f->get_poly().outer_boundary());
+//        if (offsetPoly.size() != 1) std::cout << "YOYOYO SOMETHING WRONG HERE!!!!" << std::endl; //todo tempstd
+
+        std::vector<double> height;
+        auto itPoly = offsetPolys.begin();
+        std::advance(itPoly, offsetPolys.size() - offsets.size());
+        geomutils::interpolate_poly_from_pc(*itPoly, height, _pointCloudTerrain);
+        heights.push_back(height);
+        height.clear();
+
+        std::next(itPoly);
+        geomutils::interpolate_poly_from_pc(*itPoly, height, _pointCloudTerrain);
+        heights.push_back(height);
+    }
+
+    // then add new points after the whole thing has been done
+    // here or after averaging? we'll see
+    for (auto i = 0; i < offsetPolys.size(); ++i) {
+        Polygon_2& poly = offsetPolys[i];
+        std::vector<double>& height = heights[i];
+        for (auto j = 0; j < poly.size(); ++j) {
+            _pointCloudTerrain.insert(Point_3(poly[j].x(), poly[j].y(), height[j]));
+//            _pointCloudTerrain.insert(Point_3(poly[j].x(), poly[j].y(), 50));
+        }
+    }
+    */
 
     //-- Change points with flattened values
     int pcOrigSize = _pointCloudTerrain.points().size();
@@ -188,6 +413,7 @@ void PointCloud::flatten_polygon_pts(const PolyFeatures& lsFeatures) {
             flattenedPts.erase(i);
         }
     }
+
     _pointCloudTerrain.collect_garbage();
 }
 

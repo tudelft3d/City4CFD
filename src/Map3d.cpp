@@ -181,6 +181,8 @@ void Map3d::set_features() {
     if (Config::get().influRegionConfig.type() == typeid(bool)) _influRegionBPG = true;
     if (Config::get().domainBndConfig.type() == typeid(bool))   _bndBPG = true;
 
+//    //todo temp maybe prep flattening here?
+//    if (!Config::get().flattenSurfaces.empty()) _pointCloud.prep_flattening(_lsFeatures);
     if (Config::get().smoothTerrain) {
         _pointCloud.smooth_terrain();
     }
@@ -274,6 +276,8 @@ void Map3d::reconstruct_terrain() {
         _terrain->prep_constraints(_lsFeatures, _pointCloud.get_terrain());
         if (!Config::get().flattenSurfaces.empty()) _pointCloud.flatten_polygon_pts(_lsFeatures);
         _terrain->set_cdt(_pointCloud.get_terrain());
+        //todo temp
+        _pointCloud.prep_flattening(_lsFeatures, _terrain->get_cdt());
         _terrain->constrain_features();
     }
 

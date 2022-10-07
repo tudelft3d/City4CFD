@@ -201,6 +201,8 @@ void geomutils::check_layer(const Face_handle& fh, int surfaceLayer) {
 }
 
 void geomutils::shorten_long_poly_edges(Polygon_2& poly, double maxLen) {
+    if (maxLen < 0) return;
+
     auto& polyVec = poly.container();
     int i = 0;
     while (i != polyVec.size()) {
