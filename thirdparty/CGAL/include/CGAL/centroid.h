@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Principal_component_analysis_LGPL/include/CGAL/centroid.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Principal_component_analysis_LGPL/include/CGAL/centroid.h $
 // $Id: centroid.h 5e72746 2020-10-29T14:15:38+01:00 Simon Giraudot
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //

@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Algebraic_kernel_d/include/CGAL/Algebraic_kernel_d/Algebraic_real_d_1.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Algebraic_kernel_d/include/CGAL/Algebraic_kernel_d/Algebraic_real_d_1.h $
 // $Id: Algebraic_real_d_1.h 4e519a3 2021-05-05T13:15:37+02:00 Sébastien Loriot
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //

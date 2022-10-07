@@ -7,7 +7,7 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/STL_Extension/include/CGAL/algorithm.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/STL_Extension/include/CGAL/algorithm.h $
 // $Id: algorithm.h 4e519a3 2021-05-05T13:15:37+02:00 Sébastien Loriot
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //

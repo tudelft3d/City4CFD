@@ -7,7 +7,7 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Cartesian_kernel/include/CGAL/Cartesian/Aff_transformation_rep_2.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Cartesian_kernel/include/CGAL/Cartesian/Aff_transformation_rep_2.h $
 // $Id: Aff_transformation_rep_2.h e73b8de 2021-04-22T21:17:24+01:00 Andreas Fabri
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //

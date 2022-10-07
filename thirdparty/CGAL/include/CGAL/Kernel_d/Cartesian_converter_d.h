@@ -6,8 +6,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Kernel_d/include/CGAL/Kernel_d/Cartesian_converter_d.h $
-// $Id: Cartesian_converter_d.h 0779373 2020-03-26T13:31:46+01:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Kernel_d/include/CGAL/Kernel_d/Cartesian_converter_d.h $
+// $Id: Cartesian_converter_d.h 3a0a4a6 2021-12-17T12:22:40+01:00 Mael Rouxel-Labbé
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Sylvain Pion <Sylvain.Pion@sophia.inria.fr>
@@ -82,13 +82,13 @@ public:
         : c(), k(), result_point_(20) {}
 
     Origin
-    operator()(const Origin& o) const
+    operator()(Origin o) const
     {
         return o;
     }
 
     Null_vector
-    operator()(const Null_vector& n) const
+    operator()(Null_vector n) const
     {
         return n;
     }
@@ -97,6 +97,14 @@ public:
     operator()(const typename K1::FT &a) const
     {
         return c(a);
+    }
+
+    template <typename T>
+    T
+    operator()(const T t,
+               typename std::enable_if<std::is_fundamental<T>::value>::type* = nullptr) const
+    {
+        return t;
     }
 
     std::vector<Object>
@@ -108,11 +116,6 @@ public:
         res.push_back(operator()(v[i]));
       }
       return res;
-    }
-
-    int operator()(const int &a)
-    {
-        return a;
     }
 
     typename K2::Point_d

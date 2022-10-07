@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Kernel_23/include/CGAL/rank.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Kernel_23/include/CGAL/rank.h $
 // $Id: rank.h 7ebdd07 2021-03-30T14:28:55+01:00 Andreas Fabri
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //

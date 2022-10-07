@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/GraphicsView/include/CGAL/Buffer_for_vao.h $
-// $Id: Buffer_for_vao.h 2cbc381 2021-09-23T16:13:57+02:00 Laurent Rineau
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/GraphicsView/include/CGAL/Buffer_for_vao.h $
+// $Id: Buffer_for_vao.h 440a8df 2022-02-03T08:41:04+00:00 Andreas Fabri
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -22,6 +22,7 @@
 #include <CGAL/Constrained_triangulation_plus_2.h>
 #include <CGAL/Cartesian_converter.h>
 #include <CGAL/IO/Color.h>
+#include <CGAL/assertions.h>
 
 #include <vector>
 #include <cstdlib>
@@ -58,7 +59,7 @@ namespace internal
       ++nb;
     }
 
-    assert(nb>0);
+    CGAL_assertion(nb>0);
     return (typename Kernel_traits<Vector>::Kernel::Construct_scaled_vector_3()
             (normal, 1.0/nb));
   }

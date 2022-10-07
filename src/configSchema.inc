@@ -31,7 +31,7 @@
 #include "types.h"
 
 namespace jsonschema {
-    //- JSON config schema defined here as a string literal
+    //-- JSON config schema defined here as a string literal
     const nlohmann::json schema = R"(
     {
       "$schema": "https://json-schema.org/draft-07/schema#",
@@ -42,6 +42,31 @@ namespace jsonschema {
         "point_clouds": {
           "type": "object",
           "properties": {
+            "las_datasets": {
+              "description": "Schema that deals with import of LAS/LAZ tiles",
+              "description": "Depreciated, but keeping the schema for now",
+              "type": "object",
+              "properties": {
+                "files": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "ground_classes": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  }
+                },
+                "building_classes": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  }
+                }
+              }
+            },
             "ground": {
               "type": "string"
             },
@@ -187,7 +212,17 @@ namespace jsonschema {
         },
         "smooth_terrain": {
           "description": "Optional: Terrain smoothing flag",
-          "type": "boolean"
+          "type": "object",
+          "properties": {
+            "iterations": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "max_pts": {
+              "type": "integer",
+              "exclusiveMinimum": 0
+            }
+          }
         },
         "flat_terrain": {
           "description": "Optional: Force flat terrain",

@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Property_map/include/CGAL/Index_property_map.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Property_map/include/CGAL/Index_property_map.h $
 // $Id: Index_property_map.h 8166579 2021-10-11T19:58:07+02:00 Mael Rouxel-Labbé
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //

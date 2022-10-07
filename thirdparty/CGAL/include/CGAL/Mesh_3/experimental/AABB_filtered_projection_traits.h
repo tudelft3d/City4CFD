@@ -4,7 +4,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Mesh_3/include/CGAL/Mesh_3/experimental/AABB_filtered_projection_traits.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Mesh_3/include/CGAL/Mesh_3/experimental/AABB_filtered_projection_traits.h $
 // $Id: AABB_filtered_projection_traits.h 1af4f93 2021-10-08T16:24:51+02:00 Laurent Rineau
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

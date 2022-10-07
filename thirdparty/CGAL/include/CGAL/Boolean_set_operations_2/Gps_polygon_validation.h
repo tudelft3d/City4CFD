@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Boolean_set_operations_2/include/CGAL/Boolean_set_operations_2/Gps_polygon_validation.h $
-// $Id: Gps_polygon_validation.h e599bd4 2021-07-08T13:50:18+02:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Boolean_set_operations_2/include/CGAL/Boolean_set_operations_2/Gps_polygon_validation.h $
+// $Id: Gps_polygon_validation.h 6fd9388 2021-11-03T18:32:40+02:00 Efi Fogel
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -631,7 +631,7 @@ bool are_holes_and_boundary_pairwise_disjoint
   typedef std::pair<Curve_const_iterator, Curve_const_iterator>
                                                         Cci_pair;
   typedef typename Traits_2::Construct_curves_2         Construct_curves_2;
-  typedef typename Traits_2::Construct_general_polygon_with_holes_2
+  typedef typename Traits_2::Construct_polygon_with_holes_2
     Construct_polygon_with_holes_2;
 
   typedef Gps_polygon_validation_visitor<Traits_2>      Visitor;
@@ -698,7 +698,7 @@ bool are_holes_and_boundary_pairwise_disjoint
        * whose performance is better than the join(pgn)
        */
       Polygon_with_holes_2 empty_pwh = construct_pwh_functor(hole);
-      // traits.Construct_general_polygon_with_holes_2 (hole);
+      // traits.Construct_polygon_with_holes_2 (hole);
       // Polygon_with_holes_2 empty_pwh(hole);
       gps.insert(empty_pwh);
       num_of_holes++;

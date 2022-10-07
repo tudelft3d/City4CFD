@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/GraphicsView/include/CGAL/Basic_shaders.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/GraphicsView/include/CGAL/Basic_shaders.h $
 // $Id: Basic_shaders.h 66f92a3 2021-08-30T11:11:57+02:00 Maxime Gimeno
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

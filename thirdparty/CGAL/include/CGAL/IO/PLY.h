@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Stream_support/include/CGAL/IO/PLY.h $
-// $Id: PLY.h ad79d37 2021-09-29T11:46:30+02:00 Laurent Rineau
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Stream_support/include/CGAL/IO/PLY.h $
+// $Id: PLY.h 10b0af3 2022-01-13T14:43:34+01:00 Sébastien Loriot
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s) : Simon Giraudot
@@ -16,7 +16,7 @@
 #include <CGAL/IO/PLY/PLY_writer.h>
 #include <CGAL/IO/helpers.h>
 
-#include <CGAL/boost/graph/Named_function_parameters.h>
+#include <CGAL/Named_function_parameters.h>
 #include <CGAL/boost/graph/named_params_helper.h>
 #include <CGAL/property_map.h>
 #include <CGAL/iterator.h>
@@ -31,11 +31,6 @@
 #include <type_traits>
 #include <utility>
 #include <vector>
-
-#ifdef DOXYGEN_RUNNING
-#define CGAL_BGL_NP_TEMPLATE_PARAMETERS NamedParameters
-#define CGAL_BGL_NP_CLASS NamedParameters
-#endif
 
 namespace CGAL {
 
@@ -308,11 +303,11 @@ bool read_PLY(std::istream& is,
  *
  * \returns `true` if the reading was successful, `false` otherwise.
  */
-template <class PointRange, class PolygonRange, typename CGAL_BGL_NP_TEMPLATE_PARAMETERS>
+template <class PointRange, class PolygonRange, typename CGAL_NP_TEMPLATE_PARAMETERS>
 bool read_PLY(std::istream& is,
               PointRange& points,
               PolygonRange& polygons,
-              const CGAL_BGL_NP_CLASS& np
+              const CGAL_NP_CLASS& np = parameters::default_values()
 #ifndef DOXYGEN_RUNNING
               , typename boost::enable_if<internal::is_Range<PolygonRange> >::type* = nullptr
 #endif
@@ -332,17 +327,6 @@ bool read_PLY(std::istream& is,
                             std::back_inserter(dummy_pf),
                             choose_parameter(get_parameter(np, internal_np::verbose), true));
 }
-
-/// \cond SKIP_IN_MANUAL
-
-template <class PointRange, class PolygonRange>
-bool read_PLY(std::istream& is, PointRange& points, PolygonRange& polygons,
-              typename boost::enable_if<internal::is_Range<PolygonRange> >::type* = nullptr)
-{
-  return read_PLY(is, points, polygons, parameters::all_default());
-}
-
-/// \endcond
 
 /*!
  * \ingroup PkgStreamSupportIoFuncsPLY
@@ -379,11 +363,11 @@ bool read_PLY(std::istream& is, PointRange& points, PolygonRange& polygons,
  *
  * \returns `true` if the reading was successful, `false` otherwise.
  */
-template <typename PointRange, typename PolygonRange, typename CGAL_BGL_NP_TEMPLATE_PARAMETERS>
+template <typename PointRange, typename PolygonRange, typename CGAL_NP_TEMPLATE_PARAMETERS>
 bool read_PLY(const std::string& fname,
               PointRange& points,
               PolygonRange& polygons,
-              const CGAL_BGL_NP_CLASS& np
+              const CGAL_NP_CLASS& np = parameters::default_values()
 #ifndef DOXYGEN_RUNNING
               , typename boost::enable_if<internal::is_Range<PolygonRange> >::type* = nullptr
 #endif
@@ -403,17 +387,6 @@ bool read_PLY(const std::string& fname,
     return read_PLY(is, points, polygons, np);
   }
 }
-
-/// \cond SKIP_IN_MANUAL
-
-template <typename PointRange, typename PolygonRange>
-bool read_PLY(const std::string& fname, PointRange& points, PolygonRange& polygons,
-              typename boost::enable_if<internal::is_Range<PolygonRange> >::type* = nullptr)
-{
-  return read_PLY(fname, points, polygons, parameters::all_default());
-}
-
-/// \endcond
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -453,11 +426,11 @@ bool read_PLY(const std::string& fname, PointRange& points, PolygonRange& polygo
  *
  * \return `true` if the writing was successful, `false` otherwise.
  */
-template <class PointRange, class PolygonRange, typename CGAL_BGL_NP_TEMPLATE_PARAMETERS >
+template <class PointRange, class PolygonRange, typename CGAL_NP_TEMPLATE_PARAMETERS >
 bool write_PLY(std::ostream& out,
                const PointRange& points,
                const PolygonRange& polygons,
-               const CGAL_BGL_NP_CLASS& np
+               const CGAL_NP_CLASS& np = parameters::default_values()
 #ifndef DOXYGEN_RUNNING
                , typename boost::enable_if<internal::is_Range<PolygonRange> >::type* = nullptr
 #endif
@@ -498,17 +471,6 @@ bool write_PLY(std::ostream& out,
   return out.good();
 }
 
-/// \cond SKIP_IN_MANUAL
-
-template <class PointRange, class PolygonRange>
-bool write_PLY(std::ostream& out, const PointRange& points, const PolygonRange& polygons,
-               typename boost::enable_if<internal::is_Range<PolygonRange> >::type* = nullptr)
-{
-  return write_PLY(out, points, polygons, parameters::all_default());
-}
-
-/// \endcond
-
 /*!
  * \ingroup PkgStreamSupportIoFuncsPLY
  *
@@ -543,11 +505,11 @@ bool write_PLY(std::ostream& out, const PointRange& points, const PolygonRange& 
  *
  * \return `true` if the writing was successful, `false` otherwise.
  */
-template <class PointRange, class PolygonRange, typename CGAL_BGL_NP_TEMPLATE_PARAMETERS >
+template <class PointRange, class PolygonRange, typename CGAL_NP_TEMPLATE_PARAMETERS >
 bool write_PLY(const std::string& fname,
                const PointRange& points,
                const PolygonRange& polygons,
-               const CGAL_BGL_NP_CLASS& np
+               const CGAL_NP_CLASS& np = parameters::default_values()
 #ifndef DOXYGEN_RUNNING
                , typename boost::enable_if<internal::is_Range<PolygonRange> >::type* = nullptr
 #endif
@@ -567,17 +529,6 @@ bool write_PLY(const std::string& fname,
     return write_PLY(os, points, polygons, np);
   }
 }
-
-/// \cond SKIP_IN_MANUAL
-
-template <class PointRange, class PolygonRange>
-bool write_PLY(const std::string& fname, const PointRange& points, const PolygonRange& polygons,
-               typename boost::enable_if<internal::is_Range<PolygonRange> >::type* = nullptr)
-{
-  return write_PLY(fname, points, polygons, parameters::all_default());
-}
-
-/// \endcond
 
 } // namespace IO
 

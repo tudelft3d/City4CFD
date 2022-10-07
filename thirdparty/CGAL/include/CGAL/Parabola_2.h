@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Apollonius_graph_2/include/CGAL/Parabola_2.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Apollonius_graph_2/include/CGAL/Parabola_2.h $
 // $Id: Parabola_2.h d2a2532 2021-06-17T10:29:02+02:00 Mael Rouxel-Labbé
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

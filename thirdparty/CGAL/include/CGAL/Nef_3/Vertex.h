@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Nef_3/include/CGAL/Nef_3/Vertex.h $
-// $Id: Vertex.h 4e519a3 2021-05-05T13:15:37+02:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Nef_3/include/CGAL/Nef_3/Vertex.h $
+// $Id: Vertex.h 2d4a857 2022-03-12T12:06:17+00:00 Giles Bathgate
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -261,8 +261,7 @@ class Vertex_base {
           fend = sfaces_end();
         while (fit != fend) {
           SFace_iterator fdel = fit++;
-          /* TO VERIFY: next statement needs access to a private attribute */
-          sncp()->reset_sm_object_list(fdel->boundary_entry_objects_);
+          sncp()->reset_sm_object_list(fdel->boundary_entry_objects());
           sncp()->delete_sface_only(fdel);
         }
         sfaces_begin_ = sfaces_last_ = sncp()->sfaces_end();

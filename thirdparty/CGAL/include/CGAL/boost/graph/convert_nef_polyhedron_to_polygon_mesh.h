@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Nef_3/include/CGAL/boost/graph/convert_nef_polyhedron_to_polygon_mesh.h $
-// $Id: convert_nef_polyhedron_to_polygon_mesh.h 3795c52 2021-05-18T10:16:24+02:00 Maxime Gimeno
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Nef_3/include/CGAL/boost/graph/convert_nef_polyhedron_to_polygon_mesh.h $
+// $Id: convert_nef_polyhedron_to_polygon_mesh.h 4ffc949 2022-02-03T17:11:20+01:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -20,13 +20,13 @@
 #include <CGAL/Polygon_mesh_processing/polygon_soup_to_polygon_mesh.h>
 #include <CGAL/circulator.h>
 #include <CGAL/Cartesian_converter.h>
-#include <boost/unordered_map.hpp>
 #include <CGAL/Constrained_Delaunay_triangulation_2.h>
 #include <CGAL/Projection_traits_3.h>
 #include <CGAL/Triangulation_vertex_base_with_info_2.h>
 #include <CGAL/Triangulation_face_base_with_info_2.h>
 #include <CGAL/Kernel/global_functions_3.h>
 
+#include <unordered_map>
 
 namespace CGAL{
 
@@ -36,7 +36,7 @@ namespace nef_to_pm{
 template<class Nef_polyhedron, class PointRange, class Converter>
 struct Shell_vertex_index_visitor
 {
-  typedef boost::unordered_map<
+  typedef std::unordered_map<
     typename Nef_polyhedron::Vertex_const_handle, std::size_t> Vertex_index_map;
   typedef typename PointRange::value_type Point_3;
   PointRange& points;
@@ -76,7 +76,7 @@ struct FaceInfo2
 template <class Nef_polyhedron, typename PolygonRange>
 struct Shell_polygons_visitor
 {
-  typedef boost::unordered_map<typename Nef_polyhedron::Vertex_const_handle, std::size_t> Vertex_index_map;
+  typedef std::unordered_map<typename Nef_polyhedron::Vertex_const_handle, std::size_t> Vertex_index_map;
   typedef typename PolygonRange::value_type Polygon;
   Vertex_index_map& vertex_indices;
   PolygonRange& polygons;

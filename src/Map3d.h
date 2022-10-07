@@ -78,6 +78,7 @@ private:
     void reconstruct_with_flat_terrain();
     void solve_building_conflicts();
     void clip_buildings();
+    void wrap();
 
     void prep_feature_output();
     void prep_cityjson_output();

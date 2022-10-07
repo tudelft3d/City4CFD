@@ -2,7 +2,7 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Surface_mesh/include/CGAL/boost/graph/properties_Surface_mesh.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Surface_mesh/include/CGAL/boost/graph/properties_Surface_mesh.h $
 // $Id: properties_Surface_mesh.h 590ddf8 2021-10-08T15:38:47+02:00 Mael Rouxel-Labbé
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //

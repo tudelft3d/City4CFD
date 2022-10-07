@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Surface_mesh_topology/include/CGAL/Surface_mesh_topology/internal/Functors_for_face_graph_wrapper.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Surface_mesh_topology/include/CGAL/Surface_mesh_topology/internal/Functors_for_face_graph_wrapper.h $
 // $Id: Functors_for_face_graph_wrapper.h 3fb644e 2020-04-10T17:40:30+02:00 Guillaume Damiand
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/AABB_tree/include/CGAL/AABB_polyhedron_triangle_primitive.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/AABB_tree/include/CGAL/AABB_polyhedron_triangle_primitive.h $
 // $Id: AABB_polyhedron_triangle_primitive.h 98e4718 2021-08-26T11:33:39+02:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

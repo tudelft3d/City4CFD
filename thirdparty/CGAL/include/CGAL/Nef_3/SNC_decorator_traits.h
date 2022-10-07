@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Nef_3/include/CGAL/Nef_3/SNC_decorator_traits.h $
-// $Id: SNC_decorator_traits.h 0779373 2020-03-26T13:31:46+01:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Nef_3/include/CGAL/Nef_3/SNC_decorator_traits.h $
+// $Id: SNC_decorator_traits.h 252aab7 2022-03-19T12:16:25+00:00 Giles Bathgate
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -36,9 +36,6 @@ class SNC_decorator_traits : public CGAL::SM_decorator_traits<Refs_> {
   typedef typename Refs::SHalfedge_handle SHalfedge_handle;
   typedef typename Refs::SHalfloop_handle SHalfloop_handle;
   typedef typename Refs::SFace_handle SFace_handle;
-
-  typedef typename Refs::Halffacet_triangle_handle
-    Halffacet_triangle_handle;
 
   typedef typename Refs::Vertex_iterator Vertex_iterator;
   typedef typename Refs::Halfedge_iterator Halfedge_iterator;
@@ -75,9 +72,6 @@ class SNC_decorator_const_traits {
   typedef typename Refs::SHalfedge_const_handle SHalfedge_handle;
   typedef typename Refs::SHalfloop_const_handle SHalfloop_handle;
   typedef typename Refs::SFace_const_handle SFace_handle;
-
-  typedef typename Refs::Halffacet_triangle_const_handle
-    Halffacet_triangle_handle;
 
   typedef typename Refs::Vertex_const_iterator Vertex_iterator;
   typedef typename Refs::Halfedge_const_iterator Halfedge_iterator;

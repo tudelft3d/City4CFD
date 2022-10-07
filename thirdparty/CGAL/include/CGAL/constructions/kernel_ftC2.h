@@ -7,7 +7,7 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Cartesian_kernel/include/CGAL/constructions/kernel_ftC2.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Cartesian_kernel/include/CGAL/constructions/kernel_ftC2.h $
 // $Id: kernel_ftC2.h 2165605 2021-02-18T15:26:51+01:00 Laurent Rineau
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //

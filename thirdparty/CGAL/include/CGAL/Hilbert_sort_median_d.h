@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Spatial_sorting/include/CGAL/Hilbert_sort_median_d.h $
-// $Id: Hilbert_sort_median_d.h 6b87fe3 2020-12-05T11:11:33+01:00 Mael Rouxel-Labbé
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Spatial_sorting/include/CGAL/Hilbert_sort_median_d.h $
+// $Id: Hilbert_sort_median_d.h f60dfa8 2022-04-04T10:00:16+02:00 Sébastien Loriot
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     :  Olivier Devillers
@@ -32,7 +32,7 @@ struct Hilbert_cmp_d
   K k;
   int axe;
   bool orient;
-  Hilbert_cmp_d (int a, bool o, const K &_k = K()) : k(_k), axe(a),  orient(o) {}
+  Hilbert_cmp_d (int a, bool o, const K &_k) : k(_k), axe(a),  orient(o) {}
 
   bool operator() (const Point &p, const Point &q) const
   {
@@ -64,7 +64,7 @@ private:
   };
 
 public:
-  Hilbert_sort_median_d(const Kernel &k = Kernel(), std::ptrdiff_t limit = 1)
+  Hilbert_sort_median_d(const Kernel &k, std::ptrdiff_t limit = 1)
     : _k(k), _limit (limit)
   {}
 

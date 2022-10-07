@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Visibility_2/include/CGAL/Rotational_sweep_visibility_2.h $
-// $Id: Rotational_sweep_visibility_2.h d370326 2021-10-27T14:45:10+02:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Visibility_2/include/CGAL/Rotational_sweep_visibility_2.h $
+// $Id: Rotational_sweep_visibility_2.h 4ffc949 2022-02-03T17:11:20+01:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -22,7 +22,6 @@
 #include <CGAL/bounding_box.h>
 #include <CGAL/assertions.h>
 #include <CGAL/Kernel/global_functions_2.h>
-#include <boost/unordered_map.hpp>
 #include <iterator>
 
 

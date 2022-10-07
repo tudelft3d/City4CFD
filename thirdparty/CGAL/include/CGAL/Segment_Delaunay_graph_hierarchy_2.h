@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Segment_Delaunay_graph_2/include/CGAL/Segment_Delaunay_graph_hierarchy_2.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Segment_Delaunay_graph_2/include/CGAL/Segment_Delaunay_graph_hierarchy_2.h $
 // $Id: Segment_Delaunay_graph_hierarchy_2.h cc18ed3 2020-04-06T18:33:26+02:00 Mael Rouxel-Labbé
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Kernel_23/include/CGAL/Kernel/hash_functions.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Kernel_23/include/CGAL/Kernel/hash_functions.h $
 // $Id: hash_functions.h 9bf61b7 2020-04-22T11:02:16+02:00 Maxime Gimeno
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //

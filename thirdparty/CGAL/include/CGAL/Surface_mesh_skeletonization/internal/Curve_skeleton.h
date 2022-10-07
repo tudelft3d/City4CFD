@@ -2,7 +2,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Surface_mesh_skeletonization/include/CGAL/Surface_mesh_skeletonization/internal/Curve_skeleton.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Surface_mesh_skeletonization/include/CGAL/Surface_mesh_skeletonization/internal/Curve_skeleton.h $
 // $Id: Curve_skeleton.h 98e4718 2021-08-26T11:33:39+02:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Mesh_3/include/CGAL/Mesh_3/experimental/Lipschitz_sizing_polyhedron.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Mesh_3/include/CGAL/Mesh_3/experimental/Lipschitz_sizing_polyhedron.h $
 // $Id: Lipschitz_sizing_polyhedron.h 1faa0e2 2021-04-28T10:55:26+02:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

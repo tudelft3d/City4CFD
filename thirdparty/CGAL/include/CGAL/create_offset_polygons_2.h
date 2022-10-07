@@ -3,8 +3,8 @@
 // This file is part of CGAL (www.cgal.org).
 //
 
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Straight_skeleton_2/include/CGAL/create_offset_polygons_2.h $
-// $Id: create_offset_polygons_2.h 145f204 2020-10-09T17:20:01+02:00 Mael Rouxel-Labbé
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Straight_skeleton_2/include/CGAL/create_offset_polygons_2.h $
+// $Id: create_offset_polygons_2.h 6462cac 2022-06-23T16:29:11+02:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Fernando Cacciola <fernando_cacciola@ciudad.com.ar>
@@ -50,7 +50,7 @@ struct Is_same_type<U,U> { typedef Tag_true type ; } ;
 
 // The return type of create_interior/exterior_skeleton_and_offset_polygons_2:
 // - if polygon input is a model of 'GeneralPolygonWithHoles_2', the return type
-//   should be the internal (hole-less) polygon type GeneralPolygonWithHoles_2::General_polygon_2
+//   should be the internal (hole-less) polygon type GeneralPolygonWithHoles_2::Polygon_2
 // - if polygon input is just a sequence container of points (e.g. Polygon_2), then the same type
 //   is expected in output
 template <typename Polygon, typename OfK,
@@ -59,9 +59,9 @@ struct Default_return_polygon_type // Polygon type supports holes
 {
   typedef typename std::conditional<std::is_same<
                                       typename Kernel_traits<typename boost::range_value<
-                                        typename Polygon::General_polygon_2>::type>::Kernel,
+                                        typename Polygon::Polygon_2>::type>::Kernel,
                                       OfK>::value,
-                                    typename Polygon::General_polygon_2, // correct kernel
+                                    typename Polygon::Polygon_2, // correct kernel
                                     CGAL::Polygon_2<OfK> /*incorrect kernel*/ >::type type;
 };
 
@@ -85,7 +85,7 @@ struct Default_return_polygon_with_holes_type // Polygon type supports holes
 {
   typedef typename std::conditional<std::is_same<
                                       typename Kernel_traits<typename boost::range_value<
-                                        typename Polygon::General_polygon_2>::type>::Kernel,
+                                        typename Polygon::Polygon_2>::type>::Kernel,
                                       OfK>::value,
                                     Polygon, // correct kernel
                                     CGAL::Polygon_with_holes_2<OfK> /*incorrect kernel*/ >::type type;
@@ -389,7 +389,7 @@ create_exterior_skeleton_and_offset_polygons_2(const FT& aOffset,
            ofk);
 }
 
-// Overloads common to both polygons with and without holes, a simple polygon is returned in any case
+// Overloads common to both polygons with and without holes, a simple polygons are returned in any case
 template<class FT, class APolygon, class OfK,
          class OutPolygon = typename CGAL_SS_i::Default_return_polygon_type<APolygon, OfK>::type>
 std::vector< boost::shared_ptr<OutPolygon> >

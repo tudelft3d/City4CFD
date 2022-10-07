@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Minkowski_sum_2/include/CGAL/Minkowski_sum_2/Minkowski_sum_by_reduced_convolution_2.h $
-// $Id: Minkowski_sum_by_reduced_convolution_2.h 254d60f 2019-10-19T15:23:19+02:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Minkowski_sum_2/include/CGAL/Minkowski_sum_2/Minkowski_sum_by_reduced_convolution_2.h $
+// $Id: Minkowski_sum_by_reduced_convolution_2.h 4ffc949 2022-02-03T17:11:20+01:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s): Sebastian Morr    <sebastian@morr.cc>
@@ -20,10 +20,10 @@
 #include <CGAL/Arr_segment_traits_2.h>
 
 #include <CGAL/Minkowski_sum_2/AABB_collision_detector_2.h>
+#include <boost/functional/hash.hpp>
 
 #include <queue>
-#include <boost/unordered_set.hpp>
-#include <boost/unordered_map.hpp>
+#include <unordered_set>
 
 namespace CGAL {
 
@@ -240,7 +240,7 @@ private:
     std::vector<Direction_2> p2_dirs = directions_of_polygon(p2_vertices);
 
     // Contains states that were already visited
-    boost::unordered_set<State> visited_states;
+    std::unordered_set<State, boost::hash<State>> visited_states;
 
     // Init the queue with vertices from the first column
     std::queue<State> state_queue;

@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Surface_mesh_parameterization/include/CGAL/Surface_mesh_parameterization/internal/validity.h $
-// $Id: validity.h c47ba58 2021-11-19T13:42:11+01:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Surface_mesh_parameterization/include/CGAL/Surface_mesh_parameterization/internal/validity.h $
+// $Id: validity.h 4ffc949 2022-02-03T17:11:20+01:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Mael Rouxel-Labbé
@@ -52,7 +52,7 @@ bool has_flips(const TriangleMesh& mesh,
   typedef typename Kernel::Vector_3                                   Vector_3;
 
   // Fill containers
-  boost::unordered_set<vertex_descriptor> vertices;
+  std::unordered_set<vertex_descriptor> vertices;
   std::vector<face_descriptor> faces;
 
   internal::Containers_filler<TriangleMesh> fc(mesh, vertices, &faces);
@@ -302,7 +302,7 @@ bool is_one_to_one_mapping(const TriangleMesh& mesh,
   typedef typename boost::graph_traits<TriangleMesh>::vertex_descriptor  vertex_descriptor;
   typedef typename boost::graph_traits<TriangleMesh>::face_descriptor    face_descriptor;
 
-  boost::unordered_set<vertex_descriptor> vertices;
+  std::unordered_set<vertex_descriptor> vertices;
   std::vector<face_descriptor> faces;
 
   internal::Containers_filler<TriangleMesh> fc(mesh, vertices, &faces);

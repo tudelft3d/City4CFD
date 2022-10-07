@@ -29,7 +29,7 @@
 #include "io.h"
 #include "Map3d.h"
 
-std::string CITY4CFD_VERSION = "0.1.2";
+std::string CITY4CFD_VERSION = "0.2.0";
 
 void printWelcome() {
     auto logo{
@@ -87,7 +87,7 @@ int main(int argc, char** argv) {
         std::string config_path;
         //-- Path to config.json file
         if (argc >= 2) {
-            config_path = fs::current_path().append(argv[1]).string();
+            config_path = fs::absolute(argv[1]).string();
         } else {
             printHelp();
             return EXIT_SUCCESS;
@@ -104,8 +104,8 @@ int main(int argc, char** argv) {
             } else if (boost::iequals(argv[i], "--output_dir")) {
                 if (i + 1 == argc) throw std::invalid_argument("Missing argument for --output_dir");
 
-                Config::get().outputDir = fs::absolute(fs::current_path().append(argv[++i]));
-                if (!fs::exists(Config::get().outputDir)) throw std::invalid_argument("Output directory does not exist!");
+                Config::get().outputDir = fs::absolute(argv[++i]);
+                if (!fs::exists(Config::get().outputDir)) throw std::invalid_argument(std::string("Output directory '" + Config::get().outputDir.string() + "' does not exist!"));
             } else if (boost::iequals(argv[i], "--output_file")) {
                 if (i + 1 == argc) throw std::invalid_argument("Missing argument for --output_file");
 

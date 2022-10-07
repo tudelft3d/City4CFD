@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Bounding_volumes/include/CGAL/min_quadrilateral_2.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Bounding_volumes/include/CGAL/min_quadrilateral_2.h $
 // $Id: min_quadrilateral_2.h d678d0f 2021-02-02T11:12:16+01:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

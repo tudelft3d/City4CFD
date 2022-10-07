@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/SearchStructures/include/CGAL/Tree_assertions.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/SearchStructures/include/CGAL/Tree_assertions.h $
 // $Id: Tree_assertions.h 5a36ff8 2020-12-04T08:02:26+00:00 Giles Bathgate
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

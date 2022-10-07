@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Principal_component_analysis/include/CGAL/linear_least_squares_fitting_segments_2.h $
-// $Id: linear_least_squares_fitting_segments_2.h 7d716c0 2021-04-06T08:38:56+02:00 Simon Giraudot
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Principal_component_analysis/include/CGAL/linear_least_squares_fitting_segments_2.h $
+// $Id: linear_least_squares_fitting_segments_2.h 4e7edc7 2022-01-27T11:03:42+01:00 Sebastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s) : Pierre Alliez and Sylvain Pion and Ankit Gupta
@@ -85,7 +85,7 @@ linear_least_squares_fitting_2(InputIterator first,
     Matrix transformation = init_matrix<FT>(2,delta);
     using std::sqrt;
     FT length = CGAL::approximate_sqrt(t.squared_length());
-    CGAL_assertion(length != 0.0);
+    CGAL_assertion(!CGAL::is_zero(length));
 
     // Find the 2nd order moment for the segment wrt to the origin by an affine transformation.
 
@@ -104,9 +104,9 @@ linear_least_squares_fitting_2(InputIterator first,
 
   // Translate the 2nd order moment calculated about the origin to
   // the center of mass to get the covariance.
-  covariance[0] += -mass * ( c.x() * c.x());
-  covariance[1] += -mass * (c.x() * c.y());
-  covariance[2] += -mass * (c.y() * c.y());
+  covariance[0] -= mass * CGAL::square(c.x());
+  covariance[1] -= mass * (c.x() * c.y());
+  covariance[2] -= mass * (CGAL::square(c.y()));
 
   // solve for eigenvalues and eigenvectors.
   // eigen values are sorted in ascending order,

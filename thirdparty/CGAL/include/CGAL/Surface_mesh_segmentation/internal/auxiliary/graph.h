@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Surface_mesh_segmentation/include/CGAL/Surface_mesh_segmentation/internal/auxiliary/graph.h $
-// $Id: graph.h 444f347 2021-09-20T19:49:56+01:00 Andreas Fabri
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Surface_mesh_segmentation/include/CGAL/Surface_mesh_segmentation/internal/auxiliary/graph.h $
+// $Id: graph.h b45e788 2022-06-23T16:25:21+01:00 Andreas Fabri
 // Re-licensed for CGAL distribution to:
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Original license is:
@@ -520,6 +520,8 @@ public:
   /* Destructor */
   ~Graph();
 
+  void clear();
+
   /* Adds a node to the graph */
   node_id add_node();
 
@@ -701,7 +703,7 @@ inline Graph::Graph(void (*err_function)(const char *))
   flow = 0;
 }
 
-inline Graph::~Graph()
+inline void Graph::clear()
 {
   while (node_block_first) {
     node_block *next = node_block_first -> next;
@@ -720,6 +722,11 @@ inline Graph::~Graph()
     delete[] arc_rev_block_first -> start;
     arc_rev_block_first = next;
   }
+}
+
+inline Graph::~Graph()
+{
+  clear();
 }
 
 inline Graph::node_id Graph::add_node()

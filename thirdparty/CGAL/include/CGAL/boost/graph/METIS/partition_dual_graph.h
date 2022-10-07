@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/BGL/include/CGAL/boost/graph/METIS/partition_dual_graph.h $
-// $Id: partition_dual_graph.h 4f02dd2 2021-11-22T13:06:46+01:00 Mael Rouxel-Labbé
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/BGL/include/CGAL/boost/graph/METIS/partition_dual_graph.h $
+// $Id: partition_dual_graph.h 75b03e6 2022-01-10T15:33:04+01:00 Sébastien Loriot
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Mael Rouxel-Labbé
@@ -17,7 +17,7 @@
 #include <CGAL/boost/graph/copy_face_graph.h>
 #include <CGAL/boost/graph/Face_filtered_graph.h>
 #include <CGAL/boost/graph/helpers.h>
-#include <CGAL/boost/graph/Named_function_parameters.h>
+#include <CGAL/Named_function_parameters.h>
 #include <CGAL/boost/graph/named_params_helper.h>
 
 #include <CGAL/assertions.h>
@@ -184,18 +184,12 @@ void partition_dual_graph(const TriangleMesh& tm, int nparts,
 ///
 /// \pre `tm` is a pure triangular surface mesh: there are no edges
 ///       without at least one incident face
-template<typename TriangleMesh, typename NamedParameters>
-void partition_dual_graph(const TriangleMesh& tm, int nparts, const NamedParameters& np)
+template<typename TriangleMesh, typename NamedParameters = parameters::Default_named_parameters>
+void partition_dual_graph(const TriangleMesh& tm, int nparts, const NamedParameters& np = parameters::default_values())
 {
   using parameters::get_parameter;
 
   return partition_dual_graph(tm, nparts, get_parameter(np, internal_np::METIS_options), np);
-}
-
-template<typename TriangleMesh>
-void partition_dual_graph(const TriangleMesh& tm, const int nparts)
-{
-  return partition_dual_graph(tm, nparts, CGAL::parameters::all_default());
 }
 
 } // end namespace METIS

@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Arrangement_on_surface_2/include/CGAL/Arr_vertical_decomposition_2.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Arrangement_on_surface_2/include/CGAL/Arr_vertical_decomposition_2.h $
 // $Id: Arr_vertical_decomposition_2.h 3c5552b 2020-06-30T21:22:40+03:00 Efi Fogel
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

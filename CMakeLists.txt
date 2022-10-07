@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.1)
 
 project(city4cfd)
 
-#set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/Modules/" ${CMAKE_MODULE_PATH})
 #set( CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS true )
 
 set(CMAKE_CXX_FLAGS "-O3")
@@ -13,21 +12,16 @@ set(CMAKE_BUILD_TYPE "Release")
 #    cmake_policy(SET CMP0003 NEW)
 #endif()
 
-#==============================
-# Alpha wrap support
-set(ALPHA_WRAP_SUPPORT OFF)
-#==============================
-
 # BOOST
-find_package(Boost 1.66 REQUIRED COMPONENTS filesystem)
+find_package(Boost 1.66 REQUIRED COMPONENTS filesystem locale)
 
 # CGAL
 find_package(CGAL REQUIRED QUIET COMPONENTS)
 if (CGAL_FOUND)
-    if (CGAL_VERSION VERSION_GREATER_EQUAL "5.3")
+    if (CGAL_VERSION VERSION_GREATER_EQUAL "5.5")
         message(STATUS "Found CGAL ${CGAL_VERSION}")
     elseif (CGAL_VERSION VERSION_GREATER_EQUAL "5.0")
-        message(STATUS "Found CGAL version greater than 5.0, but less than 5.3. "
+        message(STATUS "Found CGAL version greater than 5.0, but less than 5.5. "
                 "Proceeding to compile with included CGAL headers.")
         include_directories(${CMAKE_SOURCE_DIR}/thirdparty/CGAL/include)
         set(CGAL_USE_INCLUDED_HEADERS ON)
@@ -37,16 +31,20 @@ if (CGAL_FOUND)
         return()
     endif ()
 endif ()
-if (NOT CGAL_USE_INCLUDED_HEADERS AND ALPHA_WRAP_SUPPORT)
-    message(STATUS "Requested alpha wrap support. Compiling with included CGAL headers.")
-    include_directories( ${CMAKE_SOURCE_DIR}/thirdparty/CGAL/include )
-endif()
+
+# Eigen
+find_package(Eigen3 3.2.0) #(requires 3.2.0 or greater)
+include(${CMAKE_SOURCE_DIR}/thirdparty/CGAL/cmake/CGAL_Eigen3_support.cmake)
 
 # Third-party
 add_subdirectory(${CMAKE_SOURCE_DIR}/thirdparty/LAStools)
+add_subdirectory(${CMAKE_SOURCE_DIR}/thirdparty/CSF/src)
 include_directories(${CMAKE_SOURCE_DIR}/thirdparty)
 include_directories(${CMAKE_SOURCE_DIR}/thirdparty/valijson)
 include_directories(${Boost_INCLUDE_DIR})
+
+# Tools
+add_subdirectory(${CMAKE_SOURCE_DIR}/tools/prepare_point_cloud)
 
 # Creating entries for target: City4CFD
 FILE(GLOB SRC_FILES "src/*.cpp")
@@ -61,7 +59,9 @@ target_link_libraries(city4cfd
         ${CGAL_3RD_PARTY_LIBRARIES}
         ${Boost_SYSTEM_LIBRARY}
         ${Boost_FILESYSTEM_LIBRARY}
+        ${Boost_LOCALE_LIBRARY}
         LASlib
+        CGAL::Eigen3_support
         )
 
 install(TARGETS city4cfd DESTINATION bin)

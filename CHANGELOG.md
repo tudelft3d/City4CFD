@@ -1,7 +1,15 @@
 # Changelog
 
+## [0.2.0] - 2022-10-07
+### Added
+- Point cloud preparation tool city4cfd_pcprep
+### Changed
+- (breaking) Terrain smoothing overhaul
+### Removed
+- Previous point cloud preparation script
+
 ## [0.1.2] - 2022-09-13
-### Improved
+### Changed
 - Bad triangles handling
 
 ## [0.1.1] - 2022-09-02

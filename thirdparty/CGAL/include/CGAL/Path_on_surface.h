@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Surface_mesh_topology/include/CGAL/Path_on_surface.h $
-// $Id: Path_on_surface.h 393ae7d 2021-05-12T15:03:53+02:00 Maxime Gimeno
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Surface_mesh_topology/include/CGAL/Path_on_surface.h $
+// $Id: Path_on_surface.h c5c6098 2022-01-27T11:02:17+01:00 Guillaume Damiand
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Guillaume Damiand <guillaume.damiand@liris.cnrs.fr>
@@ -70,7 +70,7 @@ public:
       { extend_straight_negative(-(it->length), false); }
     }
     update_is_closed();
-    CGAL_assertion(is_valid(true));
+    CGAL_expensive_assertion(is_valid(true));
   }
 
   Path_on_surface(const Self& apath) : m_map(apath.m_map),
@@ -1099,7 +1099,7 @@ public:
   /// @return the primitive root and the power of the path in the sense of string.
   ///         use the linear Knuth-Morris-Pratt search
   std::pair<Self, int> factorize() {
-    CGAL_assertion(is_valid());
+    CGAL_expensive_assertion(is_valid());
     if (!is_closed()) {
       // if a path is not closed, it is already primitive
       return std::make_pair(Path_on_surface<Map>(*this), 1);

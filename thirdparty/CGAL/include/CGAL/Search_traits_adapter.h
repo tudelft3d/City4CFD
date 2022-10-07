@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Spatial_searching/include/CGAL/Search_traits_adapter.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Spatial_searching/include/CGAL/Search_traits_adapter.h $
 // $Id: Search_traits_adapter.h 8166579 2021-10-11T19:58:07+02:00 Mael Rouxel-Labbé
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

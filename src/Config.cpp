@@ -80,10 +80,9 @@ void Config::validate(nlohmann::json& j) {
 }
 
 void Config::set_config(nlohmann::json& j) {
-    //-- Schema validation
-    //-- Path to point cloud(s)
+    //-- Point cloud configuration
     if (j.contains("point_clouds")) {
-        if (j["point_clouds"].contains("ground")) points_xyz = j["point_clouds"]["ground"];
+        if (j["point_clouds"].contains("ground")) ground_xyz = j["point_clouds"]["ground"];
         if (j["point_clouds"].contains("buildings")) buildings_xyz = j["point_clouds"]["buildings"];
     }
 
@@ -143,7 +142,7 @@ void Config::set_config(nlohmann::json& j) {
     }
     outputSurfaces.emplace_back("Top");
 
-    //-- Path to polygons
+    //-- Polygon configuration
     int i = 0;
     int surfLayerIdx = outputSurfaces.size(); // 0 - terrain, 1 - buildings, surface layers start from 2
     for (auto& poly : j["polygons"]) {
@@ -200,8 +199,17 @@ void Config::set_config(nlohmann::json& j) {
     // Terrain
     if (j.contains("terrain_thinning"))
         terrainThinning = j["terrain_thinning"];
-    if (j.contains("smooth_terrain"))
-        smoothTerrain = j["smooth_terrain"];
+    if (j.contains("smooth_terrain")) {
+        if (j["smooth_terrain"].contains("iterations")) {
+            smoothTerrain = true;
+            if ((int)j["smooth_terrain"]["iterations"] > 0) {
+                nSmoothIterations = (int)j["smooth_terrain"]["iterations"];
+            } else { smoothTerrain = false; }
+        }
+        if (j["smooth_terrain"].contains("max_pts")) {
+            maxSmoothPts = (int)j["smooth_terrain"]["max_pts"];
+        } else { smoothTerrain = false; }
+    }
     if (j.contains("flat_terrain"))
         flatTerrain = j["flat_terrain"];
 
@@ -258,6 +266,8 @@ void Config::set_config(nlohmann::json& j) {
             handleSelfIntersect = j["experimental"]["handle_self_intersections"];
         if (j["experimental"].contains("refine_buildings"))
             refineBuildings = j["experimental"]["refine_buildings"];
+        if (j["experimental"].contains("alpha_wrap"))
+            alphaWrap = j["experimental"]["alpha_wrap"];
     }
 }
 

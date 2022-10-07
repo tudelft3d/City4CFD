@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Surface_mesh_parameterization/include/CGAL/Surface_mesh_parameterization/Two_vertices_parameterizer_3.h $
-// $Id: Two_vertices_parameterizer_3.h bdd4efe 2021-01-15T10:06:56+01:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Surface_mesh_parameterization/include/CGAL/Surface_mesh_parameterization/Two_vertices_parameterizer_3.h $
+// $Id: Two_vertices_parameterizer_3.h 4ffc949 2022-02-03T17:11:20+01:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Laurent Saboret, Pierre Alliez, Bruno Levy
@@ -305,7 +305,7 @@ public:
                           VertexParameterizedMap vpmap)
   {
     // Fill containers
-    boost::unordered_set<vertex_descriptor> vertices;
+    std::unordered_set<vertex_descriptor> vertices;
     internal::Containers_filler<Triangle_mesh> fc(mesh, vertices);
     Polygon_mesh_processing::connected_component(
                                       face(opposite(bhd, mesh), mesh),

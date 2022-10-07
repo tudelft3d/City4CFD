@@ -6,8 +6,8 @@
  This file is part of a fork of the QGLViewer library version 2.7.0.
 
 *****************************************************************************/
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/GraphicsView/include/CGAL/Qt/camera_impl.h $
-// $Id: camera_impl.h db338aa 2021-02-18T15:19:06+01:00 Laurent Rineau
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/GraphicsView/include/CGAL/Qt/camera_impl.h $
+// $Id: camera_impl.h 225e3c2 2022-05-12T12:39:21+02:00 Laurent Rineau
 // SPDX-License-Identifier: GPL-3.0-only
 
 #ifdef CGAL_HEADER_ONLY
@@ -160,10 +160,11 @@ frustrum coherence.
 If your Camera is used without a CGAL::QGLViewer (offscreen rendering, shadow maps),
 use setAspectRatio() instead to define the projection matrix. */
 CGAL_INLINE_FUNCTION
-void Camera::setScreenWidthAndHeight(int width, int height) {
+void Camera::setScreenWidthAndHeight(int width, int height, qreal devicePixelRatio) {
   // Prevent negative and zero dimensions that would cause divisions by zero.
   screenWidth_ = width > 0 ? width : 1;
   screenHeight_ = height > 0 ? height : 1;
+  devicePixelRatio_ = devicePixelRatio;
   projectionMatrixIsUpToDate_ = false;
 }
 
@@ -884,8 +885,7 @@ Vec Camera::pointUnderPixel(const QPoint &pixel, bool &found) const {
   // Qt uses upper corner for its origin while GL uses the lower corner.
   if(auto p = dynamic_cast<QOpenGLFunctions*>(parent()))
   {
-    p->glReadPixels(pixel.x(), screenHeight() - 1 - pixel.y(), 1, 1,
-                    GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
+    depth = read_depth_under_pixel(pixel, p, this);
   }
   found = depth < 1.0;
   Vec point(pixel.x(), pixel.y(), depth);

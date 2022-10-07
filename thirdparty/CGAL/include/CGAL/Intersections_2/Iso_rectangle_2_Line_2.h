@@ -7,7 +7,7 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Intersections_2/include/CGAL/Intersections_2/Iso_rectangle_2_Line_2.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Intersections_2/include/CGAL/Intersections_2/Iso_rectangle_2_Line_2.h $
 // $Id: Iso_rectangle_2_Line_2.h fb37f69 2021-09-23T13:15:28+02:00 Sébastien Loriot
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //

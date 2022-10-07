@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Intersections_2/include/CGAL/Intersection_traits.h $
-// $Id: Intersection_traits.h 9ed943e 2021-06-23T17:38:22+02:00 Mael Rouxel-Labbé
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Intersections_2/include/CGAL/Intersection_traits.h $
+// $Id: Intersection_traits.h 1d01b0d 2022-01-18T09:20:03+00:00 Andreas Fabri
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -86,28 +86,6 @@ struct Intersection_traits {
   // This defaults to Object, if we use VERSION < 2 and do nothing
   // otherwise.
 };
-
-
-// Alias that gets the Kernel automatically and does some error checking.
-// Including corresponding specialization for Bbox, as it has no Kernel.
-template<typename A, typename B>
-class IT : public Intersection_traits< typename Kernel_traits<A>::Kernel, A, B > {
-  typedef typename Kernel_traits<A>::Kernel A_Kernel;
-  typedef typename Kernel_traits<B>::Kernel B_Kernel;
-  // CGAL_static_assertion_msg( (boost::is_same< A_Kernel, B_Kernel>::value),
-  //                            "IT instantiated with objects from two different Kernels");
-};
-
-class Bbox_2;
-class Bbox_3;
-
-template<typename B>
-class IT<Bbox_2, B> : public Intersection_traits< typename Kernel_traits<B>::Kernel, CGAL::Bbox_2, B >
-{ };
-
-template<typename B>
-class IT<Bbox_3, B> : public Intersection_traits< typename Kernel_traits<B>::Kernel, CGAL::Bbox_3, B >
-{ };
 
 
 namespace Intersections {

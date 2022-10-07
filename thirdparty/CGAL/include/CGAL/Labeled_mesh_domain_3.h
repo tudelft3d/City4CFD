@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Mesh_3/include/CGAL/Labeled_mesh_domain_3.h $
-// $Id: Labeled_mesh_domain_3.h ac7b637 2021-10-05T10:27:03+02:00 Jane Tournois
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Mesh_3/include/CGAL/Labeled_mesh_domain_3.h $
+// $Id: Labeled_mesh_domain_3.h 61e3637 2022-04-25T14:04:11+01:00 Andreas Fabri
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -372,6 +372,13 @@ public:
 #  pragma warning(push)
 #  pragma warning(disable: 4003)
 #endif
+
+  // see <CGAL/config.h>
+CGAL_PRAGMA_DIAG_PUSH
+// see <CGAL/boost/parameter.h>
+CGAL_IGNORE_BOOST_PARAMETER_NAME_WARNINGS
+
+
   BOOST_PARAMETER_MEMBER_FUNCTION(
                                   (Labeled_mesh_domain_3),
                                   static create_gray_image_mesh_domain,
@@ -493,6 +500,8 @@ public:
        p::construct_surface_patch_index =
          create_construct_surface_patch_index(construct_surface_patch_index_));
   }
+
+CGAL_PRAGMA_DIAG_POP
 
 #if defined(BOOST_MSVC)
 #  pragma warning(pop)

@@ -30,13 +30,16 @@
   "buffer_region":     5,
   "reconstruct_boundaries": true,
 
-  "terrain_thinning": 80,
-  "smooth_terrain":   false,
+  "terrain_thinning": 10,
+  "smooth_terrain":   {
+    "iterations": 1,
+    "max_pts": 100000
+  },
 
   "lod": "1.2",
   "building_percentile": 90,
 
-  "edge_max_len": 2,
+  "edge_max_len": 5,
 
   "output_file_name":  "Mesh",
   "output_format":     "obj",

@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Poisson_surface_reconstruction_3/include/CGAL/Reconstruction_triangulation_3.h $
-// $Id: Reconstruction_triangulation_3.h 0779373 2020-03-26T13:31:46+01:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Poisson_surface_reconstruction_3/include/CGAL/Reconstruction_triangulation_3.h $
+// $Id: Reconstruction_triangulation_3.h 4968d21 2022-05-17T10:31:07+01:00 Andreas Fabri
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -348,12 +348,12 @@ public:
   /// Insert the [first, beyond) range of points in the triangulation using a spatial sort.
   /// Default type is INPUT.
   ///
-  /// @commentheading Template Parameters:
-  /// @param InputIterator iterator over input points.
-  /// @param PointPMap is a model of `ReadablePropertyMap` with a value_type = Point_3.
+  /// *Template Parameters:*
+  /// @tparam InputIterator iterator over input points.
+  /// @tparam PointPMap is a model of `ReadablePropertyMap` with a value_type = Point_3.
   ///        It can be omitted if InputIterator value_type is convertible to Point_3.
-  /// @param NormalPMap is a model of `ReadablePropertyMap` with a value_type = Vector_3.
-  ///
+  /// @tparam NormalPMap is a model of `ReadablePropertyMap` with a value_type = Vector_3.
+  /// @tparam Visitor the visitor type
   /// @return the number of inserted points.
 
   // This variant requires all parameters.

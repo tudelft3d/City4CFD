@@ -5,7 +5,7 @@
  *
  * This file is part of CGAL (www.cgal.org).
  *
- * $URL: https://github.com/CGAL/cgal/blob/v5.4/CGAL_Core/include/CGAL/CORE/Config.h $
+ * $URL: https://github.com/CGAL/cgal/blob/v5.5/CGAL_Core/include/CGAL/CORE/Config.h $
  * $Id: Config.h 26fb266 2019-10-19T16:28:33+02:00 Sébastien Loriot
  * SPDX-License-Identifier: LGPL-3.0-or-later
  ***************************************************************************/

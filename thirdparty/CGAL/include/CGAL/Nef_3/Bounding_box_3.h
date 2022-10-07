@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Nef_3/include/CGAL/Nef_3/Bounding_box_3.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Nef_3/include/CGAL/Nef_3/Bounding_box_3.h $
 // $Id: Bounding_box_3.h b1c09a5 2020-07-20T16:52:24+02:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

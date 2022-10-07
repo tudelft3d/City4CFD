@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Triangulation_on_sphere_2/include/CGAL/Triangulation_on_sphere_2/internal/arc_on_sphere_2_subsampling.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Triangulation_on_sphere_2/include/CGAL/Triangulation_on_sphere_2/internal/arc_on_sphere_2_subsampling.h $
 // $Id: arc_on_sphere_2_subsampling.h 8de892f 2021-05-12T10:05:26+02:00 Mael Rouxel-Labbé
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Surface_mesher/include/CGAL/Gray_level_image_3.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Surface_mesher/include/CGAL/Gray_level_image_3.h $
 // $Id: Gray_level_image_3.h 44df664 2021-10-07T11:38:06+02:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

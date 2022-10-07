@@ -1,0 +1,11 @@
+{
+  "las_files":
+  [
+      "points_2.laz",
+      "points_1.laz"
+  ],
+  "ground_classes": [2, 9],
+  "building_classes": [6],
+  "bbox": [22130, 441400, 23130, 44240],
+  "thinning": 90
+}

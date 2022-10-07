@@ -7,8 +7,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Stream_support/include/CGAL/IO/Color.h $
-// $Id: Color.h 115fa5a 2021-12-14T14:01:21+00:00 Andreas Fabri
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Stream_support/include/CGAL/IO/Color.h $
+// $Id: Color.h 98ee8d7 2022-02-25T14:54:48+01:00 Charrière Maxime
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -132,6 +132,11 @@ public:
     return !( (*this) == c);
   }
 
+  bool operator<(const Color& c) const
+  {
+      return m_data < c.to_rgba();
+  }
+
   unsigned char r() const { return red(); }
   unsigned char g() const { return green(); }
   unsigned char b() const { return blue(); }
@@ -206,7 +211,7 @@ public:
   /*!
     replaces the rgb values of the colors by the one given as parameters.
   */
-  void set_rgb (unsigned char red,
+  Color& set_rgb (unsigned char red,
                 unsigned char green,
                 unsigned char blue,
                 unsigned char alpha = 255)
@@ -215,13 +220,15 @@ public:
     m_data[1] = green;
     m_data[2] = blue;
     m_data[3] = alpha;
+
+    return *this;
   }
 
   /*!
     replaces the rgb values of the colors by the conversion to rgb of
     the hsv values given as parameters.
   */
-  void set_hsv (double hue,
+  Color& set_hsv (double hue,
                 double saturation,
                 double value,
                 unsigned char alpha = 255)
@@ -275,6 +282,8 @@ public:
     m_data[1] = (unsigned char)g;
     m_data[2] = (unsigned char)b;
     m_data[3] = alpha;
+
+    return *this;
   }
 
   /// @}

@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Installation/include/CGAL/license/Shape_regularization.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Installation/include/CGAL/license/Shape_regularization.h $
 // $Id: Shape_regularization.h 542f67b 2021-06-11T12:59:00+02:00 Dmitry Anisimov
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //

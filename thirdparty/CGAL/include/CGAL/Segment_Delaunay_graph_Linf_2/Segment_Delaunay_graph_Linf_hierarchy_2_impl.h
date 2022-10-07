@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Segment_Delaunay_graph_Linf_2/include/CGAL/Segment_Delaunay_graph_Linf_2/Segment_Delaunay_graph_Linf_hierarchy_2_impl.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Segment_Delaunay_graph_Linf_2/include/CGAL/Segment_Delaunay_graph_Linf_2/Segment_Delaunay_graph_Linf_hierarchy_2_impl.h $
 // $Id: Segment_Delaunay_graph_Linf_hierarchy_2_impl.h 4e519a3 2021-05-05T13:15:37+02:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

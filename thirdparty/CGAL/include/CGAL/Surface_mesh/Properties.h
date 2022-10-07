@@ -4,8 +4,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Surface_mesh/include/CGAL/Surface_mesh/Properties.h $
-// $Id: Properties.h 3b70343 2020-11-16T16:19:43+01:00 Maxime Gimeno
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Surface_mesh/include/CGAL/Surface_mesh/Properties.h $
+// $Id: Properties.h 090c61c 2022-04-20T17:08:05+02:00 Laurent Rineau
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 
@@ -234,13 +234,18 @@ class Property_container
 public:
 
     // default constructor
-    Property_container() : size_(0), capacity_(0) {}
+    Property_container() = default;
 
     // destructor (deletes all property arrays)
     virtual ~Property_container() { clear(); }
 
     // copy constructor: performs deep copy of property arrays
     Property_container(const Property_container& _rhs) { operator=(_rhs); }
+
+    Property_container(Property_container&& c) noexcept
+    {
+      c.swap(*this);
+    }
 
     // assignment: performs deep copy of property arrays
     Property_container& operator=(const Property_container& _rhs)
@@ -256,6 +261,14 @@ public:
         }
         return *this;
     }
+
+    Property_container& operator=(Property_container&& c) noexcept
+    {
+      Property_container tmp(std::move(c));
+      tmp.swap(*this);
+      return *this;
+    }
+
 
     void transfer(const Property_container& _rhs)
     {
@@ -495,12 +508,13 @@ public:
     {
       this->parrays_.swap (other.parrays_);
       std::swap(this->size_, other.size_);
+      std::swap(this->capacity_, other.capacity_);
     }
 
 private:
     std::vector<Base_property_array*>  parrays_;
-    size_t  size_;
-    size_t  capacity_;
+    size_t  size_ = 0;
+    size_t  capacity_ = 0;
 };
 
   /// @endcond
@@ -553,6 +567,20 @@ public:
 public:
 /// @cond CGAL_DOCUMENT_INTERNALS
     Property_map_base(Property_array<T>* p=nullptr) : parray_(p) {}
+
+    Property_map_base(Property_map_base&& pm) noexcept
+      : parray_(std::exchange(pm.parray_, nullptr))
+    {}
+
+    Property_map_base(const Property_map_base& pm)
+      : parray_(pm.parray_)
+    {}
+
+    Property_map_base& operator=(const Property_map_base& pm)
+    {
+      parray_ = pm.parray_;
+      return *this;
+    }
 
     void reset()
     {

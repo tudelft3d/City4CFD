@@ -2,7 +2,7 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Polynomial/include/CGAL/Polynomial/bezout_matrix.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Polynomial/include/CGAL/Polynomial/bezout_matrix.h $
 // $Id: bezout_matrix.h e9d41d7 2020-04-21T10:03:00+02:00 Maxime Gimeno
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //

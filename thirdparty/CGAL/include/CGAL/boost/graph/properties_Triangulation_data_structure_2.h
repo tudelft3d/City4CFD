@@ -2,8 +2,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/TDS_2/include/CGAL/boost/graph/properties_Triangulation_data_structure_2.h $
-// $Id: properties_Triangulation_data_structure_2.h 129f427 2021-12-16T13:48:01+01:00 Mael Rouxel-Labbé
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/TDS_2/include/CGAL/boost/graph/properties_Triangulation_data_structure_2.h $
+// $Id: properties_Triangulation_data_structure_2.h 6d3176e 2022-01-07T14:42:25+01:00 Sébastien Loriot
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Mael Rouxel-Labbé
@@ -15,7 +15,7 @@
 #include <CGAL/boost/graph/internal/graph_traits_2D_TDS_helper.h>
 #include <CGAL/boost/graph/internal/Has_member_id.h>
 
-#include <CGAL/boost/graph/Named_function_parameters.h>
+#include <CGAL/Named_function_parameters.h>
 
 #include <boost/graph/properties.hpp>
 

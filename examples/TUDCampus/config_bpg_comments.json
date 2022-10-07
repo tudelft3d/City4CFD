@@ -45,15 +45,18 @@
 
   //-- Reconstruction related
   //- Terrain
-  "terrain_thinning": 90,             // Optional - percentage of randomly removed terrain points
-  "smooth_terrain":   true,           // Optional - smoothing flag
+  "terrain_thinning": 80,             // Optional - percentage of randomly removed terrain points
+  "smooth_terrain": {                 // Optional - smoothing flag
+    "iterations": 1,                  //            number of smoothing iterations. Typical numbers are 1-10
+    "max_pts": 100000                 //            number of points after optimized thinning for smoothing 
+  },  
   "flat_terrain":     false,          // Optional - make terrain flat
   //- Buildings
   "lod": "1.2",
   "building_percentile": 90,
 
   //-- Polygons related
-  "edge_max_len": 2,
+  "edge_max_len": 5,
 
   //-- Output
   "output_file_name":  "Mesh",

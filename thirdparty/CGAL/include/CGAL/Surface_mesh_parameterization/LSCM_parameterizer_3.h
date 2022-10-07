@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Surface_mesh_parameterization/include/CGAL/Surface_mesh_parameterization/LSCM_parameterizer_3.h $
-// $Id: LSCM_parameterizer_3.h bdd4efe 2021-01-15T10:06:56+01:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Surface_mesh_parameterization/include/CGAL/Surface_mesh_parameterization/LSCM_parameterizer_3.h $
+// $Id: LSCM_parameterizer_3.h 4ffc949 2022-02-03T17:11:20+01:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Laurent Saboret, Pierre Alliez, Bruno Levy
@@ -32,8 +32,8 @@
 #include <CGAL/OpenNL/linear_solver.h>
 
 #include <boost/iterator/function_output_iterator.hpp>
-#include <boost/unordered_set.hpp>
 
+#include <unordered_set>
 #include <vector>
 
 /// \file LSCM_parameterizer_3.h
@@ -201,7 +201,7 @@ public:
     CGAL_precondition(bhd != boost::graph_traits<Triangle_mesh>::null_halfedge() && is_border(bhd, mesh));
 
     // Fill containers
-    boost::unordered_set<vertex_descriptor> ccvertices;
+    std::unordered_set<vertex_descriptor> ccvertices;
     std::vector<face_descriptor> ccfaces;
 
     internal::Containers_filler<Triangle_mesh> fc(mesh, ccvertices, &ccfaces);
@@ -274,7 +274,7 @@ private:
   // \pre At least 2 border vertices must be parameterized.
   template <typename UVmap, typename VertexIndexMap, typename VertexParameterizedMap>
   void initialize_system_from_mesh_border(LeastSquaresSolver& solver,
-                                          const boost::unordered_set<vertex_descriptor>& ccvertices,
+                                          const std::unordered_set<vertex_descriptor>& ccvertices,
                                           UVmap uvmap,
                                           VertexIndexMap vimap,
                                           VertexParameterizedMap vpmap) const

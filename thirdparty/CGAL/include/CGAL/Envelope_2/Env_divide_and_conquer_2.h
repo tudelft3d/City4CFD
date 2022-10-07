@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Envelope_2/include/CGAL/Envelope_2/Env_divide_and_conquer_2.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Envelope_2/include/CGAL/Envelope_2/Env_divide_and_conquer_2.h $
 // $Id: Env_divide_and_conquer_2.h 35fd91b 2020-08-20T16:03:29+02:00 Ahmed Essam
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Convex_hull_2/include/CGAL/Convex_hull_2/ch_eddy_impl.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Convex_hull_2/include/CGAL/Convex_hull_2/ch_eddy_impl.h $
 // $Id: ch_eddy_impl.h c4ad713 2021-01-05T11:40:22+01:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

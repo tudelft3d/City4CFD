@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Point_set_processing_3/include/CGAL/IO/read_points.h $
-// $Id: read_points.h 78ff918 2021-06-23T23:34:14+02:00 Mael Rouxel-Labbé
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Point_set_processing_3/include/CGAL/IO/read_points.h $
+// $Id: read_points.h 75b03e6 2022-01-10T15:33:04+01:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s) : Maxime Gimeno
@@ -85,10 +85,10 @@ namespace IO {
 */
 template <typename OutputIteratorValueType,
           typename PointOutputIterator,
-          typename NamedParameters>
+          typename NamedParameters = parameters::Default_named_parameters>
 bool read_points(const std::string& fname,
                  PointOutputIterator output,
-                 const NamedParameters& np)
+                 const NamedParameters& np = parameters::default_values())
 {
   const std::string ext = internal::get_file_extension(fname);
 
@@ -109,24 +109,12 @@ bool read_points(const std::string& fname,
 /// \cond SKIP_IN_MANUAL
 
 // variant with default OutputIteratorType
-template <typename OutputIterator, typename NamedParameters>
-bool read_points(const std::string& fname, OutputIterator output, const NamedParameters& np)
+template <typename OutputIterator, typename NamedParameters = parameters::Default_named_parameters>
+bool read_points(const std::string& fname, OutputIterator output, const NamedParameters& np = parameters::default_values())
 {
   return read_points<typename value_type_traits<OutputIterator>::type>(fname, output, np);
 }
 
-template <typename OutputIteratorValueType, typename OutputIterator>
-bool read_points(const std::string& fname, OutputIterator output)
-{
-  return read_points<OutputIteratorValueType>(fname, output, parameters::all_default());
-}
-
-// variant with all default
-template<typename OutputIterator>
-bool read_points(const std::string& fname, OutputIterator output)
-{
-  return read_points<typename value_type_traits<OutputIterator>::type>(fname, output, parameters::all_default());
-}
 
 /// \endcond
 

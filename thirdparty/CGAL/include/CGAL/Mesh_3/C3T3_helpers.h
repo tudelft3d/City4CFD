@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Mesh_3/include/CGAL/Mesh_3/C3T3_helpers.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Mesh_3/include/CGAL/Mesh_3/C3T3_helpers.h $
 // $Id: C3T3_helpers.h a9318b3 2021-10-15T09:48:54+02:00 Jane Tournois
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

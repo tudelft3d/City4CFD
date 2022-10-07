@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Nef_3/include/CGAL/Nef_nary_intersection_3.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Nef_3/include/CGAL/Nef_nary_intersection_3.h $
 // $Id: Nef_nary_intersection_3.h a86712d 2020-06-07T15:25:18+02:00 Thomas Krijnen
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

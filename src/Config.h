@@ -55,8 +55,8 @@ public:
                     nlohmann::json& j);
 
     //-- Input info
-    std::string              points_xyz;             // Ground
-    std::string              buildings_xyz;          // Buildings
+    std::string              ground_xyz;             // Ground points
+    std::string              buildings_xyz;          // Building points
     std::string              gisdata;                // Building Polygons
     std::vector<std::string> topoLayers = {};        // Other polygons
     std::string              importedBuildingsPath;  // Additional pre-reconstructed buildings
@@ -80,6 +80,8 @@ public:
     //- Terrain
     double    terrainThinning                   = 0.;
     bool      smoothTerrain                     = false;
+    int       nSmoothIterations                 = 0;
+    int       maxSmoothPts                      = -9999;
     bool      flatTerrain                       = false;
     //- Buildings
     std::string buildingUniqueId;
@@ -122,6 +124,7 @@ public:
     bool       clip                             = false;
     bool       handleSelfIntersect              = false;
     bool       refineBuildings                  = false;
+    bool       alphaWrap                        = false;
 };
 
 #endif //CITY4CFD_CONFIG_H

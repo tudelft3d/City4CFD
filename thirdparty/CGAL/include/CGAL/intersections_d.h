@@ -7,7 +7,7 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Kernel_d/include/CGAL/intersections_d.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Kernel_d/include/CGAL/intersections_d.h $
 // $Id: intersections_d.h e4f5d0b 2020-07-22T16:28:40+02:00 Dmitry Anisimov
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //

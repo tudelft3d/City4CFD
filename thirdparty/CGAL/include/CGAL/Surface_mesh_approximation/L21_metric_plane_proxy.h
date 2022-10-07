@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Surface_mesh_approximation/include/CGAL/Surface_mesh_approximation/L21_metric_plane_proxy.h $
-// $Id: L21_metric_plane_proxy.h fbbff67 2021-01-08T10:15:12+01:00 Dmitry Anisimov
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Surface_mesh_approximation/include/CGAL/Surface_mesh_approximation/L21_metric_plane_proxy.h $
+// $Id: L21_metric_plane_proxy.h 4ffc949 2022-02-03T17:11:20+01:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -22,7 +22,8 @@
 
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <boost/graph/graph_traits.hpp>
-#include <boost/unordered_map.hpp>
+
+#include <unordered_map>
 
 namespace CGAL {
 namespace Surface_mesh_approximation {

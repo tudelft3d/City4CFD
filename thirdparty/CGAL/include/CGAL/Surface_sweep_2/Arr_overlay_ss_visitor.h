@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Arrangement_on_surface_2/include/CGAL/Surface_sweep_2/Arr_overlay_ss_visitor.h $
-// $Id: Arr_overlay_ss_visitor.h 6e1fc8a 2021-09-02T16:53:07+02:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Arrangement_on_surface_2/include/CGAL/Surface_sweep_2/Arr_overlay_ss_visitor.h $
+// $Id: Arr_overlay_ss_visitor.h 4ffc949 2022-02-03T17:11:20+01:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -24,8 +24,9 @@
 
 #include <boost/variant.hpp>
 #include <boost/optional.hpp>
-#include <boost/unordered_map.hpp>
 #include <boost/variant/apply_visitor.hpp>
+
+#include <unordered_map>
 
 #include <CGAL/Arr_tags.h>
 #include <CGAL/Surface_sweep_2/Arr_construction_ss_visitor.h>
@@ -114,7 +115,7 @@ protected:
                                                         Halfedge_map;
 
   typedef std::pair<Cell_handle_red, Cell_handle_blue>  Handle_info;
-  typedef boost::unordered_map<Vertex_handle, Handle_info, Handle_hash_function>
+  typedef std::unordered_map<Vertex_handle, Handle_info, Handle_hash_function>
                                                         Vertex_map;
 
   // Side categoties:

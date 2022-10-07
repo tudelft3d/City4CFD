@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Surface_mesh_parameterization/include/CGAL/Surface_mesh_parameterization/MVC_post_processor_3.h $
-// $Id: MVC_post_processor_3.h 373d21e 2021-12-20T18:06:26+01:00 Laurent Rineau
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Surface_mesh_parameterization/include/CGAL/Surface_mesh_parameterization/MVC_post_processor_3.h $
+// $Id: MVC_post_processor_3.h 4ffc949 2022-02-03T17:11:20+01:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Mael Rouxel-Labbé
@@ -34,8 +34,7 @@
 
 #include <CGAL/Default.h>
 
-#include <boost/unordered_set.hpp>
-
+#include <unordered_set>
 #include <vector>
 #include <fstream>
 #include <iostream>
@@ -117,7 +116,7 @@ private:
   typedef typename boost::graph_traits<Triangle_mesh>::face_iterator        face_iterator;
   typedef typename boost::graph_traits<Triangle_mesh>::vertex_iterator      vertex_iterator;
 
-  typedef boost::unordered_set<vertex_descriptor>       Vertex_set;
+  typedef std::unordered_set<vertex_descriptor>         Vertex_set;
   typedef std::vector<face_descriptor>                  Faces_vector;
 
   // Traits subtypes:
@@ -704,8 +703,8 @@ public:
 
     // Prepare the constrained triangulation: collect exterior faces (faces in
     // the convex hull but not -- geometrically -- in 'mesh').
-    boost::unordered_set<vertex_descriptor> vs;
-    internal::Bool_property_map<boost::unordered_set<vertex_descriptor> > vpmap(vs);
+    std::unordered_set<vertex_descriptor> vs;
+    internal::Bool_property_map<std::unordered_set<vertex_descriptor> > vpmap(vs);
     prepare_CT_for_parameterization(ct, vpmap);
 
     // Run the MVC

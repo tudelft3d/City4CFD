@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Three/include/CGAL/Three/Viewer_interface.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Three/include/CGAL/Three/Viewer_interface.h $
 // $Id: Viewer_interface.h 8f1c510 2021-08-10T15:21:33+02:00 Maxime Gimeno
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

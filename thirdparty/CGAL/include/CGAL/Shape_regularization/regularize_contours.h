@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Shape_regularization/include/CGAL/Shape_regularization/regularize_contours.h $
-// $Id: regularize_contours.h 298c33f 2021-08-12T18:00:36+02:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Shape_regularization/include/CGAL/Shape_regularization/regularize_contours.h $
+// $Id: regularize_contours.h 75b03e6 2022-01-10T15:33:04+01:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -28,7 +28,7 @@
 // Boost includes.
 /// \cond SKIP_IN_MANUAL
 #include <CGAL/boost/graph/named_params_helper.h>
-#include <CGAL/boost/graph/Named_function_parameters.h>
+#include <CGAL/Named_function_parameters.h>
 /// \endcond
 
 // Internal includes.
@@ -115,12 +115,12 @@ namespace Contours {
   typename InputRange,
   typename ContDirections,
   typename OutIterator,
-  typename NamedParameters>
+  typename NamedParameters = parameters::Default_named_parameters>
   OutIterator regularize_closed_contour(
     const InputRange& input_range,
     const ContDirections& directions,
     OutIterator contour,
-    const NamedParameters& np) {
+    const NamedParameters& np = parameters::default_values()) {
 
     using PointMap = typename CGAL::GetPointMap<InputRange, NamedParameters>::type;
     using Point_2 = typename PointMap::value_type;
@@ -140,22 +140,6 @@ namespace Contours {
       directions, input_range, point_map, np, traits);
     return regularizer.regularize(contour);
   }
-
-  /// \cond SKIP_IN_MANUAL
-  template<
-  typename InputRange,
-  typename ContDirections,
-  typename OutIterator>
-  OutIterator regularize_closed_contour(
-    const InputRange& input_range,
-    const ContDirections& directions,
-    OutIterator contour) {
-
-    CGAL_precondition(input_range.size() >= 3);
-    return regularize_closed_contour(
-      input_range, directions, contour, CGAL::parameters::all_default());
-  }
-  /// \endcond
 
   /*!
     \ingroup PkgShapeRegularizationRefContours
@@ -254,12 +238,12 @@ namespace Contours {
   typename InputRange,
   typename ContDirections,
   typename OutIterator,
-  typename NamedParameters>
+  typename NamedParameters = parameters::Default_named_parameters>
   OutIterator regularize_open_contour(
     const InputRange& input_range,
     const ContDirections& directions,
     OutIterator contour,
-    const NamedParameters& np) {
+    const NamedParameters& np = parameters::default_values()) {
 
     using PointMap = typename CGAL::GetPointMap<InputRange, NamedParameters>::type;
     using Point_2 = typename PointMap::value_type;
@@ -279,22 +263,6 @@ namespace Contours {
       directions, input_range, point_map, np, traits);
     return regularizer.regularize(contour);
   }
-
-  /// \cond SKIP_IN_MANUAL
-  template<
-  typename InputRange,
-  typename ContDirections,
-  typename OutIterator>
-  OutIterator regularize_open_contour(
-    const InputRange& input_range,
-    const ContDirections& directions,
-    OutIterator contour) {
-
-    CGAL_precondition(input_range.size() >= 2);
-    return regularize_open_contour(
-      input_range, directions, contour, CGAL::parameters::all_default());
-  }
-  /// \endcond
 
   /*!
     \ingroup PkgShapeRegularizationRefContours

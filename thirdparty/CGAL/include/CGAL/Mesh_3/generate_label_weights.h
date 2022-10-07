@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Mesh_3/include/CGAL/Mesh_3/generate_label_weights.h $
-// $Id: generate_label_weights.h b664ee5 2021-10-21T12:15:49+02:00 Jane Tournois
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Mesh_3/include/CGAL/Mesh_3/generate_label_weights.h $
+// $Id: generate_label_weights.h 5913be0 2022-03-22T12:13:42+01:00 Jane Tournois
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -227,6 +227,7 @@ CGAL::Image_3 generate_label_weights_with_known_word_type(const CGAL::Image_3& i
 /// @endcond
 
 /*!
+* \ingroup PkgMesh3Functions
 * Free function that generates a `CGAL::Image_3` of weights associated to each
 * voxel of `image`, to make the output mesh surfaces smoother.
 * The weights image is generated using the algorithm described by Stalling et al

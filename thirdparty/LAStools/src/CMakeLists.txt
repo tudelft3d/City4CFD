@@ -7,9 +7,7 @@ include_directories(../LASzip/src)
 include_directories(../LASlib/inc)
 
 set(GEOPROJECTION_TARGETS
-	laszip
 	las2las
-	lasmerge
 )
 
 set(ALL_TARGETS ${GEOPROJECTION_TARGETS})
@@ -20,7 +18,7 @@ endforeach(TARGET)
 
 foreach(TARGET ${ALL_TARGETS})
 	target_link_libraries(${TARGET} LASlib)
-	set_target_properties(${TARGET} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../bin64)
-	set_target_properties(${TARGET} PROPERTIES OUTPUT_NAME ${TARGET}64)
+	set_target_properties(${TARGET} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/tools/LAStools)
+	set_target_properties(${TARGET} PROPERTIES OUTPUT_NAME city4cfd_${TARGET})
 	install(TARGETS ${TARGET} RUNTIME DESTINATION bin)
 endforeach(TARGET)

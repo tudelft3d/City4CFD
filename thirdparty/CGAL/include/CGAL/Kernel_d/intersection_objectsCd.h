@@ -7,7 +7,7 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Kernel_d/include/CGAL/Kernel_d/intersection_objectsCd.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Kernel_d/include/CGAL/Kernel_d/intersection_objectsCd.h $
 // $Id: intersection_objectsCd.h 0779373 2020-03-26T13:31:46+01:00 Sébastien Loriot
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //

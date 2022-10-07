@@ -4,8 +4,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Intersections_3/include/CGAL/Intersections_3/internal/Bbox_3_Line_3_do_intersect.h $
-// $Id: Bbox_3_Line_3_do_intersect.h 9c6456f 2021-07-29T14:23:40+02:00 Mael Rouxel-Labbé
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Intersections_3/include/CGAL/Intersections_3/internal/Bbox_3_Line_3_do_intersect.h $
+// $Id: Bbox_3_Line_3_do_intersect.h a7ff075 2022-02-03T13:21:11+00:00 Andreas Fabri
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -63,7 +63,7 @@ bbox_line_do_intersect_aux(const LFT px, const LFT py, const LFT pz,
   }
 
   //if px is not in the x-slab
-  if(dmin == FT(0) && (tmin > FT(0) || tmax < FT(0)))
+  if(is_zero(dmin) && (is_positive(tmin) || is_negative(tmax)))
     return false;
 
   FT dmax = dmin;

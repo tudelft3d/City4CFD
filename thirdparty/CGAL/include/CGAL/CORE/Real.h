@@ -21,7 +21,7 @@
  * WWW URL: http://cs.nyu.edu/exact/
  * Email: exact@cs.nyu.edu
  *
- * $URL: https://github.com/CGAL/cgal/blob/v5.4/CGAL_Core/include/CGAL/CORE/Real.h $
+ * $URL: https://github.com/CGAL/cgal/blob/v5.5/CGAL_Core/include/CGAL/CORE/Real.h $
  * $Id: Real.h 10e99cb 2020-07-22T09:51:07+02:00 Laurent Rineau
  * SPDX-License-Identifier: LGPL-3.0-or-later
  ***************************************************************************/

@@ -7,7 +7,7 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/HalfedgeDS/include/CGAL/HalfedgeDS_list.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/HalfedgeDS/include/CGAL/HalfedgeDS_list.h $
 // $Id: HalfedgeDS_list.h 1373150 2020-11-29T14:42:55+00:00 Giles Bathgate
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //

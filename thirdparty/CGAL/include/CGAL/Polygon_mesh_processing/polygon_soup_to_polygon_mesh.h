@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Polygon_mesh_processing/include/CGAL/Polygon_mesh_processing/polygon_soup_to_polygon_mesh.h $
-// $Id: polygon_soup_to_polygon_mesh.h 19e5e4a 2021-03-02T12:25:28+00:00 Andreas Fabri
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Polygon_mesh_processing/include/CGAL/Polygon_mesh_processing/polygon_soup_to_polygon_mesh.h $
+// $Id: polygon_soup_to_polygon_mesh.h bb0b9a8 2022-03-07T15:32:37+01:00 Mael Rouxel-Labbé
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -145,9 +145,10 @@ private:
 /**
 * \ingroup PMP_repairing_grp
 *
-* returns `true` if the soup of polygons defines a valid polygon
+* \brief returns `true` if the soup of polygons defines a valid polygon
 * mesh that can be handled by
 * `CGAL::Polygon_mesh_processing::polygon_soup_to_polygon_mesh()`.
+*
 * It checks that each edge has at most two incident faces and such an edge
 * is visited in opposite direction along the two face boundaries,
 * no polygon has twice the same vertex,
@@ -164,7 +165,7 @@ private:
 * @param polygons each element in the range describes a polygon
 * using the indices of the vertices.
 *
-* @sa `orient_polygon_soup()`
+* @sa `CGAL::Polygon_mesh_processing::orient_polygon_soup()`
 */
 template<typename PolygonRange>
 bool is_polygon_soup_a_polygon_mesh(const PolygonRange& polygons)
@@ -221,6 +222,7 @@ bool is_polygon_soup_a_polygon_mesh(const PolygonRange& polygons)
 
 /**
 * \ingroup PMP_repairing_grp
+*
 * builds a polygon mesh from a soup of polygons.
 *
 * @pre the input polygon soup describes a consistently oriented
@@ -269,12 +271,12 @@ bool is_polygon_soup_a_polygon_mesh(const PolygonRange& polygons)
 */
 template<typename PolygonMesh,
          typename PointRange, typename PolygonRange,
-         typename NamedParameters_PS, typename NamedParameters_PM>
+         typename NamedParameters_PS = parameters::Default_named_parameters, typename NamedParameters_PM = parameters::Default_named_parameters>
 void polygon_soup_to_polygon_mesh(const PointRange& points,
                                   const PolygonRange& polygons,
                                   PolygonMesh& out,
-                                  const NamedParameters_PS& np_ps,
-                                  const NamedParameters_PM& np_pm)
+                                  const NamedParameters_PS& np_ps = parameters::default_values(),
+                                  const NamedParameters_PM& np_pm = parameters::default_values())
 {
   CGAL_precondition_msg(is_polygon_soup_a_polygon_mesh(polygons),
                         "Input soup needs to define a valid polygon mesh! See is_polygon_soup_a_polygon_mesh() for further information.");
@@ -292,29 +294,6 @@ void polygon_soup_to_polygon_mesh(const PointRange& points,
   internal::PS_to_PM_converter<PointRange, PolygonRange, Point_map> converter(points, polygons, pm);
   converter(out, vpm);
 }
-
-/// \cond SKIP_IN_MANUAL
-
-template<typename PolygonMesh,
-         typename PointRange, typename PolygonRange,
-         typename NamedParameters_PS>
-void polygon_soup_to_polygon_mesh(const PointRange& points,
-                                  const PolygonRange& polygons,
-                                  PolygonMesh& out,
-                                  const NamedParameters_PS& np_ps)
-{
-  return polygon_soup_to_polygon_mesh(points, polygons, out, np_ps, parameters::all_default());
-}
-
-template<typename PolygonMesh, typename PointRange, typename PolygonRange>
-void polygon_soup_to_polygon_mesh(const PointRange& points,
-                                  const PolygonRange& polygons,
-                                  PolygonMesh& out)
-{
-  return polygon_soup_to_polygon_mesh(points, polygons, out, parameters::all_default(), parameters::all_default());
-}
-
-/// \endcond
 
 } // namespace Polygon_mesh_processing
 } // namespace CGAL

@@ -3,7 +3,7 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Boolean_set_operations_2/include/CGAL/General_polygon_set_2.h $
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Boolean_set_operations_2/include/CGAL/General_polygon_set_2.h $
 // $Id: General_polygon_set_2.h 76f4465 2021-03-03T11:29:12+02:00 Efi Fogel
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //

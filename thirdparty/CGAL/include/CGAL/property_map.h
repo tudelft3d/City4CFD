@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Property_map/include/CGAL/property_map.h $
-// $Id: property_map.h da0ba6a 2021-12-20T18:06:31+01:00 Laurent Rineau
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Property_map/include/CGAL/property_map.h $
+// $Id: property_map.h 62936f8 2022-06-13T17:01:35+02:00 Sébastien Loriot
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Andreas Fabri and Laurent Saboret
@@ -410,7 +410,11 @@ struct Property_map_to_unary_function{
   {}
 
   template <class KeyType>
+  #if defined(__INTEL_COMPILER) && defined(__INTEL_COMPILER_BUILD_DATE) && (__INTEL_COMPILER_BUILD_DATE < 20210000)
+  result_type
+  #else
   decltype(auto)
+  #endif
   operator()(const KeyType& a) const
   {
     return get(map,a);

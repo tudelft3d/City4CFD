@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Spatial_searching/include/CGAL/Incremental_neighbor_search.h $
-// $Id: Incremental_neighbor_search.h 98e4718 2021-08-26T11:33:39+02:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Spatial_searching/include/CGAL/Incremental_neighbor_search.h $
+// $Id: Incremental_neighbor_search.h 9888d44 2022-01-31T09:44:04+00:00 Andreas Fabri
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -17,6 +17,7 @@
 #include <CGAL/license/Spatial_searching.h>
 
 #include <CGAL/disable_warnings.h>
+#include <CGAL/Kd_tree.h>
 #include <CGAL/Kd_tree_node.h>
 #include <CGAL/Kd_tree_rectangle.h>
 #include <CGAL/Euclidean_distance.h>
@@ -342,7 +343,8 @@ namespace CGAL {
 
           typename SearchTraits::Construct_cartesian_const_iterator_d construct_it =
             m_tree.traits().construct_cartesian_const_iterator_d_object();
-          m_dim = static_cast<int>(std::distance(construct_it(q), construct_it(q, 0)));
+          const Point_d& p = *m_tree.begin();
+          m_dim = static_cast<int>(std::distance(construct_it(p), construct_it(p, 0)));
 
           multiplication_factor= distance.transformed_distance(FT(1)+Eps);
 

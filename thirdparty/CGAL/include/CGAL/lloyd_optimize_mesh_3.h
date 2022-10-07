@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Mesh_3/include/CGAL/lloyd_optimize_mesh_3.h $
-// $Id: lloyd_optimize_mesh_3.h 98e4718 2021-08-26T11:33:39+02:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Mesh_3/include/CGAL/lloyd_optimize_mesh_3.h $
+// $Id: lloyd_optimize_mesh_3.h 1c3e09f 2022-01-10T15:32:38+01:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -51,9 +51,9 @@ BOOST_PARAMETER_FUNCTION(
   (optional
     (time_limit_, *, 0 )
     (max_iteration_number_, *, 0 )
-    (convergence_, *, parameters::default_values::lloyd_convergence_ratio )
-    (freeze_bound_, *, parameters::default_values::lloyd_freeze_ratio )
-    (do_freeze_, *, parameters::default_values::do_freeze ))
+    (convergence_, *, parameters::default_values_for_mesh_3::lloyd_convergence_ratio )
+    (freeze_bound_, *, parameters::default_values_for_mesh_3::lloyd_freeze_ratio )
+    (do_freeze_, *, parameters::default_values_for_mesh_3::do_freeze ))
 )
 {
   return lloyd_optimize_mesh_3_impl(c3t3, domain,

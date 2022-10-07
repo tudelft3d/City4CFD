@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Arrangement_on_surface_2/include/CGAL/Arrangement_on_surface_2.h $
-// $Id: Arrangement_on_surface_2.h 30da4eb 2021-03-22T13:35:23+02:00 Efi Fogel
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Arrangement_on_surface_2/include/CGAL/Arrangement_on_surface_2.h $
+// $Id: Arrangement_on_surface_2.h 4ea5251 2022-06-10T16:44:17+02:00 Laurent Rineau
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -48,8 +48,6 @@
 #include <CGAL/Iterator_transform.h>
 #include <CGAL/Arr_point_location_result.h>
 
-#include <boost/pool/pool_alloc.hpp>
-
 namespace CGAL {
 
 /*! \class Arrangement_on_surface_2
@@ -68,7 +66,7 @@ class Arrangement_on_surface_2 {
 public:
   typedef GeomTraits_                                     Geometry_traits_2;
   typedef TopTraits_                                      Topology_traits;
-  typedef boost::fast_pool_allocator<int>                 Allocator;
+  typedef CGAL_ALLOCATOR(int)                             Allocator;
 
   // first define adaptor ...
   typedef Arr_traits_basic_adaptor_2<Geometry_traits_2>   Traits_adaptor_2;

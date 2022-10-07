@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.4/Barycentric_coordinates_2/include/CGAL/Barycentric_coordinates_2/triangle_coordinates_2.h $
-// $Id: triangle_coordinates_2.h 92434bf 2021-09-21T17:10:58+02:00 Dmitry Anisimov
+// $URL: https://github.com/CGAL/cgal/blob/v5.5/Barycentric_coordinates_2/include/CGAL/Barycentric_coordinates_2/triangle_coordinates_2.h $
+// $Id: triangle_coordinates_2.h 0e84898 2022-05-13T15:50:21+02:00 Sebastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -197,9 +197,6 @@ namespace Barycentric_coordinates {
   */
   template<class Traits>
   class
-  #ifndef DOXYGEN_RUNNING
-  CGAL_DEPRECATED_MSG("This part of the package is deprecated since the version 5.4 of CGAL!")
-  #endif
   Triangle_coordinates_2
   {
 
@@ -230,6 +227,10 @@ namespace Barycentric_coordinates {
     /// Creates the class `Triangle_coordinates_2` that implements triangle coordinates with respect to an arbitrary non-degenerate triangle in the plane.
     /// The triangle is given by its three vertices.
     /// \pre Triangle is not degenerate.
+
+    #ifndef DOXYGEN_RUNNING
+      CGAL_DEPRECATED_MSG("This part of the package is deprecated since the version 5.4 of CGAL!")
+    #endif
     Triangle_coordinates_2(
       const Point_2 &first_vertex,
       const Point_2 &second_vertex,
@@ -368,6 +369,7 @@ namespace Barycentric_coordinates {
 
       // Compute the last = third coordinate, using the partition of unity property.
       *output = FT(1) - b_first - b_second;
+      ++output;
 
       // Output all coordinates.
       return boost::optional<OutputIterator>(output);
@@ -397,22 +399,19 @@ namespace Barycentric_coordinates {
     // Some predefined functions.
     typename Traits::Compute_area_2 area_2 = barycentric_traits.compute_area_2_object();
 
-    // Number type.
-    typedef typename Traits::FT FT;
-
     // Compute some related sub-areas.
-    const FT area_second = area_2(second_vertex, third_vertex, query_point);
-    const FT area_third  = area_2(third_vertex , first_vertex, query_point);
+    const typename Traits::FT area_second = area_2(second_vertex, third_vertex, query_point);
+    const typename Traits::FT area_third  = area_2(third_vertex , first_vertex, query_point);
 
     // Compute the total inverted area of the triangle.
-    const FT inverted_total_area = FT(1) / area_2(first_vertex, second_vertex, third_vertex);
+    const typename Traits::FT inverted_total_area = typename Traits::FT(1) / area_2(first_vertex, second_vertex, third_vertex);
 
     // Compute the first and second coordinate functions.
-    const FT b_first  = area_second * inverted_total_area;
-    const FT b_second = area_third  * inverted_total_area;
+    const typename Traits::FT b_first  = area_second * inverted_total_area;
+    const typename Traits::FT b_second = area_third  * inverted_total_area;
 
     // Return the std::array<FT,3> type of coordinates.
-    return CGAL::make_array(b_first, b_second, FT(1) - b_first - b_second);
+    return CGAL::make_array(b_first, b_second, typename Traits::FT(1) - b_first - b_second);
   }
 
 #endif // CGAL_NO_DEPRECATED_CODE
