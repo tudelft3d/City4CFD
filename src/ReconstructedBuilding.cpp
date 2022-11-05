@@ -63,7 +63,7 @@ ReconstructedBuilding::ReconstructedBuilding(const nlohmann::json& poly)
 ReconstructedBuilding::ReconstructedBuilding(const nlohmann::json& poly, const int internalID)
         : Building(poly, internalID), _searchTree(nullptr),
           _attributeHeight(-9999), _attributeHeightAdvantage(Config::get().buildingHeightAttrAdv) {
-    if (!Config::get().buildingUniqueId.empty()) {
+    if (!Config::get().buildingUniqueId.empty() && poly["properties"].contains(Config::get().buildingUniqueId)) {
         _id = poly["properties"][Config::get().buildingUniqueId].dump();
     } else {
         _id = std::to_string(internalID);
