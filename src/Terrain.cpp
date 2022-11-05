@@ -83,7 +83,7 @@ void Terrain::prep_constraints(const PolyFeatures& features, Point_set_3& pointC
         }
         ++countFeatures;
     }
-    std::clog << "\n    Num of polygons to constrain: " << countFeatures << std::endl;
+    std::clog << "\n    Number of polygons to constrain: " << countFeatures << std::endl;
 }
 
 void Terrain::constrain_features() {

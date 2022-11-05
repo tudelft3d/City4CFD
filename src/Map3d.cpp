@@ -316,6 +316,7 @@ void Map3d::reconstruct_buildings() {
         }
     }
     this->clear_inactives();
+    std::cout << "    Number of successfully reconstructed buildings: " << _buildings.size() << std::endl;
     Config::get().logSummary << "Building reconstruction summary: successfully reconstructed buildings: "
                              << _buildings.size() << std::endl;
     Config::get().logSummary << "                                 num of failed reconstructions: "

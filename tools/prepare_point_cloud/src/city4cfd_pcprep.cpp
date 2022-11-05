@@ -241,8 +241,8 @@ int main(int argc, char** argv) {
                 CSF csf;
                 //-- Hardcoded CSF parameters
                 csf.params.bSloopSmooth = true;
-                csf.params.class_threshold = 0.5;
-                csf.params.cloth_resolution = 2;
+                csf.params.class_threshold = 0.5; //1
+                csf.params.cloth_resolution = 2;  //3
                 csf.params.interations = 500;
                 csf.params.rigidness = 3;
                 csf.params.time_step = 0.65;
