@@ -1,12 +1,16 @@
 # Changelog
 
+## Unreleased
+### Changed
+- Improvement of polygon flatenning
+### Fixed
+- Minor bugfixes
+
 ## [0.2.0] - 2022-10-07
 ### Added
 - Point cloud preparation tool city4cfd_pcprep
 ### Changed
 - (breaking) Terrain smoothing overhaul
-### Fixed
-- Minor bugfixes
 ### Removed
 - Previous point cloud preparation script
 
