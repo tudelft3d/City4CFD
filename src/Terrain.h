@@ -49,6 +49,7 @@ public:
 
     CDT&                   get_cdt();
     const CDT&             get_cdt() const;
+    std::list<Polygon_3>&  get_constrained_polys();
     const vertex_face_map& get_vertex_face_map() const;
     const SearchTree&      get_mesh_search_tree() const;
 
@@ -62,9 +63,9 @@ public:
 protected:
     CDT                    _cdt;
     SurfaceLayers          _surfaceLayersTerrain;
-    std::list<Polygon_3>   _constrainedPolys;
     vertex_face_map        _vertexFaceMap;
     SearchTree             _searchTree;
+    std::list<Polygon_3>   _constrainedPolys;
 };
 
 #endif //CITY4CFD_TERRAIN_H

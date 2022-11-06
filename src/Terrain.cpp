@@ -212,6 +212,10 @@ const CDT& Terrain::get_cdt() const {
     return _cdt;
 }
 
+std::list<Polygon_3>& Terrain::get_constrained_polys() {
+    return _constrainedPolys;
+}
+
 const vertex_face_map& Terrain::get_vertex_face_map() const {
     return _vertexFaceMap;
 }

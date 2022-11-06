@@ -45,8 +45,8 @@ public:
     void create_flat_terrain(const PolyFeatures& lsFeatures);
     void set_flat_terrain();
     void smooth_terrain();
-    void prep_flattening(const PolyFeatures& lsFeature, CDT& cdt);
-    void flatten_polygon_pts(const PolyFeatures& lsFeatures);
+    void flatten_polygon_pts(const PolyFeatures& lsFeatures, std::list<Polygon_3>& constrainedPolys);
+    void buffer_flat_edges(const PolyFeatures& avgFeatures, std::list<Polygon_3>& constrainedPolys);
     SearchTreePtr make_search_tree_buildings();
     void read_point_clouds();
 

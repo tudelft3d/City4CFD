@@ -181,8 +181,6 @@ void Map3d::set_features() {
     if (Config::get().influRegionConfig.type() == typeid(bool)) _influRegionBPG = true;
     if (Config::get().domainBndConfig.type() == typeid(bool))   _bndBPG = true;
 
-//    //todo temp maybe prep flattening here?
-//    if (!Config::get().flattenSurfaces.empty()) _pointCloud.prep_flattening(_lsFeatures);
     if (Config::get().smoothTerrain) {
         _pointCloud.smooth_terrain();
     }
@@ -274,10 +272,9 @@ void Map3d::reconstruct_terrain() {
     if (_terrain->get_cdt().number_of_vertices() == 0) {
         std::cout << "\nReconstructing terrain" << std::endl;
         _terrain->prep_constraints(_lsFeatures, _pointCloud.get_terrain());
-        if (!Config::get().flattenSurfaces.empty()) _pointCloud.flatten_polygon_pts(_lsFeatures);
+        if (!Config::get().flattenSurfaces.empty())
+            _pointCloud.flatten_polygon_pts(_lsFeatures, _terrain->get_constrained_polys());
         _terrain->set_cdt(_pointCloud.get_terrain());
-        //todo temp
-        _pointCloud.prep_flattening(_lsFeatures, _terrain->get_cdt());
         _terrain->constrain_features();
     }
 
@@ -297,7 +294,6 @@ void Map3d::reconstruct_buildings() {
     for (auto& building : _reconstructedBuildings) building->set_search_tree(searchTree);
 
     int failed = 0;
-    int count = 0;
     for (auto& f : _buildings) {
         if (!f->is_active()) continue;
         try {
@@ -378,7 +374,8 @@ void Map3d::clip_buildings() {
     //-- Prepare terrain with subset
     std::cout << "\nReconstructing terrain" << std::endl;
     _terrain->prep_constraints(_lsFeatures, _pointCloud.get_terrain());
-    if (!Config::get().flattenSurfaces.empty()) _pointCloud.flatten_polygon_pts(_lsFeatures);
+    if (!Config::get().flattenSurfaces.empty())
+        _pointCloud.flatten_polygon_pts(_lsFeatures, _terrain->get_constrained_polys());
     _terrain->set_cdt(_pointCloud.get_terrain());
     _terrain->constrain_features();
     _terrain->prepare_subset();

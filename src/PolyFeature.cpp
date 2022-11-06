@@ -36,13 +36,13 @@
 #endif
 
 PolyFeature::PolyFeature()
-    : TopoFeature(), _poly(), _base_heights(), _polyInternalID(), _minBbox() {}
+    : TopoFeature(), _poly(), _base_heights(), _polyInternalID(), _minBbox(), _flatPoly(false) {}
 
 PolyFeature::PolyFeature(const int outputLayerID)
-    : TopoFeature(outputLayerID), _poly(), _base_heights(), _polyInternalID(), _minBbox() {}
+    : TopoFeature(outputLayerID), _poly(), _base_heights(), _polyInternalID(), _minBbox(), _flatPoly(false) {}
 
 PolyFeature::PolyFeature(const nlohmann::json& poly, const bool checkSimplicity)
-    : TopoFeature(), _base_heights(), _polyInternalID(), _minBbox() {
+    : TopoFeature(), _base_heights(), _polyInternalID(), _minBbox(), _flatPoly(false) {
     this->parse_json_poly(poly, checkSimplicity);
 }
 
@@ -148,7 +148,7 @@ double PolyFeature::get_avg_base_elevation() {
 void PolyFeature::flatten_polygon_inner_points(const Point_set_3& pointCloud,
                                                std::map<int, Point_3>& flattenedPts,
                                                const SearchTree& searchTree,
-                                               const std::unordered_map<Point_3, int>& pointCloudConnectivity) const {
+                                               const std::unordered_map<Point_3, int>& pointCloudConnectivity) {
     std::vector<int>    indices;
     std::vector<double> originalHeights;
     auto is_building_pt = pointCloud.property_map<bool>("is_building_point").first;
@@ -191,6 +191,7 @@ void PolyFeature::flatten_polygon_inner_points(const Point_set_3& pointCloud,
     for (auto& i : indices) {
         flattenedPts[i] = Point_3(pointCloud.point(i).x(), pointCloud.point(i).y(), avgHeight);
     }
+    this->_flatPoly = true;
 }
 
 void PolyFeature::set_zero_borders() {
@@ -247,6 +248,10 @@ MinBbox& PolyFeature::get_min_bbox() {
         this->calc_min_bbox();
     }
     return _minBbox;
+}
+
+bool PolyFeature::is_flat() const {
+    return _flatPoly;
 }
 
 void PolyFeature::parse_json_poly(const nlohmann::json& poly, const bool checkSimplicity) {
