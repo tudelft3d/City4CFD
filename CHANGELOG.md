@@ -2,7 +2,7 @@
 
 ## Unreleased
 ### Changed
-- Improvement of polygon flatenning
+- Improvement of polygon flattening
 ### Fixed
 - Minor bugfixes
 

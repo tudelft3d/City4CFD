@@ -187,8 +187,7 @@ void PointCloud::flatten_polygon_pts(const PolyFeatures& lsFeatures, std::list<P
 }
 
 void PointCloud::buffer_flat_edges(const PolyFeatures& avgFeatures, std::list<Polygon_3>& constrainedPolys) {
-    std::cout << "\n    Prepping flattening surfaces" << std::endl;
-
+//    std::cout << "\n    Buffering flattening surfaces" << std::endl;
     //-- Add buffer around flattened polygons
     typedef CGAL::Straight_skeleton_builder_traits_2<EPICK> SsBuilderTraits;
     typedef CGAL::Straight_skeleton_2<EPICK> Ss;
@@ -199,7 +198,6 @@ void PointCloud::buffer_flat_edges(const PolyFeatures& avgFeatures, std::list<Po
     typedef boost::shared_ptr<Polygon_2> ContourPtr;
     typedef std::vector<ContourPtr> ContourSequence;
     // get info using the original point cloud
-    std::vector<Polygon_2> offsetPolys;
 //    std::vector<double> offsets{0.001, 0.2};
     std::vector<double> offsets{0.001};
     std::vector<std::vector<double>> heights;
@@ -228,7 +226,6 @@ void PointCloud::buffer_flat_edges(const PolyFeatures& avgFeatures, std::list<Po
         boost::shared_ptr<Ss> ss = ssb.construct_skeleton();
         // Proceed only if the skeleton was correctly constructed.
         if (ss) {
-            bool first = false;
             for (auto& offset: offsets) {
                 // Instantiate the container of offsetSmall contours
                 ContourSequence offset_contours;
@@ -257,8 +254,6 @@ void PointCloud::buffer_flat_edges(const PolyFeatures& avgFeatures, std::list<Po
                               << std::endl;
                 }
 #endif
-                offsetPolys.push_back(*(offset_contours.back()));
-
                 std::vector<double> height;
                 Polygon_2& offsetPoly2 = *(offset_contours.back());
                 geomutils::interpolate_poly_from_pc(offsetPoly2, height, _pointCloudTerrain);
