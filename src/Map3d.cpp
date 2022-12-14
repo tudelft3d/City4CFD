@@ -293,7 +293,6 @@ void Map3d::reconstruct_buildings() {
     for (auto& building : _reconstructedBuildings) building->set_search_tree(searchTree);
 
     int failed = 0;
-    int count = 0;
     for (auto& f : _buildings) {
         if (!f->is_active()) continue;
         try {

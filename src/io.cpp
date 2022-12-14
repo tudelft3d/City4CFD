@@ -89,7 +89,7 @@ void IO::read_geojson_polygons(std::string& file, JsonVector& jsonPolygons) {
         std::ifstream ifs(file);
         nlohmann::json j = nlohmann::json::parse(ifs);
 
-        int count;
+//        int count;
         for (auto& feature : j["features"]) {
             if (feature["geometry"]["type"] == "Polygon") {
                 jsonPolygons.emplace_back(std::make_unique<nlohmann::json>(feature));
@@ -105,7 +105,7 @@ void IO::read_geojson_polygons(std::string& file, JsonVector& jsonPolygons) {
 //                std::cout << "In file '" << file << "' cannot parse geometry type "
 //                          << feature["geometry"]["type"] << ". Object ID: " << count << std::endl;
             }
-            ++count;
+//            ++count;
         }
     } catch (std::exception& e) {
         throw std::runtime_error(std::string("Error parsing JSON file '" + file + "'. Details: " + e.what()));

@@ -35,7 +35,6 @@ public:
     ReconstructedBuilding();
     ReconstructedBuilding(const int internalID);
     ReconstructedBuilding(const Mesh& mesh);
-    ReconstructedBuilding(const nlohmann::json& poly);
 //    ReconstructedBuilding(const nlohmann::json& poly);
     ReconstructedBuilding(const nlohmann::json& poly, const int internalID);
     ~ReconstructedBuilding();
