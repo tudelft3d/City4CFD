@@ -4,6 +4,7 @@
 ### Changed
 - Improvement of polygon flattening
 ### Fixed
+- Bad reconstruction of buildings with low height
 - Minor bugfixes
 
 ## [0.2.0] - 2022-10-07

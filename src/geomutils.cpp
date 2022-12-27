@@ -104,7 +104,7 @@ void geomutils::mark_domains(CDT& ct,
                              const Face_handle& start,
                              int index,
                              std::list<CDT::Edge>& border,
-                             PolyFeatures& features)
+                             PolyFeaturesPtr& features)
 {
     if (start->info().nesting_level != -1) {
         return;
@@ -159,7 +159,7 @@ void geomutils::mark_domains(CDT& ct,
     }
 }
 
-void geomutils::mark_domains(CDT& cdt, PolyFeatures features) {
+void geomutils::mark_domains(CDT& cdt, PolyFeaturesPtr features) {
     for (CDT::Face_handle f : cdt.all_face_handles()) {
         f->info().nesting_level = -1;
     }
@@ -232,27 +232,20 @@ Point_3 geomutils::rotate_pt_xy(const Point_3& pt, const double angle, Point_2 c
             pt.z()};
 }
 
-void geomutils::interpolate_poly_from_pc(const Polygon_2& poly, std::vector<double>& heights,
+void geomutils::interpolate_poly_from_pc(const Polygon_2& poly, std::vector<double>& elevations,
                                          const Point_set_3& pointCloud) {
     SearchTree searchTree(pointCloud.points().begin(), pointCloud.points().end());
     //-- Calculate elevation of polygon outer boundary
     //-- Point elevation is the average of 5 nearest neighbors from the PC
-    std::vector<double> ringHeights;
     for (auto& polypt : poly) {
-        Point_3 query(polypt.x(), polypt.y(), 0);
+        Point_2 query(polypt.x(), polypt.y());
         Neighbor_search search(searchTree, query, 5);
-//        Fuzzy_sphere search_radius(query, 5);
-//        std::list<Point_3> result;
-//        searchTree.search(std::back_inserter(result), search_radius);
 
-        std::vector<double> poly_height;
+        std::vector<double> poly_elevation;
         for (Neighbor_search::iterator it = search.begin(); it != search.end(); ++it) {
-            poly_height.push_back(it->first.z());
+            poly_elevation.push_back(it->first.z());
         }
-//        for (auto& pt : result) {
-//            poly_height.push_back(pt.z());
-//        }
-        heights.emplace_back(geomutils::avg(poly_height));
+        elevations.emplace_back(geomutils::avg(poly_elevation));
     }
 }
 

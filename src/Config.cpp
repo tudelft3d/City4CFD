@@ -283,7 +283,7 @@ void Config::set_region(boost::variant<bool, double, Polygon_2>& regionType,
         }
         //-- Read poly
         Polygon_2 tempPoly;
-        JsonVector influJsonPoly;
+        JsonVectorPtr influJsonPoly;
         IO::read_geojson_polygons(polyFilePath, influJsonPoly);
         for (auto& coords : influJsonPoly.front()->at("geometry").at("coordinates").front()) { // I know it should be only 1 polygon with 1 ring
             tempPoly.push_back(Point_2((double)coords[0] - Config::get().pointOfInterest.x(),

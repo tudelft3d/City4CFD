@@ -112,7 +112,7 @@ void PointCloud::smooth_terrain() {
     _pointCloudTerrain.add_property_map<bool> ("is_building_point", false);
 }
 
-void PointCloud::create_flat_terrain(const PolyFeatures& lsFeatures) {
+void PointCloud::create_flat_terrain(const PolyFeaturesPtr& lsFeatures) {
     std::cout << "\nCreating flat terrain" << std::endl;
     for (auto& f : lsFeatures) {
         if (f->get_poly().rings().empty()) {
@@ -135,7 +135,7 @@ void PointCloud::set_flat_terrain() {
     _pointCloudTerrain.add_property_map<bool> ("is_building_point", false);
 }
 
-void PointCloud::flatten_polygon_pts(const PolyFeatures& lsFeatures, std::list<Polygon_3>& constrainedPolys) {
+void PointCloud::flatten_polygon_pts(const PolyFeaturesPtr& lsFeatures, std::list<Polygon_3>& constrainedPolys) {
     std::cout << "\n    Flattening surfaces" << std::endl;
     std::map<int, Point_3> flattenedPts;
 
@@ -157,10 +157,12 @@ void PointCloud::flatten_polygon_pts(const PolyFeatures& lsFeatures, std::list<P
     _pointCloudTerrain.collect_garbage();
 
     //-- Construct search tree from ground points
-    SearchTree searchTree(_pointCloudTerrain.points().begin(), _pointCloudTerrain.points().end());
+    SearchTree searchTree(_pointCloudTerrain.points().begin(),
+                          _pointCloudTerrain.points().end(),
+                          Config::get().searchtree_bucket_size);
 
     //-- Perform averaging
-    PolyFeatures avgFeatures;
+    PolyFeaturesPtr avgFeatures;
     for (auto& f : lsFeatures) {
         auto ita = Config::get().flattenSurfaces.find(f->get_output_layer_id());
         if (ita != Config::get().flattenSurfaces.end()) {
@@ -186,7 +188,7 @@ void PointCloud::flatten_polygon_pts(const PolyFeatures& lsFeatures, std::list<P
     _pointCloudTerrain.collect_garbage();
 }
 
-void PointCloud::buffer_flat_edges(const PolyFeatures& avgFeatures, std::list<Polygon_3>& constrainedPolys) {
+void PointCloud::buffer_flat_edges(const PolyFeaturesPtr& avgFeatures, std::list<Polygon_3>& constrainedPolys) {
 //    std::cout << "\n    Buffering flattening surfaces" << std::endl;
     //-- Add buffer around flattened polygons
     typedef CGAL::Straight_skeleton_builder_traits_2<EPICK> SsBuilderTraits;
@@ -268,11 +270,6 @@ void PointCloud::buffer_flat_edges(const PolyFeatures& avgFeatures, std::list<Po
     }
 }
 
-SearchTreePtr PointCloud::make_search_tree_buildings() {
-    return std::make_shared<SearchTree>(_pointCloudBuildings.points().begin(),
-                                        _pointCloudBuildings.points().end());
-}
-
 void PointCloud::read_point_clouds() {
     //- Read ground points
     if (!Config::get().ground_xyz.empty()) {
@@ -283,7 +280,7 @@ void PointCloud::read_point_clouds() {
         std::cout << "    Points read: " << _pointCloudTerrain.size() << std::endl;
     } else {
         std::cout << "INFO: Did not find any ground points! Will calculate ground as a flat surface." << std::endl;
-        std::cout << "WARNING: Ground height of buildings can only be approximated. "
+        std::cout << "WARNING: Ground elevation of buildings can only be approximated. "
                   << "If you are using point cloud to reconstruct buildings, building height estimation can be wrong.\n"
                   << std::endl;
     }

@@ -32,29 +32,43 @@
 #include "Terrain.h"
 
 #include <CGAL/Polygon_mesh_processing/orientation.h>
-#include <CGAL/Polygon_mesh_processing/repair.h>
 #include <CGAL/Polygon_mesh_processing/clip.h>
 #include <CGAL/Polygon_mesh_processing/remesh.h>
 #include <CGAL/Mesh_3/dihedral_angle_3.h>
 #include <CGAL/alpha_wrap_3.h>
 
 Building::Building()
-        : PolyFeature(1), _height(-global::largnum) {}
+        : PolyFeature(1), _elevation(-global::largnum), _height(-global::largnum),
+          _ptsPtr(std::make_shared<Point_set_3>()) {}
 
 Building::Building(const int internalID)
-        : PolyFeature(1, internalID), _height(-global::largnum) {}
+        : PolyFeature(1, internalID), _elevation(-global::largnum), _height(-global::largnum),
+          _ptsPtr(std::make_shared<Point_set_3>()) {}
 
 Building::Building(const nlohmann::json& poly)
-        : PolyFeature(poly, true, 1), _height(-global::largnum) {}
+        : PolyFeature(poly, true, 1), _elevation(-global::largnum), _height(-global::largnum),
+          _ptsPtr(std::make_shared<Point_set_3>()) {}
         // 'true' here to check for polygon simplicity
 
 Building::Building(const nlohmann::json& poly, const int internalID)
-        : PolyFeature(poly, true, 1, internalID), _height(-global::largnum) {}
+        : PolyFeature(poly, true, 1, internalID), _elevation(-global::largnum), _height(-global::largnum),
+          _ptsPtr(std::make_shared<Point_set_3>()) {}
         // 'true' here to check for polygon simplicity
 
 Building::~Building() = default;
 
-void Building::alpha_wrap(const Buildings& buildings, Mesh& newMesh) {
+void Building::insert_point(const Point_3& pt) {
+    _ptsPtr->insert(pt);
+}
+
+double Building::get_height() {
+    if (_height < -global::largnum + global::smallnum) {
+        _height = this->get_elevation() - this->ground_elevation();
+    }
+    return _height;
+}
+
+void Building::alpha_wrap(const BuildingsPtr& buildings, Mesh& newMesh) {
     typedef EPICK::FT                 FT;
     typedef std::array<FT, 3>         Custom_point;
     typedef std::vector<std::size_t>  CGAL_Polygon;
@@ -126,7 +140,7 @@ void Building::alpha_wrap(const Buildings& buildings, Mesh& newMesh) {
 //    newMesh = wrap;
 }
 
-void Building::clip_bottom(const Terrainptr& terrain) {
+void Building::clip_bottom(const TerrainPtr& terrain) {
     if (!_clip_bottom) return;
     if (this->has_self_intersections() && !Config::get().handleSelfIntersect) throw
                 std::runtime_error(std::string("Clip error in building ID " + this->get_id() +
@@ -190,7 +204,7 @@ void Building::refine() {
 }
 
 void Building::translate_footprint(const double h) {
-    for (auto& ring : _base_heights) {
+    for (auto& ring : _groundElevations) {
         for (auto& pt : ring) {
             pt += h;
         }
@@ -219,10 +233,10 @@ bool Building::has_self_intersections() const {
 void Building::set_to_zero_terrain() {
     //-- Get average footprint height
     std::vector<double> avgRings;
-    for (auto& ring : _base_heights) {
+    for (auto& ring : _groundElevations) {
         avgRings.emplace_back(geomutils::avg(ring));
     }
-    _height -= geomutils::avg(avgRings);
+    _elevation = this->get_elevation() - geomutils::avg(avgRings);
     this->set_zero_borders();
     this->reconstruct_flat_terrain();
 }
@@ -237,13 +251,9 @@ double Building::sq_max_dim() {
     MinBbox& minBbox = this->get_min_bbox();
     dims.emplace_back(minBbox.vec1.squared_length());
     dims.emplace_back(minBbox.vec2.squared_length());
-    dims.emplace_back(_height * _height);
+    dims.emplace_back(_elevation * _elevation);
 
     return *(std::max_element(dims.begin(), dims.end()));
-}
-
-double Building::get_height() const {
-    return _height;
 }
 
 void Building::get_cityjson_info(nlohmann::json& b) const {
@@ -252,8 +262,8 @@ void Building::get_cityjson_info(nlohmann::json& b) const {
 //    get_cityjson_attributes(b, _attributes);
 //    float hbase = z_to_float(this->get_height_base());
 //    float h = z_to_float(this->get_height());
-//    b["attributes"]["TerrainHeight"] = _baseHeights.back(); // temp - will calculate avg for every footprint
-    b["attributes"]["measuredHeight"] = _height - geomutils::avg(_base_heights[0]);
+//    b["attributes"]["TerrainHeight"] = _baseElevations.back(); // temp - will calculate avg for every footprint
+    b["attributes"]["measuredHeight"] = _elevation - geomutils::avg(_groundElevations[0]);
 }
 
 void Building::get_cityjson_semantics(nlohmann::json& g) const { // Temp for checking CGAL mesh properties
