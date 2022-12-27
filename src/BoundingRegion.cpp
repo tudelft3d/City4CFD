@@ -48,7 +48,7 @@ void BoundingRegion::operator()(Polygon_2& poly) {
 }
 
 void
-BoundingRegion::calc_influ_region_bpg(const DT& dt, const Point_set_3& pointCloudBuildings, Buildings& buildings) {
+BoundingRegion::calc_influ_region_bpg(const DT& dt, BuildingsPtr& buildings) {
     assert(boost::get<bool>(Config::get().influRegionConfig));
     double influRegionRadius;
     //-- Find building where the point of interest lies in and define radius of interest with BPG
@@ -77,7 +77,7 @@ BoundingRegion::calc_influ_region_bpg(const DT& dt, const Point_set_3& pointClou
 }
 
 void BoundingRegion::calc_bnd_bpg(const Polygon_2& influRegionPoly,
-                                  const Buildings& buildings) {
+                                  const BuildingsPtr& buildings) {
     double angle = std::atan2(Config::get().flowDirection.y(), Config::get().flowDirection.x());
 
     //-- Find candidate points for the AABB
@@ -227,7 +227,7 @@ Polygon_2 BoundingRegion::calc_bnd_poly(const std::vector<Point_2>& candidatePts
  *
  * Exact for LoD1.2, approximation for others; fast
  */
-double BoundingRegion::calc_blockage_ratio_from_chull(const Buildings& buildings, const double angle,
+double BoundingRegion::calc_blockage_ratio_from_chull(const BuildingsPtr& buildings, const double angle,
                                                       Polygon_2& localPoly) const {
     CDT projCDT;
     for (auto& b : buildings) {
@@ -257,7 +257,7 @@ double BoundingRegion::calc_blockage_ratio_from_chull(const Buildings& buildings
  *
  * Can be slow in case of many edges
  */
-double BoundingRegion::calc_blockage_ratio_from_ashape(const Buildings& buildings, const double angle,
+double BoundingRegion::calc_blockage_ratio_from_ashape(const BuildingsPtr& buildings, const double angle,
                                                        Polygon_2& localPoly) const {
     CDT projCDT;
     for (auto& b : buildings) {
@@ -287,7 +287,7 @@ double BoundingRegion::calc_blockage_ratio_from_ashape(const Buildings& building
  * Points are transformed and projected to yz plane for blockage ratio calculation. Coordinates are then flipped to the xy plane
  * to work with CDT which is in xy projection plane.
  */
-double BoundingRegion::calc_blockage_ratio_comb(const Buildings& buildings, const double angle,
+double BoundingRegion::calc_blockage_ratio_comb(const BuildingsPtr& buildings, const double angle,
                                                 Polygon_2& localPoly) const {
     CDT projCDT;
     for (auto& b : buildings) {
@@ -321,7 +321,7 @@ double BoundingRegion::calc_blockage_ratio_comb(const Buildings& buildings, cons
  * Points are transformed and projected to yz plane for blockage ratio calculation. Coordinates are then flipped to the xy plane
  * to work with CDT which is in xy projection plane.
  */
-double BoundingRegion::calc_blockage_ratio_from_ashape_alt(const Buildings& buildings, const double angle,
+double BoundingRegion::calc_blockage_ratio_from_ashape_alt(const BuildingsPtr& buildings, const double angle,
                                                            Polygon_2& localPoly) const {
     //-- Project building pts onto 2d plane
     CDT projCDT;
@@ -355,7 +355,7 @@ double BoundingRegion::calc_blockage_ratio_from_ashape_alt(const Buildings& buil
  *
  * Takes a long time to calculate as there are many building edges.
  */
-double BoundingRegion::calc_blockage_ratio_from_edges(const Buildings& buildings, const double angle,
+double BoundingRegion::calc_blockage_ratio_from_edges(const BuildingsPtr& buildings, const double angle,
                                                       Polygon_2& localPoly) const {
     Converter<EPICK, EPECK> to_exact;
     CDT projCDT;
@@ -447,7 +447,7 @@ void BoundingRegion::ashape_to_cdt(const std::vector<Point_2>& buildingPts, CDT&
 /*
  * Get the cross-section areas for the blocked domain, and for the full domain.
  */
-void BoundingRegion::calc_cross_sec_areas(CDT& projCDT, Polygon_2& localPoly, const Buildings& buildings,
+void BoundingRegion::calc_cross_sec_areas(CDT& projCDT, Polygon_2& localPoly, const BuildingsPtr& buildings,
                                           double& blockArea, double& domainCrossArea) const {
     //-- Mark constrained regions
     geomutils::mark_domains(projCDT);
@@ -468,7 +468,7 @@ void BoundingRegion::calc_cross_sec_areas(CDT& projCDT, Polygon_2& localPoly, co
     std::vector<double> footprintElevations;
     for (auto& b : buildings) {
         //- One elevation per building as there might be different num of points per polygon
-        footprintElevations.push_back(b->get_avg_base_elevation());
+        footprintElevations.push_back(b->ground_elevation());
     }
     double medianFootprintHeight = geomutils::percentile(footprintElevations, 0.5);
 

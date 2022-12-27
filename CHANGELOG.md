@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+# Fixed
+- Bad reconstruction of buildings with low height
+- A number of small fixes
+
 ## [0.2.0] - 2022-10-07
 ### Added
 - Point cloud preparation tool city4cfd_pcprep

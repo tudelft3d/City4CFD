@@ -37,10 +37,13 @@
 
 int ImportedBuilding::noBottom = 0;
 
-ImportedBuilding::ImportedBuilding(std::unique_ptr<nlohmann::json>& buildingJson, Point3VectorPtr& importedBuildingPts, const int internalID)
-        : Building(internalID), _buildingJson(std::move(buildingJson)), _dPts(importedBuildingPts),
-          _avgFootprintHeight(-9999), _footprintIdxList(), _parentBuildingID(),
+ImportedBuilding::ImportedBuilding(std::unique_ptr<nlohmann::json>& buildingJson, PointSet3Ptr& importedBuildingPts, const int internalID)
+        : Building(internalID), _buildingJson(std::move(buildingJson)),
+          _footprintIdxList(), _parentBuildingID(),
           _appendToBuilding(false), _lodIdx(-1), _footprintPtsIdxList(), _trueHeight(Config::get().importTrueHeight) {
+
+    //temp - assign building points here
+    _ptsPtr = (std::move(importedBuildingPts));
 
     _f_imported = true; // the flag is here to avoid shorten polygons later. todo to fix
     //-- Get parent building ID
@@ -97,10 +100,10 @@ ImportedBuilding::ImportedBuilding(std::unique_ptr<nlohmann::json>& buildingJson
         //-- Construct footprint polygon from ground surface
         nlohmann::json coordBnd = geometry["boundaries"].front()[footprintIdx].front();
         CGAL::Polygon_2<EPECK> facePoly;
-        for (auto& ptIdx: coordBnd) {
-            facePoly.push_back(ePoint_2(_dPts->at(ptIdx).x(), _dPts->at(ptIdx).y()));
-            footprintElevations.push_back(_dPts->at(ptIdx).z());
-            pointConnectivity[IO::gen_key_bucket(Point_2(_dPts->at(ptIdx).x(), _dPts->at(ptIdx).y()))] = ptIdx;
+        for (const int& ptIdx: coordBnd) {
+            facePoly.push_back(ePoint_2(_ptsPtr->point(ptIdx).x(), _ptsPtr->point(ptIdx).y()));
+            footprintElevations.push_back(_ptsPtr->point(ptIdx).z());
+            pointConnectivity[IO::gen_key_bucket(Point_2(_ptsPtr->point(ptIdx).x(), _ptsPtr->point(ptIdx).y()))] = ptIdx;
         }
         if (!facePoly.is_simple()) {
             Config::get().log << "Failed to import building: " << this->get_parent_building_id()
@@ -113,8 +116,6 @@ ImportedBuilding::ImportedBuilding(std::unique_ptr<nlohmann::json>& buildingJson
 
         polySet.join(facePoly);
     }
-    _avgFootprintHeight = geomutils::avg(footprintElevations);
-
     //-- Polyset to polygon data structure
     this->polyset_to_polygon(polySet);
 
@@ -123,9 +124,9 @@ ImportedBuilding::ImportedBuilding(std::unique_ptr<nlohmann::json>& buildingJson
 }
 
 ImportedBuilding::ImportedBuilding(Mesh& mesh, const int internalID)
-    : Building(internalID), _buildingJson(std::make_unique<nlohmann::json>()), _dPts(nullptr),
-    _avgFootprintHeight(-9999), _footprintIdxList(), _parentBuildingID(),
-    _appendToBuilding(false), _lodIdx(-1), _footprintPtsIdxList(), _trueHeight(Config::get().importTrueHeight) {
+    : Building(internalID), _buildingJson(std::make_unique<nlohmann::json>()),
+      _footprintIdxList(), _parentBuildingID(), _appendToBuilding(false),
+      _lodIdx(-1), _footprintPtsIdxList(), _trueHeight(Config::get().importTrueHeight) {
 
     _f_imported = true; // the flag is here to avoid shorten polygons later. todo to fix
     //-- Get the polygon from the building bottom
@@ -187,10 +188,9 @@ ImportedBuilding::ImportedBuilding(Mesh& mesh, const int internalID)
         }
     }
     //-- Get all pts for reconstruction from JSON
-    _dPts = std::make_shared<std::vector<Point_3>>();
     for (auto& vert : mesh.vertices()) {
         auto& pt = mesh.point(vert);
-        _dPts->push_back(mesh.point(vert));
+        _ptsPtr->insert(mesh.point(vert));
     }
 
     //-- Stitch faces of the lowest group into a polygon
@@ -200,9 +200,9 @@ ImportedBuilding::ImportedBuilding(Mesh& mesh, const int internalID)
     for (auto& face : downwardFaceGroups[lowestGroup]) {
         CGAL::Polygon_2<EPECK> facePoly;
         for (auto pt : mesh.vertices_around_face(mesh.halfedge(face))) {
-            facePoly.push_back(ePoint_2(_dPts->at(pt.idx()).x(), _dPts->at(pt.idx()).y()));
-            footprintElevations.push_back(_dPts->at(pt.idx()).z());
-            pointConectivity[IO::gen_key_bucket(Point_2(_dPts->at(pt.idx()).x(), _dPts->at(pt.idx()).y()))] = pt.idx();
+            facePoly.push_back(ePoint_2(_ptsPtr->point(pt.idx()).x(), _ptsPtr->point(pt.idx()).y()));
+            footprintElevations.push_back(_ptsPtr->point(pt.idx()).z());
+            pointConectivity[IO::gen_key_bucket(Point_2(_ptsPtr->point(pt.idx()).x(), _ptsPtr->point(pt.idx()).y()))] = pt.idx();
         }
         if (!facePoly.is_simple()) {
             Config::get().log << "Failed to import building: " << this->get_internal_id()
@@ -215,8 +215,6 @@ ImportedBuilding::ImportedBuilding(Mesh& mesh, const int internalID)
 
         polySet.join(facePoly);
     }
-    _avgFootprintHeight = geomutils::avg(footprintElevations);
-
     //-- Polyset to polygon data structure
     this->polyset_to_polygon(polySet);
 
@@ -241,6 +239,28 @@ ImportedBuilding::ImportedBuilding(Mesh& mesh, const int internalID)
 
 ImportedBuilding::~ImportedBuilding() = default;
 
+/*
+ * Calculate building elevation without reconstruction.
+ * Defined as the highest point
+ */
+double ImportedBuilding::get_elevation() {
+    if (_elevation < -global::largnum + global::smallnum) {
+        if (_ptsPtr->empty()) throw std::runtime_error("Building missing points!");
+        // loop over all points and find the highest one
+        for (auto& pt : _ptsPtr->points()) {
+            if (pt.z() > _elevation) _elevation = pt.z();
+        }
+    }
+    return _elevation;
+}
+
+double ImportedBuilding::get_height() {
+    if (_height < -global::largnum + global::smallnum) {
+        _height = this->get_elevation() - this->ground_elevation();
+    }
+    return _height;
+}
+
 void ImportedBuilding::reconstruct() {
     typedef EPICK::FT                 FT;
     typedef std::array<FT, 3>         Custom_point;
@@ -254,29 +274,27 @@ void ImportedBuilding::reconstruct() {
     }
     //-- Adjust building height points
     if (!_trueHeight || Config::get().ground_xyz.empty()) {
-        Vector_3 movePt(0, 0, _avgFootprintHeight);
+        Vector_3 movePt(0, 0, this->ground_elevation());
         std::vector<int> checkedPt;
         for (auto& faces : geometry["boundaries"].front()) {
             for (auto& faceLst : faces) {
-                for (auto& facePt: faceLst) {
+                for (const int& facePt: faceLst) {
                     if (std::find(checkedPt.begin(), checkedPt.end(), facePt) == checkedPt.end()) {
-                        _dPts->at(facePt) += movePt;
+                        _ptsPtr->point(facePt) += movePt;
                         checkedPt.push_back(facePt);
                     } else continue;
                 }
             }
         }
     }
-
     //-- Adjust footprints to terrain
     for (int i = 0; i < _footprintPtsIdxList.size(); ++i) {
         for (int j = 0; j < _footprintPtsIdxList[i].size(); ++j) {
-            _dPts->at(_footprintPtsIdxList[i][j]) = Point_3(_dPts->at(_footprintPtsIdxList[i][j]).x(),
-                                                            _dPts->at(_footprintPtsIdxList[i][j]).y(),
-                                                            _base_heights[i][j]);
+            _ptsPtr->point(_footprintPtsIdxList[i][j]) = Point_3(_ptsPtr->point(_footprintPtsIdxList[i][j]).x(),
+                                                                 _ptsPtr->point(_footprintPtsIdxList[i][j]).y(),
+                                                                 _groundElevations[i][j]);
         }
     }
-
     //-- Add points to mesh
     std::vector<std::array<FT, 3>> points;
     std::vector<CGAL_Polygon> polygons;
@@ -291,13 +309,13 @@ void ImportedBuilding::reconstruct() {
 
         for (auto& faceLst : faces) {
             CGAL_Polygon p;
-            for (auto& facePt : faceLst) {
-                points.push_back(CGAL::make_array<FT>(_dPts->at(facePt).x(),
-                                                      _dPts->at(facePt).y(),
-                                                      _dPts->at(facePt).z()));
+            for (const int& facePt : faceLst) {
+                points.push_back(CGAL::make_array<FT>(_ptsPtr->point(facePt).x(),
+                                                      _ptsPtr->point(facePt).y(),
+                                                      _ptsPtr->point(facePt).z()));
                 p.push_back(points.size() - 1);
                 //-- Store max height to calculate building height later
-                if (_dPts->at(facePt).z() > _height) _height = _dPts->at(facePt).z();
+                if (_ptsPtr->point(facePt).z() > _elevation) _elevation = _ptsPtr->point(facePt).z();
             }
             polygons.push_back(p);
         }
@@ -324,9 +342,6 @@ void ImportedBuilding::reconstruct() {
     _mesh = wrap;
      */
 
-    //-- Get height attribute
-    _height -= _avgFootprintHeight;
-
     if (_clip_bottom) {
         this->translate_footprint(5);
     }
@@ -338,7 +353,7 @@ void ImportedBuilding::reconstruct() {
             if (++facid > 0) std::cout << "YO THERE's A FACE NO: " << facid << std::endl;
 //            if (!(facid > 0)) continue;
             for (auto& face: faceLst) {
-                faceVertices.emplace_back(_mesh.add_vertex(_dPts[face]));
+                faceVertices.emplace_back(_mesh.add_vertex(_ptsPtr[face]));
             }
             bool isReconstruct = _mesh.add_face(faceVertices);
             //todo temp
@@ -346,7 +361,7 @@ void ImportedBuilding::reconstruct() {
                 std::cout << "I have a failed surface!!!" << std::endl;
                 CGAL::Polygon_with_holes_2<EPICK> tempPoly;
                 for (auto& face : faceLst) {
-                    tempPoly.outer_boundary().push_back(Point_2(_dPts[face].x(), _dPts[face].y()));
+                    tempPoly.outer_boundary().push_back(Point_2(_ptsPtr[face].x(), _ptsPtr[face].y()));
                 }
                 std::cout << "IS THAT FAILED SURFACE VALID POLY?? : " << tempPoly.outer_boundary().is_simple() << std::endl;
 //                CGAL::draw(tempPoly);
@@ -361,7 +376,7 @@ void ImportedBuilding::reconstruct() {
 
 void ImportedBuilding::reconstruct_flat_terrain() {
     _trueHeight = false;
-    _avgFootprintHeight = 0;
+    _groundElevation = 0;
     this->reconstruct();
 }
 

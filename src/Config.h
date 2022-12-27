@@ -125,6 +125,9 @@ public:
     bool       handleSelfIntersect              = false;
     bool       refineBuildings                  = false;
     bool       alphaWrap                        = false;
+
+    //-- Other settings
+    const int tree_bucket_size = 100;
 };
 
 #endif //CITY4CFD_CONFIG_H
