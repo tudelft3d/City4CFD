@@ -130,7 +130,7 @@ void ReconstructedBuilding::reconstruct() {
     if (this->get_height() < _lowHeight) { // elevation calculated here
         Config::get().log << "Building height lower than minimum prescribed height, ID: " << this->get_id()
                           << std::endl;
-        _elevation = this->ground_elevation() + _lowHeight;
+        _elevation = this->ground_elevation() + this->slope_height() + _lowHeight;
     }
     LoD12 lod12(_poly, _groundElevations, _elevation);
     lod12.reconstruct(_mesh);
@@ -194,7 +194,7 @@ void ReconstructedBuilding::reconstruct_from_attribute() {
     if (_attributeHeight < _lowHeight) { // in case of a small height
         Config::get().log << "Building height lower than minimum prescribed height, ID: " << this->get_id()
                           << std::endl;
-        _elevation = this->ground_elevation() + _lowHeight;
+        _elevation = this->ground_elevation() + this->slope_height() + _lowHeight;
     } else {
         _elevation = this->ground_elevation() + _attributeHeight;
     }

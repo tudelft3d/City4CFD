@@ -168,7 +168,7 @@ void PointCloud::flatten_polygon_pts(const PolyFeaturesPtr& lsFeatures) {
     //-- Construct search tree from ground points
     SearchTree searchTree(_pointCloudTerrain.points().begin(),
                           _pointCloudTerrain.points().end(),
-                          Config::get().tree_bucket_size);
+                          Config::get().searchtree_bucket_size);
 
     //-- Perform averaging
     for (auto& f : lsFeatures) {

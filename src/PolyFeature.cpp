@@ -45,12 +45,13 @@ PolyFeature::PolyFeature(const int outputLayerID)
 
 PolyFeature::PolyFeature(const nlohmann::json& poly, const bool checkSimplicity)
     : TopoFeature(), _groundElevations(), _polyInternalID(),
-      _groundElevation(-global::largnum) , _minBbox() {
+      _groundElevation(-global::largnum), _minBbox() {
     this->parse_json_poly(poly, checkSimplicity);
 }
 
 PolyFeature::PolyFeature(const int outputLayerID, const int internalID)
-    : TopoFeature(outputLayerID), _polyInternalID(internalID) {}
+    : TopoFeature(outputLayerID), _groundElevations(), _polyInternalID(internalID),
+      _groundElevation(-global::largnum), _minBbox() {}
 
 PolyFeature::PolyFeature(const nlohmann::json& poly, const bool checkSimplicity, const int outputLayerID)
     : PolyFeature(poly, checkSimplicity) {
@@ -141,10 +142,17 @@ double PolyFeature::ground_elevation() {
         if (_groundElevations.empty())throw std::runtime_error("Polygon elevations missing!"
                                                            " Cannot calculate average");
         // calculating base elevation as 90 percentile of outer ring
-        _groundElevation = geomutils::percentile(_groundElevations.front(), 0.9);
-        std::vector<double> footprintElevations;
+        _groundElevation = geomutils::percentile(_groundElevations.front(), 0.1);
     }
     return _groundElevation;
+}
+
+double PolyFeature::slope_height() {
+    if (_groundElevations.empty())throw std::runtime_error("Polygon elevations missing!"
+                                                           " Cannot perform calculations");
+    // calculating slope height as difference between high and low elevations
+    // calculated on the fly as rarely used
+    return geomutils::percentile(_groundElevations.front(), 0.9) - this->ground_elevation();
 }
 
 void PolyFeature::flatten_polygon_inner_points(const Point_set_3& pointCloud,

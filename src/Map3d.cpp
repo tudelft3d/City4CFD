@@ -199,7 +199,7 @@ void Map3d::add_building_pts() {
     //-- Construct a search tree from all building points
     SearchTree searchTree(_pointCloud.get_buildings().points().begin(),
                           _pointCloud.get_buildings().points().end(),
-                          Config::get().tree_bucket_size);
+                          Config::get().searchtree_bucket_size);
 
     _pointCloud.get_buildings().clear(); // release the loaded building point cloud from memory
 
