@@ -142,7 +142,7 @@ double PolyFeature::ground_elevation() {
         if (_groundElevations.empty())throw std::runtime_error("Polygon elevations missing!"
                                                            " Cannot calculate average");
         // calculating base elevation as 90 percentile of outer ring
-        _groundElevation = geomutils::percentile(_groundElevations.front(), 0.1);
+        _groundElevation = geomutils::percentile(_groundElevations.front(), 0.2);
     }
     return _groundElevation;
 }
