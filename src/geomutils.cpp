@@ -144,8 +144,8 @@ void geomutils::mark_domains(CDT& ct,
         if (fh->info().nesting_level == -1) {
             fh->info().nesting_level = index;
             if (surfaceLayer != -1) {
-//                fh->info().surfaceLayer = surfaceLayer;
-                check_layer(fh, surfaceLayer);
+                fh->info().surfaceLayer = surfaceLayer;
+//                check_layer(fh, surfaceLayer);
             }
             for (int i = 0; i < 3; i++) {
                 CDT::Edge e(fh,i);

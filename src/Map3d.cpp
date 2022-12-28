@@ -302,7 +302,7 @@ void Map3d::reconstruct_terrain() {
         std::cout << "\nReconstructing terrain" << std::endl;
         _terrainPtr->prep_constraints(_allFeaturesPtr, _pointCloud.get_terrain());
         if (!Config::get().flattenSurfaces.empty())
-            _pointCloud.flatten_polygon_pts(_allFeaturesPtr, _terrainPtr->get_constrained_polys());
+            _pointCloud.flatten_polygon_pts(_allFeaturesPtr, _terrainPtr->get_extra_constrained_edges());
         _terrainPtr->set_cdt(_pointCloud.get_terrain());
         _terrainPtr->constrain_features();
     }
@@ -400,7 +400,7 @@ void Map3d::clip_buildings() {
     std::cout << "\nReconstructing terrain" << std::endl;
     _terrainPtr->prep_constraints(_allFeaturesPtr, _pointCloud.get_terrain());
     if (!Config::get().flattenSurfaces.empty())
-        _pointCloud.flatten_polygon_pts(_allFeaturesPtr, _terrainPtr->get_constrained_polys());
+        _pointCloud.flatten_polygon_pts(_allFeaturesPtr, _terrainPtr->get_extra_constrained_edges());
     _terrainPtr->set_cdt(_pointCloud.get_terrain());
     _terrainPtr->constrain_features();
     _terrainPtr->prepare_subset();

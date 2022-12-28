@@ -33,11 +33,13 @@
 
 Terrain::Terrain()
         : TopoFeature(0), _cdt(), _surfaceLayersTerrain(),
-          _constrainedPolys(), _vertexFaceMap(), _searchTree(Config::get().searchtree_bucket_size) {}
+          _constrainedPolys(), _vertexFaceMap(), _extraConstrainedEdges(),
+          _searchTree(Config::get().searchtree_bucket_size) {}
 
 Terrain::Terrain(int pid)
         : TopoFeature(pid), _cdt(), _surfaceLayersTerrain(),
-          _constrainedPolys(), _vertexFaceMap(), _searchTree(Config::get().searchtree_bucket_size) {}
+          _constrainedPolys(), _vertexFaceMap(), _extraConstrainedEdges(),
+          _searchTree(Config::get().searchtree_bucket_size) {}
 
 Terrain::~Terrain() = default;
 
@@ -98,6 +100,12 @@ void Terrain::constrain_features() {
         ++count;
     }
     IO::print_progress_bar(100); std::clog << std::endl;
+    // extra edges to constrain when whole polygons couldn't be added
+    if (!_extraConstrainedEdges.empty()) std::cout << "\n    Adding extra constrained edges" << std::endl;
+    for (auto& extraEdge : _extraConstrainedEdges) {
+        _cdt.insert_constraint(extraEdge.source(), extraEdge.target());
+        ++count;
+    }
 }
 
 void Terrain::create_mesh(const PolyFeaturesPtr& features) {
@@ -210,7 +218,7 @@ const CDT& Terrain::get_cdt() const {
     return _cdt;
 }
 
-std::list<Polygon_3>& Terrain::get_constrained_polys() {
+std::vector<Polygon_3>& Terrain::get_constrained_polys() {
     return _constrainedPolys;
 }
 
@@ -220,6 +228,10 @@ const vertex_face_map& Terrain::get_vertex_face_map() const {
 
 const SearchTree& Terrain::get_mesh_search_tree() const {
     return _searchTree;
+}
+
+std::vector<Polygon_3::Segment_2>& Terrain::get_extra_constrained_edges() {
+    return _extraConstrainedEdges;
 }
 
 TopoClass Terrain::get_class() const {

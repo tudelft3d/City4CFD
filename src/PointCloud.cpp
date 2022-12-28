@@ -135,7 +135,9 @@ void PointCloud::set_flat_terrain() {
     _pointCloudTerrain.add_property_map<bool> ("is_building_point", false);
 }
 
-void PointCloud::flatten_polygon_pts(const PolyFeaturesPtr& lsFeatures, std::list<Polygon_3>& constrainedPolys) {
+//todo probably should move to terrain
+void PointCloud::flatten_polygon_pts(const PolyFeaturesPtr& lsFeatures,
+                                     std::vector<EPECK::Segment_3>& constrainedEdges) {
     std::cout << "\n    Flattening surfaces" << std::endl;
     std::map<int, Point_3> flattenedPts;
 
@@ -171,7 +173,7 @@ void PointCloud::flatten_polygon_pts(const PolyFeaturesPtr& lsFeatures, std::lis
         }
     }
     //-- Handle border for flattened polys
-    this->buffer_flat_edges(avgFeatures, constrainedPolys);
+    this->buffer_flat_edges(avgFeatures, constrainedEdges);
 
     //-- Change points with flattened values
     int pcOrigSize = _pointCloudTerrain.points().size();
@@ -188,7 +190,8 @@ void PointCloud::flatten_polygon_pts(const PolyFeaturesPtr& lsFeatures, std::lis
     _pointCloudTerrain.collect_garbage();
 }
 
-void PointCloud::buffer_flat_edges(const PolyFeaturesPtr& avgFeatures, std::list<Polygon_3>& constrainedPolys) {
+void PointCloud::buffer_flat_edges(const PolyFeaturesPtr& avgFeatures,
+                                   std::vector<EPECK::Segment_3>& constrainedEdges) {
 //    std::cout << "\n    Buffering flattening surfaces" << std::endl;
     //-- Add buffer around flattened polygons
     typedef CGAL::Straight_skeleton_builder_traits_2<EPICK> SsBuilderTraits;
@@ -202,7 +205,7 @@ void PointCloud::buffer_flat_edges(const PolyFeaturesPtr& avgFeatures, std::list
     // get info using the original point cloud
 //    std::vector<double> offsets{0.001, 0.2};
     std::vector<double> offsets{0.001};
-    std::vector<std::vector<double>> heights;
+    std::vector<Polygon_3> polyList;
     for (auto& f: avgFeatures) {
         auto& poly = f->get_poly().outer_boundary();
         // set the frame
@@ -263,9 +266,24 @@ void PointCloud::buffer_flat_edges(const PolyFeaturesPtr& avgFeatures, std::list
                 for (auto j = 0; j < offsetPoly2.size(); ++j) {
                     offsetPoly3.push_back(ePoint_3(offsetPoly2[j].x(), offsetPoly2[j].y(), height[j]));
                 }
-                // expand the list of polygons to constrain with flat edge buffer polygons
-                constrainedPolys.push_back(offsetPoly3);
+                polyList.push_back(offsetPoly3);
             }
+        }
+    }
+    //-- Add only non-adjacent edges to constrain
+    CDT cdt;
+    for (const auto& ring : polyList) {
+        cdt.insert_constraint(ring.begin(), ring.end());
+    }
+    geomutils::mark_domains(cdt);
+
+    for (CDT::Edge e : cdt.constrained_edges()) {
+        CDT::Face_handle f1 = e.first;
+        CDT::Face_handle f2 = f1->neighbor(e.second);
+        if (f1->info().nesting_level == 0 || f2->info().nesting_level == 0) {
+            ePoint_3 p1 = e.first->vertex((e.second + 1) % 3)->point();
+            ePoint_3 p2 = e.first->vertex((e.second + 2) % 3)->point();
+            constrainedEdges.emplace_back(p1, p2);
         }
     }
 }
