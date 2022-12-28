@@ -48,10 +48,10 @@ using Converter = CGAL::Cartesian_converter<T, U>;
 #include <CGAL/Polygon_2.h>
 
 //-- CGAL Point
-typedef EPICK::Point_2             Point_2;
-typedef EPICK::Point_3             Point_3;
-typedef EPECK::Point_2             ePoint_2;
-typedef EPECK::Point_3             ePoint_3;
+typedef EPICK::Point_2  Point_2;
+typedef EPICK::Point_3  Point_3;
+typedef EPECK::Point_2  ePoint_2;
+typedef EPECK::Point_3  ePoint_3;
 
 //-- CGAL Normal
 typedef   EPICK::Vector_3 Vector_3;
@@ -130,13 +130,10 @@ private:
     bool is_empty = true;
 };
 
-/*! CGAL Polygon Processing !*/ //todo move under 'Polygon'
+/*! CGAL Polygon Processing !*/
 #include <CGAL/Polygon_2_algorithms.h>
 #include <CGAL/Boolean_set_operations_2.h>
 #include <CGAL/convex_hull_2.h>
-#include <CGAL/Polygon_mesh_processing/repair_polygon_soup.h>
-#include <CGAL/Polygon_mesh_processing/orient_polygon_soup.h>
-#include <CGAL/Polygon_mesh_processing/polygon_soup_to_polygon_mesh.h>
 
 /*! CGAL Point Set !*/
 #include <CGAL/Point_set_3.h>
@@ -148,6 +145,9 @@ typedef CGAL::Point_set_3<Point_3> Point_set_3;
 /*! CGAL Mesh !*/
 #include <CGAL/Surface_mesh.h>
 #include <CGAL/Polygon_mesh_processing/triangulate_faces.h>
+#include <CGAL/Polygon_mesh_processing/repair_polygon_soup.h>
+#include <CGAL/Polygon_mesh_processing/orient_polygon_soup.h>
+#include <CGAL/Polygon_mesh_processing/polygon_soup_to_polygon_mesh.h>
 
 typedef CGAL::Surface_mesh<Point_3>                      Mesh;
 typedef Mesh::Vertex_index                               vertex_descriptor;
@@ -202,15 +202,31 @@ typedef CGAL::Delaunay_triangulation_2<CGAL::Projection_traits_xy_3<EPICK>>     
 #include <CGAL/Search_traits_3.h>
 #include <CGAL/Orthogonal_k_neighbor_search.h>
 
-typedef CGAL::Search_traits_3<EPICK>                 Traits;
-//typedef CGAL::Kd_tree<Traits>                         SearchTree;
-typedef CGAL::Orthogonal_k_neighbor_search<Traits>    Neighbor_search;
-typedef Neighbor_search::Tree                         SearchTree;
-typedef CGAL::Fuzzy_iso_box<Traits>                   Fuzzy_iso_box;
-typedef CGAL::Fuzzy_sphere<Traits>                    Fuzzy_sphere;
+// Point_3 to Point_2 projection on the fly
+template<class K>
+struct Projection_xy_property_map
+{
+    typedef typename K::Point_3 key_type;
+    typedef typename K::Point_2 value_type;
+    typedef value_type reference;
+    typedef boost::readable_property_map_tag category;
+
+    friend value_type get(Projection_xy_property_map<K>, const key_type& k)
+    {
+        return value_type(k.x(), k.y());
+    }
+};
+
+typedef CGAL::Search_traits_2<EPICK>                                   Traits_base;
+typedef CGAL::Search_traits_adapter<Point_3,
+                                    Projection_xy_property_map<EPICK>,
+                                    Traits_base>                       Traits;
+typedef CGAL::Orthogonal_k_neighbor_search<Traits>                     Neighbor_search;
+typedef Neighbor_search::Tree                                          SearchTree;
+typedef CGAL::Fuzzy_iso_box<Traits>                                    Fuzzy_iso_box;
 
 //-- Smart pointers with CGAl types
-typedef std::shared_ptr<std::vector<Point_3>> Point3VectorPtr;
+typedef std::shared_ptr<Point_set_3> PointSet3Ptr;
 
 //-- Global constants
 namespace global {

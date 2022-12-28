@@ -46,7 +46,8 @@ public:
 #ifndef NDEBUG
     void  calc_footprint_elevation_linear(const DT& dt);
 #endif
-    double get_avg_base_elevation();
+    double ground_elevation();
+    double slope_height();
     void   flatten_polygon_inner_points(const Point_set_3& pointCloud, std::map<int, Point_3>& flattenedPts,
                                        const SearchTree& searchTree, const std::unordered_map<Point_3,
                                        int>& pointCloudConnectivity) const;
@@ -62,14 +63,15 @@ public:
 
     Polygon_with_holes_2&                    get_poly();
     const Polygon_with_holes_2&              get_poly() const;
-    const std::vector<std::vector<double>>&  get_base_heights() const;
+    const std::vector<std::vector<double>>&  get_ground_elevations() const;
     const int                                get_internal_id() const;
     MinBbox&                                 get_min_bbox();
 
 protected:
     int                               _polyInternalID;
     Polygon_with_holes_2              _poly;
-    std::vector<std::vector<double>>  _base_heights;
+    std::vector<std::vector<double>>  _groundElevations;
+    double                            _groundElevation;
     MinBbox                           _minBbox;
 
     void parse_json_poly(const nlohmann::json& poly, const bool checkSimplicity);

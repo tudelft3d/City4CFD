@@ -40,9 +40,9 @@ public:
     ~Terrain();
 
     void set_cdt(const Point_set_3 &pointCloud);
-    void prep_constraints(const PolyFeatures& features, Point_set_3& pointCloud);
+    void prep_constraints(const PolyFeaturesPtr& features, Point_set_3& pointCloud);
     void constrain_features();
-    void create_mesh(const PolyFeatures& features);
+    void create_mesh(const PolyFeaturesPtr& features);
     void prepare_subset();
     Mesh mesh_subset(const Polygon_with_holes_2& poly) const;
     void clear_subset();
@@ -57,11 +57,11 @@ public:
     TopoClass    get_class() const override;
     std::string  get_class_name() const override;
 
-    const SurfaceLayers& get_surface_layers() const;
+    const SurfaceLayersPtr& get_surface_layers() const;
 
 protected:
     CDT                    _cdt;
-    SurfaceLayers          _surfaceLayersTerrain;
+    SurfaceLayersPtr       _surfaceLayersTerrain;
     std::list<Polygon_3>   _constrainedPolys;
     vertex_face_map        _vertexFaceMap;
     SearchTree             _searchTree;

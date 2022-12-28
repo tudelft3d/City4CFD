@@ -33,11 +33,11 @@
 
 Terrain::Terrain()
         : TopoFeature(0), _cdt(), _surfaceLayersTerrain(),
-          _constrainedPolys(), _vertexFaceMap(), _searchTree() {}
+          _constrainedPolys(), _vertexFaceMap(), _searchTree(Config::get().searchtree_bucket_size) {}
 
 Terrain::Terrain(int pid)
         : TopoFeature(pid), _cdt(), _surfaceLayersTerrain(),
-          _constrainedPolys(), _vertexFaceMap(), _searchTree() {}
+          _constrainedPolys(), _vertexFaceMap(), _searchTree(Config::get().searchtree_bucket_size) {}
 
 Terrain::~Terrain() = default;
 
@@ -59,8 +59,8 @@ void Terrain::set_cdt(const Point_set_3& pointCloud) {
     std::cout << "\r    Triangulating...done" << std::endl;
 }
 
-void Terrain::prep_constraints(const PolyFeatures& features, Point_set_3& pointCloud) {
-    std::cout << "    Lifting polygon edges to terrain height" << std::endl;
+void Terrain::prep_constraints(const PolyFeaturesPtr& features, Point_set_3& pointCloud) {
+    std::cout << "    Lifting polygon edges to terrain elevation" << std::endl;
     int countFeatures = 0;
     auto is_building_pt = pointCloud.property_map<bool>("is_building_point").first;
     for (auto& f : features) {
@@ -69,13 +69,13 @@ void Terrain::prep_constraints(const PolyFeatures& features, Point_set_3& pointC
         if (f->get_class() == BUILDING) is_building = true;
         int polyCount = 0;
         for (auto& ring : f->get_poly().rings()) {
-            auto& heights = f->get_base_heights();
+            auto& elevations = f->get_ground_elevations();
             //-- Add ring points
             int i = 0;
             Polygon_3 pts;
             for (auto& polyVertex : ring) {
-                pts.push_back(ePoint_3(polyVertex.x(), polyVertex.y(), heights[polyCount][i]));
-                auto it = pointCloud.insert(Point_3(polyVertex.x(), polyVertex.y(), heights[polyCount][i++]));
+                pts.push_back(ePoint_3(polyVertex.x(), polyVertex.y(), elevations[polyCount][i]));
+                auto it = pointCloud.insert(Point_3(polyVertex.x(), polyVertex.y(), elevations[polyCount][i++]));
                 if (is_building) is_building_pt[*it] = true;
             }
             _constrainedPolys.push_back(pts);
@@ -100,7 +100,7 @@ void Terrain::constrain_features() {
     IO::print_progress_bar(100); std::clog << std::endl;
 }
 
-void Terrain::create_mesh(const PolyFeatures& features) {
+void Terrain::create_mesh(const PolyFeaturesPtr& features) {
     _mesh.clear();
     //-- Mark surface layer
     geomutils::mark_domains(_cdt, features);
@@ -138,9 +138,7 @@ void Terrain::prepare_subset() {
     }
     //-- Construct search tree
     _searchTree.clear();
-    for (auto& pt : _mesh.points()) {
-        _searchTree.insert(pt);
-    }
+    _searchTree.insert(_mesh.points().begin(), _mesh.points().end());
 }
 
 Mesh Terrain::mesh_subset(const Polygon_with_holes_2& poly) const {
@@ -149,8 +147,8 @@ Mesh Terrain::mesh_subset(const Polygon_with_holes_2& poly) const {
     double expandSearch = 1;
     while (subsetPts.size() <= poly.outer_boundary().size()) {
         subsetPts.clear();
-        Point_3 bbox1(poly.bbox().xmin() - expandSearch, poly.bbox().ymin() - expandSearch, -global::largnum);
-        Point_3 bbox2(poly.bbox().xmax() + expandSearch, poly.bbox().ymax() + expandSearch, global::largnum);
+        Point_2 bbox1(poly.bbox().xmin() - expandSearch, poly.bbox().ymin() - expandSearch);
+        Point_2 bbox2(poly.bbox().xmax() + expandSearch, poly.bbox().ymax() + expandSearch);
         Fuzzy_iso_box pts_range(bbox1, bbox2);
         _searchTree.search(std::back_inserter(subsetPts), pts_range);
         expandSearch *= 2;
@@ -228,6 +226,6 @@ std::string Terrain::get_class_name() const {
     return "Terrain";
 }
 
-const SurfaceLayers& Terrain::get_surface_layers() const {
+const SurfaceLayersPtr& Terrain::get_surface_layers() const {
     return _surfaceLayersTerrain;
 }

@@ -84,7 +84,7 @@ bool IO::read_point_cloud(std::string& file, Point_set_3& pc) {
     return true;
 }
 
-void IO::read_geojson_polygons(std::string& file, JsonVector& jsonPolygons) {
+void IO::read_geojson_polygons(std::string& file, JsonVectorPtr& jsonPolygons) {
     try {
         std::ifstream ifs(file);
         nlohmann::json j = nlohmann::json::parse(ifs);
@@ -128,8 +128,8 @@ void IO::read_other_geometries(std::string& file, std::vector<Mesh>& meshes) {
     PMP::split_connected_components(mesh, meshes);
 }
 
-void IO::read_cityjson_geometries(std::string& file, JsonVector& importedBuildings,
-                                  Point3VectorPtr& importedBuildingPts) {
+void IO::read_cityjson_geometries(std::string& file, JsonVectorPtr& importedBuildings,
+                                  PointSet3Ptr& importedBuildingPts) {
     try {
         std::ifstream ifs(file);
         nlohmann::json j = nlohmann::json::parse(ifs);
@@ -139,7 +139,7 @@ void IO::read_cityjson_geometries(std::string& file, JsonVector& importedBuildin
             double ptx = ((double)pt[0] * (double)j["transform"]["scale"][0]) + (double)j["transform"]["translate"][0] - Config::get().pointOfInterest.x();
             double pty = ((double)pt[1] * (double)j["transform"]["scale"][1]) + (double)j["transform"]["translate"][1] - Config::get().pointOfInterest.y();
             double ptz = ((double)pt[2] * (double)j["transform"]["scale"][2]) + (double)j["transform"]["translate"][2];
-            importedBuildingPts->emplace_back(ptx, pty, ptz);
+            importedBuildingPts->insert(Point_3(ptx, pty, ptz));
         }
 
         //-- Separate individual buildings
@@ -172,7 +172,7 @@ void IO::print_progress_bar(int percent) {
     std::clog << percent << "%     " << std::flush;
 }
 
-void IO::output_obj(const OutputFeatures& allFeatures) {
+void IO::output_obj(const OutputFeaturesPtr& allFeatures) {
     int numOutputSurfaces = TopoFeature::get_num_output_layers();
     std::vector<std::ofstream> of;
     std::vector<std::string>   fs(numOutputSurfaces), bs(numOutputSurfaces);
@@ -211,7 +211,7 @@ void IO::output_obj(const OutputFeatures& allFeatures) {
     for (auto& f : of) f.close();
 }
 
-void IO::output_stl(const OutputFeatures& allFeatures) {
+void IO::output_stl(const OutputFeaturesPtr& allFeatures) {
     int numOutputLayers = TopoFeature::get_num_output_layers();
     std::vector<std::ofstream> of;
     std::vector<std::string>   fs(numOutputLayers);
@@ -239,7 +239,7 @@ void IO::output_stl(const OutputFeatures& allFeatures) {
     for (auto& f : of) f.close();
 }
 
-void IO::output_cityjson(const OutputFeatures& allFeatures) {
+void IO::output_cityjson(const OutputFeaturesPtr& allFeatures) {
     std::ofstream of;
     nlohmann::json j;
 
