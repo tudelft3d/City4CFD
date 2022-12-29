@@ -2,7 +2,7 @@
 
 ## Unreleased
 ### Changed
-- Improvement of polygon flattening
+- Sharper boundaries of flattened polygons
 ### Fixed
 - Bad reconstruction of buildings with low height
 - Minor bugfixes
