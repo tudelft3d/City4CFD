@@ -177,12 +177,12 @@ void PointCloud::flatten_polygon_pts(const PolyFeaturesPtr& lsFeatures,
 
     //-- Change points with flattened values
     int pcOrigSize = _pointCloudTerrain.points().size();
-    for (auto& it : flattenedPts) {
-        _pointCloudTerrain.insert(it.second);
+    for (auto& itp : flattenedPts) {
+        _pointCloudTerrain.insert(itp.second);
     }
     for (int i = 0; i < pcOrigSize; ++i) {
-        auto it = flattenedPts.find(i);
-        if (it != flattenedPts.end()) {
+        auto itp = flattenedPts.find(i);
+        if (itp != flattenedPts.end()) {
             _pointCloudTerrain.remove(i);
             flattenedPts.erase(i);
         }
@@ -206,6 +206,7 @@ void PointCloud::buffer_flat_edges(const PolyFeaturesPtr& avgFeatures,
 //    std::vector<double> offsets{0.001, 0.2};
     std::vector<double> offsets{0.001};
     std::vector<Polygon_3> polyList;
+    #pragma omp parallel for
     for (auto& f: avgFeatures) {
         auto& poly = f->get_poly().outer_boundary();
         // set the frame
