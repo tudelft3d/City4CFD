@@ -48,7 +48,7 @@ public:
 #endif
     double ground_elevation();
     double slope_height();
-    void   flatten_polygon_inner_points(const Point_set_3& pointCloud, std::map<int, Point_3>& flattenedPts,
+    bool   flatten_polygon_inner_points(const Point_set_3& pointCloud, std::map<int, Point_3>& flattenedPts,
                                        const SearchTree& searchTree, const std::unordered_map<Point_3,
                                        int>& pointCloudConnectivity);
     void  set_zero_borders();
@@ -61,7 +61,6 @@ public:
     virtual TopoClass   get_class() const = 0;
     virtual std::string get_class_name() const = 0;
 
-    bool                                     is_flat() const;
     Polygon_with_holes_2&                    get_poly();
     const Polygon_with_holes_2&              get_poly() const;
     const std::vector<std::vector<double>>&  get_ground_elevations() const;
@@ -74,7 +73,6 @@ protected:
     std::vector<std::vector<double>>  _groundElevations;
     double                            _groundElevation;
     MinBbox                           _minBbox;
-    bool                              _flatPoly;
 
     void parse_json_poly(const nlohmann::json& poly, const bool checkSimplicity);
 };

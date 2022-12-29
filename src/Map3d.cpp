@@ -298,6 +298,7 @@ void Map3d::bnd_sanity_check() {
 }
 
 void Map3d::reconstruct_terrain() {
+    this->clear_inactives();
     if (_terrainPtr->get_cdt().number_of_vertices() == 0) {
         std::cout << "\nReconstructing terrain" << std::endl;
         _terrainPtr->prep_constraints(_allFeaturesPtr, _pointCloud.get_terrain());

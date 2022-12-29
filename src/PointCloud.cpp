@@ -135,7 +135,6 @@ void PointCloud::set_flat_terrain() {
     _pointCloudTerrain.add_property_map<bool> ("is_building_point", false);
 }
 
-//todo probably should move to terrain
 void PointCloud::flatten_polygon_pts(const PolyFeaturesPtr& lsFeatures,
                                      std::vector<EPECK::Segment_3>& constrainedEdges) {
     std::cout << "\n    Flattening surfaces" << std::endl;
@@ -168,8 +167,9 @@ void PointCloud::flatten_polygon_pts(const PolyFeaturesPtr& lsFeatures,
     for (auto& f : lsFeatures) {
         auto ita = Config::get().flattenSurfaces.find(f->get_output_layer_id());
         if (ita != Config::get().flattenSurfaces.end()) {
-            f->flatten_polygon_inner_points(_pointCloudTerrain, flattenedPts, searchTree, pointCloudConnectivity);
-            if (f->is_flat()) avgFeatures.push_back(f);
+            if(f->flatten_polygon_inner_points(_pointCloudTerrain, flattenedPts, searchTree, pointCloudConnectivity)) {
+                avgFeatures.push_back(f);
+            }
         }
     }
     //-- Handle border for flattened polys
