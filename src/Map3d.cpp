@@ -392,7 +392,7 @@ void Map3d::solve_building_conflicts() {
     this->clear_inactives();
 
    // to check if conflicts are solved
-//    for (auto& b : _importedBuildings) b->deactivate();
+//    for (auto& b : _importedBuildingsPtr) b->deactivate();
 //    this->clear_inactives();
 }
 

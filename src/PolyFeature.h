@@ -50,7 +50,7 @@ public:
     double slope_height();
     bool   flatten_polygon_inner_points(const Point_set_3& pointCloud, std::map<int, Point_3>& flattenedPts,
                                        const SearchTree& searchTree, const std::unordered_map<Point_3,
-                                       int>& pointCloudConnectivity);
+                                       int>& pointCloudConnectivity) const;
     void  set_zero_borders();
     void  calc_min_bbox();
     void  clear_feature();

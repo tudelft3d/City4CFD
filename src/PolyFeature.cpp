@@ -158,7 +158,7 @@ double PolyFeature::slope_height() {
 bool PolyFeature::flatten_polygon_inner_points(const Point_set_3& pointCloud,
                                                std::map<int, Point_3>& flattenedPts,
                                                const SearchTree& searchTree,
-                                               const std::unordered_map<Point_3, int>& pointCloudConnectivity) {
+                                               const std::unordered_map<Point_3, int>& pointCloudConnectivity) const {
     std::vector<int>    indices;
     std::vector<double> originalHeights;
     auto is_building_pt = pointCloud.property_map<bool>("is_building_point").first;
