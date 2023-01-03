@@ -47,10 +47,12 @@ public:
     Mesh mesh_subset(const Polygon_with_holes_2& poly) const;
     void clear_subset();
 
-    CDT&                   get_cdt();
-    const CDT&             get_cdt() const;
-    const vertex_face_map& get_vertex_face_map() const;
-    const SearchTree&      get_mesh_search_tree() const;
+    CDT&                     get_cdt();
+    const CDT&               get_cdt() const;
+    std::vector<Polygon_3>&  get_constrained_polys();
+    const vertex_face_map&   get_vertex_face_map() const;
+    const SearchTree&        get_mesh_search_tree() const;
+    std::vector<EPECK::Segment_3>& get_extra_constrained_edges();
 
     void         get_cityjson_info(nlohmann::json& b) const override;
     std::string  get_cityjson_primitive() const override;
@@ -62,9 +64,10 @@ public:
 protected:
     CDT                    _cdt;
     SurfaceLayersPtr       _surfaceLayersTerrain;
-    std::list<Polygon_3>   _constrainedPolys;
     vertex_face_map        _vertexFaceMap;
     SearchTree             _searchTree;
+    std::vector<Polygon_3> _constrainedPolys;
+    std::vector<EPECK::Segment_3> _extraConstrainedEdges;
 };
 
 #endif //CITY4CFD_TERRAIN_H

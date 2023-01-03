@@ -100,8 +100,9 @@ public:
     bool  reconstructBoundaries                 = false;
 
     //-- Polygons related
-    double                edgeMaxLen;
+    double                edgeMaxLen            = -9999;
     std::map<int, double> flattenSurfaces;
+    std::vector<int>     flattenVertBorder;
 
     //-- Output
     fs::path                  workDir;

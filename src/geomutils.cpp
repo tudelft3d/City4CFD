@@ -144,8 +144,8 @@ void geomutils::mark_domains(CDT& ct,
         if (fh->info().nesting_level == -1) {
             fh->info().nesting_level = index;
             if (surfaceLayer != -1) {
-//                fh->info().surfaceLayer = surfaceLayer;
-                check_layer(fh, surfaceLayer);
+                fh->info().surfaceLayer = surfaceLayer;
+//                check_layer(fh, surfaceLayer);
             }
             for (int i = 0; i < 3; i++) {
                 CDT::Edge e(fh,i);
@@ -201,6 +201,8 @@ void geomutils::check_layer(const Face_handle& fh, int surfaceLayer) {
 }
 
 void geomutils::shorten_long_poly_edges(Polygon_2& poly, double maxLen) {
+    if (maxLen < 0) return;
+
     auto& polyVec = poly.container();
     int i = 0;
     while (i != polyVec.size()) {

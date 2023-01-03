@@ -1,9 +1,11 @@
 # Changelog
 
 ## Unreleased
-# Fixed
+### Changed
+- Sharper boundaries of flattened polygons
+### Fixed
 - Bad reconstruction of buildings with low height
-- A number of small fixes
+- Minor bugfixes
 
 ## [0.2.0] - 2022-10-07
 ### Added

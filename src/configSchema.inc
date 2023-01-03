@@ -44,7 +44,7 @@ namespace jsonschema {
           "properties": {
             "las_datasets": {
               "description": "Schema that deals with import of LAS/LAZ tiles",
-              "description": "Depreciated, but keeping the schema for now",
+              "description": "Deprecated, but keeping the schema for now",
               "type": "object",
               "properties": {
                 "files": {
@@ -129,6 +129,7 @@ namespace jsonschema {
                   "properties": {
                     "layer_name": {"type": "string"},
                     "flatten_surface": {"type": "boolean"},
+                    "flatten_vertical_border": {"type": "boolean"},
                     "surface_percentile": {
                       "type": "number",
                       "exclusiveMinimum": 0,

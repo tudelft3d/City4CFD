@@ -48,7 +48,7 @@ public:
 #endif
     double ground_elevation();
     double slope_height();
-    void   flatten_polygon_inner_points(const Point_set_3& pointCloud, std::map<int, Point_3>& flattenedPts,
+    bool   flatten_polygon_inner_points(const Point_set_3& pointCloud, std::map<int, Point_3>& flattenedPts,
                                        const SearchTree& searchTree, const std::unordered_map<Point_3,
                                        int>& pointCloudConnectivity) const;
     void  set_zero_borders();

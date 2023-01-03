@@ -298,10 +298,12 @@ void Map3d::bnd_sanity_check() {
 }
 
 void Map3d::reconstruct_terrain() {
+    this->clear_inactives();
     if (_terrainPtr->get_cdt().number_of_vertices() == 0) {
         std::cout << "\nReconstructing terrain" << std::endl;
         _terrainPtr->prep_constraints(_allFeaturesPtr, _pointCloud.get_terrain());
-        if (!Config::get().flattenSurfaces.empty()) _pointCloud.flatten_polygon_pts(_allFeaturesPtr);
+        if (!Config::get().flattenSurfaces.empty())
+            _pointCloud.flatten_polygon_pts(_allFeaturesPtr, _terrainPtr->get_extra_constrained_edges());
         _terrainPtr->set_cdt(_pointCloud.get_terrain());
         _terrainPtr->constrain_features();
     }
@@ -398,7 +400,8 @@ void Map3d::clip_buildings() {
     //-- Prepare terrain with subset
     std::cout << "\nReconstructing terrain" << std::endl;
     _terrainPtr->prep_constraints(_allFeaturesPtr, _pointCloud.get_terrain());
-    if (!Config::get().flattenSurfaces.empty()) _pointCloud.flatten_polygon_pts(_allFeaturesPtr);
+    if (!Config::get().flattenSurfaces.empty())
+        _pointCloud.flatten_polygon_pts(_allFeaturesPtr, _terrainPtr->get_extra_constrained_edges());
     _terrainPtr->set_cdt(_pointCloud.get_terrain());
     _terrainPtr->constrain_features();
     _terrainPtr->prepare_subset();

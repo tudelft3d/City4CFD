@@ -155,7 +155,7 @@ double PolyFeature::slope_height() {
     return geomutils::percentile(_groundElevations.front(), 0.9) - this->ground_elevation();
 }
 
-void PolyFeature::flatten_polygon_inner_points(const Point_set_3& pointCloud,
+bool PolyFeature::flatten_polygon_inner_points(const Point_set_3& pointCloud,
                                                std::map<int, Point_3>& flattenedPts,
                                                const SearchTree& searchTree,
                                                const std::unordered_map<Point_3, int>& pointCloudConnectivity) const {
@@ -181,7 +181,7 @@ void PolyFeature::flatten_polygon_inner_points(const Point_set_3& pointCloud,
             auto pointSetIt = pointCloud.begin();
             std::advance(pointSetIt, itIdx->second);
             if (is_building_pt[*pointSetIt])
-                return; //todo temp solution when having adjacent buildings
+                return false; //todo temp solution when having adjacent buildings
 
             auto it = flattenedPts.find(itIdx->second);
             if (it == flattenedPts.end()) {
@@ -192,7 +192,7 @@ void PolyFeature::flatten_polygon_inner_points(const Point_set_3& pointCloud,
     }
     //-- Flatten surface points
     if (indices.empty()) {
-        return;
+        return false;
     }
     double avgHeight = geomutils::percentile(originalHeights,
                                              Config::get().flattenSurfaces[this->get_output_layer_id()] / 100);
@@ -201,6 +201,7 @@ void PolyFeature::flatten_polygon_inner_points(const Point_set_3& pointCloud,
     for (auto& i : indices) {
         flattenedPts[i] = Point_3(pointCloud.point(i).x(), pointCloud.point(i).y(), avgHeight);
     }
+    return true;
 }
 
 void PolyFeature::set_zero_borders() {
