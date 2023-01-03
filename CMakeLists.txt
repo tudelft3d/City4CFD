@@ -5,8 +5,8 @@ project(city4cfd)
 #set( CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS true )
 
 set(CMAKE_CXX_FLAGS "-O3")
-set(CMAKE_BUILD_TYPE "Release")
-#set(CMAKE_BUILD_TYPE "Debug")
+#set(CMAKE_BUILD_TYPE "Release")
+set(CMAKE_BUILD_TYPE "Debug")
 
 #if (COMMAND cmake_policy)
 #    cmake_policy(SET CMP0003 NEW)
@@ -40,6 +40,8 @@ include(${CMAKE_SOURCE_DIR}/thirdparty/CGAL/cmake/CGAL_Eigen3_support.cmake)
 find_package(OpenMP)
 if (OpenMP_CXX_FOUND)
     set(OpenMP_support "OpenMP::OpenMP_CXX")
+else()
+    message(STATUS "OpenMP not found. Some functions will run single-threaded")
 endif()
 
 # Third-party

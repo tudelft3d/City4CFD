@@ -28,8 +28,6 @@ find_package(OpenMP)
 
 if (OpenMP_CXX_FOUND)
     target_link_libraries(CSF PUBLIC OpenMP::OpenMP_CXX)
-else()
-    message(STATUS "OpenMP not found. Cloth Simulation Filter will run single-threaded")
 endif()
 
 install(TARGETS CSF LIBRARY DESTINATION lib)

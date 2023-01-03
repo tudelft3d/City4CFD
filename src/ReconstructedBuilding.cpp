@@ -138,6 +138,7 @@ void ReconstructedBuilding::reconstruct() {
     if (_clip_bottom) {
         this->translate_footprint(5);
     }
+    if (Config::get().refineReconstructedBuildings) this->refine();
 }
 
 void ReconstructedBuilding::reconstruct_flat_terrain() {
