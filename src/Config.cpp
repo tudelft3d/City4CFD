@@ -173,6 +173,11 @@ void Config::set_config(nlohmann::json& j) {
                     flattenSurfaces[surfLayerIdx] = poly["surface_percentile"];
                 }
             }
+            if (poly.contains("flatten_vertical_border")) {
+                if (poly["flatten_vertical_border"]) {
+                    flattenVertBorder.push_back(surfLayerIdx);
+                }
+            }
             ++surfLayerIdx;
         }
     }

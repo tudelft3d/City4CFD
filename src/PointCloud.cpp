@@ -162,18 +162,23 @@ void PointCloud::flatten_polygon_pts(const PolyFeaturesPtr& lsFeatures,
                           _pointCloudTerrain.points().end(),
                           Config::get().searchtree_bucket_size);
 
-    //-- Perform averaging
-    PolyFeaturesPtr avgFeatures;
+    //-- Perform flattening
+    PolyFeaturesPtr vertBorders;
     for (auto& f : lsFeatures) {
         auto ita = Config::get().flattenSurfaces.find(f->get_output_layer_id());
         if (ita != Config::get().flattenSurfaces.end()) {
+            // flatten points
             if(f->flatten_polygon_inner_points(_pointCloudTerrain, flattenedPts, searchTree, pointCloudConnectivity)) {
-                avgFeatures.push_back(f);
+                // add to list if constructing vertical borders
+                if (std::find(Config::get().flattenVertBorder.begin(), Config::get().flattenVertBorder.end(),
+                              f->get_output_layer_id()) != Config::get().flattenVertBorder.end()) {
+                    vertBorders.push_back(f);
+                }
             }
         }
     }
     //-- Handle border for flattened polys
-    this->buffer_flat_edges(avgFeatures, constrainedEdges);
+    if (!vertBorders.empty()) this->buffer_flat_edges(vertBorders, constrainedEdges);
 
     //-- Change points with flattened values
     int pcOrigSize = _pointCloudTerrain.points().size();

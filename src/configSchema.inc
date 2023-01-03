@@ -129,6 +129,7 @@ namespace jsonschema {
                   "properties": {
                     "layer_name": {"type": "string"},
                     "flatten_surface": {"type": "boolean"},
+                    "flatten_vertical_border": {"type": "boolean"},
                     "surface_percentile": {
                       "type": "number",
                       "exclusiveMinimum": 0,
