@@ -267,6 +267,7 @@ void PointCloud::buffer_flat_edges(const PolyFeaturesPtr& avgFeatures,
                 for (auto j = 0; j < offsetPoly2.size(); ++j) {
                     offsetPoly3.push_back(ePoint_3(offsetPoly2[j].x(), offsetPoly2[j].y(), height[j]));
                 }
+                #pragma omp critical
                 polyList.push_back(offsetPoly3);
             }
         }
