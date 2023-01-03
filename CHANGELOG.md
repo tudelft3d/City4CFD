@@ -1,7 +1,7 @@
 # Changelog
 
 ## Unreleased
-### Changed
+### Added
 - Sharper boundaries of flattened polygons
 ### Fixed
 - Bad reconstruction of buildings with low height
