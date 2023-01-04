@@ -5,8 +5,8 @@ project(city4cfd)
 #set( CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS true )
 
 set(CMAKE_CXX_FLAGS "-O3")
-#set(CMAKE_BUILD_TYPE "Release")
-set(CMAKE_BUILD_TYPE "Debug")
+set(CMAKE_BUILD_TYPE "Release")
+#set(CMAKE_BUILD_TYPE "Debug")
 
 #if (COMMAND cmake_policy)
 #    cmake_policy(SET CMP0003 NEW)
@@ -18,11 +18,8 @@ find_package(Boost 1.66 REQUIRED COMPONENTS filesystem locale)
 # CGAL
 find_package(CGAL REQUIRED QUIET COMPONENTS)
 if (CGAL_FOUND)
-    if (CGAL_VERSION VERSION_GREATER_EQUAL "5.5")
-        message(STATUS "Found CGAL ${CGAL_VERSION}")
-    elseif (CGAL_VERSION VERSION_GREATER_EQUAL "5.0")
-        message(STATUS "Found CGAL version greater than 5.0, but less than 5.5. "
-                "Proceeding to compile with included CGAL headers.")
+    if (CGAL_VERSION VERSION_GREATER_EQUAL "5.0")
+        message(STATUS "Found CGAL version greater than 5.0.")
         include_directories(${CMAKE_SOURCE_DIR}/thirdparty/CGAL/include)
         set(CGAL_USE_INCLUDED_HEADERS ON)
     else()
@@ -41,7 +38,7 @@ find_package(OpenMP)
 if (OpenMP_CXX_FOUND)
     set(OpenMP_support "OpenMP::OpenMP_CXX")
 else()
-    message(STATUS "OpenMP not found. Some functions will run single-threaded")
+    message(STATUS "OpenMP not found. All functions will run single-threaded")
 endif()
 
 # Third-party
