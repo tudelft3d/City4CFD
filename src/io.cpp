@@ -31,10 +31,14 @@
 #include "TopoFeature.h"
 #include "Boundary.h"
 
-#include <CGAL/Polygon_mesh_processing/IO/polygon_mesh_io.h>
+#include <CGAL/Polygon_mesh_processing/compute_normal.h>
 #include <CGAL/Polygon_mesh_processing/connected_components.h>
 #include <CGAL/Polygon_mesh_processing/transform.h>
+#include <CGAL/Polygon_mesh_processing/repair_polygon_soup.h>
+#include <CGAL/Polygon_mesh_processing/IO/polygon_mesh_io.h>
 #include <CGAL/IO/read_las_points.h>
+
+#include <boost/algorithm/string.hpp>
 
 //-- Input functions
 void IO::read_config(std::string& config_path) {

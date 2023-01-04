@@ -29,8 +29,9 @@
 
 #include "geomutils.h"
 
-#include <CGAL/natural_neighbor_coordinates_2.h>
+#include <CGAL/convex_hull_2.h>
 #include <CGAL/min_quadrilateral_2.h>
+#include <CGAL/natural_neighbor_coordinates_2.h>
 #ifndef NDEBUG
 #include <CGAL/Barycentric_coordinates_2/Triangle_coordinates_2.h>
 #endif

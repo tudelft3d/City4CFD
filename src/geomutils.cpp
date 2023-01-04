@@ -29,6 +29,8 @@
 
 #include "PolyFeature.h"
 
+#include <CGAL/compute_average_spacing.h>
+#include <CGAL/Boolean_set_operations_2/do_intersect.h>
 #include <CGAL/Polygon_mesh_processing/repair.h>
 
 double geomutils::avg(const std::vector<double>& values) {

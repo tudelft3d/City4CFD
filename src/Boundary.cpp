@@ -29,6 +29,8 @@
 
 #include "geomutils.h"
 
+#include <CGAL/centroid.h>
+
 Boundary::Boundary()
         : TopoFeature(), _sideOutputPts() {}
 

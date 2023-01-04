@@ -32,8 +32,6 @@
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/Exact_predicates_exact_constructions_kernel.h>
 #include <CGAL/Projection_traits_xy_3.h>
-#include <CGAL/IO/WKT.h>
-#include <CGAL/centroid.h>
 
 typedef CGAL::Exact_predicates_inexact_constructions_kernel  EPICK;
 typedef CGAL::Exact_predicates_exact_constructions_kernel    EPECK;
@@ -46,6 +44,7 @@ using Converter = CGAL::Cartesian_converter<T, U>;
 
 /*! CGAL Primitives !*/
 #include <CGAL/Polygon_2.h>
+#include <CGAL/Polygon_with_holes_2.h>
 
 //-- CGAL Point
 typedef EPICK::Point_2  Point_2;
@@ -132,22 +131,15 @@ private:
 
 /*! CGAL Polygon Processing !*/
 #include <CGAL/Polygon_2_algorithms.h>
-#include <CGAL/Boolean_set_operations_2.h>
-#include <CGAL/convex_hull_2.h>
 
 /*! CGAL Point Set !*/
 #include <CGAL/Point_set_3.h>
-#include <CGAL/Point_set_3/IO.h>
 #include <CGAL/random_simplify_point_set.h>
 
 typedef CGAL::Point_set_3<Point_3> Point_set_3;
 
 /*! CGAL Mesh !*/
 #include <CGAL/Surface_mesh.h>
-#include <CGAL/Polygon_mesh_processing/triangulate_faces.h>
-#include <CGAL/Polygon_mesh_processing/repair_polygon_soup.h>
-#include <CGAL/Polygon_mesh_processing/orient_polygon_soup.h>
-#include <CGAL/Polygon_mesh_processing/polygon_soup_to_polygon_mesh.h>
 
 typedef CGAL::Surface_mesh<Point_3>                      Mesh;
 typedef Mesh::Vertex_index                               vertex_descriptor;
@@ -192,7 +184,6 @@ typedef CGAL::Delaunay_triangulation_2<CGAL::Projection_traits_xy_3<EPICK>>     
 /*! CGAL Search !*/
 #include <boost/graph/adjacency_list.hpp>
 #include <CGAL/boost/graph/split_graph_into_polylines.h>
-#include <CGAL/compute_average_spacing.h>
 
 #include <CGAL/Kd_tree.h>
 #include <CGAL/algorithm.h>

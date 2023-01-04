@@ -37,6 +37,8 @@
 
 #include "configSchema.inc"
 
+#include  <boost/algorithm/string/predicate.hpp>
+
 void Config::validate(nlohmann::json& j) {
     using valijson::Schema;
     using valijson::SchemaParser;
