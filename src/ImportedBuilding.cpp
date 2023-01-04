@@ -42,8 +42,7 @@ ImportedBuilding::ImportedBuilding(std::unique_ptr<nlohmann::json>& buildingJson
           _footprintIdxList(), _parentBuildingID(),
           _appendToBuilding(false), _lodIdx(-1), _footprintPtsIdxList(), _trueHeight(Config::get().importTrueHeight) {
 
-    //temp - assign building points here
-    _ptsPtr = (std::move(importedBuildingPts));
+    _ptsPtr = importedBuildingPts;
 
     _f_imported = true; // the flag is here to avoid shorten polygons later. todo to fix
     //-- Get parent building ID
