@@ -33,7 +33,7 @@
 namespace geomutils {
     double  avg(const std::vector<double>& values);
     double  percentile(std::vector<double> values, const double percentile);
-    bool    point_in_circle(const Point_3& pt, const Point_2& center, const double& radius);
+//    bool    point_in_circle(const Point_3& pt, const Point_2& center, const double& radius);
     void    cdt_to_mesh(CDT& cdt, Mesh& mesh, const int surfaceLayerID = -9999);
     void    dt_to_mesh(DT& dt, Mesh& mesh);
     void    mark_domains(CDT& cdt, PolyFeaturesPtr features = {});

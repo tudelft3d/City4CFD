@@ -50,6 +50,7 @@ double geomutils::percentile(std::vector<double> values, const double percentile
     return values[i];
 }
 
+/*
 bool geomutils::point_in_circle(const Point_3& pt, const Point_2& center, const double& radius) {
     if (pow(pt.x() - center.x(), 2)
       + pow(pt.y() - center.y(), 2)
@@ -58,6 +59,7 @@ bool geomutils::point_in_circle(const Point_3& pt, const Point_2& center, const 
     }
     return false;
 }
+*/
 
 void geomutils::cdt_to_mesh(CDT& cdt, Mesh& mesh, const int surfaceLayerID) {
     std::map<CDT::Vertex_handle, int> indices;
@@ -153,8 +155,10 @@ void geomutils::mark_domains(CDT& ct,
                 CDT::Edge e(fh,i);
                 Face_handle n = fh->neighbor(i);
                 if (n->info().nesting_level == -1) {
-                    if (ct.is_constrained(e)) border.push_back(e);
-                    else queue.push_back(n);
+                    if (ct.is_constrained(e)) {
+                        #pragma omp critical
+                        border.push_back(e);
+                    } else queue.push_back(n);
                 }
             }
         }
@@ -167,9 +171,24 @@ void geomutils::mark_domains(CDT& cdt, PolyFeaturesPtr features) {
     }
     std::list<CDT::Edge> border;
     mark_domains(cdt, cdt.infinite_face(), 0, border, features);
-    while (!border.empty()) {
-        CDT::Edge e = border.front();
-        border.pop_front();
+    bool toCheck = true;
+    #pragma omp parallel
+    while (true) {
+        CDT::Edge e;
+         #pragma omp critical
+        {
+            if (!border.empty()) {
+                e = border.front();
+                border.pop_front();
+            } else {
+                toCheck = false;
+            }
+        }
+        if (!toCheck)
+        {
+            #pragma omp cancel parallel
+            break;
+        }
         Face_handle n = e.first->neighbor(e.second);
         if (n->info().nesting_level == -1) {
             mark_domains(cdt, n, e.first->info().nesting_level + 1, border, features);
