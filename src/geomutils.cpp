@@ -184,7 +184,7 @@ void geomutils::mark_domains(CDT& cdt, PolyFeaturesPtr features) {
                 sstop = true;
             }
         }
-        if (!sstop) continue;
+        if (sstop) continue;
 
         Face_handle n = e.first->neighbor(e.second);
         if (n->info().nesting_level == -1) {
