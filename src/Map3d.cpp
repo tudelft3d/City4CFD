@@ -333,10 +333,8 @@ void Map3d::reconstruct_buildings() {
         } catch (std::exception& e) {
             #pragma omp atomic
             ++failed;
-            //-- Add information to log file
-            #pragma omp critical
-            Config::get().log << "Failed to reconstruct building ID: " << f->get_id()
-                        << " Reason: " << e.what() << std::endl;
+            // add information to log file
+            Config::write_to_log("Failed to reconstruct building ID: " + f->get_id() + " Reason: " + e.what());
             //-- Get JSON file ID for failed reconstructions output
             //   For now only polygons (reconstructed buildings) are stored to GeoJSON
             if (!f->is_imported())

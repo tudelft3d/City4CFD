@@ -309,3 +309,8 @@ void Config::set_region(boost::variant<bool, double, Polygon_2>& regionType,
         regionType = (double)j[regionName].front();
     } else regionType = true; // Leave it to BPG
 }
+
+void Config::write_to_log(const std::string& msg) {
+    #pragma omp critical
+    Config::get().log << msg << std::endl;
+}

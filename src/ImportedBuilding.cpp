@@ -106,8 +106,8 @@ ImportedBuilding::ImportedBuilding(std::unique_ptr<nlohmann::json>& buildingJson
             pointConnectivity[IO::gen_key_bucket(Point_2(_ptsPtr->point(ptIdx).x(), _ptsPtr->point(ptIdx).y()))] = ptIdx;
         }
         if (!facePoly.is_simple()) {
-            Config::get().log << "Failed to import building: " << this->get_parent_building_id()
-                              << " Reason: " << "Footprint polygon is not simple." << std::endl;
+            Config::write_to_log("Failed to import building: " + this->get_parent_building_id()
+                                       + " Reason: Footprint polygon is not simple.");
             this->deactivate();
             return;
         }
@@ -205,8 +205,8 @@ ImportedBuilding::ImportedBuilding(Mesh& mesh, const int internalID)
             pointConectivity[IO::gen_key_bucket(Point_2(_ptsPtr->point(pt.idx()).x(), _ptsPtr->point(pt.idx()).y()))] = pt.idx();
         }
         if (!facePoly.is_simple()) {
-            Config::get().log << "Failed to import building: " << this->get_internal_id()
-                              << " Reason: " << "Footprint polygon is not simple." << std::endl;
+            Config::write_to_log("Failed to import building: " + std::to_string(this->get_internal_id())
+                              + " Reason: Footprint polygon is not simple.");
             this->deactivate();
             return;
         }
@@ -404,8 +404,8 @@ const bool ImportedBuilding::is_appending() const {
 
 void ImportedBuilding::check_simplicity(Polygon_2& ring) {
     if (!ring.is_simple()) {
-        Config::get().log << "Failed to import building: " << this->get_parent_building_id()
-                    << " Reason: " << "Footprint polygon is not simple." << std::endl;
+        Config::write_to_log("Failed to import building: " + this->get_parent_building_id()
+                             + " Reason: Footprint polygon is not simple.");
         this->deactivate();
         return;
     }

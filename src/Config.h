@@ -53,6 +53,7 @@ public:
     void set_region(boost::variant<bool, double, Polygon_2>& regionType,
                     std::string& regionName,
                     nlohmann::json& j);
+    static void write_to_log(const std::string& msg);
 
     //-- Input info
     std::string              ground_xyz;             // Ground points
