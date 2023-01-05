@@ -171,9 +171,9 @@ void geomutils::mark_domains(CDT& cdt, PolyFeaturesPtr features) {
     }
     std::list<CDT::Edge> border;
     mark_domains(cdt, cdt.infinite_face(), 0, border, features);
-    bool toCheck = true;
+    bool sstop = false;
     #pragma omp parallel
-    while (true) {
+    while (!sstop) {
         CDT::Edge e;
          #pragma omp critical
         {
@@ -181,14 +181,11 @@ void geomutils::mark_domains(CDT& cdt, PolyFeaturesPtr features) {
                 e = border.front();
                 border.pop_front();
             } else {
-                toCheck = false;
+                sstop = true;
             }
         }
-        if (!toCheck)
-        {
-            #pragma omp cancel parallel
-            break;
-        }
+        if (!sstop) continue;
+
         Face_handle n = e.first->neighbor(e.second);
         if (n->info().nesting_level == -1) {
             mark_domains(cdt, n, e.first->info().nesting_level + 1, border, features);
