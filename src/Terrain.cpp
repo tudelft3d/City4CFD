@@ -110,8 +110,8 @@ void Terrain::constrain_features() {
 
 void Terrain::create_mesh(const PolyFeaturesPtr& features) {
     _mesh.clear();
-    //-- Mark surface layer
-    geomutils::mark_domains(_cdt, features);
+    //-- Mark surface layers
+    this->tag_layers(features);
 
     //-- Create the mesh for the terrain
     geomutils::cdt_to_mesh(_cdt, _mesh);
@@ -200,6 +200,123 @@ void Terrain::clear_subset() {
     _vertexFaceMap.clear();
     _searchTree.clear();
 }
+
+/*
+ * Domain marker enriched with surface layer tagging
+ */
+void Terrain::tag_layers(const Face_handle& start,
+                         int index,
+                         std::list<CDT::Edge>& border,
+                         const PolyFeaturesPtr& features)
+{
+    if (start->info().nesting_level != -1) {
+        return;
+    }
+
+    //-- Check which polygon contains the constrained (i.e. non-terrain) point
+    Point_3 chkPoint;
+    Converter<EPECK, EPICK> to_inexact;
+    if (!features.empty()) {
+        chkPoint = CGAL::centroid(to_inexact(start->vertex(0)->point()),
+                                  to_inexact(start->vertex(1)->point()),
+                                  to_inexact(start->vertex(2)->point()));
+    }
+    int surfaceLayer = -1; //-- Default value is unmarked triangle, i.e. general terrain
+    if (index != 0) {
+        for (auto& feature : features) {
+            if (!feature->is_active()) continue;
+            //- Polygons are already ordered according to importance - find first polygon
+            if (geomutils::point_in_poly(chkPoint, feature->get_poly())) {
+                if (feature->get_class() == BUILDING) {
+//                    surfaceLayer = 9999; //- Remove building footprints from terrain
+                    surfaceLayer = -1; //- Leave building footprints as part of terrain
+                    break;
+                } else {
+                    surfaceLayer = feature->get_output_layer_id();
+                    break;
+                }
+            }
+        }
+    }
+    std::list<Face_handle> queue;
+    queue.push_back(start);
+    while (! queue.empty()) {
+        Face_handle fh = queue.front();
+        queue.pop_front();
+        if (fh->info().nesting_level == -1) {
+            fh->info().nesting_level = index;
+            if (surfaceLayer != -1) {
+                fh->info().surfaceLayer = surfaceLayer;
+//                check_layer(fh, surfaceLayer);
+            }
+            for (int i = 0; i < 3; i++) {
+                CDT::Edge e(fh,i);
+                Face_handle n = fh->neighbor(i);
+                if (n->info().nesting_level == -1) {
+                    if (_cdt.is_constrained(e)) {
+                    #pragma omp critical
+                        border.push_back(e);
+                    } else queue.push_back(n);
+                }
+            }
+        }
+    }
+}
+
+void Terrain::tag_layers(const PolyFeaturesPtr& features) {
+    for (CDT::Face_handle f : _cdt.all_face_handles()) {
+        f->info().nesting_level = -1;
+    }
+    std::list<CDT::Edge> border;
+    tag_layers(_cdt.infinite_face(), 0, border, features);
+    #pragma omp parallel
+    while (!border.empty()) {
+        bool sstop = false;
+        CDT::Edge e;
+        #pragma omp critical
+        {
+            if (!border.empty()) {
+                e = border.front();
+                border.pop_front();
+            } else {
+                sstop = true;
+            }
+        }
+        if (sstop) continue;
+
+        Face_handle n = e.first->neighbor(e.second);
+        if (n->info().nesting_level == -1) {
+            tag_layers(n, e.first->info().nesting_level + 1, border, features);
+        }
+    }
+    for (CDT::Face_handle f : _cdt.all_face_handles()) {
+        if (f->info().surfaceLayer == -2) {
+            f->info().surfaceLayer = -9999;
+        }
+    }
+}
+
+/*
+void Terrain::check_layer(const Face_handle& fh, int surfaceLayer) {
+    if (fh->info().surfaceLayer == 9999) return;
+    auto it = Config::get().flattenSurfaces.find(surfaceLayer);
+    if (it != Config::get().flattenSurfaces.end()) {
+        Converter<EPECK, EPICK> to_inexact;
+        Vector_3 vertical(0, 0, 1);
+        Vector_3 norm = CGAL::normal(to_inexact(fh->vertex(0)->point()),
+                                     to_inexact(fh->vertex(1)->point()),
+                                     to_inexact(fh->vertex(2)->point()));
+
+        if (CGAL::approximate_angle(norm, vertical) < 60.0) {
+            fh->info().surfaceLayer = surfaceLayer;
+        } else {
+            fh->info().surfaceLayer = -2;
+        }
+    } else {
+        fh->info().surfaceLayer = surfaceLayer;
+    }
+}
+*/
 
 void Terrain::get_cityjson_info(nlohmann::json& b) const {
     b["type"] = "TINRelief";

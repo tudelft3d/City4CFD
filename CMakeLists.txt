@@ -17,7 +17,7 @@ find_package(Boost 1.66 REQUIRED COMPONENTS filesystem locale)
 # CGAL
 find_package(CGAL REQUIRED QUIET COMPONENTS)
 if (CGAL_VERSION VERSION_GREATER_EQUAL "5.0")
-    message(STATUS "Found CGAL version greater than 5.0.")
+    message(STATUS "Found CGAL version greater than 5.0")
     include_directories(${CMAKE_SOURCE_DIR}/thirdparty/CGAL/include)
     set(CGAL_USE_INCLUDED_HEADERS ON)
 else()
