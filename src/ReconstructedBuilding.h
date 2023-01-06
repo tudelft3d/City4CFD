@@ -49,9 +49,6 @@ protected:
     double _attributeHeight;
     bool   _attributeHeightAdvantage;
 
-    //-- Hardcoded low height info
-    double _lowHeight = 2.;
-
     void reconstruct_from_attribute();
     bool reconstruct_again_from_attribute(const std::string& reason);
 };

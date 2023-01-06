@@ -4,6 +4,7 @@
 ### Added
 - Building surface refinement
 - Sharper boundaries of flattened polygons
+- Minimum building height as an argument
 ### Fixed
 - Bad reconstruction of buildings with low height
 - Minor bugfixes

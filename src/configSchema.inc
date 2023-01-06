@@ -241,6 +241,15 @@ namespace jsonschema {
           "exclusiveMinimum": 0,
           "exclusiveMaximum": 100
         },
+        "min_height": {
+          "description": "Default: 2.; minimum allowed height to be reconstructed",
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "reconstruct_failed": {
+          "description": "Optional: Reconstruct failed buildings to minimum height",
+          "type": "boolean"
+        },
         "reconstruct_boundaries": {
           "type": "boolean"
         },
