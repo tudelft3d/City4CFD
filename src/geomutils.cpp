@@ -103,7 +103,7 @@ void geomutils::dt_to_mesh(DT& dt, Mesh& mesh) {
     }
 }
 
-//-- CGAL's constrained domain marker expanded to mark different polygon types
+//-- CGAL's constrained domain marker
 void geomutils::mark_domains(CDT& ct,
                              const Face_handle& start,
                              int index,
@@ -171,9 +171,9 @@ void geomutils::mark_domains(CDT& cdt, PolyFeaturesPtr features) {
     }
     std::list<CDT::Edge> border;
     mark_domains(cdt, cdt.infinite_face(), 0, border, features);
-    bool sstop = false;
     #pragma omp parallel
-    while (!sstop) {
+    while (!border.empty()) {
+        bool sstop = false;
         CDT::Edge e;
          #pragma omp critical
         {
@@ -184,7 +184,7 @@ void geomutils::mark_domains(CDT& cdt, PolyFeaturesPtr features) {
                 sstop = true;
             }
         }
-        if (!sstop) continue;
+        if (sstop) continue;
 
         Face_handle n = e.first->neighbor(e.second);
         if (n->info().nesting_level == -1) {

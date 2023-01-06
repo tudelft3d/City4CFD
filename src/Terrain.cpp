@@ -110,7 +110,7 @@ void Terrain::constrain_features() {
 
 void Terrain::create_mesh(const PolyFeaturesPtr& features) {
     _mesh.clear();
-    //-- Mark surface layer
+    //-- Mark surface layers
     geomutils::mark_domains(_cdt, features);
 
     //-- Create the mesh for the terrain
