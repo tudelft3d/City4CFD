@@ -221,6 +221,12 @@ void Config::set_config(nlohmann::json& j) {
     // Buildings
     lod = j["lod"].front();
     buildingPercentile = (double)j["building_percentile"].front() / 100.;
+    if (j.contains("min_height")) {
+        minHeight = j["min_height"];
+    }
+    if (j.contains("reconstruct_failed")) {
+        reconstructFailed = j["reconstruct_failed"];
+    }
 
     // Imported buildings
     if (j.contains("import_geometries")) {

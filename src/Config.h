@@ -66,7 +66,7 @@ public:
 
     //-- Domain setup
     Point_2     pointOfInterest;
-    double      topHeight                       = 0;
+    double      topHeight                       = 0.;
     //- Influ region and domain bnd
     boost::variant<bool, double, Polygon_2> influRegionConfig;
     boost::variant<bool, double, Polygon_2> domainBndConfig;
@@ -88,22 +88,24 @@ public:
     std::string buildingUniqueId;
     std::string lod;
     bool        refineReconstructedBuildings    = false;
-    double      buildingPercentile;
+    double      buildingPercentile              = -9999.; // Handled by schema
+    double      minHeight                       = 2.;
+    bool        reconstructFailed               = false;
     // Height from attributes
     std::string buildingHeightAttribute;
     std::string floorAttribute;
-    double      floorHeight;
+    double      floorHeight                     = 9999.; // Handled by schema
     bool        buildingHeightAttrAdv           = false;
     //- Imported buildings
-    bool        importAdvantage;
-    bool        importTrueHeight;
+    bool        importAdvantage                 = false;
+    bool        importTrueHeight                = true;
     bool        refineImportedBuildings         = false;
     std::string importLoD                       = "9999";
     //- Boundary
     bool  reconstructBoundaries                 = false;
 
     //-- Polygons related
-    double                edgeMaxLen            = -9999;
+    double                edgeMaxLen            = -9999.; // Handled by schema
     std::map<int, double> flattenSurfaces;
     std::vector<int>     flattenVertBorder;
 
