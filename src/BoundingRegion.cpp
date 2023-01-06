@@ -386,7 +386,7 @@ double BoundingRegion::calc_blockage_ratio_from_edges(const BuildingsPtr& buildi
             buildingCDT.insert_constraint(pt1, pt2);
         }
         //-- Add only outer shell of the building triangulation to overall projected CDT
-        geomutils::mark_domains(buildingCDT);
+        geomutils::tag_layers(buildingCDT);
         for (auto it = buildingCDT.edges_begin(); it != buildingCDT.edges_end(); ++it) {
             if (!buildingCDT.is_constrained(*it)) continue;
             auto fh1 = it->first;

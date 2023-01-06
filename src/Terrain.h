@@ -46,6 +46,10 @@ public:
     void prepare_subset();
     Mesh mesh_subset(const Polygon_with_holes_2& poly) const;
     void clear_subset();
+    void  tag_layers(const PolyFeaturesPtr& features);
+    void  tag_layers(const Face_handle& start, int index,
+                     std::list<CDT::Edge>& border, const PolyFeaturesPtr& features);
+//    void  check_layer(const Face_handle& fh, int surfaceLayer);
 
     CDT&                     get_cdt();
     const CDT&               get_cdt() const;
