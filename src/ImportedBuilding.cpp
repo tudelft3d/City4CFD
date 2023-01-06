@@ -32,8 +32,9 @@
 #include "geomutils.h"
 #include "io.h"
 
-#include "CGAL/Polygon_set_2.h"
 #include <CGAL/alpha_wrap_3.h>
+#include <CGAL/Polygon_mesh_processing/repair_polygon_soup.h>
+#include <CGAL/Polygon_mesh_processing/triangulate_faces.h>
 
 int ImportedBuilding::noBottom = 0;
 
@@ -105,8 +106,8 @@ ImportedBuilding::ImportedBuilding(std::unique_ptr<nlohmann::json>& buildingJson
             pointConnectivity[IO::gen_key_bucket(Point_2(_ptsPtr->point(ptIdx).x(), _ptsPtr->point(ptIdx).y()))] = ptIdx;
         }
         if (!facePoly.is_simple()) {
-            Config::get().log << "Failed to import building: " << this->get_parent_building_id()
-                              << " Reason: " << "Footprint polygon is not simple." << std::endl;
+            Config::write_to_log("Failed to import building: " + this->get_parent_building_id()
+                                       + " Reason: Footprint polygon is not simple.");
             this->deactivate();
             return;
         }
@@ -204,8 +205,8 @@ ImportedBuilding::ImportedBuilding(Mesh& mesh, const int internalID)
             pointConectivity[IO::gen_key_bucket(Point_2(_ptsPtr->point(pt.idx()).x(), _ptsPtr->point(pt.idx()).y()))] = pt.idx();
         }
         if (!facePoly.is_simple()) {
-            Config::get().log << "Failed to import building: " << this->get_internal_id()
-                              << " Reason: " << "Footprint polygon is not simple." << std::endl;
+            Config::write_to_log("Failed to import building: " + std::to_string(this->get_internal_id())
+                              + " Reason: Footprint polygon is not simple.");
             this->deactivate();
             return;
         }
@@ -371,6 +372,7 @@ void ImportedBuilding::reconstruct() {
     PMP::stitch_borders(_mesh);
     PMP::triangulate_faces(_mesh);
     */
+    if (Config::get().refineImportedBuildings) this->refine();
 }
 
 void ImportedBuilding::reconstruct_flat_terrain() {
@@ -402,8 +404,8 @@ const bool ImportedBuilding::is_appending() const {
 
 void ImportedBuilding::check_simplicity(Polygon_2& ring) {
     if (!ring.is_simple()) {
-        Config::get().log << "Failed to import building: " << this->get_parent_building_id()
-                    << " Reason: " << "Footprint polygon is not simple." << std::endl;
+        Config::write_to_log("Failed to import building: " + this->get_parent_building_id()
+                             + " Reason: Footprint polygon is not simple.");
         this->deactivate();
         return;
     }

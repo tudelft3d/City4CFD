@@ -103,7 +103,8 @@ namespace jsonschema {
                       "exclusiveMinimum": 0
                     },
                     "height_attribute_advantage": {"type": "boolean"},
-                    "avoid_bad_polys": {"type": "boolean"}
+                    "avoid_bad_polys": {"type": "boolean"},
+                    "refine": {"type": "boolean"}
                   },
                   "dependencies": {
                     "floor_attribute": ["floor_height"]
@@ -146,7 +147,7 @@ namespace jsonschema {
           }
         },
         "import_geometries": {
-          "description": "Handling imported CityJSON geometries",
+          "description": "Handling imported geometries",
           "type": "object",
           "properties": {
             "path": {
@@ -160,6 +161,9 @@ namespace jsonschema {
             },
             "lod": {
               "type": "string"
+            },
+            "refine": {
+              "type": "boolean"
             }
           },
           "required": ["path", "advantage", "true_height"]

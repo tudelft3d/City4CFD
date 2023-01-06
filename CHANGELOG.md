@@ -2,6 +2,7 @@
 
 ## Unreleased
 ### Added
+- Building surface refinement
 - Sharper boundaries of flattened polygons
 ### Fixed
 - Bad reconstruction of buildings with low height

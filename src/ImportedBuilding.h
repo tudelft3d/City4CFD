@@ -30,6 +30,8 @@
 
 #include "Building.h"
 
+#include <CGAL/Polygon_set_2.h>
+
 class ImportedBuilding : public Building {
 public:
     static int noBottom;

@@ -79,8 +79,8 @@ ReconstructedBuilding::ReconstructedBuilding(const nlohmann::json& poly, const i
     }
     if (!this->is_active()) { // It can only fail if the polygon is not simple
         Config::get().failedBuildings.push_back(internalID);
-        Config::get().log << "Failed to import building polygon ID:" << _id
-                          << ". Polygon is not simple." << std::endl;
+        Config::write_to_log("Failed to import building polygon ID:" + _id
+                          + ". Polygon is not simple.");
     }
 }
 
@@ -128,8 +128,7 @@ void ReconstructedBuilding::reconstruct() {
     }
     //-- LoD12 reconstruction
     if (this->get_height() < _lowHeight) { // elevation calculated here
-        Config::get().log << "Building height lower than minimum prescribed height, ID: " << this->get_id()
-                          << std::endl;
+        Config::write_to_log("Building height lower than minimum prescribed height, ID: " + this->get_id());
         _elevation = this->ground_elevation() + this->slope_height() + _lowHeight;
     }
     LoD12 lod12(_poly, _groundElevations, _elevation);
@@ -138,6 +137,7 @@ void ReconstructedBuilding::reconstruct() {
     if (_clip_bottom) {
         this->translate_footprint(5);
     }
+    if (Config::get().refineReconstructedBuildings) this->refine();
 }
 
 void ReconstructedBuilding::reconstruct_flat_terrain() {
@@ -192,8 +192,7 @@ void ReconstructedBuilding::reconstruct_from_attribute() {
     }
     //-- Set the height from attribute and reconstruct
     if (_attributeHeight < _lowHeight) { // in case of a small height
-        Config::get().log << "Building height lower than minimum prescribed height, ID: " << this->get_id()
-                          << std::endl;
+        Config::write_to_log("Building height lower than minimum prescribed height, ID: " + this->get_id());
         _elevation = this->ground_elevation() + this->slope_height() + _lowHeight;
     } else {
         _elevation = this->ground_elevation() + _attributeHeight;
@@ -204,9 +203,8 @@ void ReconstructedBuilding::reconstruct_from_attribute() {
 
 bool ReconstructedBuilding::reconstruct_again_from_attribute(const std::string& reason) {
     if (_attributeHeight > 0) {
-        Config::get().log << "Failed to reconstruct using point cloud building ID: " << _id
-                    << " Reason: " << reason
-                    << ". Reconstructing using height attribute from JSON polygon." << std::endl;
+        Config::write_to_log("Failed to reconstruct using point cloud building ID: " + _id
+                    + " Reason: " + reason + ". Reconstructing using height attribute from JSON polygon.");
         this->reconstruct_from_attribute();
         return true;
     } else {

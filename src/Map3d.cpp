@@ -320,6 +320,7 @@ void Map3d::reconstruct_buildings() {
                   << std::endl;
     }
     int failed = 0;
+    #pragma omp parallel for
     for (auto& f : _buildingsPtr) {
         if (!f->is_active()) continue;
         try {
@@ -329,15 +330,15 @@ void Map3d::reconstruct_buildings() {
                 f->set_clip_flag(false);
                 f->reconstruct();
             }
-            if (Config::get().refineBuildings) f->refine();
         } catch (std::exception& e) {
+            #pragma omp atomic
             ++failed;
-            //-- Add information to log file
-            Config::get().log << "Failed to reconstruct building ID: " << f->get_id()
-                        << " Reason: " << e.what() << std::endl;
+            // add information to log file
+            Config::write_to_log("Failed to reconstruct building ID: " + f->get_id() + " Reason: " + e.what());
             //-- Get JSON file ID for failed reconstructions output
             //   For now only polygons (reconstructed buildings) are stored to GeoJSON
             if (!f->is_imported())
+                #pragma omp critical
                 Config::get().failedBuildings.push_back(f->get_internal_id());
         }
     }

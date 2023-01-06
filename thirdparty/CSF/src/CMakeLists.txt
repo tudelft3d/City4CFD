@@ -24,12 +24,8 @@ set(CSF_HEADERS
 add_library(CSF ${CSF_SOURCES} ${CSF_HEADERS})
 target_compile_options(CSF PRIVATE -Werror -Wall -Wextra -Wno-unused-private-field)
 
-find_package(OpenMP)
-
 if (OpenMP_CXX_FOUND)
     target_link_libraries(CSF PUBLIC OpenMP::OpenMP_CXX)
-else()
-    message(STATUS "OpenMP not found. Cloth Simulation Filter will run single-threaded")
 endif()
 
 install(TARGETS CSF LIBRARY DESTINATION lib)

@@ -53,6 +53,7 @@ public:
     void set_region(boost::variant<bool, double, Polygon_2>& regionType,
                     std::string& regionName,
                     nlohmann::json& j);
+    static void write_to_log(const std::string& msg);
 
     //-- Input info
     std::string              ground_xyz;             // Ground points
@@ -86,6 +87,7 @@ public:
     //- Buildings
     std::string buildingUniqueId;
     std::string lod;
+    bool        refineReconstructedBuildings    = false;
     double      buildingPercentile;
     // Height from attributes
     std::string buildingHeightAttribute;
@@ -95,6 +97,7 @@ public:
     //- Imported buildings
     bool        importAdvantage;
     bool        importTrueHeight;
+    bool        refineImportedBuildings         = false;
     std::string importLoD                       = "9999";
     //- Boundary
     bool  reconstructBoundaries                 = false;
@@ -124,7 +127,6 @@ public:
     //-- Experimental
     bool       clip                             = false;
     bool       handleSelfIntersect              = false;
-    bool       refineBuildings                  = false;
     bool       alphaWrap                        = false;
 
     //-- Other settings

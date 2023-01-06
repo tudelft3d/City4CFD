@@ -31,10 +31,14 @@
 #include "TopoFeature.h"
 #include "Boundary.h"
 
-#include <CGAL/Polygon_mesh_processing/IO/polygon_mesh_io.h>
+#include <CGAL/Polygon_mesh_processing/compute_normal.h>
 #include <CGAL/Polygon_mesh_processing/connected_components.h>
 #include <CGAL/Polygon_mesh_processing/transform.h>
+#include <CGAL/Polygon_mesh_processing/repair_polygon_soup.h>
+#include <CGAL/Polygon_mesh_processing/IO/polygon_mesh_io.h>
 #include <CGAL/IO/read_las_points.h>
+
+#include <boost/algorithm/string.hpp>
 
 //-- Input functions
 void IO::read_config(std::string& config_path) {
@@ -89,7 +93,7 @@ void IO::read_geojson_polygons(std::string& file, JsonVectorPtr& jsonPolygons) {
         std::ifstream ifs(file);
         nlohmann::json j = nlohmann::json::parse(ifs);
 
-//        int count;
+//        int count = 0;
         for (auto& feature : j["features"]) {
             if (feature["geometry"]["type"] == "Polygon") {
                 jsonPolygons.emplace_back(std::make_unique<nlohmann::json>(feature));
@@ -136,8 +140,10 @@ void IO::read_cityjson_geometries(std::string& file, JsonVectorPtr& importedBuil
 
         //-- Add vertices
         for (auto& pt : j["vertices"]) {
-            double ptx = ((double)pt[0] * (double)j["transform"]["scale"][0]) + (double)j["transform"]["translate"][0] - Config::get().pointOfInterest.x();
-            double pty = ((double)pt[1] * (double)j["transform"]["scale"][1]) + (double)j["transform"]["translate"][1] - Config::get().pointOfInterest.y();
+            double ptx = ((double)pt[0] * (double)j["transform"]["scale"][0]) + (double)j["transform"]["translate"][0]
+                    - Config::get().pointOfInterest.x();
+            double pty = ((double)pt[1] * (double)j["transform"]["scale"][1]) + (double)j["transform"]["translate"][1]
+                    - Config::get().pointOfInterest.y();
             double ptz = ((double)pt[2] * (double)j["transform"]["scale"][2]) + (double)j["transform"]["translate"][2];
             importedBuildingPts->insert(Point_3(ptx, pty, ptz));
         }

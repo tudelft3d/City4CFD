@@ -37,6 +37,8 @@
 
 #include "configSchema.inc"
 
+#include  <boost/algorithm/string/predicate.hpp>
+
 void Config::validate(nlohmann::json& j) {
     using valijson::Schema;
     using valijson::SchemaParser;
@@ -85,10 +87,6 @@ void Config::set_config(nlohmann::json& j) {
         if (j["point_clouds"].contains("ground")) ground_xyz = j["point_clouds"]["ground"];
         if (j["point_clouds"].contains("buildings")) buildings_xyz = j["point_clouds"]["buildings"];
     }
-
-    //-- Additional geometries
-    if (j.contains("import_geometries"))
-        importedBuildingsPath = j["import_geometries"]["path"];
 
     //-- Domain setup
     pointOfInterest = Point_2(j["point_of_interest"][0], j["point_of_interest"][1]);
@@ -160,6 +158,8 @@ void Config::set_config(nlohmann::json& j) {
                 floorHeight = (double)poly["floor_height"];
             if (poly.contains("avoid_bad_polys"))
                 avoidBadPolys = poly["avoid_bad_polys"];
+            if (poly.contains("refine"))
+                refineReconstructedBuildings = poly["refine"];
         }
         if (poly["type"] == "SurfaceLayer") {
             topoLayers.push_back(poly["path"]);
@@ -224,10 +224,13 @@ void Config::set_config(nlohmann::json& j) {
 
     // Imported buildings
     if (j.contains("import_geometries")) {
-        importAdvantage  = j["import_geometries"]["advantage"];
-        importTrueHeight = j["import_geometries"]["true_height"];
+        importedBuildingsPath = j["import_geometries"]["path"];
+        importAdvantage       = j["import_geometries"]["advantage"];
+        importTrueHeight      = j["import_geometries"]["true_height"];
         if (j["import_geometries"].contains("lod"))
             importLoD = j["import_geometries"]["lod"];
+        if (j["import_geometries"].contains("refine"))
+            refineImportedBuildings = j["import_geometries"]["refine"];
     }
 
     // Boundary
@@ -269,8 +272,6 @@ void Config::set_config(nlohmann::json& j) {
             clip = j["experimental"]["clip"];
         if (j["experimental"].contains("handle_self_intersections"))
             handleSelfIntersect = j["experimental"]["handle_self_intersections"];
-        if (j["experimental"].contains("refine_buildings"))
-            refineBuildings = j["experimental"]["refine_buildings"];
         if (j["experimental"].contains("alpha_wrap"))
             alphaWrap = j["experimental"]["alpha_wrap"];
     }
@@ -307,4 +308,9 @@ void Config::set_region(boost::variant<bool, double, Polygon_2>& regionType,
     } else if (j[regionName].is_number() || j[regionName].is_array() && j[regionName][0].is_number()) { // Influ region radius
         regionType = (double)j[regionName].front();
     } else regionType = true; // Leave it to BPG
+}
+
+void Config::write_to_log(const std::string& msg) {
+    #pragma omp critical
+    Config::get().log << msg << std::endl;
 }
