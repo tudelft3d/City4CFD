@@ -46,7 +46,6 @@ public:
     virtual void   reconstruct() override;
     virtual void   reconstruct_flat_terrain() override;
 
-    double get_height();
     void   append_nonground_part(const std::shared_ptr<ImportedBuilding>& other);
 
     const nlohmann::json& get_building_json() const;
@@ -58,13 +57,14 @@ public:
 //    virtual void  get_cityjson_semantics(nlohmann::json& g) const override;
 
 protected:
-    std::unique_ptr<nlohmann::json>  _buildingJson;
-    std::vector<int>                 _footprintIdxList;
-    std::vector<std::vector<int>>    _footprintPtsIdxList;
-    std::string                      _parentBuildingID;
-    bool                             _appendToBuilding;
-    bool                             _trueHeight;
-    int                              _lodIdx;
+    std::unordered_map<int, Point_3>  _ptMap;
+    std::unique_ptr<nlohmann::json>   _buildingJson;
+    std::vector<int>                  _footprintIdxList;
+    std::vector<std::vector<int>>     _footprintPtsIdxList;
+    std::string                       _parentBuildingID;
+    bool                              _appendToBuilding;
+    bool                              _trueHeight;
+    int                               _lodIdx;
 
     void check_simplicity(Polygon_2& ring);
     void polyset_to_polygon(const CGAL::Polygon_set_2<CGAL::Epeck>& polySet);
