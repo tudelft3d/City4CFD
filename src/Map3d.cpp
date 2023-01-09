@@ -175,15 +175,17 @@ void Map3d::set_features() {
     //-- Set flat terrain or random thin terrain points
     if (_pointCloud.get_terrain().empty()) {
         _pointCloud.create_flat_terrain(_allFeaturesPtr);
-        Config::get().flatTerrain = false;
+        Config::get().flatTerrain = false; // all points are already at 0 elevation
     } else {
         _pointCloud.random_thin_pts();
     }
+    if (Config::get().flatTerrain) std::cout << "\nINFO: Reconstructing with flat terrain" << std::endl;
 
     //-- BPG flags for influ region and domain boundary
     if (Config::get().influRegionConfig.type() == typeid(bool)) _influRegionBPG = true;
     if (Config::get().domainBndConfig.type() == typeid(bool))   _bndBPG = true;
 
+    //-- Smooth terrain
     if (Config::get().smoothTerrain) {
         _pointCloud.smooth_terrain();
     }
