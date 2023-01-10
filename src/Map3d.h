@@ -73,6 +73,7 @@ private:
     void set_bnd();
     void bnd_sanity_check();
     void add_building_pts();
+    void remove_extra_terrain_pts();
     void reconstruct_terrain();
     void reconstruct_buildings();
     void reconstruct_boundaries();
