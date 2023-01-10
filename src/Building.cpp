@@ -213,8 +213,8 @@ void Building::translate_footprint(const double h) {
 }
 
 void Building::check_feature_scope(const Polygon_2& otherPoly) {
-    for (auto& poly: _poly.rings()) {
-        for (auto& vert : poly) {
+    for (auto& ring: _poly.rings()) {
+        for (auto& vert : ring) {
             if (geomutils::point_in_poly(vert, otherPoly))
                 return;
         }

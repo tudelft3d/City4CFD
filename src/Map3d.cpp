@@ -245,7 +245,7 @@ void Map3d::set_influ_region() {
                   << "Calculating with BPG." << std::endl;
 
         //-- Check if imported and reconstructed buildings are overlapping
-        if (!_importedBuildingsPtr.empty()) this->solve_building_conflicts();
+        if (!_importedBuildingsPtr.empty()) this->solve_building_conflicts(); // have to do it earlier if BPG
 
         //-- Calculate influ region
         _influRegion.calc_influ_region_bpg(_dt, _buildingsPtr);
@@ -260,7 +260,7 @@ void Map3d::set_influ_region() {
     this->clear_inactives();
 
     //-- Check if imported and reconstructed buildings are overlapping
-    if (!_importedBuildingsPtr.empty()) this->solve_building_conflicts();
+    if (!_importedBuildingsPtr.empty() && !_influRegionBPG) this->solve_building_conflicts();
 
     std::cout << "    Number of building geometries in the influence region: " << _buildingsPtr.size() << std::endl;
     if (_buildingsPtr.empty()) {
