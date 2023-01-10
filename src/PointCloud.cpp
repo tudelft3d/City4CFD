@@ -30,7 +30,8 @@
 #include "io.h"
 #include "geomutils.h"
 #include "Config.h"
-#include "PolyFeature.h"
+#include "Building.h"
+#include "Quadtree/Quadtree.h"
 
 #include <boost/locale.hpp>
 #include <CGAL/Polygon_mesh_processing/remesh.h>
@@ -110,6 +111,37 @@ void PointCloud::smooth_terrain() {
         _pointCloudTerrain.insert(pt);
     }
     _pointCloudTerrain.add_property_map<bool> ("is_building_point", false);
+}
+
+void PointCloud::remove_points_in_polygon(const BuildingsPtr& features) {
+    typedef Quadtree_node<EPICK, Point_set_3> Point_index;
+    Point_index pointCloudIndex;
+    auto& pointCloud = _pointCloudTerrain;
+
+    pointCloudIndex.compute_extent(pointCloud);
+    for (auto pointIndex = pointCloud.begin();
+         pointIndex != pointCloud.end();
+         ++pointIndex) {
+        pointCloudIndex.insert_point(pointCloud, *pointIndex);
+    }
+    pointCloudIndex.optimise(pointCloud, 100, 10);
+
+    //-- Find points belonging to individual buildings
+    for (auto& f: features) {
+        auto& poly = f->get_poly();
+
+        std::vector<Point_index *> intersected_nodes;
+        pointCloudIndex.find_intersections(intersected_nodes, poly.bbox().xmin(), poly.bbox().xmax(),
+                                           poly.bbox().ymin(), poly.bbox().ymax());
+        for (auto const &node: intersected_nodes) {
+            for (auto const &point_index: node->points) {
+                if (geomutils::point_in_poly(pointCloud.point(point_index), poly)) {
+                    pointCloud.remove(point_index);
+                }
+            }
+        }
+    }
+    pointCloud.collect_garbage();
 }
 
 void PointCloud::create_flat_terrain(const PolyFeaturesPtr& lsFeatures) {

@@ -49,6 +49,9 @@ void Map3d::reconstruct() {
     //-- Define influence region
     this->set_influ_region();
 
+    //-- Remove points belonging to buildings from terrain
+    this->remove_extra_terrain_pts();
+
     //-- Different flow if explicitly defining domain boundary or leaving it to BPG
     if (!_bndBPG) {
         //-- Set outer boundary
@@ -216,13 +219,22 @@ void Map3d::add_building_pts() {
         searchTree.search(std::back_inserter(subsetPts), pts_range);
 
         //-- Check if subset point lies inside the polygon
-        Point_set_3 building_pts;
         for (auto& pt : subsetPts) {
             if (geomutils::point_in_poly(pt, poly)) {
                 b->insert_point(pt);
             }
         }
     }
+}
+
+void Map3d::remove_extra_terrain_pts() {
+    std::cout << "\nRemove extra terrain points" << std::endl;
+    //-- Remove terrain points that lay in buildings
+    _pointCloud.remove_points_in_polygon(_buildingsPtr);
+    //-- Update DT for interpolation
+    _dt.clear();
+    _dt.insert(_pointCloud.get_terrain().points().begin(),
+               _pointCloud.get_terrain().points().end());
 }
 
 void Map3d::set_influ_region() {
