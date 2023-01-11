@@ -125,8 +125,6 @@ void Terrain::create_mesh(const PolyFeaturesPtr& features) {
 }
 
 void Terrain::prepare_subset() {
-    typedef std::vector<std::size_t>  CGAL_Polygon;
-
     //-- Make terrain mesh without surface layers marked
     geomutils::cdt_to_mesh(_cdt, _mesh);
     if (_mesh.is_empty()) throw std::runtime_error("Cannot create vertex-face map of empty mesh!");

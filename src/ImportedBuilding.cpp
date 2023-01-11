@@ -275,7 +275,6 @@ double ImportedBuilding::get_elevation() {
 
 void ImportedBuilding::reconstruct() {
     typedef EPICK::FT                 FT;
-    typedef std::array<FT, 3>         Custom_point;
     typedef std::vector<std::size_t>  CGAL_Polygon;
 
     nlohmann::json& geometry = (*_buildingJson)["geometry"][_lodIdx];

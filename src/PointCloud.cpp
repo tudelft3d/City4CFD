@@ -173,7 +173,6 @@ void PointCloud::flatten_polygon_pts(const PolyFeaturesPtr& lsFeatures,
     std::map<int, Point_3> flattenedPts;
 
     //-- Construct a connectivity map and remove duplicates along the way
-    auto is_building_pt = _pointCloudTerrain.property_map<bool>("is_building_point").first;
     std::unordered_map<Point_3, int> pointCloudConnectivity;
     auto it = _pointCloudTerrain.points().begin();
     int count = 0;

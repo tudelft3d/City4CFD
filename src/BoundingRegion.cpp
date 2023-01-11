@@ -437,11 +437,8 @@ void BoundingRegion::ashape_to_cdt(const std::vector<Point_2>& buildingPts, CDT&
     typedef CGAL::Delaunay_triangulation_2<EPICK ,Tds>                        Triangulation_2;
     typedef CGAL::Alpha_shape_2<Triangulation_2>                              Alpha_shape_2;
 
-    typedef EPICK::FT                                                         FT;
-
     Alpha_shape_2 A(buildingPts.begin(), buildingPts.end(), aVal, Alpha_shape_2::GENERAL);
 
-    Converter<EPICK, EPECK> to_exact;
     for (auto it = A.finite_edges_begin(); it != A.finite_edges_end(); ++it) {
         auto fh1 = it->first;
         auto fh2 = it->first->neighbor(it->second);

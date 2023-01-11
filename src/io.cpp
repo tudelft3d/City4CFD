@@ -294,12 +294,9 @@ void IO::output_cityjson(const OutputFeaturesPtr& allFeatures) {
 void IO::get_obj_pts(const Mesh& mesh,
                      std::string& fs,
                      std::string& bs,
-                     std::unordered_map<std::string, int>& dPts)
-{
+                     std::unordered_map<std::string, int>& dPts) {
     for (auto& face : mesh.faces()) {
         if (IO::is_degen(mesh, face)) continue;
-        std::vector<int> faceIdx; faceIdx.reserve(3);
-        std::string fsTemp;
         std::string bsTemp;
         for (auto index : CGAL::vertices_around_face(mesh.halfedge(face), mesh)) {
             std::string pt = gen_key_bucket(mesh.point(index));
@@ -308,12 +305,9 @@ void IO::get_obj_pts(const Mesh& mesh,
                 fs += "\nv " + pt;
                 bsTemp += " " + std::to_string(dPts.size() + 1);
 
-                faceIdx.push_back(dPts.size() + 1);
-
                 dPts[pt] = dPts.size() + 1;
             } else {
                 bsTemp += " " + std::to_string(it->second);
-                faceIdx.push_back(it->second);
             }
         }
         bs += "\nf" + bsTemp;
@@ -347,21 +341,17 @@ void IO::get_cityjson_geom(const Mesh& mesh, nlohmann::json& g, std::unordered_m
     g["boundaries"];
     for (auto& face: mesh.faces()) {
         if (IO::is_degen(mesh, face)) continue;
-        std::vector<int> faceIdx;
-        faceIdx.reserve(3);
         std::vector<int> tempPoly;
         tempPoly.reserve(3);
         for (auto index: CGAL::vertices_around_face(mesh.halfedge(face), mesh)) {
             std::string pt = gen_key_bucket(mesh.point(index));
             auto it = dPts.find(pt);
             if (it == dPts.end()) {
-                faceIdx.push_back(dPts.size());
 
                 tempPoly.push_back(dPts.size());
 
                 dPts[pt] = dPts.size();
             } else {
-                faceIdx.push_back(it->second);
                 tempPoly.push_back(it->second);
             }
         }

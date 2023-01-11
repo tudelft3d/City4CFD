@@ -71,7 +71,6 @@ double Building::get_height() {
 
 void Building::alpha_wrap(const BuildingsPtr& buildings, Mesh& newMesh) {
     typedef EPICK::FT                 FT;
-    typedef std::array<FT, 3>         Custom_point;
     typedef std::vector<std::size_t>  CGAL_Polygon;
 
     //-- Make a single mesh out of all individual buildings
@@ -122,14 +121,14 @@ void Building::alpha_wrap(const BuildingsPtr& buildings, Mesh& newMesh) {
     */
 
     //-- Perform CGAL's alpha wrapping
-    const double relative_alpha = 900.;
-    const double relative_offset = 15000.;
-    CGAL::Bbox_3 bbox = CGAL::Polygon_mesh_processing::bbox(newMesh);
-    const double diag_length = std::sqrt(CGAL::square(bbox.xmax() - bbox.xmin()) +
-                                         CGAL::square(bbox.ymax() - bbox.ymin()) +
-                                         CGAL::square(bbox.zmax() - bbox.zmin()));
-    const double alpha = diag_length / relative_alpha;
-    const double offset = diag_length / relative_offset;
+//    const double relative_alpha = 900.;
+//    const double relative_offset = 15000.;
+//    CGAL::Bbox_3 bbox = CGAL::Polygon_mesh_processing::bbox(newMesh);
+//    const double diag_length = std::sqrt(CGAL::square(bbox.xmax() - bbox.xmin()) +
+//                                         CGAL::square(bbox.ymax() - bbox.ymin()) +
+//                                         CGAL::square(bbox.zmax() - bbox.zmin()));
+//    const double alpha = diag_length / relative_alpha;
+//    const double offset = diag_length / relative_offset;
 //    CGAL::alpha_wrap_3(newMesh, alpha, offset, wrap);
 
 //    CGAL::alpha_wrap_3(newMesh, 2, 0.01, newMesh);   // 'coarse'
