@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## [0.3.0] - 2023-01-18
 ### Added
 - Building surface refinement
 - Sharper boundaries of flattened polygons
