@@ -1,7 +1,7 @@
 /*
   City4CFD
  
-  Copyright (c) 2021-2022, 3D Geoinformation Research Group, TU Delft  
+  Copyright (c) 2021-2023, 3D Geoinformation Research Group, TU Delft
 
   This file is part of City4CFD.
 
@@ -40,31 +40,38 @@ public:
     ~Terrain();
 
     void set_cdt(const Point_set_3 &pointCloud);
-    void prep_constraints(const PolyFeatures& features, Point_set_3& pointCloud);
+    void prep_constraints(const PolyFeaturesPtr& features, Point_set_3& pointCloud);
     void constrain_features();
-    void create_mesh(const PolyFeatures& features);
+    void create_mesh(const PolyFeaturesPtr& features);
     void prepare_subset();
     Mesh mesh_subset(const Polygon_with_holes_2& poly) const;
     void clear_subset();
+    void  tag_layers(const PolyFeaturesPtr& features);
+    void  tag_layers(const Face_handle& start, int index,
+                     std::list<CDT::Edge>& border, const PolyFeaturesPtr& features);
+//    void  check_layer(const Face_handle& fh, int surfaceLayer);
 
-    CDT&                   get_cdt();
-    const CDT&             get_cdt() const;
-    const vertex_face_map& get_vertex_face_map() const;
-    const SearchTree&      get_mesh_search_tree() const;
+    CDT&                     get_cdt();
+    const CDT&               get_cdt() const;
+    std::vector<Polygon_3>&  get_constrained_polys();
+    const vertex_face_map&   get_vertex_face_map() const;
+    const SearchTree&        get_mesh_search_tree() const;
+    std::vector<EPECK::Segment_3>& get_extra_constrained_edges();
 
     void         get_cityjson_info(nlohmann::json& b) const override;
     std::string  get_cityjson_primitive() const override;
     TopoClass    get_class() const override;
     std::string  get_class_name() const override;
 
-    const SurfaceLayers& get_surface_layers() const;
+    const SurfaceLayersPtr& get_surface_layers() const;
 
 protected:
     CDT                    _cdt;
-    SurfaceLayers          _surfaceLayersTerrain;
-    std::list<Polygon_3>   _constrainedPolys;
+    SurfaceLayersPtr       _surfaceLayersTerrain;
     vertex_face_map        _vertexFaceMap;
     SearchTree             _searchTree;
+    std::vector<Polygon_3> _constrainedPolys;
+    std::vector<EPECK::Segment_3> _extraConstrainedEdges;
 };
 
 #endif //CITY4CFD_TERRAIN_H

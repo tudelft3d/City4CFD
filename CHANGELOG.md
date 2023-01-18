@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.3.0] - 2023-01-18
+### Added
+- Building surface refinement
+- Sharper boundaries of flattened polygons
+- Minimum building height as an argument
+### Fixed
+- Bad reconstruction of buildings with low height
+- Minor bugfixes
+
 ## [0.2.0] - 2022-10-07
 ### Added
 - Point cloud preparation tool city4cfd_pcprep

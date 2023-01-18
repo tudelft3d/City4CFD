@@ -1,7 +1,7 @@
 /*
   City4CFD
  
-  Copyright (c) 2021-2022, 3D Geoinformation Research Group, TU Delft  
+  Copyright (c) 2021-2023, 3D Geoinformation Research Group, TU Delft
 
   This file is part of City4CFD.
 
@@ -31,10 +31,14 @@
 #include "TopoFeature.h"
 #include "Boundary.h"
 
-#include <CGAL/Polygon_mesh_processing/IO/polygon_mesh_io.h>
+#include <CGAL/Polygon_mesh_processing/compute_normal.h>
 #include <CGAL/Polygon_mesh_processing/connected_components.h>
 #include <CGAL/Polygon_mesh_processing/transform.h>
+#include <CGAL/Polygon_mesh_processing/repair_polygon_soup.h>
+#include <CGAL/Polygon_mesh_processing/IO/polygon_mesh_io.h>
 #include <CGAL/IO/read_las_points.h>
+
+#include <boost/algorithm/string.hpp>
 
 //-- Input functions
 void IO::read_config(std::string& config_path) {
@@ -84,12 +88,12 @@ bool IO::read_point_cloud(std::string& file, Point_set_3& pc) {
     return true;
 }
 
-void IO::read_geojson_polygons(std::string& file, JsonVector& jsonPolygons) {
+void IO::read_geojson_polygons(std::string& file, JsonVectorPtr& jsonPolygons) {
     try {
         std::ifstream ifs(file);
         nlohmann::json j = nlohmann::json::parse(ifs);
 
-        int count;
+//        int count = 0;
         for (auto& feature : j["features"]) {
             if (feature["geometry"]["type"] == "Polygon") {
                 jsonPolygons.emplace_back(std::make_unique<nlohmann::json>(feature));
@@ -105,7 +109,7 @@ void IO::read_geojson_polygons(std::string& file, JsonVector& jsonPolygons) {
 //                std::cout << "In file '" << file << "' cannot parse geometry type "
 //                          << feature["geometry"]["type"] << ". Object ID: " << count << std::endl;
             }
-            ++count;
+//            ++count;
         }
     } catch (std::exception& e) {
         throw std::runtime_error(std::string("Error parsing JSON file '" + file + "'. Details: " + e.what()));
@@ -128,18 +132,20 @@ void IO::read_other_geometries(std::string& file, std::vector<Mesh>& meshes) {
     PMP::split_connected_components(mesh, meshes);
 }
 
-void IO::read_cityjson_geometries(std::string& file, JsonVector& importedBuildings,
-                                  Point3VectorPtr& importedBuildingPts) {
+void IO::read_cityjson_geometries(std::string& file, JsonVectorPtr& importedBuildings,
+                                  PointSet3Ptr& importedBuildingPts) {
     try {
         std::ifstream ifs(file);
         nlohmann::json j = nlohmann::json::parse(ifs);
 
         //-- Add vertices
         for (auto& pt : j["vertices"]) {
-            double ptx = ((double)pt[0] * (double)j["transform"]["scale"][0]) + (double)j["transform"]["translate"][0] - Config::get().pointOfInterest.x();
-            double pty = ((double)pt[1] * (double)j["transform"]["scale"][1]) + (double)j["transform"]["translate"][1] - Config::get().pointOfInterest.y();
+            double ptx = ((double)pt[0] * (double)j["transform"]["scale"][0]) + (double)j["transform"]["translate"][0]
+                    - Config::get().pointOfInterest.x();
+            double pty = ((double)pt[1] * (double)j["transform"]["scale"][1]) + (double)j["transform"]["translate"][1]
+                    - Config::get().pointOfInterest.y();
             double ptz = ((double)pt[2] * (double)j["transform"]["scale"][2]) + (double)j["transform"]["translate"][2];
-            importedBuildingPts->emplace_back(ptx, pty, ptz);
+            importedBuildingPts->insert(Point_3(ptx, pty, ptz));
         }
 
         //-- Separate individual buildings
@@ -172,7 +178,7 @@ void IO::print_progress_bar(int percent) {
     std::clog << percent << "%     " << std::flush;
 }
 
-void IO::output_obj(const OutputFeatures& allFeatures) {
+void IO::output_obj(const OutputFeaturesPtr& allFeatures) {
     int numOutputSurfaces = TopoFeature::get_num_output_layers();
     std::vector<std::ofstream> of;
     std::vector<std::string>   fs(numOutputSurfaces), bs(numOutputSurfaces);
@@ -211,7 +217,7 @@ void IO::output_obj(const OutputFeatures& allFeatures) {
     for (auto& f : of) f.close();
 }
 
-void IO::output_stl(const OutputFeatures& allFeatures) {
+void IO::output_stl(const OutputFeaturesPtr& allFeatures) {
     int numOutputLayers = TopoFeature::get_num_output_layers();
     std::vector<std::ofstream> of;
     std::vector<std::string>   fs(numOutputLayers);
@@ -239,7 +245,7 @@ void IO::output_stl(const OutputFeatures& allFeatures) {
     for (auto& f : of) f.close();
 }
 
-void IO::output_cityjson(const OutputFeatures& allFeatures) {
+void IO::output_cityjson(const OutputFeaturesPtr& allFeatures) {
     std::ofstream of;
     nlohmann::json j;
 
@@ -288,12 +294,9 @@ void IO::output_cityjson(const OutputFeatures& allFeatures) {
 void IO::get_obj_pts(const Mesh& mesh,
                      std::string& fs,
                      std::string& bs,
-                     std::unordered_map<std::string, int>& dPts)
-{
+                     std::unordered_map<std::string, int>& dPts) {
     for (auto& face : mesh.faces()) {
         if (IO::is_degen(mesh, face)) continue;
-        std::vector<int> faceIdx; faceIdx.reserve(3);
-        std::string fsTemp;
         std::string bsTemp;
         for (auto index : CGAL::vertices_around_face(mesh.halfedge(face), mesh)) {
             std::string pt = gen_key_bucket(mesh.point(index));
@@ -302,12 +305,9 @@ void IO::get_obj_pts(const Mesh& mesh,
                 fs += "\nv " + pt;
                 bsTemp += " " + std::to_string(dPts.size() + 1);
 
-                faceIdx.push_back(dPts.size() + 1);
-
                 dPts[pt] = dPts.size() + 1;
             } else {
                 bsTemp += " " + std::to_string(it->second);
-                faceIdx.push_back(it->second);
             }
         }
         bs += "\nf" + bsTemp;
@@ -341,21 +341,17 @@ void IO::get_cityjson_geom(const Mesh& mesh, nlohmann::json& g, std::unordered_m
     g["boundaries"];
     for (auto& face: mesh.faces()) {
         if (IO::is_degen(mesh, face)) continue;
-        std::vector<int> faceIdx;
-        faceIdx.reserve(3);
         std::vector<int> tempPoly;
         tempPoly.reserve(3);
         for (auto index: CGAL::vertices_around_face(mesh.halfedge(face), mesh)) {
             std::string pt = gen_key_bucket(mesh.point(index));
             auto it = dPts.find(pt);
             if (it == dPts.end()) {
-                faceIdx.push_back(dPts.size());
 
                 tempPoly.push_back(dPts.size());
 
                 dPts[pt] = dPts.size();
             } else {
-                faceIdx.push_back(it->second);
                 tempPoly.push_back(it->second);
             }
         }

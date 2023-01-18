@@ -1,7 +1,7 @@
 /*
   City4CFD
  
-  Copyright (c) 2021-2022, 3D Geoinformation Research Group, TU Delft  
+  Copyright (c) 2021-2023, 3D Geoinformation Research Group, TU Delft
 
   This file is part of City4CFD.
 
@@ -29,25 +29,30 @@
 
 #include "geomutils.h"
 
-#include <CGAL/natural_neighbor_coordinates_2.h>
+#include <CGAL/convex_hull_2.h>
 #include <CGAL/min_quadrilateral_2.h>
+#include <CGAL/natural_neighbor_coordinates_2.h>
 #ifndef NDEBUG
 #include <CGAL/Barycentric_coordinates_2/Triangle_coordinates_2.h>
 #endif
 
 PolyFeature::PolyFeature()
-    : TopoFeature(), _poly(), _base_heights(), _polyInternalID(), _minBbox() {}
+    : TopoFeature(), _poly(), _groundElevations(), _polyInternalID(),
+      _groundElevation(-global::largnum), _minBbox() {}
 
 PolyFeature::PolyFeature(const int outputLayerID)
-    : TopoFeature(outputLayerID), _poly(), _base_heights(), _polyInternalID(), _minBbox() {}
+    : TopoFeature(outputLayerID), _poly(), _groundElevations(), _polyInternalID(),
+      _groundElevation(-global::largnum), _minBbox() {}
 
 PolyFeature::PolyFeature(const nlohmann::json& poly, const bool checkSimplicity)
-    : TopoFeature(), _base_heights(), _polyInternalID(), _minBbox() {
+    : TopoFeature(), _groundElevations(), _polyInternalID(),
+      _groundElevation(-global::largnum), _minBbox() {
     this->parse_json_poly(poly, checkSimplicity);
 }
 
 PolyFeature::PolyFeature(const int outputLayerID, const int internalID)
-    : TopoFeature(outputLayerID), _polyInternalID(internalID) {}
+    : TopoFeature(outputLayerID), _groundElevations(), _polyInternalID(internalID),
+      _groundElevation(-global::largnum), _minBbox() {}
 
 PolyFeature::PolyFeature(const nlohmann::json& poly, const bool checkSimplicity, const int outputLayerID)
     : PolyFeature(poly, checkSimplicity) {
@@ -62,7 +67,7 @@ PolyFeature::PolyFeature(const nlohmann::json& poly, const bool checkSimplicity,
                          const int outputLayerID, const int internalID)
     : PolyFeature(poly, checkSimplicity) {
     _polyInternalID = internalID;
-    _outputLayerID    = outputLayerID;
+    _outputLayerID  = outputLayerID;
     if (_outputLayerID  >= _numOfOutputLayers) _numOfOutputLayers = _outputLayerID + 1;
 }
 
@@ -75,7 +80,7 @@ void PolyFeature::calc_footprint_elevation_nni(const DT& dt) {
     typedef std::vector<std::pair<DT::Point, double>> Point_coordinate_vector;
     DT::Face_handle fh = nullptr;
     for (auto& ring: _poly.rings()) {
-        std::vector<double> ringHeights;
+        std::vector<double> ringElevations;
         for (auto& polypt: ring) {
             Point_coordinate_vector coords;
             DT::Point pt(polypt.x(), polypt.y(), 0);
@@ -89,13 +94,13 @@ void PolyFeature::calc_footprint_elevation_nni(const DT& dt) {
                 return;
             }
 
-            double height = 0;
+            double elevation = 0;
             for (auto& coord : coords) {
-                height += coord.first.z() * coord.second / result.second;
+                elevation += coord.first.z() * coord.second / result.second;
             }
-            ringHeights.push_back(height);
+            ringElevations.push_back(elevation);
         }
-        _base_heights.push_back(ringHeights);
+        _groundElevations.push_back(ringElevations);
     }
 }
 
@@ -128,24 +133,30 @@ void PolyFeature::calc_footprint_elevation_linear(const DT& dt) {
             }
             ringHeights.push_back(h);
         }
-        _base_heights.push_back(ringHeights);
+        _groundElevations.push_back(ringHeights);
     }
 }
 #endif
 
-double PolyFeature::get_avg_base_elevation() {
-    if (_base_heights.empty())throw std::runtime_error("Polygon heights missing!"
-                                                       " Cannot calculate average");
-    std::vector<double> footprintElevations;
-    for (auto& ring : _base_heights) {
-        for (auto& pt : ring) {
-            footprintElevations.push_back(pt);
-        }
+double PolyFeature::ground_elevation() {
+    if (_groundElevation < -global::largnum + global::smallnum) {
+        if (_groundElevations.empty())throw std::runtime_error("Polygon elevations missing!"
+                                                           " Cannot calculate average");
+        // calculating base elevation as 90 percentile of outer ring
+        _groundElevation = geomutils::percentile(_groundElevations.front(), 0.2);
     }
-    return geomutils::avg(footprintElevations);
+    return _groundElevation;
 }
 
-void PolyFeature::flatten_polygon_inner_points(const Point_set_3& pointCloud,
+double PolyFeature::slope_height() {
+    if (_groundElevations.empty())throw std::runtime_error("Polygon elevations missing!"
+                                                           " Cannot perform calculations");
+    // calculating slope height as difference between high and low elevations
+    // calculated on the fly as rarely used
+    return geomutils::percentile(_groundElevations.front(), 0.9) - this->ground_elevation();
+}
+
+bool PolyFeature::flatten_polygon_inner_points(const Point_set_3& pointCloud,
                                                std::map<int, Point_3>& flattenedPts,
                                                const SearchTree& searchTree,
                                                const std::unordered_map<Point_3, int>& pointCloudConnectivity) const {
@@ -155,8 +166,8 @@ void PolyFeature::flatten_polygon_inner_points(const Point_set_3& pointCloud,
     //-- Take tree subset bounded by the polygon
     std::vector<Point_3> subsetPts;
     Polygon_2 bbox = geomutils::calc_bbox_poly(_poly.rings().front());
-    Point_3 bbox1(bbox[0].x(), bbox[0].y(), -global::largnum);
-    Point_3 bbox2(bbox[2].x(), bbox[2].y(), global::largnum);
+    Point_2 bbox1(bbox[0].x(), bbox[0].y());
+    Point_2 bbox2(bbox[2].x(), bbox[2].y());
     Fuzzy_iso_box pts_range(bbox1, bbox2);
     searchTree.search(std::back_inserter(subsetPts), pts_range);
 
@@ -171,7 +182,7 @@ void PolyFeature::flatten_polygon_inner_points(const Point_set_3& pointCloud,
             auto pointSetIt = pointCloud.begin();
             std::advance(pointSetIt, itIdx->second);
             if (is_building_pt[*pointSetIt])
-                return; //todo temp solution when having adjacent buildings
+                return false; //todo temp solution when having adjacent buildings
 
             auto it = flattenedPts.find(itIdx->second);
             if (it == flattenedPts.end()) {
@@ -182,7 +193,7 @@ void PolyFeature::flatten_polygon_inner_points(const Point_set_3& pointCloud,
     }
     //-- Flatten surface points
     if (indices.empty()) {
-        return;
+        return false;
     }
     double avgHeight = geomutils::percentile(originalHeights,
                                              Config::get().flattenSurfaces[this->get_output_layer_id()] / 100);
@@ -191,10 +202,11 @@ void PolyFeature::flatten_polygon_inner_points(const Point_set_3& pointCloud,
     for (auto& i : indices) {
         flattenedPts[i] = Point_3(pointCloud.point(i).x(), pointCloud.point(i).y(), avgHeight);
     }
+    return true;
 }
 
 void PolyFeature::set_zero_borders() {
-    for (auto& ring : _base_heights) {
+    for (auto& ring : _groundElevations) {
         for (auto& pt : ring) {
             pt = 0.;
         }
@@ -222,7 +234,7 @@ void PolyFeature::calc_min_bbox() {
 }
 
 void PolyFeature::clear_feature() {
-    _base_heights.clear();
+    _groundElevations.clear();
     _mesh.clear();
 }
 
@@ -234,8 +246,8 @@ const Polygon_with_holes_2& PolyFeature::get_poly() const {
     return _poly;
 }
 
-const std::vector<std::vector<double>>& PolyFeature::get_base_heights() const {
-    return _base_heights;
+const std::vector<std::vector<double>>& PolyFeature::get_ground_elevations() const {
+    return _groundElevations;
 }
 
 const int PolyFeature::get_internal_id() const {

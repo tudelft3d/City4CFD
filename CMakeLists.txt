@@ -6,7 +6,6 @@ project(city4cfd)
 
 set(CMAKE_CXX_FLAGS "-O3")
 set(CMAKE_BUILD_TYPE "Release")
-#set(CMAKE_BUILD_TYPE "Debug")
 
 #if (COMMAND cmake_policy)
 #    cmake_policy(SET CMP0003 NEW)
@@ -17,24 +16,27 @@ find_package(Boost 1.66 REQUIRED COMPONENTS filesystem locale)
 
 # CGAL
 find_package(CGAL REQUIRED QUIET COMPONENTS)
-if (CGAL_FOUND)
-    if (CGAL_VERSION VERSION_GREATER_EQUAL "5.5")
-        message(STATUS "Found CGAL ${CGAL_VERSION}")
-    elseif (CGAL_VERSION VERSION_GREATER_EQUAL "5.0")
-        message(STATUS "Found CGAL version greater than 5.0, but less than 5.5. "
-                "Proceeding to compile with included CGAL headers.")
-        include_directories(${CMAKE_SOURCE_DIR}/thirdparty/CGAL/include)
-        set(CGAL_USE_INCLUDED_HEADERS ON)
-    else()
-        message(FATAL_ERROR "Found CGAL version ${CGAL_VERSION} which is not supported!"
-                "Please use CGAL version 5")
-        return()
-    endif ()
+if (CGAL_VERSION VERSION_GREATER_EQUAL "5.0")
+    message(STATUS "Found CGAL version greater than 5.0")
+    include_directories(${CMAKE_SOURCE_DIR}/thirdparty/CGAL/include)
+    set(CGAL_USE_INCLUDED_HEADERS ON)
+else()
+    message(FATAL_ERROR "Found CGAL version ${CGAL_VERSION} which is not supported!"
+            "Please use CGAL version 5")
+    return()
 endif ()
 
 # Eigen
 find_package(Eigen3 3.2.0) #(requires 3.2.0 or greater)
 include(${CMAKE_SOURCE_DIR}/thirdparty/CGAL/cmake/CGAL_Eigen3_support.cmake)
+
+# OpenMP
+find_package(OpenMP)
+if (OpenMP_CXX_FOUND)
+    set(OpenMP_support "OpenMP::OpenMP_CXX")
+else()
+    message(STATUS "OpenMP not found. All functions will run single-threaded")
+endif()
 
 # Third-party
 add_subdirectory(${CMAKE_SOURCE_DIR}/thirdparty/LAStools)
@@ -62,6 +64,7 @@ target_link_libraries(city4cfd
         ${Boost_LOCALE_LIBRARY}
         LASlib
         CGAL::Eigen3_support
+        ${OpenMP_support}
         )
 
 install(TARGETS city4cfd DESTINATION bin)

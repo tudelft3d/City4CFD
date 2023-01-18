@@ -1,7 +1,7 @@
 /*
   City4CFD
 
-  Copyright (c) 2021-2022, 3D Geoinformation Research Group, TU Delft
+  Copyright (c) 2021-2023, 3D Geoinformation Research Group, TU Delft
 
   This file is part of City4CFD.
 
@@ -31,12 +31,12 @@
 #include "LoD12.h"
 
 ReconstructedBuilding::ReconstructedBuilding()
-        : Building(), _searchTree(nullptr),
-        _attributeHeight(-9999), _attributeHeightAdvantage(Config::get().buildingHeightAttrAdv) {}
+        : Building(), _attributeHeight(-global::largnum),
+          _attributeHeightAdvantage(Config::get().buildingHeightAttrAdv) {}
 
 ReconstructedBuilding::ReconstructedBuilding(const int internalID)
-        : Building(internalID), _searchTree(nullptr),
-          _attributeHeight(-9999), _attributeHeightAdvantage(Config::get().buildingHeightAttrAdv) {}
+        : Building(internalID), _attributeHeight(-global::largnum),
+          _attributeHeightAdvantage(Config::get().buildingHeightAttrAdv) {}
 
 ReconstructedBuilding::ReconstructedBuilding(const Mesh& mesh)
         : ReconstructedBuilding() {
@@ -61,9 +61,9 @@ ReconstructedBuilding::ReconstructedBuilding(const nlohmann::json& poly)
 */
 
 ReconstructedBuilding::ReconstructedBuilding(const nlohmann::json& poly, const int internalID)
-        : Building(poly, internalID), _searchTree(nullptr),
-          _attributeHeight(-9999), _attributeHeightAdvantage(Config::get().buildingHeightAttrAdv) {
-    if (!Config::get().buildingUniqueId.empty()) {
+        : Building(poly, internalID), _attributeHeight(-global::largnum),
+          _attributeHeightAdvantage(Config::get().buildingHeightAttrAdv) {
+    if (!Config::get().buildingUniqueId.empty() && poly["properties"].contains(Config::get().buildingUniqueId)) {
         _id = poly["properties"][Config::get().buildingUniqueId].dump();
     } else {
         _id = std::to_string(internalID);
@@ -79,15 +79,35 @@ ReconstructedBuilding::ReconstructedBuilding(const nlohmann::json& poly, const i
     }
     if (!this->is_active()) { // It can only fail if the polygon is not simple
         Config::get().failedBuildings.push_back(internalID);
-        Config::get().log << "Failed to import building polygon ID:" << _id
-                          << ". Polygon is not simple." << std::endl;
+        Config::write_to_log("Failed to import building polygon ID:" + _id
+                          + ". Polygon is not simple.");
     }
 }
 
 ReconstructedBuilding::~ReconstructedBuilding() = default;
 
-void ReconstructedBuilding::set_search_tree(const std::shared_ptr<SearchTree>& searchTree) {
-    _searchTree = searchTree;
+/*
+ * Calculate building elevation without mesh reconstruction
+ */
+double ReconstructedBuilding::get_elevation() {
+    if (_elevation < -global::largnum + global::smallnum) { // calculate if not already available
+        if (_attributeHeightAdvantage && _attributeHeight > 0) { // get height from attribute
+            _elevation = this->ground_elevation() + _attributeHeight;
+        } else if (_ptsPtr->empty()) { // set height as minimum if not able to calculate
+            _elevation = this->ground_elevation() + this->slope_height() + Config::get().minHeight;
+            Config::write_to_log("Building ID: " + this->get_id() + " Missing points for elevation calculation."
+                                 + "Using minimum of " + std::to_string(Config::get().minHeight) + "m");
+        } else { // else calculate as a percentile from config
+            // gather all building elevations
+            std::vector<double> buildingElevations;
+            for (auto& pt : _ptsPtr->points()) {
+                buildingElevations.push_back(pt.z());
+            }
+            // calculate percentile
+            _elevation = geomutils::percentile(buildingElevations, Config::get().buildingPercentile);
+        }
+    }
+    return _elevation;
 }
 
 void ReconstructedBuilding::reconstruct() {
@@ -95,53 +115,41 @@ void ReconstructedBuilding::reconstruct() {
     if (_clip_bottom) {
         this->translate_footprint(-5);
     }
-
     //-- Check if reconstructing from height attribute takes precedence
     if (_attributeHeightAdvantage) {
         this->reconstruct_from_attribute();
         return;
     }
-
-    //-- Take tree subset bounded by the polygon
-    std::vector<Point_3> subsetPts;
-    Point_3 bbox1(_poly.bbox().xmin(), _poly.bbox().ymin(), -global::largnum);
-    Point_3 bbox2(_poly.bbox().xmax(), _poly.bbox().ymax(), global::largnum);
-    Fuzzy_iso_box pts_range(bbox1, bbox2);
-    _searchTree->search(std::back_inserter(subsetPts), pts_range);
-
-    //-- Check if subset point lies inside the polygon
-    std::vector<double> building_pts;
-    for (auto& pt : subsetPts) {
-        if (geomutils::point_in_poly(pt, _poly)) {
-            building_pts.push_back(pt.z());
-        }
-    }
-
-    //-- Don't reconstruct if there are no points belonging to the polygon
-    if (building_pts.empty()) {
+    //-- Reconstruction fallbacks if there are no points belonging to the polygon
+    if (_ptsPtr->empty()) {
+        // reconstruct using attribute
         if (this->reconstruct_again_from_attribute("Found no points belonging to the building")) {
             return;
-        } else {
+        } else if (Config::get().reconstructFailed) { // fall back to minimum height if defined as an argument
+            Config::write_to_log("Building ID:" + this->get_id()
+                                 + " Found no points belonging to the building."
+                                 + "Reconstructing with the minimum height of "
+                                 + std::to_string(Config::get().minHeight) + " m");
+            _elevation = this->ground_elevation() + this->slope_height() + Config::get().minHeight;
+        } else { // exception handling when cannot reconstruct
             this->deactivate();
             throw std::domain_error("Found no points belonging to the building");
         }
     }
-
     //-- LoD12 reconstruction
-    LoD12 lod12(_poly, _base_heights, building_pts);
-    lod12.lod12_calc_height(_height);
-    lod12.lod12_reconstruct(_mesh);
-
-    if (lod12.get_height() < _lowHeight) { // In case of a small height
-        Config::get().log << "Building height lower than minimum prescribed height, ID: " << this->get_id()
-                          << std::endl;
-        _height = _lowHeight;
-        lod12.lod12_reconstruct(_mesh, _height);
+    if (this->get_height() < Config::get().minHeight) { // elevation calculated here
+        Config::write_to_log("Building ID:" + this->get_id()
+                             + " Height lower than minimum prescribed height of "
+                             + std::to_string(Config::get().minHeight) + " m");
+        _elevation = this->ground_elevation() + this->slope_height() + Config::get().minHeight;
     }
+    LoD12 lod12(_poly, _groundElevations, _elevation);
+    lod12.reconstruct(_mesh);
 
     if (_clip_bottom) {
         this->translate_footprint(5);
     }
+    if (Config::get().refineReconstructedBuildings) this->refine();
 }
 
 void ReconstructedBuilding::reconstruct_flat_terrain() {
@@ -149,9 +157,9 @@ void ReconstructedBuilding::reconstruct_flat_terrain() {
     if (_clip_bottom) {
         this->translate_footprint(-5);
     }
-
-    LoD12 lod12HeightAttribute(_poly, _base_heights, {}, _height);
-    lod12HeightAttribute.lod12_reconstruct(_mesh);
+    // the new height was previously calculated
+    LoD12 lod12HeightAttribute(_poly, _groundElevations, this->get_elevation());
+    lod12HeightAttribute.reconstruct(_mesh);
 
     if (_clip_bottom) {
         this->translate_footprint(5);
@@ -164,8 +172,8 @@ void ReconstructedBuilding::get_cityjson_info(nlohmann::json& b) const {
 //    get_cityjson_attributes(b, _attributes);
 //    float hbase = z_to_float(this->get_height_base());
 //    float h = z_to_float(this->get_height());
-//    b["attributes"]["TerrainHeight"] = _baseHeights.back(); // temp - will calculate avg for every footprint
-    b["attributes"]["measuredHeight"] = _height - geomutils::avg(_base_heights[0]);
+//    b["attributes"]["TerrainHeight"] = _baseElevations.back(); // temp - will calculate avg for every footprint
+    b["attributes"]["measuredHeight"] = _elevation - geomutils::avg(_groundElevations[0]);
 }
 
 void ReconstructedBuilding::get_cityjson_semantics(nlohmann::json& g) const { // Temp for checking CGAL mesh properties
@@ -194,33 +202,23 @@ void ReconstructedBuilding::reconstruct_from_attribute() {
         this->deactivate();
         throw std::runtime_error("Attribute height from geojson file is invalid!");
     }
-
-    //-- Average the fooprint height to get ground-zero height
-    std::vector<double> footprintElevations;
-    for (auto& rings : _base_heights) {
-        for (auto& pt : rings) footprintElevations.push_back(pt);
-    }
-    double baseHeight = geomutils::avg(footprintElevations);
-
     //-- Set the height from attribute and reconstruct
-    _height = baseHeight + _attributeHeight;
-    LoD12 lod12HeightAttribute(_poly, _base_heights, {}, _height);
-    lod12HeightAttribute.lod12_reconstruct(_mesh);
-
-    //-- Low height check
-    if (lod12HeightAttribute.get_height() < _lowHeight) { // In case of a small height
-        Config::get().log << "Building height lower than minimum prescribed height, ID: " << this->get_id()
-                          << std::endl;
-        _height = _lowHeight;
-        lod12HeightAttribute.lod12_reconstruct(_mesh, _height);
+    if (_attributeHeight < Config::get().minHeight) { // in case of a small height
+        Config::write_to_log("Building ID:" + this->get_id()
+                             + " Height lower than minimum prescribed height of "
+                             + std::to_string(Config::get().minHeight) + " m");
+        _elevation = this->ground_elevation() + this->slope_height() + Config::get().minHeight;
+    } else {
+        _elevation = this->ground_elevation() + _attributeHeight;
     }
+    LoD12 lod12HeightAttribute(_poly, _groundElevations, _elevation);
+    lod12HeightAttribute.reconstruct(_mesh);
 }
 
 bool ReconstructedBuilding::reconstruct_again_from_attribute(const std::string& reason) {
     if (_attributeHeight > 0) {
-        Config::get().log << "Failed to reconstruct using point cloud building ID: " << _id
-                    << " Reason: " << reason
-                    << ". Reconstructing using height attribute from JSON polygon." << std::endl;
+        Config::write_to_log("Building ID: " + _id + " Failed to reconstruct using point cloud. Reason: "
+                             + reason + ". Reconstructing using height attribute from GeoJSON polygon.");
         this->reconstruct_from_attribute();
         return true;
     } else {

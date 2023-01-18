@@ -1,7 +1,7 @@
 /*
   City4CFD
  
-  Copyright (c) 2021-2022, 3D Geoinformation Research Group, TU Delft  
+  Copyright (c) 2021-2023, 3D Geoinformation Research Group, TU Delft
 
   This file is part of City4CFD.
 
@@ -41,8 +41,8 @@ public:
     void operator()(double radius);
     void operator()(Polygon_2& poly);
 
-    void calc_influ_region_bpg(const DT& dt, const Point_set_3& pointCloudBuildings, Buildings& buildings);
-    void calc_bnd_bpg(const Polygon_2& influRegionPoly, const Buildings& buildings);
+    void calc_influ_region_bpg(const DT& dt, BuildingsPtr& buildings);
+    void calc_bnd_bpg(const Polygon_2& influRegionPoly, const BuildingsPtr& buildings);
 
     Polygon_2& get_bounding_region();
     const Polygon_2& get_bounding_region() const;
@@ -53,21 +53,21 @@ protected:
     Polygon_2  calc_bnd_poly(const std::vector<Point_2>& candidatePts, const double hMax,
                              const double angle, const double enlargeRatio = 1);
 
-    double     calc_blockage_ratio_from_chull (const Buildings& buildings, const double angle,
-                                               Polygon_2& localPoly) const;
-    double     calc_blockage_ratio_from_ashape(const Buildings& buildings, const double angle,
-                                               Polygon_2& localPoly) const;
-    double     calc_blockage_ratio_comb(const Buildings& buildings, const double angle,
+//    double     calc_blockage_ratio_from_chull (const BuildingsPtr& buildings, const double angle,
+//                                               Polygon_2& localPoly) const;
+//    double     calc_blockage_ratio_from_ashape(const BuildingsPtr& buildings, const double angle,
+//                                               Polygon_2& localPoly) const;
+    double     calc_blockage_ratio_comb(const BuildingsPtr& buildings, const double angle,
                                         Polygon_2& localPoly) const;
-    double     calc_blockage_ratio_from_ashape_alt(const Buildings& buildings, const double angle,
-                                                   Polygon_2& localPoly) const;
-    double     calc_blockage_ratio_from_edges(const Buildings& buildings, const double angle,
-                                              Polygon_2& localPoly) const;
+//    double     calc_blockage_ratio_from_ashape_alt(const BuildingsPtr& buildings, const double angle,
+//                                                   Polygon_2& localPoly) const;
+//    double     calc_blockage_ratio_from_edges(const BuildingsPtr& buildings, const double angle,
+//                                              Polygon_2& localPoly) const;
 
     void       project_mesh_pts(const Mesh& mesh, const double angle, std::vector<Point_2>& buildingPts) const;
     void       chull_to_cdt(const std::vector<Point_2>& buildingPts, CDT& projCDT) const;
     void       ashape_to_cdt(const std::vector<Point_2>& buildingPts, CDT& projCDT, const double aVal) const;
-    void       calc_cross_sec_areas(CDT& projCDT, Polygon_2& localPoly, const Buildings& buildings,
+    void       calc_cross_sec_areas(CDT& projCDT, Polygon_2& localPoly, const BuildingsPtr& buildings,
                                     double& blockArea, double& domainCrossArea) const;
 };
 

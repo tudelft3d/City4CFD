@@ -1,7 +1,7 @@
 /*
   City4CFD
  
-  Copyright (c) 2021-2022, 3D Geoinformation Research Group, TU Delft  
+  Copyright (c) 2021-2023, 3D Geoinformation Research Group, TU Delft
 
   This file is part of City4CFD.
 
@@ -44,7 +44,7 @@ namespace jsonschema {
           "properties": {
             "las_datasets": {
               "description": "Schema that deals with import of LAS/LAZ tiles",
-              "description": "Depreciated, but keeping the schema for now",
+              "description": "Deprecated, but keeping the schema for now",
               "type": "object",
               "properties": {
                 "files": {
@@ -103,7 +103,8 @@ namespace jsonschema {
                       "exclusiveMinimum": 0
                     },
                     "height_attribute_advantage": {"type": "boolean"},
-                    "avoid_bad_polys": {"type": "boolean"}
+                    "avoid_bad_polys": {"type": "boolean"},
+                    "refine": {"type": "boolean"}
                   },
                   "dependencies": {
                     "floor_attribute": ["floor_height"]
@@ -129,6 +130,7 @@ namespace jsonschema {
                   "properties": {
                     "layer_name": {"type": "string"},
                     "flatten_surface": {"type": "boolean"},
+                    "flatten_vertical_border": {"type": "boolean"},
                     "surface_percentile": {
                       "type": "number",
                       "exclusiveMinimum": 0,
@@ -145,7 +147,7 @@ namespace jsonschema {
           }
         },
         "import_geometries": {
-          "description": "Handling imported CityJSON geometries",
+          "description": "Handling imported geometries",
           "type": "object",
           "properties": {
             "path": {
@@ -159,6 +161,9 @@ namespace jsonschema {
             },
             "lod": {
               "type": "string"
+            },
+            "refine": {
+              "type": "boolean"
             }
           },
           "required": ["path", "advantage", "true_height"]
@@ -235,6 +240,15 @@ namespace jsonschema {
           "type": "number",
           "exclusiveMinimum": 0,
           "exclusiveMaximum": 100
+        },
+        "min_height": {
+          "description": "Default: 2.; minimum allowed height to be reconstructed",
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "reconstruct_failed": {
+          "description": "Optional: Reconstruct failed buildings to minimum height",
+          "type": "boolean"
         },
         "reconstruct_boundaries": {
           "type": "boolean"

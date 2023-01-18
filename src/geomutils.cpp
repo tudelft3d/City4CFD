@@ -1,7 +1,7 @@
 /*
   City4CFD
  
-  Copyright (c) 2021-2022, 3D Geoinformation Research Group, TU Delft  
+  Copyright (c) 2021-2023, 3D Geoinformation Research Group, TU Delft
 
   This file is part of City4CFD.
 
@@ -27,8 +27,8 @@
 
 #include "geomutils.h"
 
-#include "PolyFeature.h"
-
+//#include <CGAL/compute_average_spacing.h>
+#include <CGAL/Boolean_set_operations_2/do_intersect.h>
 #include <CGAL/Polygon_mesh_processing/repair.h>
 
 double geomutils::avg(const std::vector<double>& values) {
@@ -48,6 +48,7 @@ double geomutils::percentile(std::vector<double> values, const double percentile
     return values[i];
 }
 
+/*
 bool geomutils::point_in_circle(const Point_3& pt, const Point_2& center, const double& radius) {
     if (pow(pt.x() - center.x(), 2)
       + pow(pt.y() - center.y(), 2)
@@ -56,6 +57,7 @@ bool geomutils::point_in_circle(const Point_3& pt, const Point_2& center, const 
     }
     return false;
 }
+*/
 
 void geomutils::cdt_to_mesh(CDT& cdt, Mesh& mesh, const int surfaceLayerID) {
     std::map<CDT::Vertex_handle, int> indices;
@@ -99,43 +101,17 @@ void geomutils::dt_to_mesh(DT& dt, Mesh& mesh) {
     }
 }
 
-//-- CGAL's constrained domain marker expanded to mark different polygon types
+/*
+ * CGAL's constrained domain marker
+ */
 void geomutils::mark_domains(CDT& ct,
                              const Face_handle& start,
                              int index,
-                             std::list<CDT::Edge>& border,
-                             PolyFeatures& features)
+                             std::list<CDT::Edge>& border)
 {
     if (start->info().nesting_level != -1) {
         return;
     }
-
-    //-- Check which polygon contains the constrained (i.e. non-terrain) point
-    Point_3 chkPoint;
-    Converter<EPECK, EPICK> to_inexact;
-    if (!features.empty()) {
-        chkPoint = CGAL::centroid(to_inexact(start->vertex(0)->point()),
-                                  to_inexact(start->vertex(1)->point()),
-                                  to_inexact(start->vertex(2)->point()));
-    }
-    int surfaceLayer = -1; //-- Default value is unmarked triangle, i.e. general terrain
-    if (index != 0) {
-        for (auto& feature : features) {
-            if (!feature->is_active()) continue;
-            //- Polygons are already ordered according to importance - find first polygon
-            if (geomutils::point_in_poly(chkPoint, feature->get_poly())) {
-                if (feature->get_class() == BUILDING) {
-//                    surfaceLayer = 9999; //- Remove building footprints from terrain
-                    surfaceLayer = -1; //- Leave building footprints as part of terrain
-                    break;
-                } else {
-                    surfaceLayer = feature->get_output_layer_id();
-                    break;
-                }
-            }
-        }
-    }
-
     std::list<Face_handle> queue;
     queue.push_back(start);
     while (! queue.empty()) {
@@ -143,64 +119,51 @@ void geomutils::mark_domains(CDT& ct,
         queue.pop_front();
         if (fh->info().nesting_level == -1) {
             fh->info().nesting_level = index;
-            if (surfaceLayer != -1) {
-//                fh->info().surfaceLayer = surfaceLayer;
-                check_layer(fh, surfaceLayer);
-            }
             for (int i = 0; i < 3; i++) {
                 CDT::Edge e(fh,i);
                 Face_handle n = fh->neighbor(i);
                 if (n->info().nesting_level == -1) {
-                    if (ct.is_constrained(e)) border.push_back(e);
-                    else queue.push_back(n);
+                    if (ct.is_constrained(e)) {
+                        #pragma omp critical
+                        border.push_back(e);
+                    } else queue.push_back(n);
                 }
             }
         }
     }
 }
 
-void geomutils::mark_domains(CDT& cdt, PolyFeatures features) {
+void geomutils::mark_domains(CDT& cdt) {
     for (CDT::Face_handle f : cdt.all_face_handles()) {
         f->info().nesting_level = -1;
     }
     std::list<CDT::Edge> border;
-    mark_domains(cdt, cdt.infinite_face(), 0, border, features);
+    mark_domains(cdt, cdt.infinite_face(), 0, border);
+    #pragma omp parallel
     while (!border.empty()) {
-        CDT::Edge e = border.front();
-        border.pop_front();
+        bool sstop = false;
+        CDT::Edge e;
+         #pragma omp critical
+        {
+            if (!border.empty()) {
+                e = border.front();
+                border.pop_front();
+            } else {
+                sstop = true;
+            }
+        }
+        if (sstop) continue;
+
         Face_handle n = e.first->neighbor(e.second);
         if (n->info().nesting_level == -1) {
-            mark_domains(cdt, n, e.first->info().nesting_level + 1, border, features);
+            mark_domains(cdt, n, e.first->info().nesting_level + 1, border);
         }
-    }
-    for (CDT::Face_handle f : cdt.all_face_handles()) {
-        if (f->info().surfaceLayer == -2) {
-            f->info().surfaceLayer = -9999;
-        }
-    }
-}
-
-void geomutils::check_layer(const Face_handle& fh, int surfaceLayer) {
-    if (fh->info().surfaceLayer == 9999) return;
-    auto it = Config::get().flattenSurfaces.find(surfaceLayer);
-    if (it != Config::get().flattenSurfaces.end()) {
-        Converter<EPECK, EPICK> to_inexact;
-        Vector_3 vertical(0, 0, 1);
-        Vector_3 norm = CGAL::normal(to_inexact(fh->vertex(0)->point()),
-                                     to_inexact(fh->vertex(1)->point()),
-                                     to_inexact(fh->vertex(2)->point()));
-
-        if (CGAL::approximate_angle(norm, vertical) < 60.0) {
-            fh->info().surfaceLayer = surfaceLayer;
-        } else {
-            fh->info().surfaceLayer = -2;
-        }
-    } else {
-        fh->info().surfaceLayer = surfaceLayer;
     }
 }
 
 void geomutils::shorten_long_poly_edges(Polygon_2& poly, double maxLen) {
+    if (maxLen < 0) return;
+
     auto& polyVec = poly.container();
     int i = 0;
     while (i != polyVec.size()) {
@@ -230,27 +193,20 @@ Point_3 geomutils::rotate_pt_xy(const Point_3& pt, const double angle, Point_2 c
             pt.z()};
 }
 
-void geomutils::interpolate_poly_from_pc(const Polygon_2& poly, std::vector<double>& heights,
+void geomutils::interpolate_poly_from_pc(const Polygon_2& poly, std::vector<double>& elevations,
                                          const Point_set_3& pointCloud) {
     SearchTree searchTree(pointCloud.points().begin(), pointCloud.points().end());
     //-- Calculate elevation of polygon outer boundary
     //-- Point elevation is the average of 5 nearest neighbors from the PC
-    std::vector<double> ringHeights;
     for (auto& polypt : poly) {
-        Point_3 query(polypt.x(), polypt.y(), 0);
+        Point_2 query(polypt.x(), polypt.y());
         Neighbor_search search(searchTree, query, 5);
-//        Fuzzy_sphere search_radius(query, 5);
-//        std::list<Point_3> result;
-//        searchTree.search(std::back_inserter(result), search_radius);
 
-        std::vector<double> poly_height;
+        std::vector<double> poly_elevation;
         for (Neighbor_search::iterator it = search.begin(); it != search.end(); ++it) {
-            poly_height.push_back(it->first.z());
+            poly_elevation.push_back(it->first.z());
         }
-//        for (auto& pt : result) {
-//            poly_height.push_back(pt.z());
-//        }
-        heights.emplace_back(geomutils::avg(poly_height));
+        elevations.emplace_back(geomutils::avg(poly_elevation));
     }
 }
 
@@ -342,6 +298,7 @@ void geomutils::make_round_poly(const Point_2& centre, double radius1, double ra
 template void geomutils::make_round_poly<Polygon_2>(const Point_2& centre, double radius1, double radius2, int nPts, double angInt, double ang, Polygon_2& poly);
 template void geomutils::make_round_poly<Polygon_with_holes_2>(const Point_2& centre, double radius1, double radius2, int nPts, double angInt, double ang, Polygon_with_holes_2& poly);
 
+/*
 template <typename T, typename U>
 void geomutils::smooth_dt(const Point_set_3& pointCloud, T& dt) {
     // Smooth heights with 5 successive Gaussian filters
@@ -377,6 +334,7 @@ void geomutils::smooth_dt(const Point_set_3& pointCloud, T& dt) {
 //-- Explicit template instantiation
 template void geomutils::smooth_dt<DT, EPICK>(const Point_set_3& pointCloud, DT& dt);
 template void geomutils::smooth_dt<CDT, EPECK>(const Point_set_3& pointCloud, CDT& dt);
+*/
 
 template <typename T>
 Polygon_2 geomutils::calc_bbox_poly(const T& inputPts) {

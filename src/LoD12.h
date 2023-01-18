@@ -1,7 +1,7 @@
 /*
   City4CFD
  
-  Copyright (c) 2021-2022, 3D Geoinformation Research Group, TU Delft  
+  Copyright (c) 2021-2023, 3D Geoinformation Research Group, TU Delft
 
   This file is part of City4CFD.
 
@@ -33,24 +33,18 @@
 class LoD12 {
 public:
     LoD12() = delete;
-    LoD12(const Polygon_with_holes_2& poly, const std::vector<std::vector<double>>& base_heights,
-          const std::vector<double>& building_pts);
-    LoD12(const Polygon_with_holes_2& poly, const std::vector<std::vector<double>>& base_heights,
-          const std::vector<double>& building_pts, const double height);
+    LoD12(const Polygon_with_holes_2& poly, const std::vector<std::vector<double>>& base_elevations);
+    LoD12(const Polygon_with_holes_2& poly, const std::vector<std::vector<double>>& base_elevations,
+          const double elevation);
     ~LoD12() = default;
 
-    void   lod12_calc_height(double& height);
-    void   lod12_reconstruct(Mesh& mesh);
-    void   lod12_reconstruct(Mesh& mesh, const double height);
-    double get_height() const;
+    void   set_elevation(const double& elevation);
+    void   reconstruct(Mesh& mesh);
 
 private:
-    double _height;
+    double                                   _elevation;
     const Polygon_with_holes_2&              _poly;
-    const std::vector<std::vector<double>>&  _baseHeights;
-    const std::vector<double>&               _buildingPts;
-
-    void create_mesh(Mesh& mesh);
+    const std::vector<std::vector<double>>&  _baseElevations;
 };
 
 #endif //CITY4CFD_LOD12_H

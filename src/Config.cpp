@@ -1,7 +1,7 @@
 /*
   City4CFD
  
-  Copyright (c) 2021-2022, 3D Geoinformation Research Group, TU Delft  
+  Copyright (c) 2021-2023, 3D Geoinformation Research Group, TU Delft
 
   This file is part of City4CFD.
 
@@ -36,6 +36,8 @@
 #include "geomutils.h"
 
 #include "configSchema.inc"
+
+#include  <boost/algorithm/string/predicate.hpp>
 
 void Config::validate(nlohmann::json& j) {
     using valijson::Schema;
@@ -85,10 +87,6 @@ void Config::set_config(nlohmann::json& j) {
         if (j["point_clouds"].contains("ground")) ground_xyz = j["point_clouds"]["ground"];
         if (j["point_clouds"].contains("buildings")) buildings_xyz = j["point_clouds"]["buildings"];
     }
-
-    //-- Additional geometries
-    if (j.contains("import_geometries"))
-        importedBuildingsPath = j["import_geometries"]["path"];
 
     //-- Domain setup
     pointOfInterest = Point_2(j["point_of_interest"][0], j["point_of_interest"][1]);
@@ -160,6 +158,8 @@ void Config::set_config(nlohmann::json& j) {
                 floorHeight = (double)poly["floor_height"];
             if (poly.contains("avoid_bad_polys"))
                 avoidBadPolys = poly["avoid_bad_polys"];
+            if (poly.contains("refine"))
+                refineReconstructedBuildings = poly["refine"];
         }
         if (poly["type"] == "SurfaceLayer") {
             topoLayers.push_back(poly["path"]);
@@ -171,6 +171,11 @@ void Config::set_config(nlohmann::json& j) {
             if (poly.contains("flatten_surface")) {
                 if (poly["flatten_surface"]) {
                     flattenSurfaces[surfLayerIdx] = poly["surface_percentile"];
+                }
+            }
+            if (poly.contains("flatten_vertical_border")) {
+                if (poly["flatten_vertical_border"]) {
+                    flattenVertBorder.push_back(surfLayerIdx);
                 }
             }
             ++surfLayerIdx;
@@ -216,13 +221,22 @@ void Config::set_config(nlohmann::json& j) {
     // Buildings
     lod = j["lod"].front();
     buildingPercentile = (double)j["building_percentile"].front() / 100.;
+    if (j.contains("min_height")) {
+        minHeight = j["min_height"];
+    }
+    if (j.contains("reconstruct_failed")) {
+        reconstructFailed = j["reconstruct_failed"];
+    }
 
     // Imported buildings
     if (j.contains("import_geometries")) {
-        importAdvantage  = j["import_geometries"]["advantage"];
-        importTrueHeight = j["import_geometries"]["true_height"];
+        importedBuildingsPath = j["import_geometries"]["path"];
+        importAdvantage       = j["import_geometries"]["advantage"];
+        importTrueHeight      = j["import_geometries"]["true_height"];
         if (j["import_geometries"].contains("lod"))
             importLoD = j["import_geometries"]["lod"];
+        if (j["import_geometries"].contains("refine"))
+            refineImportedBuildings = j["import_geometries"]["refine"];
     }
 
     // Boundary
@@ -264,8 +278,6 @@ void Config::set_config(nlohmann::json& j) {
             clip = j["experimental"]["clip"];
         if (j["experimental"].contains("handle_self_intersections"))
             handleSelfIntersect = j["experimental"]["handle_self_intersections"];
-        if (j["experimental"].contains("refine_buildings"))
-            refineBuildings = j["experimental"]["refine_buildings"];
         if (j["experimental"].contains("alpha_wrap"))
             alphaWrap = j["experimental"]["alpha_wrap"];
     }
@@ -283,7 +295,7 @@ void Config::set_region(boost::variant<bool, double, Polygon_2>& regionType,
         }
         //-- Read poly
         Polygon_2 tempPoly;
-        JsonVector influJsonPoly;
+        JsonVectorPtr influJsonPoly;
         IO::read_geojson_polygons(polyFilePath, influJsonPoly);
         for (auto& coords : influJsonPoly.front()->at("geometry").at("coordinates").front()) { // I know it should be only 1 polygon with 1 ring
             tempPoly.push_back(Point_2((double)coords[0] - Config::get().pointOfInterest.x(),
@@ -302,4 +314,9 @@ void Config::set_region(boost::variant<bool, double, Polygon_2>& regionType,
     } else if (j[regionName].is_number() || j[regionName].is_array() && j[regionName][0].is_number()) { // Influ region radius
         regionType = (double)j[regionName].front();
     } else regionType = true; // Leave it to BPG
+}
+
+void Config::write_to_log(const std::string& msg) {
+    #pragma omp critical
+    Config::get().log << msg << std::endl;
 }

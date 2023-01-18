@@ -1,7 +1,7 @@
 /*
   City4CFD
  
-  Copyright (c) 2021-2022, 3D Geoinformation Research Group, TU Delft  
+  Copyright (c) 2021-2023, 3D Geoinformation Research Group, TU Delft
 
   This file is part of City4CFD.
 
@@ -30,19 +30,23 @@
 
 #include "Building.h"
 
+#include <CGAL/Polygon_set_2.h>
+
 class ImportedBuilding : public Building {
 public:
     static int noBottom;
 
     ImportedBuilding() = delete;
-    ImportedBuilding(std::unique_ptr<nlohmann::json>& buildingJson, Point3VectorPtr& importedBuildingPts, const int internalID);
+    ImportedBuilding(std::unique_ptr<nlohmann::json>& buildingJson,
+                     PointSet3Ptr& importedBuildingPts, const int internalID);
     ImportedBuilding(Mesh& mesh, const int internalID);
     ~ImportedBuilding();
 
-    virtual void  reconstruct() override;
-    virtual void  reconstruct_flat_terrain() override;
+    virtual double get_elevation() override;
+    virtual void   reconstruct() override;
+    virtual void   reconstruct_flat_terrain() override;
 
-    void append_nonground_part(const std::shared_ptr<ImportedBuilding>& other);
+    void   append_nonground_part(const std::shared_ptr<ImportedBuilding>& other);
 
     const nlohmann::json& get_building_json() const;
     const std::string&    get_parent_building_id() const;
@@ -53,15 +57,14 @@ public:
 //    virtual void  get_cityjson_semantics(nlohmann::json& g) const override;
 
 protected:
-    std::unique_ptr<nlohmann::json>  _buildingJson;
-    double                           _avgFootprintHeight;
-    std::vector<int>                 _footprintIdxList;
-    std::vector<std::vector<int>>    _footprintPtsIdxList;
-    std::string                      _parentBuildingID;
-    bool                             _appendToBuilding;
-    bool                             _trueHeight;
-    int                              _lodIdx;
-    Point3VectorPtr                  _dPts;
+    std::unordered_map<int, Point_3>  _ptMap;
+    std::unique_ptr<nlohmann::json>   _buildingJson;
+    std::vector<int>                  _footprintIdxList;
+    std::vector<std::vector<int>>     _footprintPtsIdxList;
+    std::string                       _parentBuildingID;
+    bool                              _appendToBuilding;
+    bool                              _trueHeight;
+    int                               _lodIdx;
 
     void check_simplicity(Polygon_2& ring);
     void polyset_to_polygon(const CGAL::Polygon_set_2<CGAL::Epeck>& polySet);

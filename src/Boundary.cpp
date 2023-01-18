@@ -1,7 +1,7 @@
 /*
   City4CFD
  
-  Copyright (c) 2021-2022, 3D Geoinformation Research Group, TU Delft  
+  Copyright (c) 2021-2023, 3D Geoinformation Research Group, TU Delft
 
   This file is part of City4CFD.
 
@@ -28,6 +28,8 @@
 #include "Boundary.h"
 
 #include "geomutils.h"
+
+#include <CGAL/centroid.h>
 
 Boundary::Boundary()
         : TopoFeature(), _sideOutputPts() {}
@@ -87,13 +89,10 @@ void Boundary::set_bounds_to_terrain_pc(Point_set_3& pointCloud, const Polygon_2
     //-- Remove points out of the boundary region
     Boundary::set_bounds_to_buildings_pc(pointCloud, pcBndPoly);
 
-    //-- Add outer points to match the domain size to prescribed one
-    SearchTree searchTree(pointCloud.points().begin(),pointCloud.points().end());
-
     std::vector<double> bndHeights;
     geomutils::interpolate_poly_from_pc(bndPoly, bndHeights, pointCloud);
     _outerBndHeight = geomutils::avg(bndHeights); // Height for buffer (for now) - average of outer pts
-    Config::get().logSummary << "Domain edge height: " << _outerBndHeight << std::endl;
+    Config::get().logSummary << "Domain edge elevation: " << _outerBndHeight << std::endl;
 
     if (Config::get().domainBuffer > -global::largnum + global::smallnum) {
         /*

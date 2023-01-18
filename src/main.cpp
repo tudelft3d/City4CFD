@@ -1,7 +1,7 @@
 /*
   City4CFD
  
-  Copyright (c) 2021-2022, 3D Geoinformation Research Group, TU Delft  
+  Copyright (c) 2021-2023, 3D Geoinformation Research Group, TU Delft
 
   This file is part of City4CFD.
 
@@ -29,7 +29,9 @@
 #include "io.h"
 #include "Map3d.h"
 
-std::string CITY4CFD_VERSION = "0.2.0";
+#include  <boost/algorithm/string/predicate.hpp>
+
+std::string CITY4CFD_VERSION = "0.3.0";
 
 void printWelcome() {
     auto logo{
@@ -55,7 +57,7 @@ void printWelcome() {
     };
 
     std::cout << logo;
-    std::cout << "City4CFD Copyright (C) 2021-2022 3D Geoinformation Research Group, TU Delft\n" << std::endl;
+    std::cout << "City4CFD Copyright (C) 2021-2023 3D Geoinformation Research Group, TU Delft\n" << std::endl;
 }
 
 void printHelp() {

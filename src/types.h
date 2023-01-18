@@ -1,7 +1,7 @@
 /*
   City4CFD
  
-  Copyright (c) 2021-2022, 3D Geoinformation Research Group, TU Delft  
+  Copyright (c) 2021-2023, 3D Geoinformation Research Group, TU Delft
 
   This file is part of City4CFD.
 
@@ -34,18 +34,18 @@
 class Building;    class Boundary; class TopoFeature;
 class PolyFeature; class Terrain;  class SurfaceLayer;
 class ReconstructedBuilding; class ImportedBuilding;
-typedef std::shared_ptr<Terrain>                               Terrainptr;
-typedef std::vector<std::shared_ptr<Building>>                 Buildings;
-typedef std::vector<std::shared_ptr<ReconstructedBuilding>>    ReconstructedBuildings;
-typedef std::vector<std::shared_ptr<ImportedBuilding>>         ImportedBuildings;
-typedef std::vector<std::shared_ptr<Boundary>>                 Boundaries;
-typedef std::vector<std::shared_ptr<TopoFeature>>              OutputFeatures;
-typedef std::vector<std::shared_ptr<PolyFeature>>              PolyFeatures;
-typedef std::vector<std::shared_ptr<SurfaceLayer>>             SurfaceLayers;
-typedef std::vector<std::unique_ptr<nlohmann::json>>           JsonVector;
+typedef std::shared_ptr<Terrain>                               TerrainPtr;
+typedef std::vector<std::shared_ptr<Building>>                 BuildingsPtr;
+typedef std::vector<std::shared_ptr<ReconstructedBuilding>>    ReconstructedBuildingsPtr;
+typedef std::vector<std::shared_ptr<ImportedBuilding>>         ImportedBuildingsPtr;
+typedef std::vector<std::shared_ptr<Boundary>>                 BoundariesPtr;
+typedef std::vector<std::shared_ptr<TopoFeature>>              OutputFeaturesPtr;
+typedef std::vector<std::shared_ptr<PolyFeature>>              PolyFeaturesPtr;
+typedef std::vector<std::shared_ptr<SurfaceLayer>>             SurfaceLayersPtr;
+typedef std::vector<std::unique_ptr<nlohmann::json>>           JsonVectorPtr;
 
 //-- TopoClasses
-typedef enum { // temp
+typedef enum {
     TERRAIN          = 0,
     BUILDING         = 1,
     SIDES            = 2,
@@ -55,21 +55,21 @@ typedef enum { // temp
 
 //-- Domain types
 typedef enum {
-    ROUND     = 0,
-    RECTANGLE = 1,
-    OVAL      = 2
+    ROUND        = 0,
+    RECTANGLE    = 1,
+    OVAL         = 2
 } DomainType;
 
 //-- Output Formats
 typedef enum {
-    OBJ       = 0,
-    CityJSON  = 1,
-    STL       = 2,
+    OBJ          = 0,
+    CityJSON     = 1,
+    STL          = 2,
 } GeomFormat;
 
 //-- Global Constants
 namespace global {
-    const double largnum = 1e7;
+    const double largnum  = 1e7;
     const double smallnum = 1e-7;
 }
 

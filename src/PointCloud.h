@@ -1,7 +1,7 @@
 /*
   City4CFD
  
-  Copyright (c) 2021-2022, 3D Geoinformation Research Group, TU Delft  
+  Copyright (c) 2021-2023, 3D Geoinformation Research Group, TU Delft
 
   This file is part of City4CFD.
 
@@ -34,19 +34,18 @@
 #include "lasreader.hpp"
 #include "CSF/src/CSF.h"
 
-typedef std::shared_ptr<SearchTree> SearchTreePtr;
-
 class PointCloud {
 public:
     PointCloud();
     ~PointCloud();
 
     void random_thin_pts();
-    void create_flat_terrain(const PolyFeatures& lsFeatures);
+    void create_flat_terrain(const PolyFeaturesPtr& lsFeatures);
     void set_flat_terrain();
     void smooth_terrain();
-    void flatten_polygon_pts(const PolyFeatures& lsFeatures);
-    SearchTreePtr make_search_tree_buildings();
+    void remove_points_in_polygon(const BuildingsPtr& features);
+    void flatten_polygon_pts(const PolyFeaturesPtr& lsFeatures, std::vector<EPECK::Segment_3>& constrainedEdges);
+    void buffer_flat_edges(const PolyFeaturesPtr& avgFeatures, std::vector<EPECK::Segment_3>& constrainedEdges);
     void read_point_clouds();
 
     Point_set_3& get_terrain();
