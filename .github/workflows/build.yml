@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron:  '0 6 1 * *' # Run on the first day of every month at 06:00 UTC
+
+jobs:
+  build_linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install dependencies
+        run: |
+            sudo apt-get update
+            sudo apt-get install libcgal-dev libboost-all-dev libeigen3-dev libomp-dev
+      - name: Build
+        run: |
+            mkdir build && cd build
+            cmake .. && make -j4
+
+  build_macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install dependencies
+        run: |
+            brew update
+            brew install cmake boost cgal eigen libomp
+      - name: Build
+        run: |
+            mkdir build && cd build
+            cmake .. && make -j4
+
+  build_docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Docker registry login
+        run: echo "${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
+      - name: Build the Docker image
+        run: docker build --build-arg JOBS=2 . --file docker/city4cfd.dockerfile --tag tudelft3d/city4cfd:latest
