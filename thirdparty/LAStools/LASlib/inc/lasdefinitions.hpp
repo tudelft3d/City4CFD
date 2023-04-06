@@ -49,7 +49,7 @@
 #ifndef LAS_DEFINITIONS_HPP
 #define LAS_DEFINITIONS_HPP
 
-#define LAS_TOOLS_VERSION 211112
+#define LAS_TOOLS_VERSION 221128
 
 #include <stdio.h>
 #include <string.h>
@@ -83,6 +83,10 @@
 
 #define LAS_TOOLS_IO_IBUFFER_SIZE   262144
 #define LAS_TOOLS_IO_OBUFFER_SIZE   262144
+
+#ifndef MAX_PATH // linux
+#define MAX_PATH 256
+#endif
 
 class LASvlr
 {
@@ -638,11 +642,11 @@ public:
     {
       if (keep_existing)
       {
-        i = number_of_variable_length_records;
+        i = number_of_extended_variable_length_records;
       }
       else
       {
-        for (i = 0; i < number_of_variable_length_records; i++)
+        for (i = 0; i < number_of_extended_variable_length_records; i++)
         {
           if ((strcmp(evlrs[i].user_id, user_id) == 0) && (evlrs[i].record_id == record_id))
           {

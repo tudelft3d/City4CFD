@@ -171,7 +171,7 @@ int main(int argc, char** argv) {
             LASheader header = lasreader->header;
 
             //-- read each point 1-by-1
-            uint32_t pointCount = header.number_of_point_records;
+            uint64_t pointCount = header.number_of_point_records;
 
             std::vector<Point> pts;
 

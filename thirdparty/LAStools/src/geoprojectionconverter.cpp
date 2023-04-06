@@ -1882,31 +1882,22 @@ static FILE* open_geo_file(const char* program_name, bool pcs=true, bool vertica
   int path_len = 0;
   char path[MAX_GEO_PATH_LENGTH];
 
-//#ifdef _WIN32
-//  if (program_name)
-//  {
-//    GetModuleFileName(GetModuleHandle(program_name),(LPTSTR)path, MAX_GEO_PATH_LENGTH);
-//    path_len = (int)strlen(path);
-//  }
-//  else
-//  {
-//    path[path_len] = '.';
-//    path_len = 1;
-//  }
-//#else //_WIN32
-//  path_len = readlink("/proc/self/exe", path, MAX_GEO_PATH_LENGTH);
-    if (vertical)
-    {
-      path_len = 22;
-    }
-    else
-    {
-      path_len = 19;
-    }
-//#endif //_WIN32
+#ifdef _WIN32
+  if (program_name)
+  {
+    GetModuleFileName(GetModuleHandle(program_name),(LPTSTR)path, MAX_GEO_PATH_LENGTH);
+    path_len = (int)strlen(path);
+  }
+  else
+  {
+    path[path_len] = '.';
+    path_len = 1;
+  }
+#else //_WIN32
+  path_len = readlink("/proc/self/exe", path, MAX_GEO_PATH_LENGTH);
+#endif //_WIN32
 
   while ((path_len > 0) && (path[path_len] != '\\') && (path[path_len] != '/') && (path[path_len] != ':')) path_len--;
-  path[path_len] = '.'; path_len++;
   path[path_len] = '/'; path_len++;
   path[path_len] = 's'; path_len++;
   path[path_len] = 'e'; path_len++;
@@ -1917,7 +1908,6 @@ static FILE* open_geo_file(const char* program_name, bool pcs=true, bool vertica
   path[path_len] = 'e'; path_len++;
   path[path_len] = 'o'; path_len++;
   path[path_len] = '/'; path_len++;
-  //10 + 1
   if (vertical)
   {
     path[path_len] = 'v'; path_len++;
@@ -1926,21 +1916,18 @@ static FILE* open_geo_file(const char* program_name, bool pcs=true, bool vertica
     path[path_len] = 't'; path_len++;
     path[path_len] = 'c'; path_len++;
     path[path_len] = 's'; path_len++;
-    //6
   }
   else
   {
     path[path_len] = (pcs ? 'p' : 'g'); path_len++;
     path[path_len] = 'c'; path_len++;
     path[path_len] = 's'; path_len++;
-    //3
   }
   path[path_len] = '.'; path_len++;
   path[path_len] = 'c'; path_len++;
   path[path_len] = 's'; path_len++;
   path[path_len] = 'v'; path_len++;
   path[path_len] = '\0';
-  //5
 
   file = fopen(path, "r");
 
@@ -4336,8 +4323,8 @@ bool GeoProjectionConverter::set_VerticalCSTypeGeoKey(short value, char* descrip
     if (file == 0)
     {
       fprintf(stderr, "ERROR: cannot open 'vertcs.csv' file. maybe your LAStools distribution\n");
-      fprintf(stderr, "       has no .\\serf\\geo\\vertcs.csv file. place the 'serf' folder to\n");
-      fprintf(stderr, "       your current directory\n");
+      fprintf(stderr, "       has no .\\LAStools\\bin\\serf\\geo\\vertcs.csv file. download the\n");
+      fprintf(stderr, "       latest version at http://lastools.org/download/LAStools.zip\n");
       return false;
     }
     int epsg_code = 0;
@@ -4616,8 +4603,8 @@ bool GeoProjectionConverter::set_gcs(short code, char* description)
     if (file == 0)
     {
       fprintf(stderr, "ERROR: cannot open 'gcs.csv' file. maybe your LAStools distribution\n");
-      fprintf(stderr, "       has no .\\serf\\geo\\gcs.csv file. place the 'serf' folder to\n");
-      fprintf(stderr, "       your current directory\n");
+      fprintf(stderr, "       has no .\\LAStools\\bin\\serf\\geo\\gcs.csv file. download the\n");
+      fprintf(stderr, "       latest version at http://lastools.org/download/LAStools.zip\n");
       return false;
     }
     int value = 0;
@@ -5382,8 +5369,8 @@ bool GeoProjectionConverter::set_epsg_code(short value, char* description, bool 
     if (file == 0)
     {
       fprintf(stderr, "ERROR: cannot open 'pcs.csv' file. maybe your LAStools distribution\n");
-      fprintf(stderr, "       has no .\\serf\\geo\\pcs.csv file. place the 'serf' folder to\n");
-      fprintf(stderr, "       your current directory\n");
+      fprintf(stderr, "       has no .\\LAStools\\bin\\serf\\geo\\pcs.csv file. download the\n");
+      fprintf(stderr, "       latest version at http://lastools.org/download/LAStools.zip\n");
       return false;
     }
     int epsg_code = 0;

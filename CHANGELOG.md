@@ -3,6 +3,8 @@
 ## [Unreleased]
 ### Added
 - Support for many polygon formats (through GDAL)
+### Changed
+- Updated LAStools to v2.0.2
 
 ## [0.3.0] - 2023-01-18
 ### Added
