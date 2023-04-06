@@ -15,7 +15,7 @@ jobs:
       - name: Install dependencies
         run: |
             sudo apt-get update
-            sudo apt-get install libcgal-dev libboost-all-dev libeigen3-dev libomp-dev
+            sudo apt-get install libcgal-dev libboost-all-dev libeigen3-dev libomp-dev libgdal-dev
       - name: Build
         run: |
             mkdir build && cd build
@@ -28,7 +28,7 @@ jobs:
       - name: Install dependencies
         run: |
             brew update
-            brew install cmake boost cgal eigen libomp
+            brew install cmake boost cgal eigen libomp gdal
       - name: Build
         run: |
             mkdir build && cd build

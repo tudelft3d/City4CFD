@@ -40,14 +40,18 @@ public:
 
     void reconstruct();
 
+    BuildingsPtr get_failed_buildings() const;
+
     void read_data();
     void output();
 
 private:
     PointCloud                  _pointCloud;
-    JsonVectorPtr               _polygonsBuildings;
+//    JsonVectorPtr               _polygonsBuildings;     // for json-only reader
+    PolyVecPtr                  _polygonsBuildings;
     JsonVectorPtr               _importedBuildingsJSON;
-    std::vector<JsonVectorPtr>  _polygonsSurfaceLayers;
+//    std::vector<JsonVectorPtr>  _polygonsSurfaceLayers; // for json-only reader
+    std::vector<PolyVecPtr>     _polygonsSurfaceLayers;
     PointSet3Ptr                _importedBuildingsPts;
     std::vector<Mesh>           _importedBuildingsOther;
 

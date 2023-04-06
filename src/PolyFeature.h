@@ -34,12 +34,17 @@ class PolyFeature : public TopoFeature {
 public:
     PolyFeature();
     PolyFeature(const int outputLayerID);
-    PolyFeature(const nlohmann::json& poly, const bool checkSimplicity = false);
     PolyFeature(const int outputLayerID, const int internalID);
+    PolyFeature(const nlohmann::json& poly, const bool checkSimplicity = false);
     PolyFeature(const nlohmann::json& poly, const bool checkSimplicity, const int outputLayerID);
     PolyFeature(const nlohmann::json& poly, const bool checkSimplicity, const int outputLayerID, const int internalID);
     PolyFeature(const nlohmann::json& poly, const int outputLayerID);
     PolyFeature(const nlohmann::json& poly, const int outputLayerID, const int internalID);
+    PolyFeature(const Polygon_with_attr& poly, const bool checkSimplicity = false);
+    PolyFeature(const Polygon_with_attr& poly, const bool checkSimplicity, const int outputLayerID);
+    PolyFeature(const Polygon_with_attr& poly, const bool checkSimplicity, const int outputLayerID, const int internalID);
+    PolyFeature(const Polygon_with_attr& poly, const int outputLayerID);
+    PolyFeature(const Polygon_with_attr& poly, const int outputLayerID, const int internalID);
     virtual ~PolyFeature();
 
     void  calc_footprint_elevation_nni(const DT& dt);

@@ -37,25 +37,25 @@
 #endif
 
 PolyFeature::PolyFeature()
-    : TopoFeature(), _poly(), _groundElevations(), _polyInternalID(),
+        : TopoFeature(), _poly(), _groundElevations(), _polyInternalID(),
       _groundElevation(-global::largnum), _minBbox() {}
 
 PolyFeature::PolyFeature(const int outputLayerID)
     : TopoFeature(outputLayerID), _poly(), _groundElevations(), _polyInternalID(),
       _groundElevation(-global::largnum), _minBbox() {}
 
+PolyFeature::PolyFeature(const int outputLayerID, const int internalID)
+        : TopoFeature(outputLayerID), _groundElevations(), _polyInternalID(internalID),
+          _groundElevation(-global::largnum), _minBbox() {}
+
 PolyFeature::PolyFeature(const nlohmann::json& poly, const bool checkSimplicity)
-    : TopoFeature(), _groundElevations(), _polyInternalID(),
+        : TopoFeature(), _groundElevations(), _polyInternalID(),
       _groundElevation(-global::largnum), _minBbox() {
     this->parse_json_poly(poly, checkSimplicity);
 }
 
-PolyFeature::PolyFeature(const int outputLayerID, const int internalID)
-    : TopoFeature(outputLayerID), _groundElevations(), _polyInternalID(internalID),
-      _groundElevation(-global::largnum), _minBbox() {}
-
 PolyFeature::PolyFeature(const nlohmann::json& poly, const bool checkSimplicity, const int outputLayerID)
-    : PolyFeature(poly, checkSimplicity) {
+        : PolyFeature(poly, checkSimplicity) {
     _outputLayerID = outputLayerID;
     if (_outputLayerID  >= _numOfOutputLayers) _numOfOutputLayers = _outputLayerID + 1;
 }
@@ -65,13 +65,72 @@ PolyFeature::PolyFeature(const nlohmann::json& poly, const int outputLayerID)
 
 PolyFeature::PolyFeature(const nlohmann::json& poly, const bool checkSimplicity,
                          const int outputLayerID, const int internalID)
-    : PolyFeature(poly, checkSimplicity) {
+        : PolyFeature(poly, checkSimplicity) {
     _polyInternalID = internalID;
     _outputLayerID  = outputLayerID;
     if (_outputLayerID  >= _numOfOutputLayers) _numOfOutputLayers = _outputLayerID + 1;
 }
 
 PolyFeature::PolyFeature(const nlohmann::json& poly, const int outputLayerID, const int internalID)
+        : PolyFeature(poly, false, outputLayerID, internalID) {}
+
+PolyFeature::PolyFeature(const Polygon_with_attr& poly, const bool checkSimplicity)
+        : TopoFeature(), _groundElevations(), _polyInternalID(),
+          _groundElevation(-global::largnum), _minBbox() {
+    bool isOuterRing = true;
+    for (auto& ring : poly.polygon.rings()) {
+        Polygon_2 tempPoly;
+        const double minDist = 0.0001;
+        Point_2 prev(global::largnum, global::largnum);
+        for (auto& pt: ring.vertices()) {
+            if (CGAL::squared_distance(pt, prev) > minDist) {
+                tempPoly.push_back(pt);
+                prev = pt;
+            }
+        }
+        geomutils::pop_back_if_equal_to_front(tempPoly);
+        if (isOuterRing) {
+            if (tempPoly.is_clockwise_oriented()) tempPoly.reverse_orientation();
+            isOuterRing = false;
+        } else {
+            if (tempPoly.is_counterclockwise_oriented()) tempPoly.reverse_orientation();
+        }
+        if (checkSimplicity) {
+            if (!tempPoly.is_simple()) {
+                if (Config::get().avoidBadPolys) {
+                    this->deactivate();
+                    return;
+                } else {
+                    std::cout << "WARNING: Bad building polygon found! This might effect reconstruction quality! "
+                                 "If you end up having problems, try to fix the dataset with GIS software or 'pprepair'."
+                              << std::endl;
+                    std::cout << "    Alternatively, you can use the 'avoid_bad_polys' flag to skip"
+                                 " the import of problematic polygons.\n" << std::endl;
+                }
+            }
+        }
+        _poly._rings.push_back(tempPoly);
+    }
+}
+
+PolyFeature::PolyFeature(const Polygon_with_attr& poly, const bool checkSimplicity, const int outputLayerID)
+        : PolyFeature(poly, checkSimplicity) {
+    _outputLayerID = outputLayerID;
+    if (_outputLayerID  >= _numOfOutputLayers) _numOfOutputLayers = _outputLayerID + 1;
+}
+
+PolyFeature::PolyFeature(const Polygon_with_attr& poly, const int outputLayerID)
+        : PolyFeature(poly, false, outputLayerID) {}
+
+PolyFeature::PolyFeature(const Polygon_with_attr& poly, const bool checkSimplicity,
+                         const int outputLayerID, const int internalID)
+        : PolyFeature(poly, checkSimplicity) {
+    _polyInternalID = internalID;
+    _outputLayerID  = outputLayerID;
+    if (_outputLayerID  >= _numOfOutputLayers) _numOfOutputLayers = _outputLayerID + 1;
+}
+
+PolyFeature::PolyFeature(const Polygon_with_attr& poly, const int outputLayerID, const int internalID)
         : PolyFeature(poly, false, outputLayerID, internalID) {}
 
 PolyFeature::~PolyFeature() = default;
@@ -148,11 +207,13 @@ double PolyFeature::ground_elevation() {
     return _groundElevation;
 }
 
+/*
+ * Difference between high and low elevations in the polygon
+ * Calculated on the fly as rarely used
+ */
 double PolyFeature::slope_height() {
     if (_groundElevations.empty())throw std::runtime_error("Polygon elevations missing!"
                                                            " Cannot perform calculations");
-    // calculating slope height as difference between high and low elevations
-    // calculated on the fly as rarely used
     return geomutils::percentile(_groundElevations.front(), 0.9) - this->ground_elevation();
 }
 
@@ -266,9 +327,7 @@ void PolyFeature::parse_json_poly(const nlohmann::json& poly, const bool checkSi
         Polygon_2 tempPoly;
 
         const double minDist = 0.0001;
-        Point_2 prev((double)polyEdges.front()[0] - Config::get().pointOfInterest.x(),
-                     (double)polyEdges.front()[1] - Config::get().pointOfInterest.y());
-        prev += (Point_2(global::largnum, global::largnum) - prev);
+        Point_2 prev(global::largnum, global::largnum);
         for (auto& coords: polyEdges) {
             Point_2 pt2((double)coords[0] - Config::get().pointOfInterest.x(),
                         (double)coords[1] - Config::get().pointOfInterest.y());

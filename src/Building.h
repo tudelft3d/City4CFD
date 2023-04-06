@@ -37,6 +37,8 @@ public:
     Building(const int internalID);
     Building(const nlohmann::json& poly);
     Building(const nlohmann::json& poly, const int internalID);
+    Building(const Polygon_with_attr& poly);
+    Building(const Polygon_with_attr& poly, const int internalID);
     ~Building();
 
     static void alpha_wrap(const BuildingsPtr& buildings, Mesh& newMesh);
@@ -52,6 +54,8 @@ public:
     void   translate_footprint(const double h);
     void   check_feature_scope(const Polygon_2& influRegion);
     void   set_clip_flag (const bool flag);
+    void   mark_as_failed();
+    bool   has_failed_to_reconstruct() const;
     bool   has_self_intersections() const;
     void   set_to_zero_terrain();
     double sq_max_dim();
@@ -66,6 +70,7 @@ protected:
     PointSet3Ptr         _ptsPtr;
     double               _elevation;
     double               _height;
+    bool                 _hasFailed;
     bool                 _clip_bottom = Config::get().clip;
 };
 

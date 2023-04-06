@@ -26,6 +26,13 @@ else()
     return()
 endif ()
 
+# GDAL
+find_package(GDAL REQUIRED 3.0)
+if (NOT GDAL_FOUND)
+    message(SEND_ERROR "City4CFD requires the GDAL library, check the README for configuration")
+endif()
+include_directories(${GDAL_INCLUDE_DIR})
+
 # Eigen
 find_package(Eigen3 3.2.0) #(requires 3.2.0 or greater)
 include(${CMAKE_SOURCE_DIR}/thirdparty/CGAL/cmake/CGAL_Eigen3_support.cmake)
@@ -59,6 +66,7 @@ set_target_properties(
 target_link_libraries(city4cfd
         ${CGAL_LIBRARIES}
         ${CGAL_3RD_PARTY_LIBRARIES}
+        ${GDAL_LIBRARY}
         ${Boost_SYSTEM_LIBRARY}
         ${Boost_FILESYSTEM_LIBRARY}
         ${Boost_LOCALE_LIBRARY}

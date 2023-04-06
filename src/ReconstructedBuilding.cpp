@@ -78,9 +78,34 @@ ReconstructedBuilding::ReconstructedBuilding(const nlohmann::json& poly, const i
         }
     }
     if (!this->is_active()) { // It can only fail if the polygon is not simple
-        Config::get().failedBuildings.push_back(internalID);
+        this->mark_as_failed();
         Config::write_to_log("Failed to import building polygon ID:" + _id
                           + ". Polygon is not simple.");
+    }
+}
+
+ReconstructedBuilding::ReconstructedBuilding(const Polygon_with_attr& poly, const int internalID)
+        : Building(poly, internalID), _attributeHeight(-global::largnum),
+          _attributeHeightAdvantage(Config::get().buildingHeightAttrAdv) {
+    // Check for the polygon ID attribute
+    auto idIt = poly.attributes.find(Config::get().buildingUniqueId);
+    if (idIt != poly.attributes.end()) {
+        _id = idIt->second;
+     } else {
+        _id = std::to_string(internalID);
+    }
+    // Check for the building height attribute
+    auto buildingHeightAttrIt = poly.attributes.find(Config::get().buildingHeightAttribute);
+    auto numFloorsAttrIT = poly.attributes.find(Config::get().floorAttribute);
+    if (buildingHeightAttrIt != poly.attributes.end()) {
+        _attributeHeight = std::stod(buildingHeightAttrIt->second);
+    } else if (numFloorsAttrIT != poly.attributes.end()) { // Check for the number of floors attribute
+        _attributeHeight = std::stod(buildingHeightAttrIt->second);
+    }
+    if (!this->is_active()) { // It can only fail if the polygon is not simple
+        this->mark_as_failed();
+        Config::write_to_log("Failed to import building polygon ID:" + _id
+                             + ". Polygon is not simple.");
     }
 }
 
@@ -138,7 +163,7 @@ void ReconstructedBuilding::reconstruct() {
     }
     //-- LoD12 reconstruction
     if (this->get_height() < Config::get().minHeight) { // elevation calculated here
-        Config::write_to_log("Building ID:" + this->get_id()
+        Config::write_to_log("Building ID: " + this->get_id()
                              + " Height lower than minimum prescribed height of "
                              + std::to_string(Config::get().minHeight) + " m");
         _elevation = this->ground_elevation() + this->slope_height() + Config::get().minHeight;
@@ -204,7 +229,7 @@ void ReconstructedBuilding::reconstruct_from_attribute() {
     }
     //-- Set the height from attribute and reconstruct
     if (_attributeHeight < Config::get().minHeight) { // in case of a small height
-        Config::write_to_log("Building ID:" + this->get_id()
+        Config::write_to_log("Building ID: " + this->get_id()
                              + " Height lower than minimum prescribed height of "
                              + std::to_string(Config::get().minHeight) + " m");
         _elevation = this->ground_elevation() + this->slope_height() + Config::get().minHeight;

@@ -40,20 +40,30 @@
 
 Building::Building()
         : PolyFeature(1), _elevation(-global::largnum), _height(-global::largnum),
-          _ptsPtr(std::make_shared<Point_set_3>()) {}
+          _ptsPtr(std::make_shared<Point_set_3>()), _hasFailed(false) {}
 
 Building::Building(const int internalID)
         : PolyFeature(1, internalID), _elevation(-global::largnum), _height(-global::largnum),
-          _ptsPtr(std::make_shared<Point_set_3>()) {}
+          _ptsPtr(std::make_shared<Point_set_3>()), _hasFailed(false) {}
 
 Building::Building(const nlohmann::json& poly)
         : PolyFeature(poly, true, 1), _elevation(-global::largnum), _height(-global::largnum),
-          _ptsPtr(std::make_shared<Point_set_3>()) {}
+          _ptsPtr(std::make_shared<Point_set_3>()), _hasFailed(false) {}
         // 'true' here to check for polygon simplicity
 
 Building::Building(const nlohmann::json& poly, const int internalID)
         : PolyFeature(poly, true, 1, internalID), _elevation(-global::largnum), _height(-global::largnum),
-          _ptsPtr(std::make_shared<Point_set_3>()) {}
+          _ptsPtr(std::make_shared<Point_set_3>()), _hasFailed(false) {}
+        // 'true' here to check for polygon simplicity
+
+Building::Building(const Polygon_with_attr& poly)
+        : PolyFeature(poly, true, 1), _elevation(-global::largnum), _height(-global::largnum),
+          _ptsPtr(std::make_shared<Point_set_3>()), _hasFailed(false) {}
+        // 'true' here to check for polygon simplicity
+
+Building::Building(const Polygon_with_attr& poly, const int internalID)
+        : PolyFeature(poly, true, 1, internalID), _elevation(-global::largnum), _height(-global::largnum),
+          _ptsPtr(std::make_shared<Point_set_3>()), _hasFailed(false) {}
         // 'true' here to check for polygon simplicity
 
 Building::~Building() = default;
@@ -77,6 +87,7 @@ void Building::alpha_wrap(const BuildingsPtr& buildings, Mesh& newMesh) {
     std::vector<std::array<FT, 3>> points;
     std::vector<CGAL_Polygon> polygons;
     for (auto& b : buildings) {
+        if (!b->is_active()) continue; // skip failed reconstructions
         auto& mesh = b->get_mesh();
         for (auto& face: mesh.faces()) {
             CGAL_Polygon p;
@@ -228,6 +239,14 @@ void Building::set_clip_flag(const bool flag) {
 
 bool Building::has_self_intersections() const {
     return PMP::does_self_intersect(_mesh);
+}
+
+void Building::mark_as_failed() {
+    _hasFailed = true;
+}
+
+bool Building::has_failed_to_reconstruct() const {
+    return _hasFailed;
 }
 
 void Building::set_to_zero_terrain() {

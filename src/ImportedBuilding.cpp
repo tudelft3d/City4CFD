@@ -359,7 +359,7 @@ void ImportedBuilding::reconstruct() {
         /*
         //-- Add other surfaces
         std::vector<Mesh::Vertex_index> faceVertices;
-        int facid = -1; //todo temp
+        int facid = -1; // temp
         for (auto& faceLst : faces) {
             if (++facid > 0) std::cout << "YO THERE's A FACE NO: " << facid << std::endl;
 //            if (!(facid > 0)) continue;
@@ -367,7 +367,7 @@ void ImportedBuilding::reconstruct() {
                 faceVertices.emplace_back(_mesh.add_vertex(_ptsPtr[face]));
             }
             bool isReconstruct = _mesh.add_face(faceVertices);
-            //todo temp
+            // temp
             if (!isReconstruct) {
                 std::cout << "I have a failed surface!!!" << std::endl;
                 CGAL::Polygon_with_holes_2<EPICK> tempPoly;

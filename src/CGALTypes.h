@@ -60,7 +60,7 @@ typedef   EPICK::Vector_2 Vector_2;
 typedef CGAL::Polygon_2<EPICK>              Polygon_2;
 typedef CGAL::Polygon_2<eProjection_traits> Polygon_3;
 
-//-- CGAL's Polygon_with_holes container expanded
+//- CGAL's Polygon_with_holes container expanded
 struct Polygon_with_holes_2 {
     std::vector<Polygon_2> _rings;
 
@@ -116,6 +116,14 @@ struct Polygon_with_holes_2 {
     }
 
     CGAL::Bbox_2 bbox() const {return _rings.front().bbox();}
+};
+
+//- Polygon_with_holes expanded with attributes from GDAL
+struct Polygon_with_attr {
+    Polygon_with_holes_2 polygon;
+    std::unordered_map<std::string, std::string> attributes;
+//    std::string semanticClass;
+//    std::string id;
 };
 
 //-- Minimum bbox
@@ -216,8 +224,9 @@ typedef CGAL::Orthogonal_k_neighbor_search<Traits>                     Neighbor_
 typedef Neighbor_search::Tree                                          SearchTree;
 typedef CGAL::Fuzzy_iso_box<Traits>                                    Fuzzy_iso_box;
 
-//-- Smart pointers with CGAl types
-typedef std::shared_ptr<Point_set_3> PointSet3Ptr;
+//-- Smart pointers with CGAL types
+typedef std::shared_ptr<Point_set_3>                                  PointSet3Ptr;
+typedef std::vector<std::unique_ptr<Polygon_with_attr>>               PolyVecPtr;
 
 //-- Global constants
 namespace global {

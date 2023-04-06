@@ -173,7 +173,7 @@ void Map3d::set_features() {
             _allFeaturesPtr.push_back(surfacePoly);
         }
     }
-    std::cout << "    Polygons read: " << _allFeaturesPtr.size() << std::endl;
+    std::cout << "Polygons read: " << _allFeaturesPtr.size() << std::endl;
 
     //-- Set flat terrain or random thin terrain points
     if (_pointCloud.get_terrain().empty()) {
@@ -228,7 +228,7 @@ void Map3d::add_building_pts() {
 }
 
 void Map3d::remove_extra_terrain_pts() {
-    std::cout << "\nRemove extra terrain points" << std::endl;
+    std::cout << "\nRemoving extra terrain points" << std::endl;
     //-- Remove terrain points that lay in buildings
     _pointCloud.remove_points_in_polygon(_buildingsPtr);
     //-- Update DT for interpolation
@@ -349,17 +349,14 @@ void Map3d::reconstruct_buildings() {
             ++failed;
             // add information to log file
             Config::write_to_log("Building ID: " + f->get_id() + " Failed to reconstruct. Reason: " + e.what());
-            //-- Get JSON file ID for failed reconstructions output
-            //   For now only polygons (reconstructed buildings) are stored to GeoJSON
-            if (!f->is_imported())
-                #pragma omp critical
-                Config::get().failedBuildings.push_back(f->get_internal_id());
+            // mark for geojson output
+            f->mark_as_failed();
         }
     }
     this->clear_inactives();
     std::cout << "    Number of successfully reconstructed buildings: " << _buildingsPtr.size() << std::endl;
     Config::get().logSummary << "Building reconstruction summary: successfully reconstructed buildings: "
-                             << _buildingsPtr.size() << std::endl;
+                             << _buildingsPtr.size() - failed << std::endl;
     Config::get().logSummary << "                                 num of failed reconstructions: "
                              << failed << std::endl;
 }
@@ -386,6 +383,7 @@ void Map3d::reconstruct_with_flat_terrain() {
     }
     //-- Account for zero terrain height of buildings
     for (auto& b : _buildingsPtr) {
+        if (!b->is_active()) continue; // skip failed reconstructions
         b->set_to_zero_terrain();
     }
     //-- Set terrain point cloud to zero height
@@ -425,6 +423,7 @@ void Map3d::clip_buildings() {
     std::cout << "\n    Clipping buildings to terrain" << std::endl;
     int count = 0;
     for (auto& b : _buildingsPtr) {
+        if (!b->is_active()) continue; // skip failed reconstructions
         b->clip_bottom(_terrainPtr);
 
         if ((count % 50) == 0) IO::print_progress_bar(100 * count / _buildingsPtr.size());
@@ -456,13 +455,13 @@ void Map3d::read_data() {
     //-- Read building polygons
     if (!Config::get().gisdata.empty()) {
         std::cout << "Reading polygons" << std::endl;
-        IO::read_geojson_polygons(Config::get().gisdata, _polygonsBuildings);
+        IO::read_polygons(Config::get().gisdata, _polygonsBuildings, &Config::get().crsInfo);
         if (_polygonsBuildings.empty()) throw std::invalid_argument("Didn't find any building polygons!");
     }
     //-- Read surface layer polygons
     for (auto& topoLayer: Config::get().topoLayers) {
         _polygonsSurfaceLayers.emplace_back();
-        IO::read_geojson_polygons(topoLayer, _polygonsSurfaceLayers.back());
+        IO::read_polygons(topoLayer, _polygonsSurfaceLayers.back(), nullptr);
     }
     //-- Read imported buildings
     if (!Config::get().importedBuildingsPath.empty()) {
@@ -514,7 +513,7 @@ void Map3d::output() {
 void Map3d::prep_feature_output() {
     _outputFeaturesPtr.push_back(_terrainPtr);
     for (auto& f : _buildingsPtr) {
-        if (!f->is_active()) continue;
+        if (!f->is_active()) continue; // skip failed reconstructions
         _outputFeaturesPtr.push_back(f);
     }
     for (auto& b : _boundariesPtr) {
@@ -572,7 +571,7 @@ void Map3d::clear_inactives() {
         }
     }
     for (unsigned long i = 0; i < _buildingsPtr.size();) {
-        if (_buildingsPtr[i]->is_active()) ++i;
+        if (_buildingsPtr[i]->is_active() || _buildingsPtr[i]->has_failed_to_reconstruct()) ++i;
         else {
             _buildingsPtr.erase(_buildingsPtr.begin() + i);
         }
@@ -589,6 +588,14 @@ void Map3d::clear_inactives() {
             _allFeaturesPtr.erase(_allFeaturesPtr.begin() + i);
         }
     }
+}
+
+BuildingsPtr Map3d::get_failed_buildings() const {
+    BuildingsPtr failedBuildings;
+    for (auto& b : _buildingsPtr) {
+        if (b->has_failed_to_reconstruct()) failedBuildings.push_back(b);
+    }
+    return failedBuildings;
 }
 
 //-- Templated functions

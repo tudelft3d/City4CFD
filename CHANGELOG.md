@@ -1,5 +1,9 @@
 # Changelog
 
+## [Unreleased]
+### Added
+- Support for many polygon formats (through GDAL)
+
 ## [0.3.0] - 2023-01-18
 ### Added
 - Building surface refinement
