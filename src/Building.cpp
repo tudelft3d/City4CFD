@@ -132,18 +132,18 @@ void Building::alpha_wrap(const BuildingsPtr& buildings, Mesh& newMesh) {
     */
 
     //-- Perform CGAL's alpha wrapping
-//    const double relative_alpha = 900.;
-//    const double relative_offset = 15000.;
-//    CGAL::Bbox_3 bbox = CGAL::Polygon_mesh_processing::bbox(newMesh);
-//    const double diag_length = std::sqrt(CGAL::square(bbox.xmax() - bbox.xmin()) +
-//                                         CGAL::square(bbox.ymax() - bbox.ymin()) +
-//                                         CGAL::square(bbox.zmax() - bbox.zmin()));
-//    const double alpha = diag_length / relative_alpha;
-//    const double offset = diag_length / relative_offset;
-//    CGAL::alpha_wrap_3(newMesh, alpha, offset, wrap);
+    const double relative_alpha = 4000.; //1000.
+    const double relative_offset = 7000.; // 12000.
+    CGAL::Bbox_3 bbox = CGAL::Polygon_mesh_processing::bbox(newMesh);
+    const double diag_length = std::sqrt(CGAL::square(bbox.xmax() - bbox.xmin()) +
+                                         CGAL::square(bbox.ymax() - bbox.ymin()) +
+                                         CGAL::square(bbox.zmax() - bbox.zmin()));
+    const double alpha = diag_length / relative_alpha;
+    const double offset = diag_length / relative_offset;
+    CGAL::alpha_wrap_3(newMesh, alpha, offset, newMesh);
 
 //    CGAL::alpha_wrap_3(newMesh, 2, 0.01, newMesh);   // 'coarse'
-    CGAL::alpha_wrap_3(newMesh, 1.5, 0.03, newMesh); // 'medium'
+//    CGAL::alpha_wrap_3(newMesh, 1.5, 0.03, newMesh); // 'medium'
 //    CGAL::alpha_wrap_3(newMesh, 0.7, 0.03, newMesh); // 'fine'
 
 //    CGAL::alpha_wrap_3(newMesh, 0.3, 0.03, newMesh); // that one takes long time
