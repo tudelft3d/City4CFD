@@ -41,6 +41,12 @@ SurfaceLayer::SurfaceLayer(const nlohmann::json& poly)
 SurfaceLayer::SurfaceLayer(const nlohmann::json& poly, const int outputLayerID)
         : PolyFeature(poly, outputLayerID) {}
 
+SurfaceLayer::SurfaceLayer(const Polygon_with_attr& poly)
+        : PolyFeature(poly) {}
+
+SurfaceLayer::SurfaceLayer(const Polygon_with_attr& poly, const int outputLayerID)
+        : PolyFeature(poly, outputLayerID) {}
+
 SurfaceLayer::~SurfaceLayer() = default;
 
 void SurfaceLayer::check_feature_scope(const Polygon_2& bndPoly) {

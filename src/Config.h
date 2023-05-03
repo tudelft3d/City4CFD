@@ -84,6 +84,7 @@ public:
     int       nSmoothIterations                 = 0;
     int       maxSmoothPts                      = -9999;
     bool      flatTerrain                       = false;
+    bool      intersectBuildingsTerrain          = false;
     //- Buildings
     std::string buildingUniqueId;
     std::string lod;
@@ -91,6 +92,7 @@ public:
     double      buildingPercentile              = -9999.; // Handled by schema
     double      minHeight                       = 2.;
     bool        reconstructFailed               = false;
+    std::string crsInfo;                                  // CRS information of building footprints
     // Height from attributes
     std::string buildingHeightAttribute;
     std::string floorAttribute;
@@ -124,7 +126,6 @@ public:
     std::string        logName                  = std::string("log");
     std::ostringstream log;
     std::ostringstream logSummary;
-    std::vector<int>   failedBuildings;
 
     //-- Experimental
     bool       clip                             = false;

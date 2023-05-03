@@ -40,20 +40,30 @@
 
 Building::Building()
         : PolyFeature(1), _elevation(-global::largnum), _height(-global::largnum),
-          _ptsPtr(std::make_shared<Point_set_3>()) {}
+          _ptsPtr(std::make_shared<Point_set_3>()), _hasFailed(false) {}
 
 Building::Building(const int internalID)
         : PolyFeature(1, internalID), _elevation(-global::largnum), _height(-global::largnum),
-          _ptsPtr(std::make_shared<Point_set_3>()) {}
+          _ptsPtr(std::make_shared<Point_set_3>()), _hasFailed(false) {}
 
 Building::Building(const nlohmann::json& poly)
         : PolyFeature(poly, true, 1), _elevation(-global::largnum), _height(-global::largnum),
-          _ptsPtr(std::make_shared<Point_set_3>()) {}
+          _ptsPtr(std::make_shared<Point_set_3>()), _hasFailed(false) {}
         // 'true' here to check for polygon simplicity
 
 Building::Building(const nlohmann::json& poly, const int internalID)
         : PolyFeature(poly, true, 1, internalID), _elevation(-global::largnum), _height(-global::largnum),
-          _ptsPtr(std::make_shared<Point_set_3>()) {}
+          _ptsPtr(std::make_shared<Point_set_3>()), _hasFailed(false) {}
+        // 'true' here to check for polygon simplicity
+
+Building::Building(const Polygon_with_attr& poly)
+        : PolyFeature(poly, true, 1), _elevation(-global::largnum), _height(-global::largnum),
+          _ptsPtr(std::make_shared<Point_set_3>()), _hasFailed(false) {}
+        // 'true' here to check for polygon simplicity
+
+Building::Building(const Polygon_with_attr& poly, const int internalID)
+        : PolyFeature(poly, true, 1, internalID), _elevation(-global::largnum), _height(-global::largnum),
+          _ptsPtr(std::make_shared<Point_set_3>()), _hasFailed(false) {}
         // 'true' here to check for polygon simplicity
 
 Building::~Building() = default;
@@ -77,6 +87,7 @@ void Building::alpha_wrap(const BuildingsPtr& buildings, Mesh& newMesh) {
     std::vector<std::array<FT, 3>> points;
     std::vector<CGAL_Polygon> polygons;
     for (auto& b : buildings) {
+        if (!b->is_active()) continue; // skip failed reconstructions
         auto& mesh = b->get_mesh();
         for (auto& face: mesh.faces()) {
             CGAL_Polygon p;
@@ -121,18 +132,18 @@ void Building::alpha_wrap(const BuildingsPtr& buildings, Mesh& newMesh) {
     */
 
     //-- Perform CGAL's alpha wrapping
-//    const double relative_alpha = 900.;
-//    const double relative_offset = 15000.;
-//    CGAL::Bbox_3 bbox = CGAL::Polygon_mesh_processing::bbox(newMesh);
-//    const double diag_length = std::sqrt(CGAL::square(bbox.xmax() - bbox.xmin()) +
-//                                         CGAL::square(bbox.ymax() - bbox.ymin()) +
-//                                         CGAL::square(bbox.zmax() - bbox.zmin()));
-//    const double alpha = diag_length / relative_alpha;
-//    const double offset = diag_length / relative_offset;
-//    CGAL::alpha_wrap_3(newMesh, alpha, offset, wrap);
+    const double relative_alpha = 2000.; //1000.
+    const double relative_offset = 7000.; // 12000.
+    CGAL::Bbox_3 bbox = CGAL::Polygon_mesh_processing::bbox(newMesh);
+    const double diag_length = std::sqrt(CGAL::square(bbox.xmax() - bbox.xmin()) +
+                                         CGAL::square(bbox.ymax() - bbox.ymin()) +
+                                         CGAL::square(bbox.zmax() - bbox.zmin()));
+    const double alpha = diag_length / relative_alpha;
+    const double offset = diag_length / relative_offset;
+    CGAL::alpha_wrap_3(newMesh, alpha, offset, newMesh);
 
 //    CGAL::alpha_wrap_3(newMesh, 2, 0.01, newMesh);   // 'coarse'
-    CGAL::alpha_wrap_3(newMesh, 1.5, 0.03, newMesh); // 'medium'
+//    CGAL::alpha_wrap_3(newMesh, 1.5, 0.03, newMesh); // 'medium'
 //    CGAL::alpha_wrap_3(newMesh, 0.7, 0.03, newMesh); // 'fine'
 
 //    CGAL::alpha_wrap_3(newMesh, 0.3, 0.03, newMesh); // that one takes long time
@@ -228,6 +239,14 @@ void Building::set_clip_flag(const bool flag) {
 
 bool Building::has_self_intersections() const {
     return PMP::does_self_intersect(_mesh);
+}
+
+void Building::mark_as_failed() {
+    _hasFailed = true;
+}
+
+bool Building::has_failed_to_reconstruct() const {
+    return _hasFailed;
 }
 
 void Building::set_to_zero_terrain() {

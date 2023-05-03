@@ -32,8 +32,10 @@
 #include "geomutils.h"
 #include "io.h"
 
-#include <CGAL/alpha_wrap_3.h>
+//#include <CGAL/alpha_wrap_3.h>
 #include <CGAL/Polygon_mesh_processing/repair_polygon_soup.h>
+#include <CGAL/Polygon_mesh_processing/orient_polygon_soup.h>
+#include <CGAL/Polygon_mesh_processing/polygon_soup_to_polygon_mesh.h>
 #include <CGAL/Polygon_mesh_processing/triangulate_faces.h>
 
 int ImportedBuilding::noBottom = 0;
@@ -280,7 +282,7 @@ void ImportedBuilding::reconstruct() {
     nlohmann::json& geometry = (*_buildingJson)["geometry"][_lodIdx];
 
     _mesh.clear();
-    if (_clip_bottom) {
+    if (_clip_bottom || Config::get().intersectBuildingsTerrain) {
         this->translate_footprint(-5);
     }
     //-- Adjust building height points
@@ -353,13 +355,13 @@ void ImportedBuilding::reconstruct() {
     _mesh = wrap;
      */
 
-    if (_clip_bottom) {
+    if (_clip_bottom || Config::get().intersectBuildingsTerrain) {
         this->translate_footprint(5);
     }
         /*
         //-- Add other surfaces
         std::vector<Mesh::Vertex_index> faceVertices;
-        int facid = -1; //todo temp
+        int facid = -1; // temp
         for (auto& faceLst : faces) {
             if (++facid > 0) std::cout << "YO THERE's A FACE NO: " << facid << std::endl;
 //            if (!(facid > 0)) continue;
@@ -367,7 +369,7 @@ void ImportedBuilding::reconstruct() {
                 faceVertices.emplace_back(_mesh.add_vertex(_ptsPtr[face]));
             }
             bool isReconstruct = _mesh.add_face(faceVertices);
-            //todo temp
+            // temp
             if (!isReconstruct) {
                 std::cout << "I have a failed surface!!!" << std::endl;
                 CGAL::Polygon_with_holes_2<EPICK> tempPoly;

@@ -37,6 +37,7 @@ public:
     ReconstructedBuilding(const Mesh& mesh);
 //    ReconstructedBuilding(const nlohmann::json& poly);
     ReconstructedBuilding(const nlohmann::json& poly, const int internalID);
+    ReconstructedBuilding(const Polygon_with_attr& poly, const int internalID);
     ~ReconstructedBuilding();
 
     virtual double get_elevation() override;

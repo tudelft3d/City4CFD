@@ -36,6 +36,7 @@ namespace IO {
     void read_config(std::string& config_path);
     bool read_point_cloud(std::string& file, Point_set_3& pc);
     void read_geojson_polygons(std::string& file, JsonVectorPtr& jsonPolygons);
+    void read_polygons(std::string& file, PolyVecPtr& polygons, std::string* crsInfo);
     void read_cityjson_geometries(std::string& file, JsonVectorPtr& importedBuildings,
                                   PointSet3Ptr& importedBuildingPts);
     void read_other_geometries(std::string& file, std::vector<Mesh>& meshes);
@@ -55,6 +56,7 @@ namespace IO {
     bool is_degen(const Mesh& mesh, Mesh::Face_index face);
 
     void output_log();
+    void output_log(const BuildingsPtr failedBuildings);
     bool has_substr(const std::string& strMain, const std::string& subStr);
 
     std::string gen_key_bucket(const Point_2 p);

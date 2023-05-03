@@ -27,7 +27,7 @@ City4CFD is developed by the [3D Geoinformation Research Group](https://3d.bk.tu
 ## Data formats
 **Point clouds** can be imported in LAS/LAZ, TXT/XYZ, or PLY format. We ask separately for ground and building points. While some datasets contain building-ground classification, some do not. Our [point cloud preparation tool](https://github.com/ipadjen/City4CFD_doc/wiki/Point-clouds#automatic-preparation) can extract ground and building points from user-defined classes, or use the [Cloth Simulation Filter](http://ramm.bnu.edu.cn/projects/CSF/) to separate the ground and non-ground points. If you would like to check your points, see if they are classified, or even conduct the filtering and classification yourself, we suggest you use [CloudCompare](https://www.danielgm.net/cc/).
 
-**2D data** (polygons) are imported in GeoJSON format. For all pre-processing related to polygons, including conversion to GeoJSON, you can use [QGIS](https://qgis.org/en/site/).
+**2D data** (polygons) are imported in [GDAL-supported formats](https://gdal.org/drivers/vector/index.html). For all pre-processing related to polygons you can use [QGIS](https://qgis.org/en/site/).
 
 **Geometry import** supports the following formats: OBJ, STL, PLY, OFF, VTP, and CityJSON.
 
@@ -41,18 +41,19 @@ The following libraries are required to build the project:
 - [CGAL](https://www.cgal.org/) version 5
 - Boost >= 1.66
 - Eigen >= 3.2
+- GDAL >= 3.0
 
 *OpenMP* is an optional dependency.
 
 All dependencies are generally available in Linux distributions, e.g. in Debian/Ubuntu/Mint:
 ```
-sudo apt-get install libcgal-dev libboost-all-dev libeigen3-dev libomp-dev
+sudo apt-get install libcgal-dev libboost-all-dev libeigen3-dev libomp-dev libgdal-dev
 ```
 
 In macOS you can install dependencies with Homebrew:
 
 ```
-brew install cmake boost cgal eigen libomp
+brew install cmake boost cgal eigen libomp gdal
 ```
 
 The project uses CMake to generate makefiles, so make sure it is also installed.
@@ -105,4 +106,4 @@ Pađen, Ivan, García-Sánchez, Clara and Ledoux, Hugo (2022). Towards Automatic
 
 ## Acknowledgements
 We would like to acknowledge the authors of the supporting libraries we use in this project:
-[CGAL](https://github.com/CGAL/cgal), [CSF](https://github.com/jianboqi/CSF), [nlohmann/json](https://github.com/nlohmann/json), [LAStools](https://github.com/LAStools), [valijson](https://github.com/tristanpenman/valijson)
+[CGAL](https://github.com/CGAL/cgal), [CSF](https://github.com/jianboqi/CSF), [GDAL](https://github.com/OSGeo/gdal), [LAStools](https://github.com/LAStools), [nlohmann/json](https://github.com/nlohmann/json), [valijson](https://github.com/tristanpenman/valijson)

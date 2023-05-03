@@ -31,7 +31,7 @@
 
 #include  <boost/algorithm/string/predicate.hpp>
 
-std::string CITY4CFD_VERSION = "0.3.0";
+std::string CITY4CFD_VERSION = "0.4.0";
 
 void printWelcome() {
     auto logo{
@@ -133,7 +133,7 @@ int main(int argc, char** argv) {
         map3d.output();
 
         //-- Output log
-        IO::output_log();
+        IO::output_log(map3d.get_failed_buildings());
 
         auto endTime = std::chrono::steady_clock::now();
         auto diffTime = endTime - startTime;
