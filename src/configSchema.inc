@@ -250,6 +250,10 @@ namespace jsonschema {
           "description": "Optional: Reconstruct failed buildings to minimum height",
           "type": "boolean"
         },
+        "intersect_buildings_terrain": {
+          "description": "Optional: Force buildings to protrude through terrain",
+          "type": "boolean"
+        },
         "reconstruct_boundaries": {
           "type": "boolean"
         },

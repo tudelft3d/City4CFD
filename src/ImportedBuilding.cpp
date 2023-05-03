@@ -282,7 +282,7 @@ void ImportedBuilding::reconstruct() {
     nlohmann::json& geometry = (*_buildingJson)["geometry"][_lodIdx];
 
     _mesh.clear();
-    if (_clip_bottom) {
+    if (_clip_bottom || Config::get().intersectBuildingsTerrain) {
         this->translate_footprint(-5);
     }
     //-- Adjust building height points
@@ -355,7 +355,7 @@ void ImportedBuilding::reconstruct() {
     _mesh = wrap;
      */
 
-    if (_clip_bottom) {
+    if (_clip_bottom || Config::get().intersectBuildingsTerrain) {
         this->translate_footprint(5);
     }
         /*

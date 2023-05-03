@@ -2,9 +2,11 @@
 
 ## [Unreleased]
 ### Added
-- Support for many polygon formats (through GDAL)
+- (breaking) Support for many polygon formats (through GDAL)
+- Optional flag that enforces buildings and terrain intersection
 ### Changed
 - Updated LAStools to v2.0.2
+- Minor bugfixes
 
 ## [0.3.0] - 2023-01-18
 ### Added

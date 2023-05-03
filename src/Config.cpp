@@ -227,6 +227,9 @@ void Config::set_config(nlohmann::json& j) {
     if (j.contains("reconstruct_failed")) {
         reconstructFailed = j["reconstruct_failed"];
     }
+    if (j.contains("intersect_buildings_terrain")) {
+       intersectBuildingsTerrain = j["intersect_buildings_terrain"];
+    }
 
     // Imported buildings
     if (j.contains("import_geometries")) {
