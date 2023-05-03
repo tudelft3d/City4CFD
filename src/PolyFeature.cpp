@@ -201,21 +201,21 @@ double PolyFeature::ground_elevation() {
     if (_groundElevation < -global::largnum + global::smallnum) {
         if (_groundElevations.empty())throw std::runtime_error("Polygon elevations missing!"
                                                            " Cannot calculate average");
-        // calculating base elevation as 90 percentile of outer ring
-        _groundElevation = geomutils::percentile(_groundElevations.front(), 0.2);
+        // calculating base elevation as 95 percentile of outer ring
+        _groundElevation = geomutils::percentile(_groundElevations.front(), 0.95);
     }
     return _groundElevation;
 }
 
-/*
- * Difference between high and low elevations in the polygon
- * Calculated on the fly as rarely used
- */
-double PolyFeature::slope_height() {
-    if (_groundElevations.empty())throw std::runtime_error("Polygon elevations missing!"
-                                                           " Cannot perform calculations");
-    return geomutils::percentile(_groundElevations.front(), 0.9) - this->ground_elevation();
-}
+///*
+// * Difference between high and low elevations in the polygon
+// * Calculated on the fly as rarely used
+// */
+//double PolyFeature::slope_height() {
+//    if (_groundElevations.empty())throw std::runtime_error("Polygon elevations missing!"
+//                                                           " Cannot perform calculations");
+//    return this->ground_elevation() - geomutils::percentile(_groundElevations.front(), 0.2);
+//}
 
 bool PolyFeature::flatten_polygon_inner_points(const Point_set_3& pointCloud,
                                                std::map<int, Point_3>& flattenedPts,
