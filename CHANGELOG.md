@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [0.4.0] - 2023-05-03
 ### Added
 - (breaking) Support for many polygon formats (through GDAL)
 - Optional flag that enforces buildings and terrain intersection
