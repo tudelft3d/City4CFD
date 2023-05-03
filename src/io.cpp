@@ -125,7 +125,7 @@ void IO::read_polygons(std::string& file, PolyVecPtr& polygons, std::string* crs
     if (inputMapDataset == NULL) {
         throw std::runtime_error("Error: Could not open input polygon");
     }
-    std::cout << "GDAL: Reading polygon file: " << file << " type: " << inputMapDataset->GetDriverName() << std::endl;
+    std::cout << "    Reading polygon file: " << file << " type: " << inputMapDataset->GetDriverName() << std::endl;
 
     CPLStringList metadataDomains(inputMapDataset->GetMetadataDomainList());
     for (int currentDomain = 0; currentDomain < metadataDomains.Count(); ++currentDomain) {
@@ -150,7 +150,7 @@ void IO::read_polygons(std::string& file, PolyVecPtr& polygons, std::string* crs
             if (authority != NULL) crsAuthority = std::string(authority);
             if (code != NULL) crsCode = std::string(code);
             if (crsInfo) *crsInfo += crsAuthority + "::" + crsCode;
-            std::cout << "    CRS information: " << authority << " code: " << code << std::endl;
+            std::cout << "        CRS information: " << authority << " code: " << code << std::endl;
         }
 
         OGRFeature *inputFeature;
