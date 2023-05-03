@@ -84,6 +84,7 @@ public:
     int       nSmoothIterations                 = 0;
     int       maxSmoothPts                      = -9999;
     bool      flatTerrain                       = false;
+    bool      intersectBuildingsTerrain          = false;
     //- Buildings
     std::string buildingUniqueId;
     std::string lod;

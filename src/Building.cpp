@@ -132,7 +132,7 @@ void Building::alpha_wrap(const BuildingsPtr& buildings, Mesh& newMesh) {
     */
 
     //-- Perform CGAL's alpha wrapping
-    const double relative_alpha = 4000.; //1000.
+    const double relative_alpha = 2000.; //1000.
     const double relative_offset = 7000.; // 12000.
     CGAL::Bbox_3 bbox = CGAL::Polygon_mesh_processing::bbox(newMesh);
     const double diag_length = std::sqrt(CGAL::square(bbox.xmax() - bbox.xmin()) +
