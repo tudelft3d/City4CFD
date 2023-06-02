@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.4.1]  - 2023-06-05
+### Fixed
+- STL export bugfix
+
 ## [0.4.0] - 2023-05-03
 ### Added
 - (breaking) Support for many polygon formats (through GDAL)
