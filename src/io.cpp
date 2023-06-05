@@ -384,9 +384,10 @@ void IO::output_stl(const OutputFeaturesPtr& allFeatures) {
             of.emplace_back();
             of.back().open(Config::get().outputFileName + "_" + Config::get().outputSurfaces[i] + ".stl");
         }
-        of.back() << "\nsolid " << Config::get().outputSurfaces[i];
+        of.back() << "solid " << Config::get().outputSurfaces[i];
         of.back() << fs[i];
         of.back() << "\nendsolid " << Config::get().outputSurfaces[i];
+        if (!Config::get().outputSeparately && i != fs.size() - 1) of.back() << "\n";
     }
     for (auto& f : of) f.close();
 }
