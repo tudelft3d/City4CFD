@@ -33,7 +33,7 @@
 #include <CGAL/min_quadrilateral_2.h>
 #include <CGAL/natural_neighbor_coordinates_2.h>
 #ifndef NDEBUG
-#include <CGAL/Barycentric_coordinates_2/Triangle_coordinates_2.h>
+#include <CGAL/Barycentric_coordinates_2/triangle_coordinates_2.h>
 #endif
 
 PolyFeature::PolyFeature()
@@ -165,7 +165,6 @@ void PolyFeature::calc_footprint_elevation_nni(const DT& dt) {
 
 #ifndef NDEBUG
 void PolyFeature::calc_footprint_elevation_linear(const DT& dt) {
-    typedef CGAL::Barycentric_coordinates::Triangle_coordinates_2<iProjection_traits>   Triangle_coordinates;
     DT::Face_handle fh = nullptr;
     for (auto& ring : _poly.rings()) {
         std::vector<double> ringHeights;
@@ -180,11 +179,14 @@ void PolyFeature::calc_footprint_elevation_linear(const DT& dt) {
                 return;
             }
 
-            Triangle_coordinates triangle_coordinates(fh->vertex(0)->point(),
-                                                      fh->vertex(1)->point(),
-                                                      fh->vertex(2)->point());
             std::vector<double> coords;
-            triangle_coordinates(pt, std::back_inserter(coords));
+            CGAL::Barycentric_coordinates::triangle_coordinates_2(
+                Point_2(fh->vertex(0)->point().x(), fh->vertex(0)->point().y()),
+                Point_2(fh->vertex(1)->point().x(), fh->vertex(1)->point().y()),
+                Point_2(fh->vertex(2)->point().x(), fh->vertex(2)->point().y()),
+                Point_2(pt.x(), pt.y()),
+                std::back_inserter(coords)
+            );
 
             double h = 0;
             for (int i = 0; i < 3; ++i) {
