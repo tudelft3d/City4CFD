@@ -28,6 +28,7 @@ jobs:
       - name: Install dependencies
         run: |
             brew update
+            brew upgrade || true
             brew install cmake boost cgal eigen libomp gdal
       - name: Build
         run: |
