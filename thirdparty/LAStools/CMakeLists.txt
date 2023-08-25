@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.9)
 set(CMAKE_SUPPRESS_REGENERATION true)
 project("LAStools")
 
