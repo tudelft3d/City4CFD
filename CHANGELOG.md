@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.4.3] - 2023-08-25
+### Fixed
+- Issue with GDAL on Ubuntu 20.04
+
+## [0.4.2]  - 2023-07-12
+### Fixed
+- Problematic compilation in debug mode
+
 ## [0.4.1]  - 2023-06-05
 ### Fixed
 - STL export bugfix
