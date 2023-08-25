@@ -8,8 +8,21 @@ on:
     - cron:  '0 6 1 * *' # Run on the first day of every month at 06:00 UTC
 
 jobs:
-  build_linux:
+  build_linux_latest:
     runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install dependencies
+        run: |
+            sudo apt-get update
+            sudo apt-get install libcgal-dev libboost-all-dev libeigen3-dev libomp-dev libgdal-dev
+      - name: Build
+        run: |
+            mkdir build && cd build
+            cmake .. && make -j4
+
+  build_linux_2004:
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v3
       - name: Install dependencies

@@ -224,7 +224,7 @@ void IO::read_polygons(std::string& file, PolyVecPtr& polygons, std::string* crs
                 for (int currentPolygon = 0;
                      currentPolygon < inputMultipolygon->getNumGeometries();
                      ++currentPolygon) {
-                    OGRPolygon *inputPolygon = inputMultipolygon->getGeometryRef(currentPolygon);
+                    OGRPolygon* inputPolygon = static_cast<OGRPolygon*>(inputMultipolygon->getGeometryRef(currentPolygon));
                     polygons.push_back(std::make_unique<Polygon_with_attr>());
 //                    polygons.back()->id = std::to_string(inputFeature->GetFID()) + "-" + std::to_string(currentPolygon);
 //                    polygons.back().semantic_class = cityjson_class;
