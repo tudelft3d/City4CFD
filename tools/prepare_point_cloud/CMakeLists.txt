@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.9)
 project(city4cfd_pcprep)
 
 set(CMAKE_CXX_FLAGS "-O3")
