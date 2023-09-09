@@ -406,7 +406,7 @@ namespace jsonschema {
       ],
         "required": [ "point_of_interest", "influence_region", "domain_bnd",
                       "building_percentile", "edge_max_len", "output_file_name", "output_format",
-                      "output_separately" ]
+                      "output_separately", "lod"]
     }
         )"_json;
 }
