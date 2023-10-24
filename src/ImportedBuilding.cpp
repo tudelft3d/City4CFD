@@ -432,7 +432,7 @@ void ImportedBuilding::check_simplicity(Polygon_2& ring) {
 
 void ImportedBuilding::polyset_to_polygon(const CGAL::Polygon_set_2<CGAL::Epeck>& polySet) {
 //    polySet.remove_redundant_edges();
-    std::list<CGAL::Polygon_with_holes_2<EPECK>> res;
+    std::vector<CGAL::Polygon_with_holes_2<EPECK>> res;
     polySet.polygons_with_holes(std::back_inserter(res));
 
     Converter<EPECK, EPICK> to_inexact;

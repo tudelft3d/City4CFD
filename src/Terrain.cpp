@@ -30,6 +30,7 @@
 #include "geomutils.h"
 #include "io.h"
 #include "SurfaceLayer.h"
+#include "Building.h"
 
 Terrain::Terrain()
         : TopoFeature(0), _cdt(), _surfaceLayersTerrain(),
@@ -64,7 +65,8 @@ void Terrain::set_cdt(const Point_set_3& pointCloud) {
 void Terrain::prep_constraints(const PolyFeaturesPtr& features, Point_set_3& pointCloud) {
     std::cout << "    Lifting polygon edges to terrain elevation" << std::endl;
     int countFeatures = 0;
-    auto is_building_pt = pointCloud.property_map<bool>("is_building_point").first;
+//    auto is_building_pt = pointCloud.add_property_map<bool>("is_building_point", false).first;
+    auto building_pt = pointCloud.add_property_map<std::shared_ptr<Building>>("building_point", nullptr).first;
     for (auto& f : features) {
         if (!f->is_active()) continue;
         bool is_building = false;
@@ -78,7 +80,7 @@ void Terrain::prep_constraints(const PolyFeaturesPtr& features, Point_set_3& poi
             for (auto& polyVertex : ring) {
                 pts.push_back(ePoint_3(polyVertex.x(), polyVertex.y(), elevations[polyCount][i]));
                 auto it = pointCloud.insert(Point_3(polyVertex.x(), polyVertex.y(), elevations[polyCount][i++]));
-                if (is_building) is_building_pt[*it] = true;
+                if (is_building) building_pt[*it] = std::static_pointer_cast<Building>(f);
             }
             _constrainedPolys.push_back(pts);
             ++polyCount;

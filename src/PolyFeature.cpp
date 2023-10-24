@@ -25,13 +25,23 @@
   Delft University of Technology
 */
 
+#ifdef CITY4CFD_VERBOSE
+  #define CITY4CFD_POLYFEATURE_VERBOSE
+#endif
+
 #include "PolyFeature.h"
 
 #include "geomutils.h"
+#include "Building.h"
 
 #include <CGAL/convex_hull_2.h>
 #include <CGAL/min_quadrilateral_2.h>
 #include <CGAL/natural_neighbor_coordinates_2.h>
+#include <CGAL/Straight_skeleton_builder_2.h>
+#include <CGAL/compute_outer_frame_margin.h>
+#include <CGAL/create_offset_polygons_from_polygon_with_holes_2.h>
+#include <CGAL/Polygon_set_2.h>
+
 #ifndef NDEBUG
 #include <CGAL/Barycentric_coordinates_2/triangle_coordinates_2.h>
 #endif
@@ -222,10 +232,17 @@ double PolyFeature::ground_elevation() {
 bool PolyFeature::flatten_polygon_inner_points(const Point_set_3& pointCloud,
                                                std::map<int, Point_3>& flattenedPts,
                                                const SearchTree& searchTree,
-                                               const std::unordered_map<Point_3, int>& pointCloudConnectivity) const {
+                                               const std::unordered_map<Point_3, int>& pointCloudConnectivity,
+                                               std::vector<EPECK::Segment_3>& constrainedEdges,
+                                               std::vector<std::pair<Polygon_with_holes_2, int>>& newPolys) {
+
+    typedef CGAL::Straight_skeleton_2<EPICK>           Ss;
+    typedef boost::shared_ptr<CGAL::Polygon_with_holes_2<EPICK>> PolygonPtrWH;
+    typedef std::vector<PolygonPtrWH> PolygonPtrVectorWH;
+
     std::vector<int>    indices;
     std::vector<double> originalHeights;
-    auto is_building_pt = pointCloud.property_map<bool>("is_building_point").first;
+    auto building_pt = pointCloud.property_map<std::shared_ptr<Building>>("building_point").first;
     //-- Take tree subset bounded by the polygon
     std::vector<Point_3> subsetPts;
     Polygon_2 bbox = geomutils::calc_bbox_poly(_poly.rings().front());
@@ -234,23 +251,88 @@ bool PolyFeature::flatten_polygon_inner_points(const Point_set_3& pointCloud,
     Fuzzy_iso_box pts_range(bbox1, bbox2);
     searchTree.search(std::back_inserter(subsetPts), pts_range);
 
-    //-- Collect points that have not been already flattened
+    //-- Check if the polygon is overlapping with a building
+    std::map<int, std::shared_ptr<Building>> overlappingBuildings; //id-building map
     for (auto& pt3 : subsetPts) {
         Point_2 pt(pt3.x(), pt3.y());
         if (CGAL::bounded_side_2(_poly._rings.front().begin(),
                                  _poly._rings.front().end(),
                                  pt) != CGAL::ON_UNBOUNDED_SIDE) {
             auto itIdx = pointCloudConnectivity.find(pt3);
-
             auto pointSetIt = pointCloud.begin();
             std::advance(pointSetIt, itIdx->second);
-            if (is_building_pt[*pointSetIt])
-                return false; //todo temp solution when having adjacent buildings
 
-            auto it = flattenedPts.find(itIdx->second);
-            if (it == flattenedPts.end()) {
-                indices.push_back(itIdx->second);
-                originalHeights.push_back(pointCloud.point(itIdx->second).z());
+            auto currBuilding = building_pt[*pointSetIt];
+            if (currBuilding != nullptr) {
+                int buildingId = currBuilding->get_internal_id();
+                auto it = overlappingBuildings.find(buildingId);
+                if (it == overlappingBuildings.end()) {
+                    overlappingBuildings[buildingId] = currBuilding;
+                }
+            }
+        }
+    }
+    //-- If next intersecting a building, clip poly with building
+    std::vector<Polygon_with_holes_2> flattenCandidatePolys;
+    if (!overlappingBuildings.empty()) {
+        // Add clipping polys to set
+        CGAL::Polygon_set_2<EPECK> polySet;
+        Converter<EPICK, EPECK> to_exact;
+        for (auto& intersectBuilding : overlappingBuildings) {
+            polySet.insert(intersectBuilding.second->get_poly().get_exact_outer_boundary());
+        }
+        // Clip with this polygon
+        polySet.complement();
+        polySet.intersection(this->get_poly().get_exact());
+        // Store this as the new polygon
+        std::vector<CGAL::Polygon_with_holes_2<EPECK>> resPolys;
+        polySet.polygons_with_holes(std::back_inserter(resPolys));
+#ifdef CITY4CFD_POLYFEATURE_VERBOSE
+        std::cout << "After flatten polygon clipping, total new polygons: " << resPolys.size() << std::endl;
+#endif
+        for (auto& flattenBndPoly : resPolys) {
+            flattenCandidatePolys.emplace_back(geomutils::exact_poly_to_poly(flattenBndPoly));
+        }
+    }
+    std::vector<Polygon_2> flattenBndPolys;
+    if (!flattenCandidatePolys.empty()) {
+        bool isFirst = true;
+        for (auto& poly : flattenCandidatePolys) {
+            const double offsetVal = 0.1; // offset value hardcoded
+            PolygonPtrVectorWH offset_poly =
+                    CGAL::create_interior_skeleton_and_offset_polygons_with_holes_2(offsetVal,
+                                                                                    poly.get_cgal_type());
+            if (offset_poly.size() == 1) { // make a check whether the offset is successfully created or not
+                flattenBndPolys.push_back(offset_poly.front()->outer_boundary());
+            } else {
+                std::cout << "Skeleton construction failed!" << std::endl;
+                return false;
+            }
+            if (isFirst) {
+                _poly = Polygon_with_holes_2(*(offset_poly.front()));
+                isFirst = false;
+            } else {
+                // Some polys are cut -- save the new resulting polys and add them as new features in Map3D
+                newPolys.emplace_back(Polygon_with_holes_2(*(offset_poly.front())), _outputLayerID);
+            }
+        }
+    } else {
+        flattenBndPolys.push_back(_poly.outer_boundary());
+    }
+    //-- Collect points that have not been already flattened
+    for (auto& pt3 : subsetPts) {
+        for (auto& flattenBndPoly : flattenBndPolys) {
+            Point_2 pt(pt3.x(), pt3.y());
+            if (CGAL::bounded_side_2(flattenBndPoly.begin(),
+                                     flattenBndPoly.end(),
+                                     pt) != CGAL::ON_UNBOUNDED_SIDE) {
+                auto itIdx = pointCloudConnectivity.find(pt3);
+
+                auto it = flattenedPts.find(itIdx->second);
+                if (it == flattenedPts.end()) {
+                    indices.push_back(itIdx->second);
+                    originalHeights.push_back(pointCloud.point(itIdx->second).z());
+                }
             }
         }
     }
@@ -265,6 +347,17 @@ bool PolyFeature::flatten_polygon_inner_points(const Point_set_3& pointCloud,
     for (auto& i : indices) {
         flattenedPts[i] = Point_3(pointCloud.point(i).x(), pointCloud.point(i).y(), avgHeight);
     }
+    //-- Add additional new segments to constrain
+    if (!flattenBndPolys.empty()) {
+        for (auto& flattenBndPoly : flattenBndPolys) {
+            for (const auto& newEdge: flattenBndPoly.edges()) {
+                ePoint_3 pt1(newEdge.point(0).x(), newEdge.point(0).y(), avgHeight);
+                ePoint_3 pt2(newEdge.point(1).x(), newEdge.point(1).y(), avgHeight);
+                constrainedEdges.emplace_back(pt1, pt2);
+            }
+        }
+    }
+
     return true;
 }
 

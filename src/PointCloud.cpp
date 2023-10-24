@@ -110,7 +110,6 @@ void PointCloud::smooth_terrain() {
     for (auto& pt : mesh.points()) {
         _pointCloudTerrain.insert(pt);
     }
-    _pointCloudTerrain.add_property_map<bool> ("is_building_point", false);
 }
 
 void PointCloud::remove_points_in_polygon(const BuildingsPtr& features) {
@@ -155,7 +154,6 @@ void PointCloud::create_flat_terrain(const PolyFeaturesPtr& lsFeatures) {
             _pointCloudTerrain.insert(Point_3(pt.x(), pt.y(), 0.0));
         }
     }
-    _pointCloudTerrain.add_property_map<bool> ("is_building_point", false);
 }
 
 void PointCloud::set_flat_terrain() {
@@ -164,11 +162,11 @@ void PointCloud::set_flat_terrain() {
         flatPC.insert(Point_3(pt.x(), pt.y(), 0.));
     }
     _pointCloudTerrain = flatPC;
-    _pointCloudTerrain.add_property_map<bool> ("is_building_point", false);
 }
 
 void PointCloud::flatten_polygon_pts(const PolyFeaturesPtr& lsFeatures,
-                                     std::vector<EPECK::Segment_3>& constrainedEdges) {
+                                     std::vector<EPECK::Segment_3>& constrainedEdges,
+                                     std::vector<std::pair<Polygon_with_holes_2, int>>& newPolys) {
     std::cout << "\n    Flattening surfaces" << std::endl;
     std::map<int, Point_3> flattenedPts;
 
@@ -199,7 +197,8 @@ void PointCloud::flatten_polygon_pts(const PolyFeaturesPtr& lsFeatures,
         auto ita = Config::get().flattenSurfaces.find(f->get_output_layer_id());
         if (ita != Config::get().flattenSurfaces.end()) {
             // flatten points
-            if(f->flatten_polygon_inner_points(_pointCloudTerrain, flattenedPts, searchTree, pointCloudConnectivity)) {
+            if(f->flatten_polygon_inner_points(_pointCloudTerrain, flattenedPts, searchTree, pointCloudConnectivity,
+                                               constrainedEdges, newPolys)) {
                 // add to list if constructing vertical borders
                 if (std::find(Config::get().flattenVertBorder.begin(), Config::get().flattenVertBorder.end(),
                               f->get_output_layer_id()) != Config::get().flattenVertBorder.end()) {
@@ -331,7 +330,6 @@ void PointCloud::read_point_clouds() {
     if (!Config::get().ground_xyz.empty()) {
         std::cout << "Reading ground points" << std::endl;
         IO::read_point_cloud(Config::get().ground_xyz, _pointCloudTerrain);
-        _pointCloudTerrain.add_property_map<bool>("is_building_point", false);
 
         std::cout << "    Points read: " << _pointCloudTerrain.size() << std::endl;
     } else {
