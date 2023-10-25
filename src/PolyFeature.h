@@ -56,7 +56,8 @@ public:
     bool   flatten_polygon_inner_points(const Point_set_3& pointCloud, std::map<int, Point_3>& flattenedPts,
                                         const SearchTree& searchTree, const std::unordered_map<Point_3, int>& pointCloudConnectivity,
                                         std::vector<EPECK::Segment_3>& constrainedEdges,
-                                        std::vector<std::pair<Polygon_with_holes_2, int>>& newPolys);
+                                        std::vector<std::pair<Polygon_with_holes_2, int>>& newPolys,
+                                        bool& isNextToBuilding);
     void  set_zero_borders();
     void  calc_min_bbox();
     void  clear_feature();

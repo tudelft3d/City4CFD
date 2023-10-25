@@ -324,7 +324,8 @@ void Map3d::reconstruct_terrain() {
                 for (auto& polyToAdd : additionalPolys) {
                     Polygon_with_attr newPolyToAdd;
                     newPolyToAdd.polygon = polyToAdd.first;
-                    auto surfacePoly = std::make_shared<SurfaceLayer>(newPolyToAdd, polyToAdd.second);
+                    auto surfacePoly
+                            = std::make_shared<SurfaceLayer>(newPolyToAdd, polyToAdd.second);
                     _surfaceLayersPtr.push_back(surfacePoly);
                     _allFeaturesPtr.push_back(surfacePoly);
                 }

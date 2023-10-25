@@ -65,7 +65,6 @@ void Terrain::set_cdt(const Point_set_3& pointCloud) {
 void Terrain::prep_constraints(const PolyFeaturesPtr& features, Point_set_3& pointCloud) {
     std::cout << "    Lifting polygon edges to terrain elevation" << std::endl;
     int countFeatures = 0;
-//    auto is_building_pt = pointCloud.add_property_map<bool>("is_building_point", false).first;
     auto building_pt = pointCloud.add_property_map<std::shared_ptr<Building>>("building_point", nullptr).first;
     for (auto& f : features) {
         if (!f->is_active()) continue;

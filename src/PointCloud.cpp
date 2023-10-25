@@ -197,11 +197,12 @@ void PointCloud::flatten_polygon_pts(const PolyFeaturesPtr& lsFeatures,
         auto ita = Config::get().flattenSurfaces.find(f->get_output_layer_id());
         if (ita != Config::get().flattenSurfaces.end()) {
             // flatten points
+            bool isNextToBuilding = false;
             if(f->flatten_polygon_inner_points(_pointCloudTerrain, flattenedPts, searchTree, pointCloudConnectivity,
-                                               constrainedEdges, newPolys)) {
+                                               constrainedEdges, newPolys, isNextToBuilding)) {
                 // add to list if constructing vertical borders
                 if (std::find(Config::get().flattenVertBorder.begin(), Config::get().flattenVertBorder.end(),
-                              f->get_output_layer_id()) != Config::get().flattenVertBorder.end()) {
+                              f->get_output_layer_id()) != Config::get().flattenVertBorder.end() && !isNextToBuilding) {
                     vertBorders.push_back(f);
                 }
             }

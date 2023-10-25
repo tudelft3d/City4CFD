@@ -234,7 +234,8 @@ bool PolyFeature::flatten_polygon_inner_points(const Point_set_3& pointCloud,
                                                const SearchTree& searchTree,
                                                const std::unordered_map<Point_3, int>& pointCloudConnectivity,
                                                std::vector<EPECK::Segment_3>& constrainedEdges,
-                                               std::vector<std::pair<Polygon_with_holes_2, int>>& newPolys) {
+                                               std::vector<std::pair<Polygon_with_holes_2, int>>& newPolys,
+                                               bool& isNextToBuilding) {
 
     typedef CGAL::Straight_skeleton_2<EPICK>           Ss;
     typedef boost::shared_ptr<CGAL::Polygon_with_holes_2<EPICK>> PolygonPtrWH;
@@ -272,6 +273,7 @@ bool PolyFeature::flatten_polygon_inner_points(const Point_set_3& pointCloud,
             }
         }
     }
+    if (!overlappingBuildings.empty()) isNextToBuilding = true;
     //-- If next intersecting a building, clip poly with building
     std::vector<Polygon_with_holes_2> flattenCandidatePolys;
     if (!overlappingBuildings.empty()) {
