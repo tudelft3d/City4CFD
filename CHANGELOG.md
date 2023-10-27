@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+### Changed
+- Improved fallbacks in case building import fails in late stages
+### Fixed
+- Minor bugfixes
+
 ## [0.4.3] - 2023-08-25
 ### Fixed
 - Issue with GDAL on Ubuntu 20.04
