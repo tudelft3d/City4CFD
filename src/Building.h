@@ -34,11 +34,8 @@
 class Building : public PolyFeature {
 public:
     Building();
-    Building(const int internalID);
     Building(const nlohmann::json& poly);
-    Building(const nlohmann::json& poly, const int internalID);
     Building(const Polygon_with_attr& poly);
-    Building(const Polygon_with_attr& poly, const int internalID);
     ~Building();
 
     static void alpha_wrap(const BuildingsPtr& buildings, Mesh& newMesh);

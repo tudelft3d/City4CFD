@@ -42,27 +42,13 @@ Building::Building()
         : PolyFeature(1), _elevation(-global::largnum), _height(-global::largnum),
           _ptsPtr(std::make_shared<Point_set_3>()), _hasFailed(false) {}
 
-Building::Building(const int internalID)
-        : PolyFeature(1, internalID), _elevation(-global::largnum), _height(-global::largnum),
-          _ptsPtr(std::make_shared<Point_set_3>()), _hasFailed(false) {}
-
 Building::Building(const nlohmann::json& poly)
         : PolyFeature(poly, true, 1), _elevation(-global::largnum), _height(-global::largnum),
           _ptsPtr(std::make_shared<Point_set_3>()), _hasFailed(false) {}
         // 'true' here to check for polygon simplicity
 
-Building::Building(const nlohmann::json& poly, const int internalID)
-        : PolyFeature(poly, true, 1, internalID), _elevation(-global::largnum), _height(-global::largnum),
-          _ptsPtr(std::make_shared<Point_set_3>()), _hasFailed(false) {}
-        // 'true' here to check for polygon simplicity
-
 Building::Building(const Polygon_with_attr& poly)
         : PolyFeature(poly, true, 1), _elevation(-global::largnum), _height(-global::largnum),
-          _ptsPtr(std::make_shared<Point_set_3>()), _hasFailed(false) {}
-        // 'true' here to check for polygon simplicity
-
-Building::Building(const Polygon_with_attr& poly, const int internalID)
-        : PolyFeature(poly, true, 1, internalID), _elevation(-global::largnum), _height(-global::largnum),
           _ptsPtr(std::make_shared<Point_set_3>()), _hasFailed(false) {}
         // 'true' here to check for polygon simplicity
 

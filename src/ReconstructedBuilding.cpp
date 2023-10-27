@@ -35,10 +35,6 @@ ReconstructedBuilding::ReconstructedBuilding()
         : Building(), _attributeHeight(-global::largnum),
           _attributeHeightAdvantage(Config::get().buildingHeightAttrAdv) {}
 
-ReconstructedBuilding::ReconstructedBuilding(const int internalID)
-        : Building(internalID), _attributeHeight(-global::largnum),
-          _attributeHeightAdvantage(Config::get().buildingHeightAttrAdv) {}
-
 ReconstructedBuilding::ReconstructedBuilding(const Mesh& mesh)
         : ReconstructedBuilding() {
     _mesh = mesh;
@@ -61,13 +57,13 @@ ReconstructedBuilding::ReconstructedBuilding(const nlohmann::json& poly)
 }
 */
 
-ReconstructedBuilding::ReconstructedBuilding(const nlohmann::json& poly, const int internalID)
-        : Building(poly, internalID), _attributeHeight(-global::largnum),
+ReconstructedBuilding::ReconstructedBuilding(const nlohmann::json& poly)
+        : Building(poly), _attributeHeight(-global::largnum),
           _attributeHeightAdvantage(Config::get().buildingHeightAttrAdv) {
     if (!Config::get().buildingUniqueId.empty() && poly["properties"].contains(Config::get().buildingUniqueId)) {
         _id = poly["properties"][Config::get().buildingUniqueId].dump();
     } else {
-        _id = std::to_string(internalID);
+        _id = std::to_string(_polyInternalID);
     }
     if (poly["properties"].contains(Config::get().buildingHeightAttribute)) {
         if (poly["properties"][Config::get().buildingHeightAttribute].is_number()) {
@@ -85,15 +81,15 @@ ReconstructedBuilding::ReconstructedBuilding(const nlohmann::json& poly, const i
     }
 }
 
-ReconstructedBuilding::ReconstructedBuilding(const Polygon_with_attr& poly, const int internalID)
-        : Building(poly, internalID), _attributeHeight(-global::largnum),
+ReconstructedBuilding::ReconstructedBuilding(const Polygon_with_attr& poly)
+        : Building(poly), _attributeHeight(-global::largnum),
           _attributeHeightAdvantage(Config::get().buildingHeightAttrAdv) {
     // Check for the polygon ID attribute
     auto idIt = poly.attributes.find(Config::get().buildingUniqueId);
     if (idIt != poly.attributes.end()) {
         _id = idIt->second;
      } else {
-        _id = std::to_string(internalID);
+        _id = std::to_string(_polyInternalID);
     }
     // Check for the building height attribute
     auto buildingHeightAttrIt = poly.attributes.find(Config::get().buildingHeightAttribute);
@@ -111,7 +107,7 @@ ReconstructedBuilding::ReconstructedBuilding(const Polygon_with_attr& poly, cons
 }
 
 ReconstructedBuilding::ReconstructedBuilding(const std::shared_ptr<ImportedBuilding>& importedBuilding)
-        : Building(importedBuilding->get_poly_w_attr(), importedBuilding->get_internal_id()),
+        : Building(importedBuilding->get_poly_w_attr()),
         _attributeHeight(-global::largnum), _attributeHeightAdvantage(Config::get().buildingHeightAttrAdv) {
     _ptsPtr = importedBuilding->get_points();
     _groundElevations = importedBuilding->get_ground_elevations();

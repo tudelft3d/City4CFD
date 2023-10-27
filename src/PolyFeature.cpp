@@ -37,19 +37,15 @@
 #endif
 
 PolyFeature::PolyFeature()
-        : TopoFeature(), _poly(), _groundElevations(), _polyInternalID(),
+        : TopoFeature(), _poly(), _groundElevations(), _polyInternalID(new_internal_id()),
       _groundElevation(-global::largnum), _minBbox() {}
 
 PolyFeature::PolyFeature(const int outputLayerID)
-    : TopoFeature(outputLayerID), _poly(), _groundElevations(), _polyInternalID(),
+    : TopoFeature(outputLayerID), _poly(), _groundElevations(), _polyInternalID(new_internal_id()),
       _groundElevation(-global::largnum), _minBbox() {}
 
-PolyFeature::PolyFeature(const int outputLayerID, const int internalID)
-        : TopoFeature(outputLayerID), _groundElevations(), _polyInternalID(internalID),
-          _groundElevation(-global::largnum), _minBbox() {}
-
 PolyFeature::PolyFeature(const nlohmann::json& poly, const bool checkSimplicity)
-        : TopoFeature(), _groundElevations(), _polyInternalID(),
+        : TopoFeature(), _groundElevations(), _polyInternalID(new_internal_id()),
       _groundElevation(-global::largnum), _minBbox() {
     this->parse_json_poly(poly, checkSimplicity);
 }
@@ -63,19 +59,8 @@ PolyFeature::PolyFeature(const nlohmann::json& poly, const bool checkSimplicity,
 PolyFeature::PolyFeature(const nlohmann::json& poly, const int outputLayerID)
         : PolyFeature(poly, false, outputLayerID) {}
 
-PolyFeature::PolyFeature(const nlohmann::json& poly, const bool checkSimplicity,
-                         const int outputLayerID, const int internalID)
-        : PolyFeature(poly, checkSimplicity) {
-    _polyInternalID = internalID;
-    _outputLayerID  = outputLayerID;
-    if (_outputLayerID  >= _numOfOutputLayers) _numOfOutputLayers = _outputLayerID + 1;
-}
-
-PolyFeature::PolyFeature(const nlohmann::json& poly, const int outputLayerID, const int internalID)
-        : PolyFeature(poly, false, outputLayerID, internalID) {}
-
 PolyFeature::PolyFeature(const Polygon_with_attr& poly, const bool checkSimplicity)
-        : TopoFeature(), _groundElevations(), _polyInternalID(),
+        : TopoFeature(), _groundElevations(), _polyInternalID(new_internal_id()),
           _groundElevation(-global::largnum), _minBbox() {
     bool isOuterRing = true;
     for (auto& ring : poly.polygon.rings()) {
@@ -122,18 +107,9 @@ PolyFeature::PolyFeature(const Polygon_with_attr& poly, const bool checkSimplici
 PolyFeature::PolyFeature(const Polygon_with_attr& poly, const int outputLayerID)
         : PolyFeature(poly, false, outputLayerID) {}
 
-PolyFeature::PolyFeature(const Polygon_with_attr& poly, const bool checkSimplicity,
-                         const int outputLayerID, const int internalID)
-        : PolyFeature(poly, checkSimplicity) {
-    _polyInternalID = internalID;
-    _outputLayerID  = outputLayerID;
-    if (_outputLayerID  >= _numOfOutputLayers) _numOfOutputLayers = _outputLayerID + 1;
-}
-
-PolyFeature::PolyFeature(const Polygon_with_attr& poly, const int outputLayerID, const int internalID)
-        : PolyFeature(poly, false, outputLayerID, internalID) {}
-
 PolyFeature::~PolyFeature() = default;
+
+int PolyFeature::_numOfPolyFeatures = 0;
 
 void PolyFeature::calc_footprint_elevation_nni(const DT& dt) {
     typedef std::vector<std::pair<DT::Point, double>> Point_coordinate_vector;
@@ -299,6 +275,10 @@ void PolyFeature::calc_min_bbox() {
 void PolyFeature::clear_feature() {
     _groundElevations.clear();
     _mesh.clear();
+}
+
+int PolyFeature::new_internal_id() {
+    return ++_numOfPolyFeatures;
 }
 
 Polygon_with_holes_2& PolyFeature::get_poly() {

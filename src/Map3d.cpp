@@ -106,9 +106,8 @@ void Map3d::set_features() {
 
     //-- Add features - order in _allFeaturesPtr defines the advantage in marking terrain polygons
     //- Buildings
-    int internalID = 0;
     for (auto& poly : _polygonsBuildings) {
-        auto building = std::make_shared<ReconstructedBuilding>(*poly, internalID++);
+        auto building = std::make_shared<ReconstructedBuilding>(*poly);
         _reconstructedBuildingsPtr.push_back(building);
         _buildingsPtr.push_back(building);
         _allFeaturesPtr.push_back(building);
@@ -119,10 +118,8 @@ void Map3d::set_features() {
         std::cout << "Importing CityJSON geometries" << std::endl;
 
         std::vector<std::shared_ptr<ImportedBuilding>> appendingBuildings;
-        internalID = 0;
         for (auto& importedBuilding: _importedBuildingsJSON) {
-            auto explicitCityJSONGeom = std::make_shared<ImportedBuilding>(importedBuilding, _importedBuildingsPts,
-                                                                           internalID++);
+            auto explicitCityJSONGeom = std::make_shared<ImportedBuilding>(importedBuilding, _importedBuildingsPts);
             if (!explicitCityJSONGeom->is_appending()) {
                 _importedBuildingsPtr.push_back(explicitCityJSONGeom);
                 _buildingsPtr.push_back(explicitCityJSONGeom);
@@ -134,7 +131,7 @@ void Map3d::set_features() {
         //- Check for building parts that do not have footprint and append to another instance of the same building
         for (auto& b: appendingBuildings) {
             for (auto& importedBuilding: _importedBuildingsPtr) {
-                if (b->get_parent_building_id() == importedBuilding->get_parent_building_id()) {
+                if (b->get_id() == importedBuilding->get_id()) {
                     importedBuilding->append_nonground_part(b);
                     break;
                 }
@@ -145,7 +142,7 @@ void Map3d::set_features() {
     } else if (!_importedBuildingsOther.empty()) {
         std::cout << "Importing geometries" << std::endl;
         for (auto& mesh : _importedBuildingsOther) {
-            auto explicitOBJGeom = std::make_shared<ImportedBuilding>(mesh, internalID++);
+            auto explicitOBJGeom = std::make_shared<ImportedBuilding>(mesh);
             _importedBuildingsPtr.push_back(explicitOBJGeom);
             _buildingsPtr.push_back(explicitOBJGeom);
             _allFeaturesPtr.push_back(explicitOBJGeom);
@@ -563,14 +560,14 @@ void Map3d::clear_inactives() {
         for (auto& importedBuilding: _importedBuildingsPtr) {
             if (!importedBuilding->is_active()) {
                 auto it = std::find(inactiveBuildingIdxs.begin(), inactiveBuildingIdxs.end(),
-                                    importedBuilding->get_parent_building_id());
+                                    importedBuilding->get_id());
                 if (it == inactiveBuildingIdxs.end())
-                    inactiveBuildingIdxs.push_back(importedBuilding->get_parent_building_id());
+                    inactiveBuildingIdxs.push_back(importedBuilding->get_id());
             }
         }
         for (unsigned long i = 0; i < _importedBuildingsPtr.size();) {
             auto it = std::find(inactiveBuildingIdxs.begin(), inactiveBuildingIdxs.end(),
-                                _importedBuildingsPtr[i]->get_parent_building_id());
+                                _importedBuildingsPtr[i]->get_id());
             if (it == inactiveBuildingIdxs.end()) ++i;
             else {
                 _importedBuildingsPtr[i]->deactivate();

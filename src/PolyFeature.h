@@ -34,17 +34,12 @@ class PolyFeature : public TopoFeature {
 public:
     PolyFeature();
     PolyFeature(const int outputLayerID);
-    PolyFeature(const int outputLayerID, const int internalID);
     PolyFeature(const nlohmann::json& poly, const bool checkSimplicity = false);
     PolyFeature(const nlohmann::json& poly, const bool checkSimplicity, const int outputLayerID);
-    PolyFeature(const nlohmann::json& poly, const bool checkSimplicity, const int outputLayerID, const int internalID);
     PolyFeature(const nlohmann::json& poly, const int outputLayerID);
-    PolyFeature(const nlohmann::json& poly, const int outputLayerID, const int internalID);
     PolyFeature(const Polygon_with_attr& poly, const bool checkSimplicity = false);
     PolyFeature(const Polygon_with_attr& poly, const bool checkSimplicity, const int outputLayerID);
-    PolyFeature(const Polygon_with_attr& poly, const bool checkSimplicity, const int outputLayerID, const int internalID);
     PolyFeature(const Polygon_with_attr& poly, const int outputLayerID);
-    PolyFeature(const Polygon_with_attr& poly, const int outputLayerID, const int internalID);
     virtual ~PolyFeature();
 
     void  calc_footprint_elevation_nni(const DT& dt);
@@ -74,12 +69,15 @@ public:
     MinBbox&                                 get_min_bbox();
 
 protected:
+    static int                        _numOfPolyFeatures;
+
     int                               _polyInternalID;
     Polygon_with_holes_2              _poly;
     std::vector<std::vector<double>>  _groundElevations;
     double                            _groundElevation;
     MinBbox                           _minBbox;
 
+    int  new_internal_id();
     void parse_json_poly(const nlohmann::json& poly, const bool checkSimplicity);
 };
 
