@@ -333,9 +333,7 @@ void Map3d::reconstruct_buildings() {
                   << ". If I cannot find a geometry with that LoD, I will reconstruct in the highest LoD available"
                   << std::endl;
     }
-    std::cout << "Total number of _buildingsPtr: " << _buildingsPtr.size() << std::endl;
     this->reconstruct_buildings(_buildingsPtr);
-    std::cout << "Total number of _buildingsPtr: " << _buildingsPtr.size() << std::endl;
     // Gather failed reconstructions
     int failed = 0;
     for (auto&  b : _buildingsPtr) if (b->has_failed_to_reconstruct()) ++failed;
@@ -375,13 +373,6 @@ void Map3d::reconstruct_buildings(BuildingsPtr& buildings) {
         }
     }
     this->clear_inactives();
-    /*
-    for (auto& b : newBuildingsToReconstruct) {
-        _reconstructedBuildingsPtr.push_back(std::static_pointer_cast<ReconstructedBuilding>(b));
-        _allFeaturesPtr.push_back(b);
-        _buildingsPtr.push_back(b);
-    }
-    */
     if (!newBuildingsToReconstruct.empty()) this->reconstruct_buildings(newBuildingsToReconstruct);
 }
 
