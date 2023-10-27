@@ -177,8 +177,8 @@ void PolyFeature::calc_footprint_elevation_linear(const DT& dt) {
 
 double PolyFeature::ground_elevation() {
     if (_groundElevation < -global::largnum + global::smallnum) {
-        if (_groundElevations.empty())throw std::runtime_error("Polygon elevations missing!"
-                                                           " Cannot calculate average");
+        if (_groundElevations.empty()) throw std::runtime_error("Polygon elevations missing!"
+                                                                " Cannot calculate average");
         // calculating base elevation as 95 percentile of outer ring
         _groundElevation = geomutils::percentile(_groundElevations.front(), 0.95);
     }
