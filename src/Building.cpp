@@ -275,6 +275,10 @@ double Building::sq_max_dim() {
     return *(std::max_element(dims.begin(), dims.end()));
 }
 
+PointSet3Ptr Building::get_points() const {
+    return _ptsPtr;
+}
+
 void Building::get_cityjson_info(nlohmann::json& b) const {
     b["type"] = "Building";
 //  b["attributes"];

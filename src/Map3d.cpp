@@ -333,10 +333,23 @@ void Map3d::reconstruct_buildings() {
                   << ". If I cannot find a geometry with that LoD, I will reconstruct in the highest LoD available"
                   << std::endl;
     }
+    std::cout << "Total number of _buildingsPtr: " << _buildingsPtr.size() << std::endl;
+    this->reconstruct_buildings(_buildingsPtr);
+    std::cout << "Total number of _buildingsPtr: " << _buildingsPtr.size() << std::endl;
+    // Gather failed reconstructions
     int failed = 0;
+    for (auto&  b : _buildingsPtr) if (b->has_failed_to_reconstruct()) ++failed;
+    std::cout << "    Number of successfully reconstructed buildings: " << _buildingsPtr.size() - failed << std::endl;
+    Config::get().logSummary << "Building reconstruction summary: successfully reconstructed buildings: "
+                             << _buildingsPtr.size() - failed << std::endl;
+    Config::get().logSummary << "                                 num of failed reconstructions: "
+                             << failed << std::endl;
+}
+
+void Map3d::reconstruct_buildings(BuildingsPtr& buildings) {
+    BuildingsPtr newBuildingsToReconstruct;
     #pragma omp parallel for
-    for (auto& f : _buildingsPtr) {
-        if (!f->is_active()) continue;
+    for (auto& f : buildings) {
         try {
             f->reconstruct();
             //-- In case of hybrid boolean/constraining reconstruction
@@ -345,20 +358,31 @@ void Map3d::reconstruct_buildings() {
                 f->reconstruct();
             }
         } catch (std::exception& e) {
-            #pragma omp atomic
-            ++failed;
+            if (f->is_imported()) {
+                // try to recover by reconstructing LoD1 from geometry pts
+                auto importToReconstructBuild =
+                        std::make_shared<ReconstructedBuilding>(std::static_pointer_cast<ImportedBuilding>(f));
+                _reconstructedBuildingsPtr.push_back(importToReconstructBuild);
+                _allFeaturesPtr.push_back(importToReconstructBuild);
+                _buildingsPtr.push_back(importToReconstructBuild);
+                newBuildingsToReconstruct.push_back(importToReconstructBuild);
+            } else {
+                // mark for geojson output
+                f->mark_as_failed();
+            }
             // add information to log file
             Config::write_to_log("Building ID: " + f->get_id() + " Failed to reconstruct. Reason: " + e.what());
-            // mark for geojson output
-            f->mark_as_failed();
         }
     }
     this->clear_inactives();
-    std::cout << "    Number of successfully reconstructed buildings: " << _buildingsPtr.size() << std::endl;
-    Config::get().logSummary << "Building reconstruction summary: successfully reconstructed buildings: "
-                             << _buildingsPtr.size() - failed << std::endl;
-    Config::get().logSummary << "                                 num of failed reconstructions: "
-                             << failed << std::endl;
+    /*
+    for (auto& b : newBuildingsToReconstruct) {
+        _reconstructedBuildingsPtr.push_back(std::static_pointer_cast<ReconstructedBuilding>(b));
+        _allFeaturesPtr.push_back(b);
+        _buildingsPtr.push_back(b);
+    }
+    */
+    if (!newBuildingsToReconstruct.empty()) this->reconstruct_buildings(newBuildingsToReconstruct);
 }
 
 void Map3d::reconstruct_boundaries() {

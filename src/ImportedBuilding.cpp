@@ -339,6 +339,14 @@ void ImportedBuilding::reconstruct() {
     PMP::polygon_soup_to_polygon_mesh(points, polygons, _mesh);
     PMP::triangulate_faces(_mesh);
 
+    if (this->get_height() < Config::get().minHeight) {
+        this->deactivate();
+        // Store points to ptsPtr so that it might be used for LoD1 reconstruction
+        for (auto& pt : _ptMap) _ptsPtr->insert(pt.second);
+        throw std::runtime_error("Importing failed. It could be that the height is lower than minimum, or the "
+                                 "mesh connectivity is broken. Trying to reconstruct LoD1 from building points");
+    }
+
     /*
     Mesh wrap;
     const double relative_alpha = 300.;

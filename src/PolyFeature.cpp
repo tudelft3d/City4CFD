@@ -309,6 +309,12 @@ const Polygon_with_holes_2& PolyFeature::get_poly() const {
     return _poly;
 }
 
+Polygon_with_attr PolyFeature::get_poly_w_attr() const {
+    Polygon_with_attr poly;
+    poly.polygon = _poly;
+    return poly;
+}
+
 const std::vector<std::vector<double>>& PolyFeature::get_ground_elevations() const {
     return _groundElevations;
 }

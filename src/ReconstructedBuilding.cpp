@@ -29,6 +29,7 @@
 
 #include "geomutils.h"
 #include "LoD12.h"
+#include "ImportedBuilding.h"
 
 ReconstructedBuilding::ReconstructedBuilding()
         : Building(), _attributeHeight(-global::largnum),
@@ -107,6 +108,14 @@ ReconstructedBuilding::ReconstructedBuilding(const Polygon_with_attr& poly, cons
         Config::write_to_log("Failed to import building polygon ID:" + _id
                              + ". Polygon is not simple.");
     }
+}
+
+ReconstructedBuilding::ReconstructedBuilding(const std::shared_ptr<ImportedBuilding>& importedBuilding)
+        : Building(importedBuilding->get_poly_w_attr(), importedBuilding->get_internal_id()),
+        _attributeHeight(-global::largnum), _attributeHeightAdvantage(Config::get().buildingHeightAttrAdv) {
+    _ptsPtr = importedBuilding->get_points();
+    _groundElevations = importedBuilding->get_ground_elevations();
+    _id = importedBuilding->get_id();
 }
 
 ReconstructedBuilding::~ReconstructedBuilding() = default;
