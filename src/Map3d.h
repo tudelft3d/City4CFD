@@ -80,7 +80,7 @@ private:
     void remove_extra_terrain_pts();
     void reconstruct_terrain();
     void reconstruct_buildings();
-    void reconstruct_buildings(BuildingsPtr& buildings);
+    void reconstruct_one_building(std::shared_ptr<Building>& building);
     void reconstruct_boundaries();
     void reconstruct_with_flat_terrain();
     void solve_building_conflicts();

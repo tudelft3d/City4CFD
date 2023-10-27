@@ -330,7 +330,9 @@ void Map3d::reconstruct_buildings() {
                   << ". If I cannot find a geometry with that LoD, I will reconstruct in the highest LoD available"
                   << std::endl;
     }
-    this->reconstruct_buildings(_buildingsPtr);
+    # pragma omp parallel for
+    for (auto& b : _buildingsPtr) this->reconstruct_one_building(b);
+    this->clear_inactives();
     // Gather failed reconstructions
     int failed = 0;
     for (auto&  b : _buildingsPtr) if (b->has_failed_to_reconstruct()) ++failed;
@@ -341,36 +343,33 @@ void Map3d::reconstruct_buildings() {
                              << failed << std::endl;
 }
 
-void Map3d::reconstruct_buildings(BuildingsPtr& buildings) {
-    BuildingsPtr newBuildingsToReconstruct;
-    #pragma omp parallel for
-    for (auto& f : buildings) {
-        try {
-            f->reconstruct();
-            //-- In case of hybrid boolean/constraining reconstruction
-            if (Config::get().clip && !Config::get().handleSelfIntersect && f->has_self_intersections()) {
-                f->set_clip_flag(false);
-                f->reconstruct();
-            }
-        } catch (std::exception& e) {
-            if (f->is_imported()) {
-                // try to recover by reconstructing LoD1 from geometry pts
-                auto importToReconstructBuild =
-                        std::make_shared<ReconstructedBuilding>(std::static_pointer_cast<ImportedBuilding>(f));
-                _reconstructedBuildingsPtr.push_back(importToReconstructBuild);
-                _allFeaturesPtr.push_back(importToReconstructBuild);
-                _buildingsPtr.push_back(importToReconstructBuild);
-                newBuildingsToReconstruct.push_back(importToReconstructBuild);
-            } else {
-                // mark for geojson output
-                f->mark_as_failed();
-            }
-            // add information to log file
-            Config::write_to_log("Building ID: " + f->get_id() + " Failed to reconstruct. Reason: " + e.what());
+void Map3d::reconstruct_one_building(std::shared_ptr<Building>& building) {
+    try {
+        building->reconstruct();
+        //-- In case of hybrid boolean/constraining reconstruction
+        if (Config::get().clip && !Config::get().handleSelfIntersect && building->has_self_intersections()) {
+            building->set_clip_flag(false);
+            building->reconstruct();
+        }
+    } catch (std::exception& e) {
+        // add information to log file
+        Config::write_to_log("Building ID: " + building->get_id() + " Failed to reconstruct. Reason: " + e.what());
+        // fallback for failed reconstruction of imported buildings
+        if (building->is_imported()) {
+            building->deactivate(); // deactivate this and use reconstructed instead
+            // try to recover by reconstructing LoD1.2 from geometry pts
+            auto importToReconstructBuild =
+                    std::make_shared<ReconstructedBuilding>(std::static_pointer_cast<ImportedBuilding>(building));
+            _reconstructedBuildingsPtr.push_back(importToReconstructBuild);
+            _allFeaturesPtr.push_back(importToReconstructBuild);
+            _buildingsPtr.push_back(importToReconstructBuild);
+            std::shared_ptr<Building> buildToReconstruct = importToReconstructBuild;
+            this->reconstruct_one_building(buildToReconstruct);
+        } else {
+            // mark for geojson output
+            building->mark_as_failed();
         }
     }
-    this->clear_inactives();
-    if (!newBuildingsToReconstruct.empty()) this->reconstruct_buildings(newBuildingsToReconstruct);
 }
 
 void Map3d::reconstruct_boundaries() {

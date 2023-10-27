@@ -341,7 +341,6 @@ void ImportedBuilding::reconstruct() {
     PMP::triangulate_faces(_mesh);
 
     if (this->get_height() < Config::get().minHeight) {
-        this->deactivate();
         // Store points to ptsPtr so that it might be used for LoD1 reconstruction
         for (auto& pt : _ptMap) _ptsPtr->insert(pt.second);
         throw std::runtime_error("Importing failed. It could be that the height is"
