@@ -22,7 +22,11 @@ set(CSF_HEADERS
 )
 
 add_library(CSF ${CSF_SOURCES} ${CSF_HEADERS})
-target_compile_options(CSF PRIVATE -Werror -Wall -Wextra -Wno-unused-private-field)
+if (!MSVC)
+    target_compile_options(CSF PRIVATE -Werror -Wall -Wextra -Wno-unused-private-field)
+else()
+    target_compile_options(CSF PRIVATE -Wall)
+endif()
 
 if (OpenMP_CXX_FOUND)
     target_link_libraries(CSF PUBLIC OpenMP::OpenMP_CXX)
