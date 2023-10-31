@@ -46,7 +46,7 @@
 
 #define USE_AS_DLL 1
 #include <lasreader_las.hpp>
-#undef USE_AS_DLL
+//#undef USE_AS_DLL
 
 #ifdef __GNUC__
 #  pragma GCC diagnostic pop
