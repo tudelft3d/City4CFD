@@ -6,11 +6,10 @@ add_definitions(-w)
 
 if (!MSVC)
 	add_compile_options(-O3 -Wall -Wno-strict-aliasing)
+    option(BUILD_SHARED_LIBS "Build LASlib as DLL" OFF)
 else()
-	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+    add_definitions(-DCOMPILE_AS_DLL -D_CRT_SECURE_NO_WARNINGS)
 endif()
-
-option(BUILD_SHARED_LIBS "Build LASlib as DLL" OFF)
 
 if (BUILD_SHARED_LIBS AND UNIX AND NOT APPLE)
 	set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib/LASlib")
