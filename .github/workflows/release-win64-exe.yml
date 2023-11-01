@@ -25,7 +25,7 @@ jobs:
         vcpkg install
         mkdir Release
         cd Release
-        cmake .. -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_INSTALLATION_ROOT\scripts\buildsystems\vcpkg.cmake" -DVCPKG_TARGET_TRIPLET=x64-windows-static -DCMAKE_INSTALL_PREFIX=C:\Software -DCMAKE_PREFIX_PATH=Release\vcpkg_installed\x64-windows\share\lastools
+        cmake .. -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_INSTALLATION_ROOT\scripts\buildsystems\vcpkg.cmake" -DVCPKG_TARGET_TRIPLET=x64-windows -DCMAKE_INSTALL_PREFIX=C:\Software -DCMAKE_PREFIX_PATH=Release\vcpkg_installed\x64-windows\share\lastools
         cmake --build . --parallel 4 --config Release
     - name: Package binary files
       run: |
