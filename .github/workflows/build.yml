@@ -48,6 +48,22 @@ jobs:
             mkdir build && cd build
             cmake .. && make -j4
 
+  build_win64:
+    runs-on: windows-latest
+    env:
+      VCPKG_DEFAULT_TRIPLET: x64-windows
+      VCPKG_INSTALLATION_ROOT: C:\vcpkg
+      VCPKG_FEATURE_FLAGS: manifests
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build
+      run: |
+        vcpkg install
+        mkdir Release
+        cd Release
+        cmake .. -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_INSTALLATION_ROOT\scripts\buildsystems\vcpkg.cmake" -DVCPKG_TARGET_TRIPLET=x64-windows -DCMAKE_INSTALL_PREFIX=C:\Software -DCMAKE_PREFIX_PATH=Release\vcpkg_installed\x64-windows\share\lastools
+        cmake --build . --parallel 4 --config Release
+
   build_docker:
     runs-on: ubuntu-latest
     steps:

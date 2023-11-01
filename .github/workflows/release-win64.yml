@@ -1,17 +1,16 @@
 # This is a basic workflow to help you get started with Actions
 
-name: windows build test
+name: Release Windows executable
 
 # Controls when the action will run. Triggers the workflow on push or pull request
 # events but only for the master branch
 on:
   push:
-    branches: [ master, development, win ]
+    branches: [ master, development, win64 ]
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  Windows-build:
-    name: Build Windows
+  release_win64:
     runs-on: windows-latest
     env:
       VCPKG_DEFAULT_TRIPLET: x64-windows
@@ -34,4 +33,4 @@ jobs:
       uses: actions/upload-artifact@master
       with:
         name: city4cfd-win64
-        path: Release/3dfier-win64.zip
+        path: Release/city4cfd-win64.zip
