@@ -14,30 +14,33 @@ on:
 jobs:
   release_win64:
     runs-on: windows-latest
-    env:
-      VCPKG_DEFAULT_TRIPLET: x64-windows
-      VCPKG_INSTALLATION_ROOT: C:\vcpkg
-      VCPKG_FEATURE_FLAGS: manifests
     steps:
-    - uses: actions/checkout@v3
-    - name: Build
-      run: |
-        vcpkg install
-        mkdir Release
-        cd Release
-        cmake .. -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_INSTALLATION_ROOT\scripts\buildsystems\vcpkg.cmake" -DVCPKG_TARGET_TRIPLET=x64-windows -DCMAKE_INSTALL_PREFIX=C:\Software -DCMAKE_PREFIX_PATH=Release\vcpkg_installed\x64-windows\share\lastools
-        cmake --build . --parallel 4 --config Release
-    - name: Package binary files
-      run: |
-        7z a city4cfd-win64.zip .\Release\*
-    - name: Upload binary files as artifact
-      uses: actions/upload-artifact@master
-      with:
-        name: city4cfd-win64
-        path: city4cfd-win64.zip
-    - name: Add binaries as an asset to the release
-      uses: softprops/action-gh-release@v1
-      with:
-        files: |
-          city4cfd-win64.zip
-
+      - uses: actions/checkout@v3
+      - name: vcpkg build
+        uses: johnwason/vcpkg-action@v5
+        id: vcpkg
+        with:
+          pkgs: |
+            boost-program-options boost-geometry boost-locale boost-chrono boost-system boost-filesystem
+            eigen3 cgal gdal
+          triplet: x64-windows-release
+          token: ${{ github.token }}
+      - name: Build
+        run: |
+          mkdir Release
+          cd Release
+          cmake .. ${{ steps.vcpkg.outputs.vcpkg-cmake-config }} 
+          cmake --build . --parallel 4 --config Release
+      - name: Package binary files
+        run: |
+          7z a city4cfd-win64.zip .\Release\*
+      - name: Upload binary files as artifact
+        uses: actions/upload-artifact@master
+        with:
+          name: city4cfd-win64
+          path: city4cfd-win64.zip
+      - name: Add binaries as an asset to the release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            city4cfd-win64.zip
