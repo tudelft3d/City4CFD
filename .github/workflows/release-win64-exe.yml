@@ -20,9 +20,7 @@ jobs:
         uses: johnwason/vcpkg-action@v5
         id: vcpkg
         with:
-          pkgs: |
-            boost-program-options boost-geometry boost-locale boost-chrono boost-system boost-filesystem
-            eigen3 cgal gdal
+          pkgs: boost-program-options boost-geometry boost-locale boost-chrono boost-system boost-filesystem eigen3 cgal gdal
           triplet: x64-windows-release
           token: ${{ github.token }}
           extra-args: --clean-after-build
@@ -34,12 +32,13 @@ jobs:
           cmake --build . --parallel 4 --config Release
       - name: Package binary files
         run: |
-          7z a city4cfd-win64.zip .\Release\*
+          cd Release
+          7z a city4cfd-win64.zip .\Release\* ..\tools\LASTools\Release\* ..\tools\prepare_point_cloud\Release\*
       - name: Upload binary files as artifact
         uses: actions/upload-artifact@master
         with:
           name: city4cfd-win64
-          path: city4cfd-win64.zip
+          path: Release/city4cfd-win64.zip
       - name: Add binaries as an asset to the release
         uses: softprops/action-gh-release@v1
         with:
