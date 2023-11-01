@@ -25,6 +25,7 @@ jobs:
             eigen3 cgal gdal
           triplet: x64-windows-release
           token: ${{ github.token }}
+          extra-args: --clean-after-build
       - name: Build
         run: |
           mkdir Release
