@@ -1,4 +1,4 @@
-name: CI
+name: build
 
 on:
   push:
@@ -66,12 +66,3 @@ jobs:
           cd Release
           cmake .. ${{ steps.vcpkg.outputs.vcpkg-cmake-config }} 
           cmake --build . --parallel 4 --config Release
-
-  build_docker:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Docker registry login
-        run: echo "${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
-      - name: Build the Docker image
-        run: docker build --build-arg JOBS=2 . --file docker/city4cfd.dockerfile --tag tudelft3d/city4cfd:latest
