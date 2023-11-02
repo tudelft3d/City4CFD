@@ -38,11 +38,11 @@
 #  pragma GCC diagnostic ignored "-Wstrict-aliasing"
 #endif
 
-#define USE_AS_DLL
+#define COMPILE_AS_DLL 1
 #include <lasdefinitions.hpp>
 #include <lasreader_las.hpp>
 #include <laswriter_las.hpp>
-#undef USE_AS_DLL
+#undef COMPILE_AS_DLL
 
 #ifdef __GNUC__
 #  pragma GCC diagnostic pop

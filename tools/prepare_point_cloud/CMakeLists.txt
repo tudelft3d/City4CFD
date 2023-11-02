@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.9)
 project(city4cfd_pcprep)
 
-set(CMAKE_CXX_FLAGS "-O3")
+set(CMAKE_CXX_FLAGS "-O2")
 set(CMAKE_BUILD_TYPE "Release")
 
 #if (COMMAND cmake_policy)
