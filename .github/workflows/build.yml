@@ -1,8 +1,8 @@
-name: CI
+name: build
 
 on:
   push:
-  pull_request:
+  pull_request:  
   workflow_dispatch:
   schedule:
     - cron:  '0 6 1 * *' # Run on the first day of every month at 06:00 UTC
@@ -48,11 +48,21 @@ jobs:
             mkdir build && cd build
             cmake .. && make -j4
 
-  build_docker:
-    runs-on: ubuntu-latest
+  build_win64:
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Docker registry login
-        run: echo "${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
-      - name: Build the Docker image
-        run: docker build --build-arg JOBS=2 . --file docker/city4cfd.dockerfile --tag tudelft3d/city4cfd:latest
+      - name: vcpkg build
+        uses: johnwason/vcpkg-action@v5
+        id: vcpkg
+        with:
+          pkgs: boost-program-options boost-geometry boost-locale boost-chrono boost-system boost-filesystem eigen3 cgal gdal
+          triplet: x64-windows-release
+          token: ${{ github.token }}
+          extra-args: --clean-after-build
+      - name: Build
+        run: |
+          mkdir Release
+          cd Release
+          cmake .. ${{ steps.vcpkg.outputs.vcpkg-cmake-config }} 
+          cmake --build . --parallel 4 --config Release

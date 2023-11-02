@@ -4,15 +4,29 @@ project(city4cfd)
 
 #set( CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS true )
 
-set(CMAKE_CXX_FLAGS "-O3")
+set(CMAKE_CXX_FLAGS "-O2")
 set(CMAKE_BUILD_TYPE "Release")
 
-#if (COMMAND cmake_policy)
-#    cmake_policy(SET CMP0003 NEW)
-#endif()
+if (COMMAND cmake_policy)
+    cmake_policy(SET CMP0003 NEW)
+endif()
+
+if (MSVC)
+    add_definitions(-DNOMINMAX)
+    add_definitions("/EHsc")
+endif (MSVC)
 
 # BOOST
 find_package(Boost 1.66 REQUIRED COMPONENTS filesystem locale)
+if (WIN32)
+    FIND_PACKAGE(Boost)
+    if (Boost_FOUND)
+        INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIR})
+        ADD_DEFINITIONS( "-DHAS_BOOST" )
+        set(Boost_USE_STATIC_LIBS   ON)
+        set(Boost_ARCHITECTURE "-x64")
+    endif()
+endif (WIN32)
 
 # CGAL
 find_package(CGAL REQUIRED QUIET COMPONENTS)

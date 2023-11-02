@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+### Added
+- Precompiled Windows executable
 ### Changed
 - Improved fallbacks in case building import fails in late stages
 ### Fixed

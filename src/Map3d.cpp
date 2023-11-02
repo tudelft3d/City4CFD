@@ -331,8 +331,10 @@ void Map3d::reconstruct_buildings() {
                   << std::endl;
     }
     # pragma omp parallel for
-    for (auto& b : _buildingsPtr) {
-       if (b->is_active()) this->reconstruct_one_building(b);
+    for (int i = 0; i < _buildingsPtr.size(); ++i) {
+    //for (auto& f : _buildingsPtr) { // MSVC doesn't like range loops with OMP
+        auto& b = _buildingsPtr[i];
+        if (b->is_active()) this->reconstruct_one_building(b);
     }
     this->clear_inactives(); // in case of imported-reconstructed fallback
     // Gather failed reconstructions
