@@ -243,8 +243,9 @@ void PointCloud::buffer_flat_edges(const PolyFeaturesPtr& avgFeatures,
     std::vector<double> offsets{0.001};
     std::vector<Polygon_3> polyList;
     #pragma omp parallel for
-    for (auto& f: avgFeatures) {
-        auto& poly = f->get_poly().outer_boundary();
+    for (int i = 0; i < avgFeatures.size(); ++i) {
+    //for (auto& f: avgFeatures) { // MSVC doesn't like range loop with OMP
+        auto& poly = avgFeatures[i]->get_poly().outer_boundary();
         // set the frame
         boost::optional<double> margin = CGAL::compute_outer_frame_margin(poly.begin(), poly.end(), offsets.back());
         CGAL::Bbox_2 bbox = CGAL::bbox_2(poly.begin(), poly.end());

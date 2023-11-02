@@ -348,7 +348,9 @@ void Map3d::reconstruct_buildings() {
     }
     int failed = 0;
     #pragma omp parallel for
-    for (auto& f : _buildingsPtr) {
+    for (int i = 0; i < _buildingsPtr.size(); ++i) {
+    //for (auto& f : _buildingsPtr) { // MSVC doesn't like range loops with OMP
+        auto& f = _buildingsPtr[i];
         if (!f->is_active()) continue;
         try {
             f->reconstruct();
