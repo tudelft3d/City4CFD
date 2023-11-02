@@ -32,13 +32,13 @@ jobs:
           cmake --build . --parallel 4 --config Release
       - name: Package binary files
         run: |
-          mkdir ReleaseArchive
-          xcopy Release\Release\* ReleaseArchive\
-          mkdir ReleaseArchive\tools\city4cfd_las2las
-          xcopy Release\tools\LASTools\Release\* ReleaseArchive\tools\city4cfd_las2las
-          mkdir ReleaseArchive\tools\prepare_point_cloud
-          xcopy Release\tools\prepare_point_cloud\Release\* ReleaseArchive\tools\prepare_point_cloud\
-          tar -zcvf city4cfd-win64.zip ReleaseArchive\*
+          mkdir city4cfd-win64
+          xcopy Release\Release\* city4cfd-win64\
+          mkdir city4cfd-win64\tools\city4cfd_las2las
+          xcopy Release\tools\LASTools\Release\* city4cfd-win64\tools\city4cfd_las2las
+          mkdir city4cfd-win64\tools\prepare_point_cloud
+          xcopy Release\tools\prepare_point_cloud\Release\* city4cfd-win64\tools\prepare_point_cloud\
+          tar -zcvf city4cfd-win64.zip city4cfd-win64\*
       - name: Upload binary files as artifact
         uses: actions/upload-artifact@master
         with:
