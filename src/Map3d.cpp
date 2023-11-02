@@ -360,11 +360,14 @@ void Map3d::reconstruct_one_building(std::shared_ptr<Building>& building) {
         if (building->is_imported()) {
             building->deactivate(); // deactivate this and use reconstructed instead
             // try to recover by reconstructing LoD1.2 from geometry pts
-            auto importToReconstructBuild =
-                    std::make_shared<ReconstructedBuilding>(std::static_pointer_cast<ImportedBuilding>(building));
-            _reconstructedBuildingsPtr.push_back(importToReconstructBuild);
-            _allFeaturesPtr.push_back(importToReconstructBuild);
-            _buildingsPtr.push_back(importToReconstructBuild);
+                auto importToReconstructBuild =
+                        std::make_shared<ReconstructedBuilding>(std::static_pointer_cast<ImportedBuilding>(building));
+            #pragma omp critical
+            {
+                _reconstructedBuildingsPtr.push_back(importToReconstructBuild);
+                _allFeaturesPtr.push_back(importToReconstructBuild);
+                _buildingsPtr.push_back(importToReconstructBuild);
+            }
             std::shared_ptr<Building> buildToReconstruct = importToReconstructBuild;
             this->reconstruct_one_building(buildToReconstruct);
         } else {

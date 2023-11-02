@@ -116,23 +116,33 @@ ImportedBuilding::ImportedBuilding(std::unique_ptr<nlohmann::json>& buildingJson
     //    int polyNo = 0;
     for (int& footprintIdx : _footprintIdxList) {
         //-- Construct footprint polygon from ground surface
-        nlohmann::json coordBnd = geometry["boundaries"].front()[footprintIdx].front();
-        CGAL::Polygon_2<EPECK> facePoly;
-        for (const int& ptIdx: coordBnd) {
-            facePoly.push_back(ePoint_2(_ptMap.at(ptIdx).x(), _ptMap.at(ptIdx).y()));
-            footprintElevations.push_back(_ptMap.at(ptIdx).z());
-            pointConnectivity[IO::gen_key_bucket(Point_2(_ptMap.at(ptIdx).x(), _ptMap.at(ptIdx).y()))] = ptIdx;
-        }
-        if (!facePoly.is_simple()) {
-            Config::write_to_log("Failed to import building: " + this->get_id()
-                                       + " Reason: Footprint polygon is not simple.");
-            this->deactivate();
-            return;
-        }
-        geomutils::pop_back_if_equal_to_front(facePoly);
-        if (facePoly.is_clockwise_oriented()) facePoly.reverse_orientation();
+        CGAL::Polygon_with_holes_2<EPECK> facePolyWH;
+        bool first = true;
+        for (auto& coordBnd : geometry["boundaries"].front()[footprintIdx]) {
+            CGAL::Polygon_2<EPECK> facePoly;
+            for (const int& ptIdx: coordBnd) {
+                facePoly.push_back(ePoint_2(_ptMap.at(ptIdx).x(), _ptMap.at(ptIdx).y()));
+                footprintElevations.push_back(_ptMap.at(ptIdx).z());
+                pointConnectivity[IO::gen_key_bucket(Point_2(_ptMap.at(ptIdx).x(), _ptMap.at(ptIdx).y()))] = ptIdx;
+            }
+            if (!facePoly.is_simple()) {
+                Config::write_to_log("Failed to import building: " + this->get_id()
+                                     + " Reason: Footprint polygon is not simple.");
+                this->deactivate();
+                return;
+            }
+            geomutils::pop_back_if_equal_to_front(facePoly);
 
-        polySet.join(facePoly);
+            if (first) {
+                if (facePoly.is_clockwise_oriented()) facePoly.reverse_orientation();
+                first = false;
+                facePolyWH.outer_boundary() = facePoly;
+            } else {
+                if (facePoly.is_counterclockwise_oriented()) facePoly.reverse_orientation();
+                facePolyWH.add_hole(facePoly);
+            }
+        }
+        polySet.join(facePolyWH);
     }
     //-- Polyset to polygon data structure
     this->polyset_to_polygon(polySet);

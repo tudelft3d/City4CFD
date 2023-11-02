@@ -41,7 +41,7 @@ PolyFeature::PolyFeature()
       _groundElevation(-global::largnum), _minBbox() {}
 
 PolyFeature::PolyFeature(const int outputLayerID)
-    : TopoFeature(outputLayerID), _poly(), _groundElevations(), _polyInternalID(new_internal_id()),
+        : TopoFeature(outputLayerID), _poly(), _groundElevations(), _polyInternalID(new_internal_id()),
       _groundElevation(-global::largnum), _minBbox() {}
 
 PolyFeature::PolyFeature(const nlohmann::json& poly, const bool checkSimplicity)
