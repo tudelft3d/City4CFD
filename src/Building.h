@@ -34,11 +34,8 @@
 class Building : public PolyFeature {
 public:
     Building();
-    Building(const int internalID);
     Building(const nlohmann::json& poly);
-    Building(const nlohmann::json& poly, const int internalID);
     Building(const Polygon_with_attr& poly);
-    Building(const Polygon_with_attr& poly, const int internalID);
     ~Building();
 
     static void alpha_wrap(const BuildingsPtr& buildings, Mesh& newMesh);
@@ -59,6 +56,7 @@ public:
     bool   has_self_intersections() const;
     void   set_to_zero_terrain();
     double sq_max_dim();
+    PointSet3Ptr get_points() const;
 
     virtual void        get_cityjson_info(nlohmann::json& b) const override;
     virtual void        get_cityjson_semantics(nlohmann::json& g) const override;

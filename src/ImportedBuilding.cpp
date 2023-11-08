@@ -40,14 +40,14 @@
 
 int ImportedBuilding::noBottom = 0;
 
-ImportedBuilding::ImportedBuilding(std::unique_ptr<nlohmann::json>& buildingJson, PointSet3Ptr& importedBuildingPts, const int internalID)
-        : Building(internalID), _buildingJson(std::move(buildingJson)),
-          _footprintIdxList(), _parentBuildingID(), _ptMap(),
-          _appendToBuilding(false), _lodIdx(-1), _footprintPtsIdxList(), _trueHeight(Config::get().importTrueHeight) {
+ImportedBuilding::ImportedBuilding(std::unique_ptr<nlohmann::json>& buildingJson, PointSet3Ptr& importedBuildingPts)
+        : Building(), _buildingJson(std::move(buildingJson)),
+          _footprintIdxList(), _ptMap(), _appendToBuilding(false),
+          _lodIdx(-1), _footprintPtsIdxList(), _trueHeight(Config::get().importTrueHeight) {
 
     _f_imported = true; // the flag is here to avoid shorten polygons later. todo to fix
-    //-- Get parent building ID
-    _parentBuildingID = (*_buildingJson)["parents"].front();
+    //-- ID is the partent building ID
+    _id = (*_buildingJson)["parents"].front();
 
     //-- Define LoD
     std::map<std::string, int> lodGeomLst;
@@ -116,23 +116,33 @@ ImportedBuilding::ImportedBuilding(std::unique_ptr<nlohmann::json>& buildingJson
     //    int polyNo = 0;
     for (int& footprintIdx : _footprintIdxList) {
         //-- Construct footprint polygon from ground surface
-        nlohmann::json coordBnd = geometry["boundaries"].front()[footprintIdx].front();
-        CGAL::Polygon_2<EPECK> facePoly;
-        for (const int& ptIdx: coordBnd) {
-            facePoly.push_back(ePoint_2(_ptMap.at(ptIdx).x(), _ptMap.at(ptIdx).y()));
-            footprintElevations.push_back(_ptMap.at(ptIdx).z());
-            pointConnectivity[IO::gen_key_bucket(Point_2(_ptMap.at(ptIdx).x(), _ptMap.at(ptIdx).y()))] = ptIdx;
-        }
-        if (!facePoly.is_simple()) {
-            Config::write_to_log("Failed to import building: " + this->get_parent_building_id()
-                                       + " Reason: Footprint polygon is not simple.");
-            this->deactivate();
-            return;
-        }
-        geomutils::pop_back_if_equal_to_front(facePoly);
-        if (facePoly.is_clockwise_oriented()) facePoly.reverse_orientation();
+        CGAL::Polygon_with_holes_2<EPECK> facePolyWH;
+        bool first = true;
+        for (auto& coordBnd : geometry["boundaries"].front()[footprintIdx]) {
+            CGAL::Polygon_2<EPECK> facePoly;
+            for (const int& ptIdx: coordBnd) {
+                facePoly.push_back(ePoint_2(_ptMap.at(ptIdx).x(), _ptMap.at(ptIdx).y()));
+                footprintElevations.push_back(_ptMap.at(ptIdx).z());
+                pointConnectivity[IO::gen_key_bucket(Point_2(_ptMap.at(ptIdx).x(), _ptMap.at(ptIdx).y()))] = ptIdx;
+            }
+            if (!facePoly.is_simple()) {
+                Config::write_to_log("Failed to import building: " + this->get_id()
+                                     + " Reason: Footprint polygon is not simple.");
+                this->deactivate();
+                return;
+            }
+            geomutils::pop_back_if_equal_to_front(facePoly);
 
-        polySet.join(facePoly);
+            if (first) {
+                if (facePoly.is_clockwise_oriented()) facePoly.reverse_orientation();
+                first = false;
+                facePolyWH.outer_boundary() = facePoly;
+            } else {
+                if (facePoly.is_counterclockwise_oriented()) facePoly.reverse_orientation();
+                facePolyWH.add_hole(facePoly);
+            }
+        }
+        polySet.join(facePolyWH);
     }
     //-- Polyset to polygon data structure
     this->polyset_to_polygon(polySet);
@@ -141,12 +151,13 @@ ImportedBuilding::ImportedBuilding(std::unique_ptr<nlohmann::json>& buildingJson
     this->set_footprint_mesh_connectivity(pointConnectivity);
 }
 
-ImportedBuilding::ImportedBuilding(Mesh& mesh, const int internalID)
-    : Building(internalID), _buildingJson(std::make_unique<nlohmann::json>()),
-      _footprintIdxList(), _parentBuildingID(), _appendToBuilding(false), _ptMap(),
+ImportedBuilding::ImportedBuilding(Mesh& mesh)
+    : Building(), _buildingJson(std::make_unique<nlohmann::json>()),
+      _footprintIdxList(), _appendToBuilding(false), _ptMap(),
       _lodIdx(-1), _footprintPtsIdxList(), _trueHeight(Config::get().importTrueHeight) {
 
     _f_imported = true; // the flag is here to avoid shorten polygons later. todo to fix
+    _id = std::to_string(_polyInternalID);
     //-- Get the polygon from the building bottom
     // group faces pointing down
     CGAL::Vector_3<EPICK> downVector(0, 0, -1);
@@ -339,6 +350,14 @@ void ImportedBuilding::reconstruct() {
     PMP::polygon_soup_to_polygon_mesh(points, polygons, _mesh);
     PMP::triangulate_faces(_mesh);
 
+    if (this->get_height() < Config::get().minHeight) {
+        // Store points to ptsPtr so that it might be used for LoD1 reconstruction
+        for (auto& pt : _ptMap) _ptsPtr->insert(pt.second);
+        throw std::runtime_error("Importing failed. It could be that the height is"
+                                 "\n             lower than minimum, or the mesh connectivity is broken."
+                                 "\n             Trying to reconstruct LoD1.2 from building points");
+    }
+
     /*
     Mesh wrap;
     const double relative_alpha = 300.;
@@ -409,10 +428,6 @@ const nlohmann::json& ImportedBuilding::get_building_json() const {
     return *_buildingJson;
 }
 
-const std::string& ImportedBuilding::get_parent_building_id() const {
-    return _parentBuildingID;
-}
-
 const int ImportedBuilding::get_lod_idx() const {
     return _lodIdx;
 }
@@ -423,7 +438,7 @@ const bool ImportedBuilding::is_appending() const {
 
 void ImportedBuilding::check_simplicity(Polygon_2& ring) {
     if (!ring.is_simple()) {
-        Config::write_to_log("Failed to import building: " + this->get_parent_building_id()
+        Config::write_to_log("Failed to import building: " + this->get_id()
                              + " Reason: Footprint polygon is not simple.");
         this->deactivate();
         return;

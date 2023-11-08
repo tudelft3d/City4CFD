@@ -106,9 +106,8 @@ void Map3d::set_features() {
 
     //-- Add features - order in _allFeaturesPtr defines the advantage in marking terrain polygons
     //- Buildings
-    int internalID = 0;
     for (auto& poly : _polygonsBuildings) {
-        auto building = std::make_shared<ReconstructedBuilding>(*poly, internalID++);
+        auto building = std::make_shared<ReconstructedBuilding>(*poly);
         _reconstructedBuildingsPtr.push_back(building);
         _buildingsPtr.push_back(building);
         _allFeaturesPtr.push_back(building);
@@ -119,10 +118,8 @@ void Map3d::set_features() {
         std::cout << "Importing CityJSON geometries" << std::endl;
 
         std::vector<std::shared_ptr<ImportedBuilding>> appendingBuildings;
-        internalID = 0;
         for (auto& importedBuilding: _importedBuildingsJSON) {
-            auto explicitCityJSONGeom = std::make_shared<ImportedBuilding>(importedBuilding, _importedBuildingsPts,
-                                                                           internalID++);
+            auto explicitCityJSONGeom = std::make_shared<ImportedBuilding>(importedBuilding, _importedBuildingsPts);
             if (!explicitCityJSONGeom->is_appending()) {
                 _importedBuildingsPtr.push_back(explicitCityJSONGeom);
                 _buildingsPtr.push_back(explicitCityJSONGeom);
@@ -134,7 +131,7 @@ void Map3d::set_features() {
         //- Check for building parts that do not have footprint and append to another instance of the same building
         for (auto& b: appendingBuildings) {
             for (auto& importedBuilding: _importedBuildingsPtr) {
-                if (b->get_parent_building_id() == importedBuilding->get_parent_building_id()) {
+                if (b->get_id() == importedBuilding->get_id()) {
                     importedBuilding->append_nonground_part(b);
                     break;
                 }
@@ -145,7 +142,7 @@ void Map3d::set_features() {
     } else if (!_importedBuildingsOther.empty()) {
         std::cout << "Importing geometries" << std::endl;
         for (auto& mesh : _importedBuildingsOther) {
-            auto explicitOBJGeom = std::make_shared<ImportedBuilding>(mesh, internalID++);
+            auto explicitOBJGeom = std::make_shared<ImportedBuilding>(mesh);
             _importedBuildingsPtr.push_back(explicitOBJGeom);
             _buildingsPtr.push_back(explicitOBJGeom);
             _allFeaturesPtr.push_back(explicitOBJGeom);
@@ -333,34 +330,53 @@ void Map3d::reconstruct_buildings() {
                   << ". If I cannot find a geometry with that LoD, I will reconstruct in the highest LoD available"
                   << std::endl;
     }
-    int failed = 0;
-    #pragma omp parallel for
+    # pragma omp parallel for
     for (int i = 0; i < _buildingsPtr.size(); ++i) {
     //for (auto& f : _buildingsPtr) { // MSVC doesn't like range loops with OMP
-        auto& f = _buildingsPtr[i];
-        if (!f->is_active()) continue;
-        try {
-            f->reconstruct();
-            //-- In case of hybrid boolean/constraining reconstruction
-            if (Config::get().clip && !Config::get().handleSelfIntersect && f->has_self_intersections()) {
-                f->set_clip_flag(false);
-                f->reconstruct();
-            }
-        } catch (std::exception& e) {
-            #pragma omp atomic
-            ++failed;
-            // add information to log file
-            Config::write_to_log("Building ID: " + f->get_id() + " Failed to reconstruct. Reason: " + e.what());
-            // mark for geojson output
-            f->mark_as_failed();
-        }
+        auto& b = _buildingsPtr[i];
+        if (b->is_active()) this->reconstruct_one_building(b);
     }
-    this->clear_inactives();
-    std::cout << "    Number of successfully reconstructed buildings: " << _buildingsPtr.size() << std::endl;
+    this->clear_inactives(); // in case of imported-reconstructed fallback
+    // Gather failed reconstructions
+    int failed = 0;
+    for (auto&  b : _buildingsPtr) if (b->has_failed_to_reconstruct()) ++failed;
+    std::cout << "    Number of successfully reconstructed buildings: " << _buildingsPtr.size() - failed << std::endl;
     Config::get().logSummary << "Building reconstruction summary: successfully reconstructed buildings: "
                              << _buildingsPtr.size() - failed << std::endl;
     Config::get().logSummary << "                                 num of failed reconstructions: "
                              << failed << std::endl;
+}
+
+void Map3d::reconstruct_one_building(std::shared_ptr<Building>& building) {
+    try {
+        building->reconstruct();
+        //-- In case of hybrid boolean/constraining reconstruction
+        if (Config::get().clip && !Config::get().handleSelfIntersect && building->has_self_intersections()) {
+            building->set_clip_flag(false);
+            building->reconstruct();
+        }
+    } catch (std::exception& e) {
+        // add information to log file
+        Config::write_to_log("Building ID: " + building->get_id() + " Failed to reconstruct. Reason: " + e.what());
+        // fallback for failed reconstruction of imported buildings
+        if (building->is_imported()) {
+            building->deactivate(); // deactivate this and use reconstructed instead
+            // try to recover by reconstructing LoD1.2 from geometry pts
+                auto importToReconstructBuild =
+                        std::make_shared<ReconstructedBuilding>(std::static_pointer_cast<ImportedBuilding>(building));
+            #pragma omp critical
+            {
+                _reconstructedBuildingsPtr.push_back(importToReconstructBuild);
+                _allFeaturesPtr.push_back(importToReconstructBuild);
+                _buildingsPtr.push_back(importToReconstructBuild);
+            }
+            std::shared_ptr<Building> buildToReconstruct = importToReconstructBuild;
+            this->reconstruct_one_building(buildToReconstruct);
+        } else {
+            // mark for geojson output
+            building->mark_as_failed();
+        }
+    }
 }
 
 void Map3d::reconstruct_boundaries() {
@@ -550,14 +566,14 @@ void Map3d::clear_inactives() {
         for (auto& importedBuilding: _importedBuildingsPtr) {
             if (!importedBuilding->is_active()) {
                 auto it = std::find(inactiveBuildingIdxs.begin(), inactiveBuildingIdxs.end(),
-                                    importedBuilding->get_parent_building_id());
+                                    importedBuilding->get_id());
                 if (it == inactiveBuildingIdxs.end())
-                    inactiveBuildingIdxs.push_back(importedBuilding->get_parent_building_id());
+                    inactiveBuildingIdxs.push_back(importedBuilding->get_id());
             }
         }
         for (unsigned long i = 0; i < _importedBuildingsPtr.size();) {
             auto it = std::find(inactiveBuildingIdxs.begin(), inactiveBuildingIdxs.end(),
-                                _importedBuildingsPtr[i]->get_parent_building_id());
+                                _importedBuildingsPtr[i]->get_id());
             if (it == inactiveBuildingIdxs.end()) ++i;
             else {
                 _importedBuildingsPtr[i]->deactivate();
