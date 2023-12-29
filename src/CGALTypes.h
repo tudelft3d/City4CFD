@@ -62,6 +62,13 @@ typedef CGAL::Polygon_2<eProjection_traits> Polygon_3;
 
 //- CGAL's Polygon_with_holes container expanded
 struct Polygon_with_holes_2 {
+    Polygon_with_holes_2() = default;
+
+    Polygon_with_holes_2(const CGAL::Polygon_with_holes_2<EPICK>& cgalPoly) {
+        _rings.push_back(cgalPoly.outer_boundary());
+        for (auto& hole : cgalPoly.holes()) _rings.push_back(hole);
+    }
+
     std::vector<Polygon_2> _rings;
 
     std::vector<Polygon_2>& rings() {return _rings;}
@@ -92,12 +99,20 @@ struct Polygon_with_holes_2 {
        }
        return cgalPoly;
     }
+
+    const CGAL::Polygon_2<EPECK> get_exact_outer_boundary() const {
+        Converter<EPICK, EPECK> to_exact;
+        CGAL::Polygon_2<EPECK> cgalOuterPoly;
+        for (auto& pt : _rings.front()) {
+            cgalOuterPoly.push_back(to_exact(pt));
+        }
+        return cgalOuterPoly;
+    }
+
     const CGAL::Polygon_with_holes_2<EPECK> get_exact() const {
         Converter<EPICK, EPECK> to_exact;
         CGAL::Polygon_with_holes_2<EPECK> cgalPoly;
-        for (auto& pt : _rings.front()) {
-            cgalPoly.outer_boundary().push_back(to_exact(pt));
-        }
+        cgalPoly.outer_boundary() = get_exact_outer_boundary();
         for (auto hole = holes_begin(); hole != holes_end(); ++hole) {
             CGAL::Polygon_2<EPECK> holePoly;
             for (auto& pt : *hole) {

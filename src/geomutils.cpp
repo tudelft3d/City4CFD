@@ -234,6 +234,27 @@ bool geomutils::polygons_in_contact(const Polygon_with_holes_2& firstPoly, const
     return false;
 }
 
+Polygon_with_holes_2 geomutils::exact_poly_to_poly(const CGAL::Polygon_with_holes_2<EPECK>& exactPoly) {
+    Converter<EPECK, EPICK> to_inexact;
+    Polygon_with_holes_2 convertedPoly;
+    Polygon_2 transferKernelPoly;
+    for (auto& outerPt : exactPoly.outer_boundary()) {
+        Point_2 polyPt = to_inexact(outerPt);
+        transferKernelPoly.push_back(polyPt);
+    }
+    convertedPoly.rings().push_back(transferKernelPoly);
+
+    for (auto& hole : exactPoly.holes()) {
+        transferKernelPoly.clear();
+        for (auto& pt : hole) {
+            Point_2 polyPt = to_inexact(pt);
+            transferKernelPoly.push_back(polyPt);
+        }
+        convertedPoly.rings().push_back(transferKernelPoly);
+    }
+    return convertedPoly;
+}
+
 //-- Templated functions
 //-- Check if the point is inside a polygon on a 2D projection
 template <typename T>

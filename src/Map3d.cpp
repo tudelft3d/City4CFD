@@ -313,8 +313,21 @@ void Map3d::reconstruct_terrain() {
     if (_terrainPtr->get_cdt().number_of_vertices() == 0) {
         std::cout << "\nReconstructing terrain" << std::endl;
         _terrainPtr->prep_constraints(_allFeaturesPtr, _pointCloud.get_terrain());
-        if (!Config::get().flattenSurfaces.empty())
-            _pointCloud.flatten_polygon_pts(_allFeaturesPtr, _terrainPtr->get_extra_constrained_edges());
+        // Handle flattening
+        if (!Config::get().flattenSurfaces.empty()) {
+            std::vector<std::pair<Polygon_with_holes_2, int>> additionalPolys;
+            _pointCloud.flatten_polygon_pts(_allFeaturesPtr, _terrainPtr->get_extra_constrained_edges(), additionalPolys);
+            if (!additionalPolys.empty()) {
+                for (auto& polyToAdd : additionalPolys) {
+                    Polygon_with_attr newPolyToAdd;
+                    newPolyToAdd.polygon = polyToAdd.first;
+                    auto surfacePoly
+                            = std::make_shared<SurfaceLayer>(newPolyToAdd, polyToAdd.second);
+                    _surfaceLayersPtr.push_back(surfacePoly);
+                    _allFeaturesPtr.push_back(surfacePoly);
+                }
+            }
+        }
         _terrainPtr->set_cdt(_pointCloud.get_terrain());
         _terrainPtr->constrain_features();
     }
@@ -431,8 +444,20 @@ void Map3d::clip_buildings() {
     //-- Prepare terrain with subset
     std::cout << "\nReconstructing terrain" << std::endl;
     _terrainPtr->prep_constraints(_allFeaturesPtr, _pointCloud.get_terrain());
-    if (!Config::get().flattenSurfaces.empty())
-        _pointCloud.flatten_polygon_pts(_allFeaturesPtr, _terrainPtr->get_extra_constrained_edges());
+    // Handle flattening
+    if (!Config::get().flattenSurfaces.empty()) {
+        std::vector<std::pair<Polygon_with_holes_2, int>> additionalPolys;
+        _pointCloud.flatten_polygon_pts(_allFeaturesPtr, _terrainPtr->get_extra_constrained_edges(), additionalPolys);
+        if (!additionalPolys.empty()) {
+            for (auto& polyToAdd : additionalPolys) {
+                Polygon_with_attr newPolyToAdd;
+                newPolyToAdd.polygon = polyToAdd.first;
+                auto surfacePoly = std::make_shared<SurfaceLayer>(newPolyToAdd, polyToAdd.second);
+                _surfaceLayersPtr.push_back(surfacePoly);
+                _allFeaturesPtr.push_back(surfacePoly);
+            }
+        }
+    }
     _terrainPtr->set_cdt(_pointCloud.get_terrain());
     _terrainPtr->constrain_features();
     _terrainPtr->prepare_subset();
