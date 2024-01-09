@@ -75,7 +75,7 @@ PolyFeature::PolyFeature(const Polygon_with_attr& poly, const bool checkSimplici
     bool isOuterRing = true;
     for (auto& ring : poly.polygon.rings()) {
         Polygon_2 tempPoly;
-        const double minDist = 0.0001;
+        const double minDist = 0.0001; // hardcoded
         Point_2 prev(global::largnum, global::largnum);
         for (auto& pt: ring.vertices()) {
             if (CGAL::squared_distance(pt, prev) > minDist) {
@@ -84,6 +84,11 @@ PolyFeature::PolyFeature(const Polygon_with_attr& poly, const bool checkSimplici
             }
         }
         geomutils::pop_back_if_equal_to_front(tempPoly);
+        if (tempPoly.size() < 3) { // Sanity check if it is even a polygon
+            std::cout << "WARNING: Skipping import of a zero-area polygon" << std::endl;
+            this->deactivate();
+            return;
+        }
         if (isOuterRing) {
             if (tempPoly.is_clockwise_oriented()) tempPoly.reverse_orientation();
             isOuterRing = false;
