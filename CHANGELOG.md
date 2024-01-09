@@ -5,6 +5,7 @@
 - Precompiled Windows executable
 ### Changed
 - Improved fallbacks in case building import fails in late stages
+- Improved polygon flattening when buildings are adjacent
 ### Fixed
 - Minor bugfixes
 

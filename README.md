@@ -1,9 +1,9 @@
-[![docs](https://img.shields.io/badge/docs-Wiki-brightgreen?style=flat-square)](https://github.com/tudelft3d/City4CFD/wiki)
+# City4CFD
+
+[![build](https://img.shields.io/github/actions/workflow/status/tudelft3d/City4CFD/build.yml?branch=main&style=flat-square)](https://github.com/tudelft3d/City4CFD/actions/workflows/build.yml)
+[![docs](https://img.shields.io/badge/docs-Wiki-yellow?style=flat-square)](https://github.com/tudelft3d/City4CFD/wiki)
 [![GitHub license](https://img.shields.io/github/license/tudelft3d/City4CFD?style=flat-square)](https://github.com/tudelft3d/City4CFD/blob/master/LICENSE)
 [![DOI:10.3389/fbuil.2022.899332](http://img.shields.io/badge/DOI-10.3389/fbuil.2022.899332-B62030.svg?style=flat-square)](https://doi.org/10.3389/fbuil.2022.899332)
-
-
-# City4CFD
 
 ![welcome_figure](https://github.com/tudelft3d/City4CFD/blob/main/docs/images/workflow.png)
 
