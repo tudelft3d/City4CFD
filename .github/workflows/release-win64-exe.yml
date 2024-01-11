@@ -39,15 +39,14 @@ jobs:
           mkdir city4cfd-win64\tools\prepare_point_cloud
           xcopy Release\tools\prepare_point_cloud\Release\* city4cfd-win64\tools\prepare_point_cloud\
           xcopy vcpkg\installed\x64-windows-release\share\proj\proj.db city4cfd-win64\
-          tar -zcvf city4cfd-win64.zip city4cfd-win64\*
       - name: Upload binary files as artifact
         uses: actions/upload-artifact@master
         with:
           name: city4cfd-win64
-          path: city4cfd-win64.zip
+          path: city4cfd-win64
       - name: Add binaries as an asset to the release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
-            city4cfd-win64.zip
+            city4cfd-win64
