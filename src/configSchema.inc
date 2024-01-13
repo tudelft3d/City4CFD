@@ -1,7 +1,7 @@
 /*
   City4CFD
  
-  Copyright (c) 2021-2023, 3D Geoinformation Research Group, TU Delft
+  Copyright (c) 2021-2024, 3D Geoinformation Research Group, TU Delft
 
   This file is part of City4CFD.
 
@@ -406,7 +406,7 @@ namespace jsonschema {
       ],
         "required": [ "point_of_interest", "influence_region", "domain_bnd",
                       "building_percentile", "edge_max_len", "output_file_name", "output_format",
-                      "output_separately" ]
+                      "output_separately", "lod"]
     }
         )"_json;
 }

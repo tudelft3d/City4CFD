@@ -1,7 +1,7 @@
 /*
   City4CFD
  
-  Copyright (c) 2021-2023, 3D Geoinformation Research Group, TU Delft
+  Copyright (c) 2021-2024, 3D Geoinformation Research Group, TU Delft
 
   This file is part of City4CFD.
 
@@ -34,17 +34,12 @@ class PolyFeature : public TopoFeature {
 public:
     PolyFeature();
     PolyFeature(const int outputLayerID);
-    PolyFeature(const int outputLayerID, const int internalID);
     PolyFeature(const nlohmann::json& poly, const bool checkSimplicity = false);
     PolyFeature(const nlohmann::json& poly, const bool checkSimplicity, const int outputLayerID);
-    PolyFeature(const nlohmann::json& poly, const bool checkSimplicity, const int outputLayerID, const int internalID);
     PolyFeature(const nlohmann::json& poly, const int outputLayerID);
-    PolyFeature(const nlohmann::json& poly, const int outputLayerID, const int internalID);
     PolyFeature(const Polygon_with_attr& poly, const bool checkSimplicity = false);
     PolyFeature(const Polygon_with_attr& poly, const bool checkSimplicity, const int outputLayerID);
-    PolyFeature(const Polygon_with_attr& poly, const bool checkSimplicity, const int outputLayerID, const int internalID);
     PolyFeature(const Polygon_with_attr& poly, const int outputLayerID);
-    PolyFeature(const Polygon_with_attr& poly, const int outputLayerID, const int internalID);
     virtual ~PolyFeature();
 
     void  calc_footprint_elevation_nni(const DT& dt);
@@ -54,8 +49,10 @@ public:
     double ground_elevation();
 //    double slope_height();
     bool   flatten_polygon_inner_points(const Point_set_3& pointCloud, std::map<int, Point_3>& flattenedPts,
-                                       const SearchTree& searchTree, const std::unordered_map<Point_3,
-                                       int>& pointCloudConnectivity) const;
+                                        const SearchTree& searchTree, const std::unordered_map<Point_3, int>& pointCloudConnectivity,
+                                        std::vector<EPECK::Segment_3>& constrainedEdges,
+                                        std::vector<std::pair<Polygon_with_holes_2, int>>& newPolys,
+                                        bool& isNextToBuilding);
     void  set_zero_borders();
     void  calc_min_bbox();
     void  clear_feature();
@@ -68,17 +65,21 @@ public:
 
     Polygon_with_holes_2&                    get_poly();
     const Polygon_with_holes_2&              get_poly() const;
+    Polygon_with_attr                        get_poly_w_attr() const;
     const std::vector<std::vector<double>>&  get_ground_elevations() const;
     const int                                get_internal_id() const;
     MinBbox&                                 get_min_bbox();
 
 protected:
+    static int                        _numOfPolyFeatures;
+
     int                               _polyInternalID;
     Polygon_with_holes_2              _poly;
     std::vector<std::vector<double>>  _groundElevations;
     double                            _groundElevation;
     MinBbox                           _minBbox;
 
+    int  new_internal_id();
     void parse_json_poly(const nlohmann::json& poly, const bool checkSimplicity);
 };
 

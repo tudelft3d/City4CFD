@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.4] - 2024-01-13
+### Changed
+- Improved fallbacks in case building import fails in late stages
+- Improved polygon flattening when buildings are adjacent
+### Fixed
+- Minor bugfixes
+
 ## [0.4.3] - 2023-08-25
 ### Fixed
 - Issue with GDAL on Ubuntu 20.04

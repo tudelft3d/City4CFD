@@ -1,0 +1,54 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Release Windows Executable
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+# events but only for the master branch
+on:
+  release:
+    types: [created]
+  pull_request:    
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  release_win64:
+    if: false
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: vcpkg build
+        uses: johnwason/vcpkg-action@v5
+        id: vcpkg
+        with:
+          pkgs: boost-program-options boost-geometry boost-locale boost-chrono boost-system boost-filesystem eigen3 cgal gdal
+          triplet: x64-windows-release
+          token: ${{ github.token }}
+          extra-args: --clean-after-build
+      - name: Build
+        run: |
+          mkdir Release
+          cd Release
+          cmake .. ${{ steps.vcpkg.outputs.vcpkg-cmake-config }} 
+          cmake --build . --parallel 4 --config Release
+      - name: Package binary files
+        run: |
+          mkdir city4cfd-win64
+          xcopy Release\Release\* city4cfd-win64\
+          mkdir city4cfd-win64\tools\city4cfd_las2las
+          xcopy Release\tools\LASTools\Release\* city4cfd-win64\tools\city4cfd_las2las
+          mkdir city4cfd-win64\tools\prepare_point_cloud
+          xcopy Release\tools\prepare_point_cloud\Release\* city4cfd-win64\tools\prepare_point_cloud\
+          xcopy vcpkg\installed\x64-windows-release\share\proj\proj.db city4cfd-win64\
+          tar -zcvf city4cfd-win64.zip city4cfd-win64\*
+      - name: Upload binary files as artifact
+        uses: actions/upload-artifact@master
+        with:
+          name: city4cfd-win64
+          path: city4cfd-win64.zip
+      - name: Add binaries as an asset to the release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            city4cfd-win64.zip

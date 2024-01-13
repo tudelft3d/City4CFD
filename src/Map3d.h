@@ -1,7 +1,7 @@
 /*
   City4CFD
  
-  Copyright (c) 2021-2023, 3D Geoinformation Research Group, TU Delft
+  Copyright (c) 2021-2024, 3D Geoinformation Research Group, TU Delft
 
   This file is part of City4CFD.
 
@@ -80,6 +80,7 @@ private:
     void remove_extra_terrain_pts();
     void reconstruct_terrain();
     void reconstruct_buildings();
+    void reconstruct_one_building(std::shared_ptr<Building>& building);
     void reconstruct_boundaries();
     void reconstruct_with_flat_terrain();
     void solve_building_conflicts();

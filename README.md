@@ -1,13 +1,13 @@
-[![docs](https://img.shields.io/badge/docs-Wiki-brightgreen?style=flat-square)](https://github.com/tudelft3d/City4CFD/wiki)
+# City4CFD
+
+[![build](https://img.shields.io/github/actions/workflow/status/tudelft3d/City4CFD/build.yml?branch=main&style=flat-square)](https://github.com/tudelft3d/City4CFD/actions/workflows/build.yml)
+[![docs](https://img.shields.io/badge/docs-Wiki-yellow?style=flat-square)](https://github.com/tudelft3d/City4CFD/wiki)
 [![GitHub license](https://img.shields.io/github/license/tudelft3d/City4CFD?style=flat-square)](https://github.com/tudelft3d/City4CFD/blob/master/LICENSE)
 [![DOI:10.3389/fbuil.2022.899332](http://img.shields.io/badge/DOI-10.3389/fbuil.2022.899332-B62030.svg?style=flat-square)](https://doi.org/10.3389/fbuil.2022.899332)
 
-
-# City4CFD
-
 ![welcome_figure](https://github.com/tudelft3d/City4CFD/blob/main/docs/images/workflow.png)
 
-City4CFD--*City for CFD*--is a tool that aims to automatically reconstruct 3D city geometries tailored for microscale urban flow simulations.
+City4CFD--*City for CFD*--is a cross-platform tool that aims to automatically reconstruct 3D city geometries tailored for microscale urban flow simulations.
 
 It can create automatically a terrain from a point cloud and imprint different surfaces (e.g. green areas, water, roads).
 
@@ -34,7 +34,7 @@ City4CFD is developed by the [3D Geoinformation Research Group](https://3d.bk.tu
 **Output** is in the following formats: OBJ, STL, and CityJSON. The ID of each polygon is preserved, and there is a 1-to-1 mapping between the input and the output.
 
 ## Installation
-You can directly compile City4CFD on your system using cmake, run it through a Docker container, or install using Homebrew in the case of macOS.
+You can directly compile City4CFD on your system using cmake, run it through a Docker container, install using Homebrew in the case of macOS, or use a precompiled binary on Windows.
 
 ### Build from source
 The following libraries are required to build the project:
@@ -76,6 +76,9 @@ Mac users can install City4CFD through Homebrew:
 ```
 brew install tudelft3d/software/city4cfd
 ```
+
+### Windows
+Windows users can use a precompiled binary in [Releases](https://github.com/tudelft3d/City4CFD/releases).
 
 ## Getting started
 

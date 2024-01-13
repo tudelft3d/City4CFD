@@ -1,7 +1,7 @@
 /*
   City4CFD
 
-  Copyright (c) 2021-2023, 3D Geoinformation Research Group, TU Delft
+  Copyright (c) 2021-2024, 3D Geoinformation Research Group, TU Delft
 
   This file is part of City4CFD.
 
@@ -33,11 +33,11 @@
 class ReconstructedBuilding : public Building {
 public:
     ReconstructedBuilding();
-    ReconstructedBuilding(const int internalID);
     ReconstructedBuilding(const Mesh& mesh);
 //    ReconstructedBuilding(const nlohmann::json& poly);
-    ReconstructedBuilding(const nlohmann::json& poly, const int internalID);
-    ReconstructedBuilding(const Polygon_with_attr& poly, const int internalID);
+    ReconstructedBuilding(const nlohmann::json& poly);
+    ReconstructedBuilding(const Polygon_with_attr& poly);
+    ReconstructedBuilding(const std::shared_ptr<ImportedBuilding>& importedBuilding);
     ~ReconstructedBuilding();
 
     virtual double get_elevation() override;

@@ -1,7 +1,7 @@
 /*
   City4CFD
  
-  Copyright (c) 2021-2023, 3D Geoinformation Research Group, TU Delft
+  Copyright (c) 2021-2024, 3D Geoinformation Research Group, TU Delft
 
   This file is part of City4CFD.
 
@@ -38,8 +38,8 @@ public:
 
     ImportedBuilding() = delete;
     ImportedBuilding(std::unique_ptr<nlohmann::json>& buildingJson,
-                     PointSet3Ptr& importedBuildingPts, const int internalID);
-    ImportedBuilding(Mesh& mesh, const int internalID);
+                     PointSet3Ptr& importedBuildingPts);
+    ImportedBuilding(Mesh& mesh);
     ~ImportedBuilding();
 
     virtual double get_elevation() override;
@@ -49,7 +49,6 @@ public:
     void   append_nonground_part(const std::shared_ptr<ImportedBuilding>& other);
 
     const nlohmann::json& get_building_json() const;
-    const std::string&    get_parent_building_id() const;
     const int             get_lod_idx() const;
     const bool            is_appending() const;
 
@@ -61,7 +60,6 @@ protected:
     std::unique_ptr<nlohmann::json>   _buildingJson;
     std::vector<int>                  _footprintIdxList;
     std::vector<std::vector<int>>     _footprintPtsIdxList;
-    std::string                       _parentBuildingID;
     bool                              _appendToBuilding;
     bool                              _trueHeight;
     int                               _lodIdx;

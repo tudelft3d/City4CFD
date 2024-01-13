@@ -1,7 +1,7 @@
 /*
   City4CFD
  
-  Copyright (c) 2021-2023, 3D Geoinformation Research Group, TU Delft
+  Copyright (c) 2021-2024, 3D Geoinformation Research Group, TU Delft
 
   This file is part of City4CFD.
 
@@ -44,7 +44,8 @@ public:
     void set_flat_terrain();
     void smooth_terrain();
     void remove_points_in_polygon(const BuildingsPtr& features);
-    void flatten_polygon_pts(const PolyFeaturesPtr& lsFeatures, std::vector<EPECK::Segment_3>& constrainedEdges);
+    void flatten_polygon_pts(const PolyFeaturesPtr& lsFeatures, std::vector<EPECK::Segment_3>& constrainedEdges,
+                             std::vector<std::pair<Polygon_with_holes_2, int>>& newPolys);
     void buffer_flat_edges(const PolyFeaturesPtr& avgFeatures, std::vector<EPECK::Segment_3>& constrainedEdges);
     void read_point_clouds();
 

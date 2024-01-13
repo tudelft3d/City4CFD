@@ -1,7 +1,7 @@
 /*
   City4CFD
  
-  Copyright (c) 2021-2023, 3D Geoinformation Research Group, TU Delft
+  Copyright (c) 2021-2024, 3D Geoinformation Research Group, TU Delft
 
   This file is part of City4CFD.
 
@@ -232,6 +232,27 @@ bool geomutils::polygons_in_contact(const Polygon_with_holes_2& firstPoly, const
         }
     }
     return false;
+}
+
+Polygon_with_holes_2 geomutils::exact_poly_to_poly(const CGAL::Polygon_with_holes_2<EPECK>& exactPoly) {
+    Converter<EPECK, EPICK> to_inexact;
+    Polygon_with_holes_2 convertedPoly;
+    Polygon_2 transferKernelPoly;
+    for (auto& outerPt : exactPoly.outer_boundary()) {
+        Point_2 polyPt = to_inexact(outerPt);
+        transferKernelPoly.push_back(polyPt);
+    }
+    convertedPoly.rings().push_back(transferKernelPoly);
+
+    for (auto& hole : exactPoly.holes()) {
+        transferKernelPoly.clear();
+        for (auto& pt : hole) {
+            Point_2 polyPt = to_inexact(pt);
+            transferKernelPoly.push_back(polyPt);
+        }
+        convertedPoly.rings().push_back(transferKernelPoly);
+    }
+    return convertedPoly;
 }
 
 //-- Templated functions
