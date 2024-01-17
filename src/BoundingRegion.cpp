@@ -38,9 +38,13 @@
 #include <CGAL/Delaunay_triangulation_2.h>
 
 BoundingRegion::BoundingRegion() = default;
+BoundingRegion::BoundingRegion(const Config::ReconRegion& reconRegion)
+: _reconSettings(reconRegion)
+{}
 BoundingRegion::~BoundingRegion() = default;
 
 //-- Operators to read bounded region if explicitly defined in config
+//   called through boost:apply_visitor
 void BoundingRegion::operator()(double radius) {
     geomutils::make_round_poly(global::nullPt, radius, _boundingRegion);
 }
@@ -49,9 +53,9 @@ void BoundingRegion::operator()(Polygon_2& poly) {
     _boundingRegion = poly;
 }
 
+//-- Reconstruction (influ) regions related functions
 void
 BoundingRegion::calc_influ_region_bpg(const DT& dt, BuildingsPtr& buildings) {
-    assert(boost::get<bool>(Config::get().influRegionConfig));
     double influRegionRadius;
     //-- Find building where the point of interest lies in and define radius of interest with BPG
     bool foundBuilding = false;
@@ -64,7 +68,7 @@ BoundingRegion::calc_influ_region_bpg(const DT& dt, BuildingsPtr& buildings) {
                 std::cerr << std::endl << "Error: " << e.what() << std::endl;
                 throw std::runtime_error("Impossible to automatically determine influence region");
             }
-            influRegionRadius = sqrt(f->sq_max_dim()) * 3.; //- BPG by Liu
+            influRegionRadius = sqrt(f->sq_max_dim()) * (3. + _reconSettings.bpgInfluExtra); //- BPG by Liu hardcoded
 
             f->clear_feature();
             foundBuilding = true;
@@ -78,6 +82,7 @@ BoundingRegion::calc_influ_region_bpg(const DT& dt, BuildingsPtr& buildings) {
     geomutils::make_round_poly(global::nullPt, influRegionRadius, _boundingRegion);
 }
 
+//-- Boundary related functions
 void BoundingRegion::calc_bnd_bpg(const Polygon_2& influRegionPoly,
                                   const BuildingsPtr& buildings) {
     double angle = std::atan2(Config::get().flowDirection.y(), Config::get().flowDirection.x());

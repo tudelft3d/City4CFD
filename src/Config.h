@@ -51,7 +51,7 @@ public:
     void validate(nlohmann::json& j);
     void set_config(nlohmann::json& j);
     void set_region(boost::variant<bool, double, Polygon_2>& regionType,
-                    std::string& regionName,
+                    const std::string regionName,
                     nlohmann::json& j);
     static void write_to_log(const std::string& msg);
 
@@ -84,7 +84,8 @@ public:
     int       nSmoothIterations                 = 0;
     int       maxSmoothPts                      = -9999;
     bool      flatTerrain                       = false;
-    bool      intersectBuildingsTerrain          = false;
+    bool      intersectBuildingsTerrain         = false;
+
     //- Buildings
     std::string buildingUniqueId;
     std::string lod;
@@ -117,7 +118,7 @@ public:
     std::string               outputFileName;
     GeomFormat                outputFormat;
     bool                      outputSeparately  = false;
-    std::vector<std::string>  outputSurfaces    = {"Terrain", "Buildings"};
+    std::vector<std::string>  outputSurfaces    = {"Terrain"};
     int                       numSides          = 1;
     std::vector<int>          surfaceLayerIDs;
 
@@ -133,7 +134,24 @@ public:
     bool       alphaWrap                        = false;
 
     //-- Other settings
-    const int searchtree_bucket_size = 100;
+    const int searchtree_bucket_size = 100; // hardcoded
+
+    //-- Struct for reconstruction regions (part of Buildings)
+    struct ReconRegion{
+        //todo wip - added some relevant attrbutes that used to be global
+        // todo need to remove them from global eventually
+        boost::variant<bool, double, Polygon_2> influRegionConfig;
+        double      buildingPercentile              = -9999.; // Handled by schema
+        std::string lod;
+        double      bpgInfluExtra                   = 0.; //todo ip
+        bool        refineReconstructedBuildings    = false;
+        double      minHeight                       = 2.;
+        bool        reconstructFailed               = false;
+        bool        importAdvantage                 = false;
+        int         outputLayerID                   = 0;
+    };
+
+    std::vector<ReconRegion> reconRegions;
 };
 
 #endif //CITY4CFD_CONFIG_H

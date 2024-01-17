@@ -30,12 +30,15 @@
 
 #include "types.h"
 #include "CGALTypes.h"
+#include "Config.h"
 
 class BoundingRegion {
 public:
     CDT _projCDT;
+    const Config::ReconRegion _reconSettings;
 
     BoundingRegion();
+    BoundingRegion(const Config::ReconRegion& reconRegion);
     ~BoundingRegion();
 
     void operator()(double radius);

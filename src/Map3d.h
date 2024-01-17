@@ -64,11 +64,10 @@ private:
     PolyFeaturesPtr             _allFeaturesPtr;
     OutputFeaturesPtr           _outputFeaturesPtr;
 
-    BoundingRegion              _influRegion;
+    std::vector<BoundingRegion> _reconRegions; // one influ region -> vector of reconstruction regions
     BoundingRegion              _domainBnd;
     DT                          _dt;
 
-    bool                        _influRegionBPG = false;
     bool                        _bndBPG         = false;
     bool                        _cityjsonInput  = false;
 

@@ -39,16 +39,16 @@
 #include <CGAL/alpha_wrap_3.h>
 
 Building::Building()
-        : PolyFeature(1), _elevation(-global::largnum), _height(-global::largnum),
+        : PolyFeature(-1), _elevation(-global::largnum), _height(-global::largnum),
           _ptsPtr(std::make_shared<Point_set_3>()), _hasFailed(false) {}
 
 Building::Building(const nlohmann::json& poly)
-        : PolyFeature(poly, true, 1), _elevation(-global::largnum), _height(-global::largnum),
+        : PolyFeature(poly, true, -1), _elevation(-global::largnum), _height(-global::largnum),
           _ptsPtr(std::make_shared<Point_set_3>()), _hasFailed(false) {}
         // 'true' here to check for polygon simplicity
 
 Building::Building(const Polygon_with_attr& poly)
-        : PolyFeature(poly, true, 1), _elevation(-global::largnum), _height(-global::largnum),
+        : PolyFeature(poly, true, -1), _elevation(-global::largnum), _height(-global::largnum),
           _ptsPtr(std::make_shared<Point_set_3>()), _hasFailed(false) {}
         // 'true' here to check for polygon simplicity
 
@@ -208,15 +208,33 @@ void Building::translate_footprint(const double h) {
     }
 }
 
-void Building::check_feature_scope(const Polygon_2& otherPoly) {
+//todo ip maybe push down to derived classes?
+void Building::set_recon_rules(const BoundingRegion& reconRegion) {
+    _outputLayerID = reconRegion._reconSettings.outputLayerID;
+
+    // todo parameters to take care of:
+    //    reconstructFailed?
+    //    refineReconstructedBuildings? Or just refine maybe
+    //    minHeight
+    //    importAdvantage
+    //    buildingPercentile
+
+    //todo ip: lod
+}
+
+bool Building::is_part_of(const Polygon_2& otherPoly) {
     for (auto& ring: _poly.rings()) {
         for (auto& vert : ring) {
             if (geomutils::point_in_poly(vert, otherPoly))
-                return;
+                return true;
         }
     }
-//    std::cout << "Poly ID " << this->get_id() << " is outside the influ region. Deactivating." << std::endl;
-    this->deactivate();
+//    std::cout << "Poly ID " << this->get_id() << " is outside the influ region." << std::endl;
+    return false;
+}
+
+bool Building::has_recon_region() {
+    return _outputLayerID > 0;
 }
 
 void Building::set_clip_flag(const bool flag) {
