@@ -38,7 +38,7 @@
 #include <CGAL/Delaunay_triangulation_2.h>
 
 BoundingRegion::BoundingRegion() = default;
-BoundingRegion::BoundingRegion(const Config::ReconRegion& reconRegion)
+BoundingRegion::BoundingRegion(std::shared_ptr<Config::ReconRegion> reconRegion)
 : _reconSettings(reconRegion)
 {}
 BoundingRegion::~BoundingRegion() = default;
@@ -63,12 +63,14 @@ BoundingRegion::calc_influ_region_bpg(const DT& dt, BuildingsPtr& buildings) {
         if (geomutils::point_in_poly(global::nullPt, f->get_poly())) {
             f->calc_footprint_elevation_nni(dt);
             try {
+                f->set_reconstruction_rules(*this); // temporary add settings for this reconstruction
                 f->reconstruct();
+                f->remove_reconstruction_rules();
             } catch (std::exception& e) {
                 std::cerr << std::endl << "Error: " << e.what() << std::endl;
                 throw std::runtime_error("Impossible to automatically determine influence region");
             }
-            influRegionRadius = sqrt(f->sq_max_dim()) * (3. + _reconSettings.bpgInfluExtra); //- BPG by Liu hardcoded
+            influRegionRadius = sqrt(f->sq_max_dim()) * (3. + _reconSettings->bpgInfluExtra); //- BPG by Liu hardcoded
 
             f->clear_feature();
             foundBuilding = true;
@@ -143,6 +145,16 @@ void BoundingRegion::calc_bnd_bpg(const Polygon_2& influRegionPoly,
     }
     //-- Return the points back to global coordinates
     for (auto& pt : localPoly) _boundingRegion.push_back(geomutils::rotate_pt(pt, angle));
+}
+
+// Check if all points of this region fall within otherRegion
+bool BoundingRegion::is_subset_of(const BoundingRegion& otherRegion) const {
+    auto& poly = otherRegion.get_bounding_region();
+    for (auto& vert : _boundingRegion) {
+        if (!geomutils::point_in_poly(vert, poly))
+            return false;
+    }
+    return true;
 }
 
 Polygon_2& BoundingRegion::get_bounding_region() {

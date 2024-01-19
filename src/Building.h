@@ -50,9 +50,11 @@ public:
     void   clip_bottom(const TerrainPtr& terrain);
     void   refine();
     void   translate_footprint(const double h);
-    bool   is_part_of(const Polygon_2& otherPoly);
-    void   set_recon_rules(const BoundingRegion& reconRegion);
-    bool   has_recon_region();
+    bool   is_part_of(const Polygon_2& otherPoly) const;
+    void   set_reconstruction_rules(const BoundingRegion& reconRegion);
+    void   remove_reconstruction_rules();
+    bool   has_reconstruction_region() const;
+    std::shared_ptr<const Config::ReconRegion> get_reconstruction_settings() const;
     void   set_clip_flag (const bool flag);
     void   mark_as_failed();
     bool   has_failed_to_reconstruct() const;
@@ -68,12 +70,12 @@ public:
     virtual std::string get_class_name() const override;
 
 protected:
-
     PointSet3Ptr         _ptsPtr;
     double               _elevation;
     double               _height;
     bool                 _hasFailed;
     bool                 _clip_bottom = Config::get().clip;
+    std::shared_ptr<const Config::ReconRegion> _reconSettings;
 };
 
 //-- Struct for clipping

@@ -67,8 +67,6 @@ public:
     //-- Domain setup
     Point_2     pointOfInterest;
     double      topHeight                       = 0.;
-    //- Influ region and domain bnd
-    boost::variant<bool, double, Polygon_2> influRegionConfig;
     boost::variant<bool, double, Polygon_2> domainBndConfig;
     DomainType            bpgDomainType;
     bool                  bpgBlockageRatioFlag  = false;
@@ -88,10 +86,8 @@ public:
 
     //- Buildings
     std::string buildingUniqueId;
-    std::string lod;
-    bool        refineReconstructedBuildings    = false;
-    double      buildingPercentile              = -9999.; // Handled by schema
     double      minHeight                       = 2.;
+    double      buildingPercentile              = 70.; // Handled by schema
     bool        reconstructFailed               = false;
     std::string crsInfo;                                  // CRS information of building footprints
     // Height from attributes
@@ -100,9 +96,7 @@ public:
     double      floorHeight                     = 9999.; // Handled by schema
     bool        buildingHeightAttrAdv           = false;
     //- Imported buildings
-    bool        importAdvantage                 = false;
     bool        importTrueHeight                = true;
-    bool        refineImportedBuildings         = false;
     std::string importLoD                       = "9999";
     //- Boundary
     bool  reconstructBoundaries                 = false;
@@ -110,7 +104,7 @@ public:
     //-- Polygons related
     double                edgeMaxLen            = -9999.; // Handled by schema
     std::map<int, double> flattenSurfaces;
-    std::vector<int>     flattenVertBorder;
+    std::vector<int>      flattenVertBorder;
 
     //-- Output
     fs::path                  workDir;
@@ -138,20 +132,15 @@ public:
 
     //-- Struct for reconstruction regions (part of Buildings)
     struct ReconRegion{
-        //todo wip - added some relevant attrbutes that used to be global
-        // todo need to remove them from global eventually
         boost::variant<bool, double, Polygon_2> influRegionConfig;
-        double      buildingPercentile              = -9999.; // Handled by schema
         std::string lod;
-        double      bpgInfluExtra                   = 0.; //todo ip
-        bool        refineReconstructedBuildings    = false;
-        double      minHeight                       = 2.;
-        bool        reconstructFailed               = false;
+        double      bpgInfluExtra                   = 0.;
+        bool        refine                          = false;
         bool        importAdvantage                 = false;
         int         outputLayerID                   = 0;
     };
 
-    std::vector<ReconRegion> reconRegions;
+    std::vector<std::shared_ptr<ReconRegion>> reconRegions;
 };
 
 #endif //CITY4CFD_CONFIG_H

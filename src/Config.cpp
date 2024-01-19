@@ -39,6 +39,12 @@
 
 #include  <boost/algorithm/string/predicate.hpp>
 
+//todo ip: list of variables changed in the schema:
+//    influence_region
+//    refine
+//    lod
+//    import_advantage
+
 void Config::validate(nlohmann::json& j) {
     using valijson::Schema;
     using valijson::SchemaParser;
@@ -91,31 +97,24 @@ void Config::set_config(nlohmann::json& j) {
     //-- Domain setup
     pointOfInterest = Point_2(j["point_of_interest"][0], j["point_of_interest"][1]);
 
-    //- Influence region
-    std::string influRegionCursor = "influence_region";
-    Config::get().set_region(influRegionConfig, influRegionCursor, j);
-
     //- Reconstruction regions setup
-    // todo ip wip
     // need to define and add all reconstruction-specific parameters
     int buildingOutputLayerID = 1;
     for (auto regionJson : j["reconstruction_regions"]) {
-        ReconRegion reconRegion;
+        std::shared_ptr<ReconRegion> reconRegion = std::make_shared<ReconRegion>();
 
         //- Influence region
-//        std::string influRegionCursor = "influence_region";
-        Config::get().set_region(reconRegion.influRegionConfig, "influence_region", regionJson);
+        Config::get().set_region(reconRegion->influRegionConfig, "influence_region", regionJson);
 
-        reconRegion.lod = regionJson["lod"].front();
-        reconRegion.buildingPercentile = (double)regionJson["building_percentile"].front() / 100.;
-        if (regionJson.contains("min_height")) {
-            reconRegion.minHeight = regionJson["min_height"];
-        }
-        if (regionJson.contains("reconstruct_failed")) {
-            reconRegion.reconstructFailed = regionJson["reconstruct_failed"];
-        }
+        reconRegion->lod = regionJson["lod"].front();
+        if (regionJson.contains("import_advantage"))
+            reconRegion->importAdvantage = regionJson["import_advantage"];
+        if (regionJson.contains("bpg_influence_region_extra"))
+            reconRegion->bpgInfluExtra = regionJson["bpg_influence_region_extra"];
+        if (regionJson.contains("refine"))
+            reconRegion->refine = regionJson["refine"];
         // set the building (belonging to recon region) output layer id
-        reconRegion.outputLayerID = buildingOutputLayerID;
+        reconRegion->outputLayerID = buildingOutputLayerID;
         ++buildingOutputLayerID;
 
         reconRegions.push_back(reconRegion);
@@ -192,8 +191,6 @@ void Config::set_config(nlohmann::json& j) {
                 floorHeight = (double)poly["floor_height"];
             if (poly.contains("avoid_bad_polys"))
                 avoidBadPolys = poly["avoid_bad_polys"];
-            if (poly.contains("refine"))
-                refineReconstructedBuildings = poly["refine"];
         }
         if (poly["type"] == "SurfaceLayer") {
             topoLayers.push_back(poly["path"]);
@@ -253,8 +250,8 @@ void Config::set_config(nlohmann::json& j) {
         flatTerrain = j["flat_terrain"];
 
     // Buildings
-    lod = j["lod"].front();
-    buildingPercentile = (double)j["building_percentile"].front() / 100.;
+    if (j.contains("building_percentile"))
+        buildingPercentile = (double)j["building_percentile"].front() / 100.;
     if (j.contains("min_height")) {
         minHeight = j["min_height"];
     }
@@ -268,12 +265,9 @@ void Config::set_config(nlohmann::json& j) {
     // Imported buildings
     if (j.contains("import_geometries")) {
         importedBuildingsPath = j["import_geometries"]["path"];
-        importAdvantage       = j["import_geometries"]["advantage"];
         importTrueHeight      = j["import_geometries"]["true_height"];
         if (j["import_geometries"].contains("lod"))
             importLoD = j["import_geometries"]["lod"];
-        if (j["import_geometries"].contains("refine"))
-            refineImportedBuildings = j["import_geometries"]["refine"];
     }
 
     // Boundary

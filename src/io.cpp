@@ -484,7 +484,7 @@ void IO::get_stl_pts(Mesh& mesh, std::string& fs) {
 void IO::get_cityjson_geom(const Mesh& mesh, nlohmann::json& g, std::unordered_map<std::string, int>& dPts,
                            std::string primitive) {
     g["type"] = primitive;
-    g["lod"] = Config::get().lod;
+    g["lod"] = "1.2"; //hardcoded for now
     g["boundaries"];
     for (auto& face: mesh.faces()) {
         if (IO::is_degen(mesh, face)) continue;

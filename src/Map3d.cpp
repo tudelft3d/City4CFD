@@ -241,34 +241,39 @@ void Map3d::remove_extra_terrain_pts() {
 }
 
 void Map3d::set_influ_region() {
+    //todo still to decide which parameters will be region-based and which global
     std::cout << "\nDefining influence region" << std::endl;
     //-- Set the reconstruction (influence) regions --//
     for (int i = 0; i < _reconRegions.size(); ++i) {
-//    for (auto& reconRegion : _reconRegions) {
-        if (_reconRegions[i]._reconSettings.influRegionConfig.type() == typeid(bool)) {// bool defines BPG request
-            std::cout << "\nINFO: Reconstruction region "<< i << " not defined in config. "
+        if (_reconRegions[i]._reconSettings->influRegionConfig.type() == typeid(bool)) {// bool defines BPG request
+            std::cout << "INFO: Reconstruction region "<< i << " not defined in config. "
                       << "Calculating with BPG." << std::endl;
             _reconRegions[i].calc_influ_region_bpg(_dt, _buildingsPtr);
         } else
-            boost::apply_visitor(_reconRegions[i], Config::get().reconRegions[i].influRegionConfig);
+            boost::apply_visitor(_reconRegions[i], Config::get().reconRegions[i]->influRegionConfig);
         // todo ip find a way to reuse previous bpg? that should make things faster rather than searching
         // for that one building
     }
-    //todo ip: sanity check here that the region 1 is smaller than 2 and smaller than 3
-
+    // Check if regions get larger with increasing index
+    for (int i = 0; i < _reconRegions.size(); ++i) {
+        if (i == 0) continue;
+        if (!_reconRegions[i-1].is_subset_of(_reconRegions[i]))
+            std::cout << "WARNING: Reconstruction region "
+                    << i - 1 << " is not a full subset of region " << i << std::endl;
+    }
     //-- Set the reconstruction rules from reconstruction regions to individual buildings
     //   also filter out buildings that are not being reconstructed
     for (auto& b: _buildingsPtr) {
         for (auto& reconRegion : _reconRegions) {
-            if (!b->has_recon_region() && b->is_part_of(reconRegion.get_bounding_region())) // first come, first served with region setup
-                b->set_recon_rules(reconRegion);
+            if (!b->has_reconstruction_region() && b->is_part_of(reconRegion.get_bounding_region())) // first come, first served with region setup
+                b->set_reconstruction_rules(reconRegion);
         }
-        if (!b->has_recon_region()) b->deactivate();
+        if (!b->has_reconstruction_region()) b->deactivate();
     }
     this->clear_inactives();
 
     //-- Check if imported and reconstructed buildings are overlapping
-    //todo ip check with new stuff
+    //todo ip to test
     if (!_importedBuildingsPtr.empty()) this->solve_building_conflicts();
 
     std::cout << "    Number of building geometries in the influence region: " << _buildingsPtr.size() << std::endl;
@@ -437,7 +442,7 @@ void Map3d::solve_building_conflicts() {
     for (auto& importedBuilding : _importedBuildingsPtr) {
         for (auto& reconstructedBuilding : _reconstructedBuildingsPtr) {
             if (geomutils::polygons_in_contact(importedBuilding->get_poly(), reconstructedBuilding->get_poly())) {
-                if (Config::get().importAdvantage) {
+                if (reconstructedBuilding->get_reconstruction_settings()->importAdvantage) {
                     reconstructedBuilding->deactivate();
                 } else {
                     importedBuilding->deactivate();
@@ -446,7 +451,6 @@ void Map3d::solve_building_conflicts() {
         }
     }
     this->clear_inactives();
-
    // to check if conflicts are solved
 //    for (auto& b : _importedBuildingsPtr) b->deactivate();
 //    this->clear_inactives();

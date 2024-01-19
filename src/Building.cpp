@@ -40,16 +40,16 @@
 
 Building::Building()
         : PolyFeature(-1), _elevation(-global::largnum), _height(-global::largnum),
-          _ptsPtr(std::make_shared<Point_set_3>()), _hasFailed(false) {}
+          _ptsPtr(std::make_shared<Point_set_3>()), _hasFailed(false), _reconSettings(nullptr) {}
 
 Building::Building(const nlohmann::json& poly)
         : PolyFeature(poly, true, -1), _elevation(-global::largnum), _height(-global::largnum),
-          _ptsPtr(std::make_shared<Point_set_3>()), _hasFailed(false) {}
+          _ptsPtr(std::make_shared<Point_set_3>()), _hasFailed(false), _reconSettings(nullptr) {}
         // 'true' here to check for polygon simplicity
 
 Building::Building(const Polygon_with_attr& poly)
         : PolyFeature(poly, true, -1), _elevation(-global::largnum), _height(-global::largnum),
-          _ptsPtr(std::make_shared<Point_set_3>()), _hasFailed(false) {}
+          _ptsPtr(std::make_shared<Point_set_3>()), _hasFailed(false), _reconSettings(nullptr) {}
         // 'true' here to check for polygon simplicity
 
 Building::~Building() = default;
@@ -208,21 +208,27 @@ void Building::translate_footprint(const double h) {
     }
 }
 
-//todo ip maybe push down to derived classes?
-void Building::set_recon_rules(const BoundingRegion& reconRegion) {
-    _outputLayerID = reconRegion._reconSettings.outputLayerID;
-
-    // todo parameters to take care of:
-    //    reconstructFailed?
-    //    refineReconstructedBuildings? Or just refine maybe
-    //    minHeight
-    //    importAdvantage
-    //    buildingPercentile
-
-    //todo ip: lod
+// Store the reconstruction settings for a defined reconstruction (influence) region
+void Building::set_reconstruction_rules(const BoundingRegion& reconRegion) {
+    _reconSettings = reconRegion._reconSettings;
+    // set the output layer ID
+    _outputLayerID = _reconSettings->outputLayerID;
 }
 
-bool Building::is_part_of(const Polygon_2& otherPoly) {
+// Remove stored reconstruction settings
+void Building::remove_reconstruction_rules() {
+    _reconSettings.reset();
+    _outputLayerID = 0;
+}
+
+std::shared_ptr<const Config::ReconRegion> Building::get_reconstruction_settings() const {
+    if (!_reconSettings)
+        throw std::runtime_error("Building " + _id + " missing reconstruction settings."
+                                 " Imported building? " + std::to_string(_f_imported));
+    return _reconSettings;
+}
+
+bool Building::is_part_of(const Polygon_2& otherPoly) const {
     for (auto& ring: _poly.rings()) {
         for (auto& vert : ring) {
             if (geomutils::point_in_poly(vert, otherPoly))
@@ -233,7 +239,7 @@ bool Building::is_part_of(const Polygon_2& otherPoly) {
     return false;
 }
 
-bool Building::has_recon_region() {
+bool Building::has_reconstruction_region() const {
     return _outputLayerID > 0;
 }
 
