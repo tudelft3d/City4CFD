@@ -136,8 +136,7 @@ public:
         boost::variant<bool, double, Polygon_2> influRegionConfig;
         std::string lod;
         double      bpgInfluExtra                   = 0.;
-        bool        refineReconstructed             = false;
-        bool        importAdvantage                 = false;
+        bool        importAdvantage                 = true;
         int         outputLayerID                   = 0;
     };
 
