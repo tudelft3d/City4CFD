@@ -244,11 +244,15 @@ void Map3d::set_influ_region() {
     //todo still to decide which parameters will be region-based and which global
     std::cout << "\nDefining influence region" << std::endl;
     //-- Set the reconstruction (influence) regions --//
+    double maxDim = -1.; // this works if there's one point of interest
     for (int i = 0; i < _reconRegions.size(); ++i) {
         if (_reconRegions[i]._reconSettings->influRegionConfig.type() == typeid(bool)) {// bool defines BPG request
             std::cout << "INFO: Reconstruction region "<< i << " not defined in config. "
                       << "Calculating with BPG." << std::endl;
-            _reconRegions[i].calc_influ_region_bpg(_dt, _buildingsPtr);
+            if (maxDim < 0.)
+                maxDim = _reconRegions[i].calc_influ_region_bpg(_dt, _buildingsPtr);
+            else
+                _reconRegions[i].calc_influ_region_bpg(maxDim);
         } else
             boost::apply_visitor(_reconRegions[i], Config::get().reconRegions[i]->influRegionConfig);
     }

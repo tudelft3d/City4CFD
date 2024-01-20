@@ -54,11 +54,10 @@ void BoundingRegion::operator()(Polygon_2& poly) {
 }
 
 //-- Reconstruction (influ) regions related functions
-void
+double
 BoundingRegion::calc_influ_region_bpg(const DT& dt, BuildingsPtr& buildings) {
     double influRegionRadius;
     //-- Find building where the point of interest lies in and define radius of interest with BPG
-    bool foundBuilding = false;
     for (auto& f : buildings) {
         if (geomutils::point_in_poly(global::nullPt, f->get_poly())) {
             f->calc_footprint_elevation_nni(dt);
@@ -70,17 +69,21 @@ BoundingRegion::calc_influ_region_bpg(const DT& dt, BuildingsPtr& buildings) {
                 std::cerr << std::endl << "Error: " << e.what() << std::endl;
                 throw std::runtime_error("Impossible to automatically determine influence region");
             }
-            influRegionRadius = sqrt(f->sq_max_dim()) * (3. + _reconSettings->bpgInfluExtra); //- BPG by Liu hardcoded
+            double maxDim = sqrt(f->sq_max_dim());
+            influRegionRadius = maxDim * (3. + _reconSettings->bpgInfluExtra); //- BPG by Liu hardcoded
 
             f->clear_feature();
-            foundBuilding = true;
-            break;
+
+            geomutils::make_round_poly(global::nullPt, influRegionRadius, _boundingRegion);
+            return maxDim;
         }
     }
-    if (!foundBuilding)
-        throw std::invalid_argument("Point of interest does not belong to any building! "
-                                    "Impossible to determine influence region");
+    throw std::invalid_argument("Point of interest does not belong to any building! "
+                                "Impossible to determine influence region");
+}
 
+void BoundingRegion::calc_influ_region_bpg(const double maxDim) {
+    double influRegionRadius = maxDim * (3. + _reconSettings->bpgInfluExtra); //- BPG by Liu hardcoded
     geomutils::make_round_poly(global::nullPt, influRegionRadius, _boundingRegion);
 }
 

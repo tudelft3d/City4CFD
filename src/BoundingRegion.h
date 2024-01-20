@@ -44,7 +44,8 @@ public:
     void operator()(double radius);
     void operator()(Polygon_2& poly);
 
-    void calc_influ_region_bpg(const DT& dt, BuildingsPtr& buildings);
+    double calc_influ_region_bpg(const DT& dt, BuildingsPtr& buildings);
+    void   calc_influ_region_bpg(const double maxDim);
     void calc_bnd_bpg(const Polygon_2& influRegionPoly, const BuildingsPtr& buildings);
     bool is_subset_of(const BoundingRegion& otherRegion) const;
 
