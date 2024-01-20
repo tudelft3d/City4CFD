@@ -112,6 +112,8 @@ ReconstructedBuilding::ReconstructedBuilding(const std::shared_ptr<ImportedBuild
     _ptsPtr = importedBuilding->get_points();
     _groundElevations = importedBuilding->get_ground_elevations();
     _id = importedBuilding->get_id();
+    _reconSettings = importedBuilding->get_reconstruction_settings();
+    _outputLayerID = importedBuilding->get_output_layer_id();
 }
 
 ReconstructedBuilding::~ReconstructedBuilding() = default;

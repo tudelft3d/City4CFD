@@ -251,8 +251,6 @@ void Map3d::set_influ_region() {
             _reconRegions[i].calc_influ_region_bpg(_dt, _buildingsPtr);
         } else
             boost::apply_visitor(_reconRegions[i], Config::get().reconRegions[i]->influRegionConfig);
-        // todo ip find a way to reuse previous bpg? that should make things faster rather than searching
-        // for that one building
     }
     // Check if regions get larger with increasing index
     for (int i = 0; i < _reconRegions.size(); ++i) {
@@ -273,7 +271,6 @@ void Map3d::set_influ_region() {
     this->clear_inactives();
 
     //-- Check if imported and reconstructed buildings are overlapping
-    //todo ip to test
     if (!_importedBuildingsPtr.empty()) this->solve_building_conflicts();
 
     std::cout << "    Number of building geometries in the influence region: " << _buildingsPtr.size() << std::endl;
@@ -505,6 +502,8 @@ void Map3d::wrap() {
     for (auto& b : _buildingsPtr) b->deactivate();
     this->clear_inactives();
     _buildingsPtr.push_back(std::make_shared<ReconstructedBuilding>(newMesh));
+    // add reconstruction settings from the first region
+    _buildingsPtr.back()->set_reconstruction_rules(_reconRegions.front());
 }
 
 void Map3d::read_data() {
