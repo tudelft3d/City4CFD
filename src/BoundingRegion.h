@@ -30,19 +30,24 @@
 
 #include "types.h"
 #include "CGALTypes.h"
+#include "Config.h"
 
 class BoundingRegion {
 public:
     CDT _projCDT;
+    std::shared_ptr<const Config::ReconRegion> _reconSettings;
 
     BoundingRegion();
+    BoundingRegion(std::shared_ptr<Config::ReconRegion> reconRegion);
     ~BoundingRegion();
 
     void operator()(double radius);
     void operator()(Polygon_2& poly);
 
-    void calc_influ_region_bpg(const DT& dt, BuildingsPtr& buildings);
+    double calc_influ_region_bpg(const DT& dt, BuildingsPtr& buildings);
+    void   calc_influ_region_bpg(const double maxDim);
     void calc_bnd_bpg(const Polygon_2& influRegionPoly, const BuildingsPtr& buildings);
+    bool is_subset_of(const BoundingRegion& otherRegion) const;
 
     Polygon_2& get_bounding_region();
     const Polygon_2& get_bounding_region() const;

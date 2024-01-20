@@ -21,15 +21,20 @@
       "layer_name": "Water"
     }
   ],
+  "reconstruction_regions": [
+    {
+      "influence_region":  "polygons/influRegion.geojson",
+      "lod": "1.2",
+      "import_advantage": true
+    }
+  ],
   "import_geometries": {
     "path": "import_buildings/TUD_geometries.json",
-    "advantage": true,
     "true_height": true,
     "lod": "1.3"
   },
 
   "point_of_interest": [85376, 446125],
-  "influence_region":  "polygons/influRegion.geojson",
   "domain_bnd":        "polygons/domainBnd.geojson",
   "top_height":        150,
   "flow_direction":    [1, 1],
@@ -42,7 +47,6 @@
     "max_pts": 100000
   },
 
-  "lod": "1.2",
   "building_percentile": 90,
 
   "edge_max_len": 5,

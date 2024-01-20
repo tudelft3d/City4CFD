@@ -112,6 +112,8 @@ ReconstructedBuilding::ReconstructedBuilding(const std::shared_ptr<ImportedBuild
     _ptsPtr = importedBuilding->get_points();
     _groundElevations = importedBuilding->get_ground_elevations();
     _id = importedBuilding->get_id();
+    _reconSettings = importedBuilding->get_reconstruction_settings();
+    _outputLayerID = importedBuilding->get_output_layer_id();
 }
 
 ReconstructedBuilding::~ReconstructedBuilding() = default;
@@ -179,7 +181,7 @@ void ReconstructedBuilding::reconstruct() {
     if (_clip_bottom || Config::get().intersectBuildingsTerrain) {
         this->translate_footprint(5);
     }
-    if (Config::get().refineReconstructedBuildings) this->refine();
+    if (_reconSettings &&_reconSettings->refineReconstructed) this->refine();
 }
 
 void ReconstructedBuilding::reconstruct_flat_terrain() {

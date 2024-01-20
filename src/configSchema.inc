@@ -103,8 +103,7 @@ namespace jsonschema {
                       "exclusiveMinimum": 0
                     },
                     "height_attribute_advantage": {"type": "boolean"},
-                    "avoid_bad_polys": {"type": "boolean"},
-                    "refine": {"type": "boolean"}
+                    "avoid_bad_polys": {"type": "boolean"}
                   },
                   "dependencies": {
                     "floor_attribute": ["floor_height"]
@@ -146,15 +145,39 @@ namespace jsonschema {
             "required": ["type", "path"]
           }
         },
+        "reconstruction_regions": {
+          "description": "Reconstruction regions/regions of interest/influence zones",
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "properties": {
+              "influence_region": {
+                "$ref": "#/$defs/influBndStruct"
+              },
+              "lod": {
+                "type": "string"
+              },
+              "bpg_influence_region_extra": {
+                "type": "number",
+                "minimum": 0
+              },
+              "import_advantage": {
+                "type": "boolean"
+              },
+              "refine": {
+                "type": "boolean"
+              }
+            },
+            "required": ["influence_region", "lod"]
+          }
+        },
         "import_geometries": {
           "description": "Handling imported geometries",
           "type": "object",
           "properties": {
             "path": {
               "type": "string"
-            },
-            "advantage": {
-              "type": "boolean"
             },
             "true_height": {
               "type": "boolean"
@@ -166,13 +189,10 @@ namespace jsonschema {
               "type": "boolean"
             }
           },
-          "required": ["path", "advantage", "true_height"]
+          "required": ["path", "true_height"]
         },
         "point_of_interest": {
           "$ref": "#/$defs/point"
-        },
-        "influence_region": {
-          "$ref": "#/$defs/influBndStruct"
         },
         "domain_bnd":{
           "$ref": "#/$defs/influBndStruct"
@@ -232,9 +252,6 @@ namespace jsonschema {
         "flat_terrain": {
           "description": "Optional: Force flat terrain",
           "type": "boolean"
-        },
-        "lod": {
-          "type": "string"
         },
         "building_percentile": {
           "type": "number",
@@ -404,9 +421,9 @@ namespace jsonschema {
           }
         }
       ],
-        "required": [ "point_of_interest", "influence_region", "domain_bnd",
-                      "building_percentile", "edge_max_len", "output_file_name", "output_format",
-                      "output_separately", "lod"]
+      "required": [ "point_of_interest", "domain_bnd", "reconstruction_regions",
+        "edge_max_len", "output_file_name", "output_format", "building_percentile",
+        "output_separately"]
     }
         )"_json;
 }

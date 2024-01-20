@@ -51,7 +51,7 @@ public:
     void validate(nlohmann::json& j);
     void set_config(nlohmann::json& j);
     void set_region(boost::variant<bool, double, Polygon_2>& regionType,
-                    std::string& regionName,
+                    const std::string regionName,
                     nlohmann::json& j);
     static void write_to_log(const std::string& msg);
 
@@ -67,8 +67,6 @@ public:
     //-- Domain setup
     Point_2     pointOfInterest;
     double      topHeight                       = 0.;
-    //- Influ region and domain bnd
-    boost::variant<bool, double, Polygon_2> influRegionConfig;
     boost::variant<bool, double, Polygon_2> domainBndConfig;
     DomainType            bpgDomainType;
     bool                  bpgBlockageRatioFlag  = false;
@@ -84,13 +82,12 @@ public:
     int       nSmoothIterations                 = 0;
     int       maxSmoothPts                      = -9999;
     bool      flatTerrain                       = false;
-    bool      intersectBuildingsTerrain          = false;
+    bool      intersectBuildingsTerrain         = false;
+
     //- Buildings
     std::string buildingUniqueId;
-    std::string lod;
-    bool        refineReconstructedBuildings    = false;
-    double      buildingPercentile              = -9999.; // Handled by schema
     double      minHeight                       = 2.;
+    double      buildingPercentile              = 70.; // Handled by schema
     bool        reconstructFailed               = false;
     std::string crsInfo;                                  // CRS information of building footprints
     // Height from attributes
@@ -99,17 +96,16 @@ public:
     double      floorHeight                     = 9999.; // Handled by schema
     bool        buildingHeightAttrAdv           = false;
     //- Imported buildings
-    bool        importAdvantage                 = false;
     bool        importTrueHeight                = true;
-    bool        refineImportedBuildings         = false;
     std::string importLoD                       = "9999";
+    bool        refineImported                  = false;
     //- Boundary
     bool  reconstructBoundaries                 = false;
 
     //-- Polygons related
     double                edgeMaxLen            = -9999.; // Handled by schema
     std::map<int, double> flattenSurfaces;
-    std::vector<int>     flattenVertBorder;
+    std::vector<int>      flattenVertBorder;
 
     //-- Output
     fs::path                  workDir;
@@ -117,7 +113,7 @@ public:
     std::string               outputFileName;
     GeomFormat                outputFormat;
     bool                      outputSeparately  = false;
-    std::vector<std::string>  outputSurfaces    = {"Terrain", "Buildings"};
+    std::vector<std::string>  outputSurfaces    = {"Terrain"};
     int                       numSides          = 1;
     std::vector<int>          surfaceLayerIDs;
 
@@ -133,7 +129,19 @@ public:
     bool       alphaWrap                        = false;
 
     //-- Other settings
-    const int searchtree_bucket_size = 100;
+    const int searchtree_bucket_size = 100; // hardcoded
+
+    //-- Struct for reconstruction regions (part of Buildings)
+    struct ReconRegion{
+        boost::variant<bool, double, Polygon_2> influRegionConfig;
+        std::string lod;
+        double      bpgInfluExtra                   = 0.;
+        bool        refineReconstructed             = false;
+        bool        importAdvantage                 = false;
+        int         outputLayerID                   = 0;
+    };
+
+    std::vector<std::shared_ptr<ReconRegion>> reconRegions;
 };
 
 #endif //CITY4CFD_CONFIG_H

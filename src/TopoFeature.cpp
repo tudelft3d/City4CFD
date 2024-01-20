@@ -43,6 +43,10 @@ TopoFeature::~TopoFeature() = default;
 
 int TopoFeature::_numOfOutputLayers = 0;
 
+void TopoFeature::add_recon_region_output_layers(const int numLayers) {
+    _numOfOutputLayers += numLayers;
+}
+
 int TopoFeature::get_num_output_layers() {
     return _numOfOutputLayers;
 }
@@ -63,7 +67,7 @@ std::string TopoFeature::get_id() const {
     return _id;
 }
 
-const int TopoFeature::get_output_layer_id() const {
+int TopoFeature::get_output_layer_id() const {
     return _outputLayerID;
 }
 

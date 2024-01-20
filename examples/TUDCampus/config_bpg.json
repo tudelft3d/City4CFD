@@ -21,9 +21,15 @@
       "layer_name": "Water"
     }
   ],
+  "reconstruction_regions": [
+    {
+      "influence_region":   300,
+      "building_percentile": 90,
+      "lod": "1.2"
+    }
+  ],
 
   "point_of_interest": [85376, 446125],
-  "influence_region":   300,
   "domain_bnd":         null,
   "top_height":         300,
 
@@ -38,9 +44,6 @@
     "iterations": 1,
     "max_pts": 100000
   },
-
-  "lod": "1.2",
-  "building_percentile": 90,
 
   "edge_max_len": 5,
 

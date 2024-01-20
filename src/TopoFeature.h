@@ -38,6 +38,7 @@ public:
     TopoFeature(int outputLayerID);
     virtual ~TopoFeature();
 
+    static void          add_recon_region_output_layers(const int numLayers);
     static int           get_num_output_layers();
 
     virtual void         get_cityjson_info(nlohmann::json& b) const;
@@ -50,7 +51,7 @@ public:
     const Mesh& get_mesh() const;
     void        set_id(unsigned long id);
     std::string get_id() const;
-    const int   get_output_layer_id() const;
+    int         get_output_layer_id() const;
     bool        is_active() const;
     bool        is_imported() const;
     void        deactivate();
@@ -62,11 +63,11 @@ protected:
     std::string    _id;
     bool           _f_active;
     bool           _f_imported;
-    int            _outputLayerID; // 0- Terrain
-                                   // 1- Buildings
-                                   //    Surface Layers
+    int            _outputLayerID; // 0  Terrain
+                                   //    Building regions
                                    //    Sides
                                    //    Top
+                                   //    Surface Layers
 };
 
 #endif //CITY4CFD_TOPOFEATURE_H

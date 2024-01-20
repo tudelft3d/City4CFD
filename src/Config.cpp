@@ -87,17 +87,43 @@ void Config::set_config(nlohmann::json& j) {
         if (j["point_clouds"].contains("ground")) ground_xyz = j["point_clouds"]["ground"];
         if (j["point_clouds"].contains("buildings")) buildings_xyz = j["point_clouds"]["buildings"];
     }
-
     //-- Domain setup
     pointOfInterest = Point_2(j["point_of_interest"][0], j["point_of_interest"][1]);
 
-    //- Influence region
-    std::string influRegionCursor = "influence_region";
-    Config::get().set_region(influRegionConfig, influRegionCursor, j);
+    //- Reconstruction regions setup
+    // need to define and add all reconstruction-specific parameters
+    int buildingOutputLayerID = 1;
+    for (auto regionJson : j["reconstruction_regions"]) {
+        std::shared_ptr<ReconRegion> reconRegion = std::make_shared<ReconRegion>();
+
+        //- Influence region
+        Config::get().set_region(reconRegion->influRegionConfig, "influence_region", regionJson);
+
+        reconRegion->lod = regionJson["lod"].front();
+        if (regionJson.contains("import_advantage"))
+            reconRegion->importAdvantage = regionJson["import_advantage"];
+        if (regionJson.contains("bpg_influence_region_extra"))
+            reconRegion->bpgInfluExtra = regionJson["bpg_influence_region_extra"];
+        if (regionJson.contains("refine"))
+            reconRegion->refineReconstructed = regionJson["refine"];
+        // set the building (belonging to recon region) output layer id
+        reconRegion->outputLayerID = buildingOutputLayerID;
+        ++buildingOutputLayerID;
+
+        reconRegions.push_back(reconRegion);
+    }
+
+    // Handle output surface names for buildings
+    if (j["reconstruction_regions"].size() < 2) {
+        outputSurfaces.emplace_back("Buildings");
+    } else {
+        for (int i = 0; i < j["reconstruction_regions"].size(); ++i) {
+            outputSurfaces.emplace_back("Buildings_" + std::to_string(i));
+        }
+    }
 
     //- Domain boundaries
-    std::string domainBndCursor = "domain_bnd";
-    Config::get().set_region(domainBndConfig, domainBndCursor, j);
+    Config::get().set_region(domainBndConfig, "domain_bnd", j);
     // Define domain type if using BPG
     if (domainBndConfig.type() == typeid(bool)) {
         if (j.contains("flow_direction"))
@@ -142,7 +168,7 @@ void Config::set_config(nlohmann::json& j) {
 
     //-- Polygon configuration
     int i = 0;
-    int surfLayerIdx = outputSurfaces.size(); // 0 - terrain, 1 - buildings, surface layers start from 2
+    int surfLayerIdx = outputSurfaces.size(); // 0 terrain, 1-x buildings, x-y boundaries, y-z surface layers
     for (auto& poly : j["polygons"]) {
         if (poly["type"] == "Building") {
             gisdata = poly["path"];
@@ -158,8 +184,6 @@ void Config::set_config(nlohmann::json& j) {
                 floorHeight = (double)poly["floor_height"];
             if (poly.contains("avoid_bad_polys"))
                 avoidBadPolys = poly["avoid_bad_polys"];
-            if (poly.contains("refine"))
-                refineReconstructedBuildings = poly["refine"];
         }
         if (poly["type"] == "SurfaceLayer") {
             topoLayers.push_back(poly["path"]);
@@ -219,8 +243,8 @@ void Config::set_config(nlohmann::json& j) {
         flatTerrain = j["flat_terrain"];
 
     // Buildings
-    lod = j["lod"].front();
-    buildingPercentile = (double)j["building_percentile"].front() / 100.;
+    if (j.contains("building_percentile"))
+        buildingPercentile = (double)j["building_percentile"].front() / 100.;
     if (j.contains("min_height")) {
         minHeight = j["min_height"];
     }
@@ -234,12 +258,11 @@ void Config::set_config(nlohmann::json& j) {
     // Imported buildings
     if (j.contains("import_geometries")) {
         importedBuildingsPath = j["import_geometries"]["path"];
-        importAdvantage       = j["import_geometries"]["advantage"];
         importTrueHeight      = j["import_geometries"]["true_height"];
         if (j["import_geometries"].contains("lod"))
             importLoD = j["import_geometries"]["lod"];
         if (j["import_geometries"].contains("refine"))
-            refineImportedBuildings = j["import_geometries"]["refine"];
+            refineImported = j["import_geometries"]["refine"];
     }
 
     // Boundary
@@ -288,7 +311,7 @@ void Config::set_config(nlohmann::json& j) {
 
 //-- influRegion and domainBndConfig flow control
 void Config::set_region(boost::variant<bool, double, Polygon_2>& regionType,
-                        std::string& regionName,
+                        const std::string regionName,
                         nlohmann::json& j) {
     if (j[regionName].is_string()) { // Search for GeoJSON polygon
         std::string polyFilePath = (std::string)j[regionName];

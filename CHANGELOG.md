@@ -1,6 +1,8 @@
 # Changelog
 
-## [Unreleased]
+## [Unreleased] - breaking changes
+### Added
+- Multiple reconstruction regions
 
 ## [0.4.4] - 2024-01-13
 ### Changed

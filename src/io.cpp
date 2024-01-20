@@ -325,14 +325,15 @@ void IO::print_progress_bar(int percent) {
 }
 
 void IO::output_obj(const OutputFeaturesPtr& allFeatures) {
-    int numOutputSurfaces = TopoFeature::get_num_output_layers();
+    int numOutputLayers = TopoFeature::get_num_output_layers();
     std::vector<std::ofstream> of;
-    std::vector<std::string>   fs(numOutputSurfaces), bs(numOutputSurfaces);
+    std::vector<std::string>   fs(numOutputLayers), bs(numOutputLayers);
 
-    std::vector<std::unordered_map<std::string, int>> dPts(numOutputSurfaces);
+    std::vector<std::unordered_map<std::string, int>> dPts(numOutputLayers);
     //-- Output points
 //    int count = 0; // to output each building as a separate group
     for (auto& f : allFeatures) {
+        assert(f->get_output_layer_id() > -1 && f->get_output_layer_id() < numOutputLayers);
         if (Config::get().outputSeparately) {
 //            if (f->get_class() == BUILDING)
 //                bs[f->get_output_layer_id()] += "\no " + std::to_string(count++);
@@ -370,6 +371,7 @@ void IO::output_stl(const OutputFeaturesPtr& allFeatures) {
 
     //-- Get all triangles
     for (auto& f : allFeatures) {
+        assert(f->get_output_layer_id() > -1 && f->get_output_layer_id() < numOutputLayers);
         if (!f->is_active()) continue;
         IO::get_stl_pts(f->get_mesh(), fs[f->get_output_layer_id()]);
     }
@@ -484,7 +486,7 @@ void IO::get_stl_pts(Mesh& mesh, std::string& fs) {
 void IO::get_cityjson_geom(const Mesh& mesh, nlohmann::json& g, std::unordered_map<std::string, int>& dPts,
                            std::string primitive) {
     g["type"] = primitive;
-    g["lod"] = Config::get().lod;
+    g["lod"] = "1.2"; //hardcoded for now
     g["boundaries"];
     for (auto& face: mesh.faces()) {
         if (IO::is_degen(mesh, face)) continue;

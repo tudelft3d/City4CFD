@@ -39,17 +39,17 @@
 #include <CGAL/alpha_wrap_3.h>
 
 Building::Building()
-        : PolyFeature(1), _elevation(-global::largnum), _height(-global::largnum),
-          _ptsPtr(std::make_shared<Point_set_3>()), _hasFailed(false) {}
+        : PolyFeature(-1), _elevation(-global::largnum), _height(-global::largnum),
+          _ptsPtr(std::make_shared<Point_set_3>()), _hasFailed(false), _reconSettings(nullptr) {}
 
 Building::Building(const nlohmann::json& poly)
-        : PolyFeature(poly, true, 1), _elevation(-global::largnum), _height(-global::largnum),
-          _ptsPtr(std::make_shared<Point_set_3>()), _hasFailed(false) {}
+        : PolyFeature(poly, true, -1), _elevation(-global::largnum), _height(-global::largnum),
+          _ptsPtr(std::make_shared<Point_set_3>()), _hasFailed(false), _reconSettings(nullptr) {}
         // 'true' here to check for polygon simplicity
 
 Building::Building(const Polygon_with_attr& poly)
-        : PolyFeature(poly, true, 1), _elevation(-global::largnum), _height(-global::largnum),
-          _ptsPtr(std::make_shared<Point_set_3>()), _hasFailed(false) {}
+        : PolyFeature(poly, true, -1), _elevation(-global::largnum), _height(-global::largnum),
+          _ptsPtr(std::make_shared<Point_set_3>()), _hasFailed(false), _reconSettings(nullptr) {}
         // 'true' here to check for polygon simplicity
 
 Building::~Building() = default;
@@ -208,15 +208,39 @@ void Building::translate_footprint(const double h) {
     }
 }
 
-void Building::check_feature_scope(const Polygon_2& otherPoly) {
+// Store the reconstruction settings for a defined reconstruction (influence) region
+void Building::set_reconstruction_rules(const BoundingRegion& reconRegion) {
+    _reconSettings = reconRegion._reconSettings;
+    // set the output layer ID
+    _outputLayerID = _reconSettings->outputLayerID;
+}
+
+// Remove stored reconstruction settings
+void Building::remove_reconstruction_rules() {
+    _reconSettings.reset();
+    _outputLayerID = 0;
+}
+
+std::shared_ptr<const Config::ReconRegion> Building::get_reconstruction_settings() const {
+    if (!_reconSettings)
+        throw std::runtime_error("Building " + _id + " missing reconstruction settings."
+                                 " Imported building? " + std::to_string(_f_imported));
+    return _reconSettings;
+}
+
+bool Building::is_part_of(const Polygon_2& otherPoly) const {
     for (auto& ring: _poly.rings()) {
         for (auto& vert : ring) {
             if (geomutils::point_in_poly(vert, otherPoly))
-                return;
+                return true;
         }
     }
-//    std::cout << "Poly ID " << this->get_id() << " is outside the influ region. Deactivating." << std::endl;
-    this->deactivate();
+//    std::cout << "Poly ID " << this->get_id() << " is outside the influ region." << std::endl;
+    return false;
+}
+
+bool Building::has_reconstruction_region() const {
+    return _outputLayerID > 0;
 }
 
 void Building::set_clip_flag(const bool flag) {
