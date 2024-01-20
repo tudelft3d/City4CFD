@@ -98,6 +98,7 @@ public:
     //- Imported buildings
     bool        importTrueHeight                = true;
     std::string importLoD                       = "9999";
+    bool        refineImported                  = false;
     //- Boundary
     bool  reconstructBoundaries                 = false;
 
@@ -135,7 +136,7 @@ public:
         boost::variant<bool, double, Polygon_2> influRegionConfig;
         std::string lod;
         double      bpgInfluExtra                   = 0.;
-        bool        refine                          = false;
+        bool        refineReconstructed             = false;
         bool        importAdvantage                 = false;
         int         outputLayerID                   = 0;
     };

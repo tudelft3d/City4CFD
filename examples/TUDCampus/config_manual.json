@@ -21,9 +21,18 @@
       "layer_name": "Water"
     }
   ],
+  "reconstruction_regions": [
+    {
+      "influence_region":  30,
+      "lod": "1.2"
+    },
+    {
+      "influence_region":  "polygons/influRegion.geojson",
+      "lod": "1.2"
+    }
+  ],
 
   "point_of_interest": [85376, 446125],
-  "influence_region":  "polygons/influRegion.geojson",
   "domain_bnd":        "polygons/domainBnd.geojson",
   "top_height":        150,
   "flow_direction":    [1, 1],
@@ -36,7 +45,6 @@
     "max_pts": 100000
   },
 
-  "lod": "1.2",
   "building_percentile": 90,
 
   "edge_max_len": 5,

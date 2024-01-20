@@ -181,7 +181,7 @@ void ReconstructedBuilding::reconstruct() {
     if (_clip_bottom || Config::get().intersectBuildingsTerrain) {
         this->translate_footprint(5);
     }
-    if (_reconSettings &&_reconSettings->refine) this->refine();
+    if (_reconSettings &&_reconSettings->refineReconstructed) this->refine();
 }
 
 void ReconstructedBuilding::reconstruct_flat_terrain() {

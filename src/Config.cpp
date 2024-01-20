@@ -39,12 +39,6 @@
 
 #include  <boost/algorithm/string/predicate.hpp>
 
-//todo ip: list of variables changed in the schema:
-//    influence_region
-//    refine
-//    lod
-//    import_advantage
-
 void Config::validate(nlohmann::json& j) {
     using valijson::Schema;
     using valijson::SchemaParser;
@@ -93,7 +87,6 @@ void Config::set_config(nlohmann::json& j) {
         if (j["point_clouds"].contains("ground")) ground_xyz = j["point_clouds"]["ground"];
         if (j["point_clouds"].contains("buildings")) buildings_xyz = j["point_clouds"]["buildings"];
     }
-
     //-- Domain setup
     pointOfInterest = Point_2(j["point_of_interest"][0], j["point_of_interest"][1]);
 
@@ -112,7 +105,7 @@ void Config::set_config(nlohmann::json& j) {
         if (regionJson.contains("bpg_influence_region_extra"))
             reconRegion->bpgInfluExtra = regionJson["bpg_influence_region_extra"];
         if (regionJson.contains("refine"))
-            reconRegion->refine = regionJson["refine"];
+            reconRegion->refineReconstructed = regionJson["refine"];
         // set the building (belonging to recon region) output layer id
         reconRegion->outputLayerID = buildingOutputLayerID;
         ++buildingOutputLayerID;
@@ -268,6 +261,8 @@ void Config::set_config(nlohmann::json& j) {
         importTrueHeight      = j["import_geometries"]["true_height"];
         if (j["import_geometries"].contains("lod"))
             importLoD = j["import_geometries"]["lod"];
+        if (j["import_geometries"].contains("refine"))
+            refineImported = j["import_geometries"]["refine"];
     }
 
     // Boundary
