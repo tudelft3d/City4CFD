@@ -74,7 +74,7 @@ protected:
     double               m_elevation;
     double               m_height;
     bool                 m_hasFailed;
-    bool                 m_clip_bottom = Config::get().clip;
+    bool                 m_clipBottom = Config::get().clip;
     std::shared_ptr<const Config::ReconRegion> m_reconSettings;
 };
 

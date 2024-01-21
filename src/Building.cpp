@@ -138,7 +138,7 @@ void Building::alpha_wrap(const BuildingsPtr& buildings, Mesh& newMesh) {
 }
 
 void Building::clip_bottom(const TerrainPtr& terrain) {
-    if (!m_clip_bottom) return;
+    if (!m_clipBottom) return;
     if (this->has_self_intersections() && !Config::get().handleSelfIntersect) throw
                 std::runtime_error(std::string("Clip error in building ID " + this->get_id() +
                                                + ". Cannot clip if there are self intersections!"));
@@ -244,7 +244,7 @@ bool Building::has_reconstruction_region() const {
 }
 
 void Building::set_clip_flag(const bool flag) {
-    m_clip_bottom = flag;
+    m_clipBottom = flag;
 }
 
 bool Building::has_self_intersections() const {

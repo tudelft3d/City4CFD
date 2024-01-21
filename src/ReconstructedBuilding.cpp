@@ -144,7 +144,7 @@ double ReconstructedBuilding::get_elevation() {
 
 void ReconstructedBuilding::reconstruct() {
     m_mesh.clear();
-    if (m_clip_bottom || Config::get().intersectBuildingsTerrain) {
+    if (m_clipBottom || Config::get().intersectBuildingsTerrain) {
         this->translate_footprint(-5);
     }
     //-- Check if reconstructing from height attribute takes precedence
@@ -178,7 +178,7 @@ void ReconstructedBuilding::reconstruct() {
     LoD12 lod12(m_poly, m_groundElevations, m_elevation);
     lod12.reconstruct(m_mesh);
 
-    if (m_clip_bottom || Config::get().intersectBuildingsTerrain) {
+    if (m_clipBottom || Config::get().intersectBuildingsTerrain) {
         this->translate_footprint(5);
     }
     if (Config::get().refineReconstructed) this->refine();
@@ -186,14 +186,14 @@ void ReconstructedBuilding::reconstruct() {
 
 void ReconstructedBuilding::reconstruct_flat_terrain() {
     m_mesh.clear();
-    if (m_clip_bottom || Config::get().intersectBuildingsTerrain) {
+    if (m_clipBottom || Config::get().intersectBuildingsTerrain) {
         this->translate_footprint(-5);
     }
     // the new height was previously calculated
     LoD12 lod12HeightAttribute(m_poly, m_groundElevations, this->get_elevation());
     lod12HeightAttribute.reconstruct(m_mesh);
 
-    if (m_clip_bottom || Config::get().intersectBuildingsTerrain) {
+    if (m_clipBottom || Config::get().intersectBuildingsTerrain) {
         this->translate_footprint(5);
     }
 }
