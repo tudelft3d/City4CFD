@@ -104,8 +104,6 @@ void Config::set_config(nlohmann::json& j) {
             reconRegion->importAdvantage = regionJson["import_advantage"];
         if (regionJson.contains("bpg_influence_region_extra"))
             reconRegion->bpgInfluExtra = regionJson["bpg_influence_region_extra"];
-        if (regionJson.contains("refine"))
-            reconRegion->refineReconstructed = regionJson["refine"];
         // set the building (belonging to recon region) output layer id
         reconRegion->outputLayerID = buildingOutputLayerID;
         ++buildingOutputLayerID;
@@ -184,6 +182,8 @@ void Config::set_config(nlohmann::json& j) {
                 floorHeight = (double)poly["floor_height"];
             if (poly.contains("avoid_bad_polys"))
                 avoidBadPolys = poly["avoid_bad_polys"];
+            if (poly.contains("refine"))
+                refineReconstructed= poly["refine"];
         }
         if (poly["type"] == "SurfaceLayer") {
             topoLayers.push_back(poly["path"]);

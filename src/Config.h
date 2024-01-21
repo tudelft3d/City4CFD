@@ -62,8 +62,6 @@ public:
     std::vector<std::string> topoLayers = {};        // Other polygons
     std::string              importedBuildingsPath;  // Additional pre-reconstructed buildings
 
-    bool                     avoidBadPolys      = false;
-
     //-- Domain setup
     Point_2     pointOfInterest;
     double      topHeight                       = 0.;
@@ -95,6 +93,8 @@ public:
     std::string floorAttribute;
     double      floorHeight                     = 9999.; // Handled by schema
     bool        buildingHeightAttrAdv           = false;
+    bool        avoidBadPolys                   = false;
+    bool        refineReconstructed             = false;
     //- Imported buildings
     bool        importTrueHeight                = true;
     std::string importLoD                       = "9999";
