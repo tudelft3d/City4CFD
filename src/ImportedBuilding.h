@@ -56,13 +56,13 @@ public:
 //    virtual void  get_cityjson_semantics(nlohmann::json& g) const override;
 
 protected:
-    std::unordered_map<int, Point_3>  _ptMap;
-    std::unique_ptr<nlohmann::json>   _buildingJson;
-    std::vector<int>                  _footprintIdxList;
-    std::vector<std::vector<int>>     _footprintPtsIdxList;
-    bool                              _appendToBuilding;
-    bool                              _trueHeight;
-    int                               _lodIdx;
+    std::unordered_map<int, Point_3>  m_ptMap;
+    std::unique_ptr<nlohmann::json>   m_buildingJson;
+    std::vector<int>                  m_footprintIdxList;
+    std::vector<std::vector<int>>     m_footprintPtsIdxList;
+    bool                              m_appendToBuilding;
+    bool                              m_trueHeight;
+    int                               m_lodIdx;
 
     void check_simplicity(Polygon_2& ring);
     void polyset_to_polygon(const CGAL::Polygon_set_2<CGAL::Epeck>& polySet);

@@ -39,18 +39,18 @@
 
 BoundingRegion::BoundingRegion() = default;
 BoundingRegion::BoundingRegion(std::shared_ptr<Config::ReconRegion> reconRegion)
-: _reconSettings(reconRegion)
+: m_reconSettings(reconRegion)
 {}
 BoundingRegion::~BoundingRegion() = default;
 
 //-- Operators to read bounded region if explicitly defined in config
 //   called through boost:apply_visitor
 void BoundingRegion::operator()(double radius) {
-    geomutils::make_round_poly(global::nullPt, radius, _boundingRegion);
+    geomutils::make_round_poly(global::nullPt, radius, m_boundingRegion);
 }
 
 void BoundingRegion::operator()(Polygon_2& poly) {
-    _boundingRegion = poly;
+    m_boundingRegion = poly;
 }
 
 //-- Reconstruction (influ) regions related functions
@@ -70,11 +70,11 @@ BoundingRegion::calc_influ_region_bpg(const DT& dt, BuildingsPtr& buildings) {
                 throw std::runtime_error("Impossible to automatically determine influence region");
             }
             double maxDim = sqrt(f->sq_max_dim());
-            influRegionRadius = maxDim * (3. + _reconSettings->bpgInfluExtra); //- BPG by Liu hardcoded
+            influRegionRadius = maxDim * (3. + m_reconSettings->bpgInfluExtra); //- BPG by Liu hardcoded
 
             f->clear_feature();
 
-            geomutils::make_round_poly(global::nullPt, influRegionRadius, _boundingRegion);
+            geomutils::make_round_poly(global::nullPt, influRegionRadius, m_boundingRegion);
             return maxDim;
         }
     }
@@ -83,8 +83,8 @@ BoundingRegion::calc_influ_region_bpg(const DT& dt, BuildingsPtr& buildings) {
 }
 
 void BoundingRegion::calc_influ_region_bpg(const double maxDim) {
-    double influRegionRadius = maxDim * (3. + _reconSettings->bpgInfluExtra); //- BPG by Liu hardcoded
-    geomutils::make_round_poly(global::nullPt, influRegionRadius, _boundingRegion);
+    double influRegionRadius = maxDim * (3. + m_reconSettings->bpgInfluExtra); //- BPG by Liu hardcoded
+    geomutils::make_round_poly(global::nullPt, influRegionRadius, m_boundingRegion);
 }
 
 //-- Boundary related functions
@@ -147,13 +147,13 @@ void BoundingRegion::calc_bnd_bpg(const Polygon_2& influRegionPoly,
         Config::get().topHeight = hMax * Config::get().bpgDomainSize.back() * expRatio;
     }
     //-- Return the points back to global coordinates
-    for (auto& pt : localPoly) _boundingRegion.push_back(geomutils::rotate_pt(pt, angle));
+    for (auto& pt : localPoly) m_boundingRegion.push_back(geomutils::rotate_pt(pt, angle));
 }
 
 // Check if all points of this region fall within otherRegion
 bool BoundingRegion::is_subset_of(const BoundingRegion& otherRegion) const {
     auto& poly = otherRegion.get_bounding_region();
-    for (auto& vert : _boundingRegion) {
+    for (auto& vert : m_boundingRegion) {
         if (!geomutils::point_in_poly(vert, poly))
             return false;
     }
@@ -161,10 +161,10 @@ bool BoundingRegion::is_subset_of(const BoundingRegion& otherRegion) const {
 }
 
 Polygon_2& BoundingRegion::get_bounding_region() {
-    return _boundingRegion;
+    return m_boundingRegion;
 }
 const Polygon_2& BoundingRegion::get_bounding_region() const {
-    return _boundingRegion;
+    return m_boundingRegion;
 }
 
 Polygon_2 BoundingRegion::calc_bnd_poly(const std::vector<Point_2>& candidatePts,

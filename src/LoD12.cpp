@@ -31,15 +31,15 @@
 
 LoD12::LoD12(const Polygon_with_holes_2& poly,
              const std::vector<std::vector<double>>& base_elevations)
-        : _elevation(), _poly(poly), _baseElevations(base_elevations) {}
+        : m_elevation(), m_poly(poly), m_baseElevations(base_elevations) {}
 
 LoD12::LoD12(const Polygon_with_holes_2& poly,
              const std::vector<std::vector<double>>& base_elevations,
              const double elevation)
-        : _elevation(elevation), _poly(poly), _baseElevations(base_elevations) {}
+        : m_elevation(elevation), m_poly(poly), m_baseElevations(base_elevations) {}
 
 void LoD12::set_elevation(const double& elevation) {
-    _elevation = elevation;
+    m_elevation = elevation;
 }
 
 void LoD12::reconstruct(Mesh& mesh) {
@@ -54,21 +54,21 @@ void LoD12::reconstruct(Mesh& mesh) {
     std::map<CDT::Vertex_handle, Mesh::Vertex_index> cdtToMesh;
 
     int polyCount = 0;
-    for (auto& poly : _poly.rings()) { // Loop over polys
+    for (auto& poly : m_poly.rings()) { // Loop over polys
         std::vector<Vertex_handle> cdt_handle;
         std::vector<Mesh::Vertex_index> mesh_vertex;
         int count = 0;
         for (auto vert = poly.vertices_begin(); vert != poly.vertices_end(); ++vert) { // Loop over poly vertices
             cdt_handle.emplace_back(cdt_buildings.insert(ePoint_3(vert->x(),
                                                                   vert->y(),
-                                                                  _baseElevations[polyCount][count])));
+                                                                  m_baseElevations[polyCount][count])));
             mesh_vertex.emplace_back(mesh.add_vertex(Point_3(vert->x(),
                                                              vert->y(),
-                                                             _baseElevations[polyCount][count++])));
+                                                             m_baseElevations[polyCount][count++])));
             cdtToMesh[cdt_handle.back()] = mesh_vertex.back();
             mesh_vertex.emplace_back(mesh.add_vertex(Point_3(vert->x(),
                                                              vert->y(),
-                                                             _elevation)));
+                                                             m_elevation)));
         }
         cdt_handle.emplace_back(cdt_handle.front());
         mesh_vertex.emplace_back(mesh_vertex.front());

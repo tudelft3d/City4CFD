@@ -54,8 +54,8 @@ public:
     virtual std::string get_cityjson_primitive() const;
 
 protected:
-    static std::vector<Point_3> _outerPts;
-    static double               _outerBndHeight;
-    std::vector<Point_3>        _sideOutputPts;
+    static std::vector<Point_3> s_outerPts;
+    static double               s_outerBndHeight;
+    std::vector<Point_3>        m_sideOutputPts;
 };
 #endif //CITY4CFD_BOUNDARY_H

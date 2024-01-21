@@ -46,30 +46,30 @@ public:
     void output();
 
 private:
-    PointCloud                  _pointCloud;
-//    JsonVectorPtr               _polygonsBuildings;     // for json-only reader
-    PolyVecPtr                  _polygonsBuildings;
-    JsonVectorPtr               _importedBuildingsJSON;
-//    std::vector<JsonVectorPtr>  _polygonsSurfaceLayers; // for json-only reader
-    std::vector<PolyVecPtr>     _polygonsSurfaceLayers;
-    PointSet3Ptr                _importedBuildingsPts;
-    std::vector<Mesh>           _importedBuildingsOther;
+    PointCloud                  m_pointCloud;
+//    JsonVectorPtr               m_polygonsBuildings;     // for json-only reader
+    PolyVecPtr                  m_polygonsBuildings;
+    JsonVectorPtr               m_importedBuildingsJSON;
+//    std::vector<JsonVectorPtr>  m_polygonsSurfaceLayers; // for json-only reader
+    std::vector<PolyVecPtr>     m_polygonsSurfaceLayers;
+    PointSet3Ptr                m_importedBuildingsPts;
+    std::vector<Mesh>           m_importedBuildingsOther;
 
-    TerrainPtr                  _terrainPtr;
-    BuildingsPtr                _buildingsPtr;
-    ReconstructedBuildingsPtr   _reconstructedBuildingsPtr;
-    ImportedBuildingsPtr        _importedBuildingsPtr;
-    SurfaceLayersPtr            _surfaceLayersPtr;
-    BoundariesPtr               _boundariesPtr;
-    PolyFeaturesPtr             _allFeaturesPtr;
-    OutputFeaturesPtr           _outputFeaturesPtr;
+    TerrainPtr                  m_terrainPtr;
+    BuildingsPtr                m_buildingsPtr;
+    ReconstructedBuildingsPtr   m_reconstructedBuildingsPtr;
+    ImportedBuildingsPtr        m_importedBuildingsPtr;
+    SurfaceLayersPtr            m_surfaceLayersPtr;
+    BoundariesPtr               m_boundariesPtr;
+    PolyFeaturesPtr             m_allFeaturesPtr;
+    OutputFeaturesPtr           m_outputFeaturesPtr;
 
-    std::vector<BoundingRegion> _reconRegions; // one influ region -> vector of reconstruction regions
-    BoundingRegion              _domainBnd;
-    DT                          _dt;
+    std::vector<BoundingRegion> m_reconRegions; // one influ region -> vector of reconstruction regions
+    BoundingRegion              m_domainBnd;
+    DT                          m_dt;
 
-    bool                        _bndBPG         = false;
-    bool                        _cityjsonInput  = false;
+    bool                        m_bndBPG         = false;
+    bool                        m_cityjsonInput  = false;
 
     void set_features();
     void set_influ_region();

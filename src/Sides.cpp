@@ -39,9 +39,9 @@ void Sides::reconstruct() {
     std::vector<Mesh::vertex_index> mesh_vertex_side;
 
     //-- Add mesh vertices and store them in a vector
-    for (auto it = _sideOutputPts.begin(); it != _sideOutputPts.end(); ++it) {
-        mesh_vertex_side.emplace_back(_mesh.add_vertex(*it));
-        mesh_vertex_side.emplace_back(_mesh.add_vertex(Point_3(it->x(), it->y(), Config::get().topHeight)));
+    for (auto it = m_sideOutputPts.begin(); it != m_sideOutputPts.end(); ++it) {
+        mesh_vertex_side.emplace_back(m_mesh.add_vertex(*it));
+        mesh_vertex_side.emplace_back(m_mesh.add_vertex(Point_3(it->x(), it->y(), Config::get().topHeight)));
     }
 
     //-- Add middle top point to mesh
@@ -53,8 +53,8 @@ void Sides::reconstruct() {
         int v1 = i;
         int v2 = i + 2;
 
-        _mesh.add_face(mesh_vertex_side[v2], mesh_vertex_side[v1], mesh_vertex_side[v1 + 1]);
-        _mesh.add_face(mesh_vertex_side[v2 + 1], mesh_vertex_side[v2], mesh_vertex_side[v1 + 1]);
+        m_mesh.add_face(mesh_vertex_side[v2], mesh_vertex_side[v1], mesh_vertex_side[v1 + 1]);
+        m_mesh.add_face(mesh_vertex_side[v2 + 1], mesh_vertex_side[v2], mesh_vertex_side[v1 + 1]);
     }
 }
 

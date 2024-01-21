@@ -71,13 +71,13 @@ public:
     MinBbox&                                 get_min_bbox();
 
 protected:
-    static int                        _numOfPolyFeatures;
+    static int                        s_numOfPolyFeatures;
 
-    int                               _polyInternalID;
-    Polygon_with_holes_2              _poly;
-    std::vector<std::vector<double>>  _groundElevations;
-    double                            _groundElevation;
-    MinBbox                           _minBbox;
+    int                               m_polyInternalID;
+    Polygon_with_holes_2              m_poly;
+    std::vector<std::vector<double>>  m_groundElevations;
+    double                            m_groundElevation;
+    MinBbox                           m_minBbox;
 
     int  new_internal_id();
     void parse_json_poly(const nlohmann::json& poly, const bool checkSimplicity);

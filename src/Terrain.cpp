@@ -33,14 +33,14 @@
 #include "Building.h"
 
 Terrain::Terrain()
-        : TopoFeature(0), _cdt(), _surfaceLayersTerrain(),
-          _constrainedPolys(), _vertexFaceMap(), _extraConstrainedEdges(),
-          _searchTree(Config::get().searchtree_bucket_size) {}
+        : TopoFeature(0), m_cdt(), m_surfaceLayersTerrain(),
+          m_constrainedPolys(), m_vertexFaceMap(), m_extraConstrainedEdges(),
+          m_searchTree(Config::get().searchtree_bucket_size) {}
 
 Terrain::Terrain(int pid)
-        : TopoFeature(pid), _cdt(), _surfaceLayersTerrain(),
-          _constrainedPolys(), _vertexFaceMap(), _extraConstrainedEdges(),
-          _searchTree(Config::get().searchtree_bucket_size) {}
+        : TopoFeature(pid), m_cdt(), m_surfaceLayersTerrain(),
+          m_constrainedPolys(), m_vertexFaceMap(), m_extraConstrainedEdges(),
+          m_searchTree(Config::get().searchtree_bucket_size) {}
 
 Terrain::~Terrain() = default;
 
@@ -58,7 +58,7 @@ void Terrain::set_cdt(const Point_set_3& pointCloud) {
     }
     IO::print_progress_bar(100); std::clog << std::endl;
     std::cout << "    Triangulating..." << std::flush;
-    _cdt.insert(pts.begin(), pts.end());
+    m_cdt.insert(pts.begin(), pts.end());
     std::cout << "\r    Triangulating...done" << std::endl;
 }
 
@@ -81,7 +81,7 @@ void Terrain::prep_constraints(const PolyFeaturesPtr& features, Point_set_3& poi
                 auto it = pointCloud.insert(Point_3(polyVertex.x(), polyVertex.y(), elevations[polyCount][i++]));
                 if (is_building) building_pt[*it] = std::static_pointer_cast<Building>(f);
             }
-            _constrainedPolys.push_back(pts);
+            m_constrainedPolys.push_back(pts);
             ++polyCount;
         }
         ++countFeatures;
@@ -93,59 +93,59 @@ void Terrain::constrain_features() {
     std::cout << "\n    Imprinting polygons" << std::endl;
 
     int count = 0;
-    for (auto& ring : _constrainedPolys) {
+    for (auto& ring : m_constrainedPolys) {
         //-- Set added points as constraints
-        _cdt.insert_constraint(ring.begin(), ring.end(), true);
+        m_cdt.insert_constraint(ring.begin(), ring.end(), true);
 
-        if ((count % 100) == 0) IO::print_progress_bar(100 * count / _constrainedPolys.size());
+        if ((count % 100) == 0) IO::print_progress_bar(100 * count / m_constrainedPolys.size());
         ++count;
     }
     IO::print_progress_bar(100); std::clog << std::endl;
     // extra edges to constrain when whole polygons couldn't be added
-    if (!_extraConstrainedEdges.empty()) std::cout << "\n    Adding extra constrained edges" << std::endl;
-    for (auto& extraEdge : _extraConstrainedEdges) {
-        _cdt.insert_constraint(extraEdge.source(), extraEdge.target());
+    if (!m_extraConstrainedEdges.empty()) std::cout << "\n    Adding extra constrained edges" << std::endl;
+    for (auto& extraEdge : m_extraConstrainedEdges) {
+        m_cdt.insert_constraint(extraEdge.source(), extraEdge.target());
         ++count;
     }
 }
 
 void Terrain::create_mesh(const PolyFeaturesPtr& features) {
-    _mesh.clear();
+    m_mesh.clear();
     //-- Mark surface layers
     this->tag_layers(features);
 
     //-- Create the mesh for the terrain
-    geomutils::cdt_to_mesh(_cdt, _mesh);
+    geomutils::cdt_to_mesh(m_cdt, m_mesh);
 
     // -- Surface layer meshes are stored here
     for (int i : Config::get().surfaceLayerIDs) {
         auto layer = std::make_shared<SurfaceLayer>(i);
-        geomutils::cdt_to_mesh(_cdt, layer->get_mesh(), i); // Create mesh for surface layers
-        _surfaceLayersTerrain.push_back(layer);
+        geomutils::cdt_to_mesh(m_cdt, layer->get_mesh(), i); // Create mesh for surface layers
+        m_surfaceLayersTerrain.push_back(layer);
     }
 }
 
 void Terrain::prepare_subset() {
     //-- Make terrain mesh without surface layers marked
-    geomutils::cdt_to_mesh(_cdt, _mesh);
-    if (_mesh.is_empty()) throw std::runtime_error("Cannot create vertex-face map of empty mesh!");
+    geomutils::cdt_to_mesh(m_cdt, m_mesh);
+    if (m_mesh.is_empty()) throw std::runtime_error("Cannot create vertex-face map of empty mesh!");
 
     //-- Construct vertex-face map used for search
-    _vertexFaceMap.clear();
-    for (auto& face : _mesh.faces()) {
-        for (auto vertex : CGAL::vertices_around_face(_mesh.halfedge(face), _mesh)) {
-            auto pt = _mesh.point(vertex);
-            auto it = _vertexFaceMap.find(pt);
-            if (it == _vertexFaceMap.end()) {
-                _vertexFaceMap[pt].push_back(face);
+    m_vertexFaceMap.clear();
+    for (auto& face : m_mesh.faces()) {
+        for (auto vertex : CGAL::vertices_around_face(m_mesh.halfedge(face), m_mesh)) {
+            auto pt = m_mesh.point(vertex);
+            auto it = m_vertexFaceMap.find(pt);
+            if (it == m_vertexFaceMap.end()) {
+                m_vertexFaceMap[pt].push_back(face);
             } else {
                 it->second.push_back(face);
             }
         }
     }
     //-- Construct search tree
-    _searchTree.clear();
-    _searchTree.insert(_mesh.points().begin(), _mesh.points().end());
+    m_searchTree.clear();
+    m_searchTree.insert(m_mesh.points().begin(), m_mesh.points().end());
 }
 
 Mesh Terrain::mesh_subset(const Polygon_with_holes_2& poly) const {
@@ -157,7 +157,7 @@ Mesh Terrain::mesh_subset(const Polygon_with_holes_2& poly) const {
         Point_2 bbox1(poly.bbox().xmin() - expandSearch, poly.bbox().ymin() - expandSearch);
         Point_2 bbox2(poly.bbox().xmax() + expandSearch, poly.bbox().ymax() + expandSearch);
         Fuzzy_iso_box pts_range(bbox1, bbox2);
-        _searchTree.search(std::back_inserter(subsetPts), pts_range);
+        m_searchTree.search(std::back_inserter(subsetPts), pts_range);
         expandSearch *= 2;
     }
 
@@ -166,9 +166,9 @@ Mesh Terrain::mesh_subset(const Polygon_with_holes_2& poly) const {
     std::unordered_map<Point_3, vertex_descriptor> dPts;
     std::vector<face_descriptor> faceLst;
     for (auto& pt : subsetPts) {
-//        auto it = _vertexFaceMap.find(IO::gen_key_bucket(pt));
-        auto it = _vertexFaceMap.find(pt);
-        assert(it != _vertexFaceMap.end());
+//        auto it = m_vertexFaceMap.find(IO::gen_key_bucket(pt));
+        auto it = m_vertexFaceMap.find(pt);
+        assert(it != m_vertexFaceMap.end());
         for (auto& face : it->second) {
             //- Make sure the same face isn't added multiple times
             if (std::find(faceLst.begin(), faceLst.end(), face) == faceLst.end()) {
@@ -178,8 +178,8 @@ Mesh Terrain::mesh_subset(const Polygon_with_holes_2& poly) const {
             }
             //- Take subset
             std::vector<vertex_descriptor> facePts; facePts.reserve(3);
-            for (auto vertex : CGAL::vertices_around_face(_mesh.halfedge(face), _mesh)) {
-                auto meshPt = _mesh.point(vertex);
+            for (auto vertex : CGAL::vertices_around_face(m_mesh.halfedge(face), m_mesh)) {
+                auto meshPt = m_mesh.point(vertex);
                 auto vertexIt = dPts.find(meshPt);
                 if (vertexIt == dPts.end()) {
                     auto meshVertId = subsetMesh.add_vertex(meshPt);
@@ -196,8 +196,8 @@ Mesh Terrain::mesh_subset(const Polygon_with_holes_2& poly) const {
 }
 
 void Terrain::clear_subset() {
-    _vertexFaceMap.clear();
-    _searchTree.clear();
+    m_vertexFaceMap.clear();
+    m_searchTree.clear();
 }
 
 /*
@@ -252,7 +252,7 @@ void Terrain::tag_layers(const Face_handle& start,
                 CDT::Edge e(fh,i);
                 Face_handle n = fh->neighbor(i);
                 if (n->info().nesting_level == -1) {
-                    if (_cdt.is_constrained(e)) {
+                    if (m_cdt.is_constrained(e)) {
                     #pragma omp critical
                         border.push_back(e);
                     } else queue.push_back(n);
@@ -263,11 +263,11 @@ void Terrain::tag_layers(const Face_handle& start,
 }
 
 void Terrain::tag_layers(const PolyFeaturesPtr& features) {
-    for (CDT::Face_handle f : _cdt.all_face_handles()) {
+    for (CDT::Face_handle f : m_cdt.all_face_handles()) {
         f->info().nesting_level = -1;
     }
     std::list<CDT::Edge> border;
-    tag_layers(_cdt.infinite_face(), 0, border, features);
+    tag_layers(m_cdt.infinite_face(), 0, border, features);
     #pragma omp parallel
     while (!border.empty()) {
         bool sstop = false;
@@ -288,7 +288,7 @@ void Terrain::tag_layers(const PolyFeaturesPtr& features) {
             tag_layers(n, e.first->info().nesting_level + 1, border, features);
         }
     }
-    for (CDT::Face_handle f : _cdt.all_face_handles()) {
+    for (CDT::Face_handle f : m_cdt.all_face_handles()) {
         if (f->info().surfaceLayer == -2) {
             f->info().surfaceLayer = -9999;
         }
@@ -327,27 +327,27 @@ std::string Terrain::get_cityjson_primitive() const {
 }
 
 CDT& Terrain::get_cdt() {
-    return _cdt;
+    return m_cdt;
 }
 
 const CDT& Terrain::get_cdt() const {
-    return _cdt;
+    return m_cdt;
 }
 
 std::vector<Polygon_3>& Terrain::get_constrained_polys() {
-    return _constrainedPolys;
+    return m_constrainedPolys;
 }
 
 const vertex_face_map& Terrain::get_vertex_face_map() const {
-    return _vertexFaceMap;
+    return m_vertexFaceMap;
 }
 
 const SearchTree& Terrain::get_mesh_search_tree() const {
-    return _searchTree;
+    return m_searchTree;
 }
 
 std::vector<Polygon_3::Segment_2>& Terrain::get_extra_constrained_edges() {
-    return _extraConstrainedEdges;
+    return m_extraConstrainedEdges;
 }
 
 TopoClass Terrain::get_class() const {
@@ -359,5 +359,5 @@ std::string Terrain::get_class_name() const {
 }
 
 const SurfaceLayersPtr& Terrain::get_surface_layers() const {
-    return _surfaceLayersTerrain;
+    return m_surfaceLayersTerrain;
 }

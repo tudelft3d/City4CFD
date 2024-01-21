@@ -48,11 +48,11 @@ PointCloud::~PointCloud() = default;
 void PointCloud::random_thin_pts() {
     if (Config::get().terrainThinning > 0 + global::smallnum) {
         std::cout <<"\nRandomly thinning terrain points" << std::endl;
-        _pointCloudTerrain.remove(CGAL::random_simplify_point_set(_pointCloudTerrain,
-                                                                  Config::get().terrainThinning),
-                                  _pointCloudTerrain.end());
-        _pointCloudTerrain.collect_garbage();
-        std::cout << "    Terrain points after thinning: " << _pointCloudTerrain.size() << std::endl;
+        m_pointCloudTerrain.remove(CGAL::random_simplify_point_set(m_pointCloudTerrain,
+                                                                   Config::get().terrainThinning),
+                                   m_pointCloudTerrain.end());
+        m_pointCloudTerrain.collect_garbage();
+        std::cout << "    Terrain points after thinning: " << m_pointCloudTerrain.size() << std::endl;
     }
 }
 
@@ -64,8 +64,8 @@ void PointCloud::smooth_terrain() {
     //-- WLOP simplification and regularization
     double retain_percentage = 100;
     int& maxTerrainPts = Config::get().maxSmoothPts;
-    if (maxTerrainPts > 0 && _pointCloudTerrain.size() > maxTerrainPts) {
-        retain_percentage = (double)maxTerrainPts / (double)_pointCloudTerrain.size() * 100.;
+    if (maxTerrainPts > 0 && m_pointCloudTerrain.size() > maxTerrainPts) {
+        retain_percentage = (double)maxTerrainPts / (double)m_pointCloudTerrain.size() * 100.;
         std::cout << "    Performing additional (optimized) terrain thinning to " << maxTerrainPts << " points" << std::endl;
     }
 
@@ -73,10 +73,10 @@ void PointCloud::smooth_terrain() {
     const double neighbor_radius = 0.5;   // neighbors size.
     Point_set_3 simplPts;
     CGAL::wlop_simplify_and_regularize_point_set<Concurrency_tag>
-            (_pointCloudTerrain, simplPts.point_back_inserter(),
+            (m_pointCloudTerrain, simplPts.point_back_inserter(),
              CGAL::parameters::select_percentage(retain_percentage).
                      neighbor_radius (neighbor_radius));
-    _pointCloudTerrain.clear();
+    m_pointCloudTerrain.clear();
 
     std::cout << "\r    Smoothing terrain 2/3..." << std::flush;
 
@@ -106,16 +106,16 @@ void PointCloud::smooth_terrain() {
     std::cout << "\r    Smoothing terrain...done" << std::endl;
 
     //-- Mesh back to points
-//    _pointCloudTerrain.clear();
+//    m_pointCloudTerrain.clear();
     for (auto& pt : mesh.points()) {
-        _pointCloudTerrain.insert(pt);
+        m_pointCloudTerrain.insert(pt);
     }
 }
 
 void PointCloud::remove_points_in_polygon(const BuildingsPtr& features) {
     typedef Quadtree_node<EPICK, Point_set_3> Point_index;
     Point_index pointCloudIndex;
-    auto& pointCloud = _pointCloudTerrain;
+    auto& pointCloud = m_pointCloudTerrain;
 
     pointCloudIndex.compute_extent(pointCloud);
     for (auto pointIndex = pointCloud.begin();
@@ -151,17 +151,17 @@ void PointCloud::create_flat_terrain(const PolyFeaturesPtr& lsFeatures) {
             continue;
         }
         for (auto& pt : f->get_poly().outer_boundary()) {
-            _pointCloudTerrain.insert(Point_3(pt.x(), pt.y(), 0.0));
+            m_pointCloudTerrain.insert(Point_3(pt.x(), pt.y(), 0.0));
         }
     }
 }
 
 void PointCloud::set_flat_terrain() {
     Point_set_3 flatPC;
-    for (auto& pt : _pointCloudTerrain.points()) {
+    for (auto& pt : m_pointCloudTerrain.points()) {
         flatPC.insert(Point_3(pt.x(), pt.y(), 0.));
     }
-    _pointCloudTerrain = flatPC;
+    m_pointCloudTerrain = flatPC;
 }
 
 void PointCloud::flatten_polygon_pts(const PolyFeaturesPtr& lsFeatures,
@@ -172,23 +172,23 @@ void PointCloud::flatten_polygon_pts(const PolyFeaturesPtr& lsFeatures,
 
     //-- Construct a connectivity map and remove duplicates along the way
     std::unordered_map<Point_3, int> pointCloudConnectivity;
-    auto it = _pointCloudTerrain.points().begin();
+    auto it = m_pointCloudTerrain.points().begin();
     int count = 0;
-    while (it != _pointCloudTerrain.points().end()) {
+    while (it != m_pointCloudTerrain.points().end()) {
         auto itPC = pointCloudConnectivity.find(*it);
         if (itPC != pointCloudConnectivity.end()) {
-            _pointCloudTerrain.remove(_pointCloudTerrain.begin() + count);
+            m_pointCloudTerrain.remove(m_pointCloudTerrain.begin() + count);
         } else {
             pointCloudConnectivity[*it] = count;
             ++it;
             ++count;
         }
     }
-    _pointCloudTerrain.collect_garbage();
+    m_pointCloudTerrain.collect_garbage();
 
     //-- Construct search tree from ground points
-    SearchTree searchTree(_pointCloudTerrain.points().begin(),
-                          _pointCloudTerrain.points().end(),
+    SearchTree searchTree(m_pointCloudTerrain.points().begin(),
+                          m_pointCloudTerrain.points().end(),
                           Config::get().searchtree_bucket_size);
 
     //-- Perform flattening
@@ -198,7 +198,7 @@ void PointCloud::flatten_polygon_pts(const PolyFeaturesPtr& lsFeatures,
         if (ita != Config::get().flattenSurfaces.end()) {
             // flatten points
             bool isNextToBuilding = false;
-            if(f->flatten_polygon_inner_points(_pointCloudTerrain, flattenedPts, searchTree, pointCloudConnectivity,
+            if(f->flatten_polygon_inner_points(m_pointCloudTerrain, flattenedPts, searchTree, pointCloudConnectivity,
                                                constrainedEdges, newPolys, isNextToBuilding)) {
                 // add to list if constructing vertical borders
                 if (std::find(Config::get().flattenVertBorder.begin(), Config::get().flattenVertBorder.end(),
@@ -212,18 +212,18 @@ void PointCloud::flatten_polygon_pts(const PolyFeaturesPtr& lsFeatures,
     if (!vertBorders.empty()) this->buffer_flat_edges(vertBorders, constrainedEdges);
 
     //-- Change points with flattened values
-    int pcOrigSize = _pointCloudTerrain.points().size();
+    int pcOrigSize = m_pointCloudTerrain.points().size();
     for (auto& itp : flattenedPts) {
-        _pointCloudTerrain.insert(itp.second);
+        m_pointCloudTerrain.insert(itp.second);
     }
     for (int i = 0; i < pcOrigSize; ++i) {
         auto itp = flattenedPts.find(i);
         if (itp != flattenedPts.end()) {
-            _pointCloudTerrain.remove(i);
+            m_pointCloudTerrain.remove(i);
             flattenedPts.erase(i);
         }
     }
-    _pointCloudTerrain.collect_garbage();
+    m_pointCloudTerrain.collect_garbage();
 }
 
 void PointCloud::buffer_flat_edges(const PolyFeaturesPtr& avgFeatures,
@@ -299,7 +299,7 @@ void PointCloud::buffer_flat_edges(const PolyFeaturesPtr& avgFeatures,
 #endif
                 std::vector<double> height;
                 Polygon_2& offsetPoly2 = *(offset_contours.back());
-                geomutils::interpolate_poly_from_pc(offsetPoly2, height, _pointCloudTerrain);
+                geomutils::interpolate_poly_from_pc(offsetPoly2, height, m_pointCloudTerrain);
                 Polygon_3 offsetPoly3;
                 for (auto j = 0; j < offsetPoly2.size(); ++j) {
                     offsetPoly3.push_back(ePoint_3(offsetPoly2[j].x(), offsetPoly2[j].y(), height[j]));
@@ -331,9 +331,9 @@ void PointCloud::read_point_clouds() {
     //- Read ground points
     if (!Config::get().ground_xyz.empty()) {
         std::cout << "Reading ground points" << std::endl;
-        IO::read_point_cloud(Config::get().ground_xyz, _pointCloudTerrain);
+        IO::read_point_cloud(Config::get().ground_xyz, m_pointCloudTerrain);
 
-        std::cout << "    Points read: " << _pointCloudTerrain.size() << std::endl;
+        std::cout << "    Points read: " << m_pointCloudTerrain.size() << std::endl;
     } else {
         std::cout << "INFO: Did not find any ground points! Will calculate ground as a flat surface." << std::endl;
         std::cout << "WARNING: Ground elevation of buildings can only be approximated. "
@@ -344,24 +344,24 @@ void PointCloud::read_point_clouds() {
     //- Read building points
     if (!Config::get().buildings_xyz.empty()) {
         std::cout << "Reading building points" << std::endl;
-        IO::read_point_cloud(Config::get().buildings_xyz, _pointCloudBuildings);
-        if (_pointCloudBuildings.empty()) throw std::invalid_argument("Didn't find any building points!");
+        IO::read_point_cloud(Config::get().buildings_xyz, m_pointCloudBuildings);
+        if (m_pointCloudBuildings.empty()) throw std::invalid_argument("Didn't find any building points!");
 
-        std::cout << "    Points read: " << _pointCloudBuildings.size() << std::endl;
+        std::cout << "    Points read: " << m_pointCloudBuildings.size() << std::endl;
     }
 }
 
 Point_set_3& PointCloud::get_terrain() {
-    return _pointCloudTerrain;
+    return m_pointCloudTerrain;
 }
 Point_set_3& PointCloud::get_buildings() {
-    return _pointCloudBuildings;
+    return m_pointCloudBuildings;
 }
 
 const Point_set_3& PointCloud::get_terrain() const {
-    return _pointCloudTerrain;
+    return m_pointCloudTerrain;
 }
 
 const Point_set_3& PointCloud::get_buildings() const {
-    return _pointCloudBuildings;
+    return m_pointCloudBuildings;
 }

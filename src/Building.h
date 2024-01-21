@@ -70,12 +70,12 @@ public:
     virtual std::string get_class_name() const override;
 
 protected:
-    PointSet3Ptr         _ptsPtr;
-    double               _elevation;
-    double               _height;
-    bool                 _hasFailed;
-    bool                 _clip_bottom = Config::get().clip;
-    std::shared_ptr<const Config::ReconRegion> _reconSettings;
+    PointSet3Ptr         m_ptsPtr;
+    double               m_elevation;
+    double               m_height;
+    bool                 m_hasFailed;
+    bool                 m_clip_bottom = Config::get().clip;
+    std::shared_ptr<const Config::ReconRegion> m_reconSettings;
 };
 
 //-- Struct for clipping

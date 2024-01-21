@@ -55,8 +55,8 @@ public:
     const Point_set_3& get_buildings() const;
 
 private:
-    Point_set_3 _pointCloudTerrain;
-    Point_set_3 _pointCloudBuildings;
+    Point_set_3 m_pointCloudTerrain;
+    Point_set_3 m_pointCloudBuildings;
 };
 
 

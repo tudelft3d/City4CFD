@@ -42,9 +42,9 @@ public:
     void   reconstruct(Mesh& mesh);
 
 private:
-    double                                   _elevation;
-    const Polygon_with_holes_2&              _poly;
-    const std::vector<std::vector<double>>&  _baseElevations;
+    double                                   m_elevation;
+    const Polygon_with_holes_2&              m_poly;
+    const std::vector<std::vector<double>>&  m_baseElevations;
 };
 
 #endif //CITY4CFD_LOD12_H

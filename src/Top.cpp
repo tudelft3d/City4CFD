@@ -39,11 +39,11 @@ void Top::reconstruct() {
 
     //-- Top is done by making a CDT of outerPts
     CDT cdt_top;
-    for (auto& pt : _outerPts) {
+    for (auto& pt : s_outerPts) {
         cdt_top.insert(ePoint_3(pt.x(), pt.y(), Config::get().topHeight));
     }
     //-- Add mesh faces for top
-    geomutils::cdt_to_mesh(cdt_top, _mesh);
+    geomutils::cdt_to_mesh(cdt_top, m_mesh);
 }
 
 TopoClass Top::get_class() const {

@@ -52,7 +52,7 @@ SurfaceLayer::~SurfaceLayer() = default;
 void SurfaceLayer::check_feature_scope(const Polygon_2& bndPoly) {
     //-- Exclude all polygons that have at least one
     //-- vertex outside the domain
-    for (auto& vert : _poly.outer_boundary()) {
+    for (auto& vert : m_poly.outer_boundary()) {
         if (!geomutils::point_in_poly(vert, bndPoly)) {
             this->deactivate();
             return;

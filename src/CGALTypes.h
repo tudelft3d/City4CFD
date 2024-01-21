@@ -65,37 +65,37 @@ struct Polygon_with_holes_2 {
     Polygon_with_holes_2() = default;
 
     Polygon_with_holes_2(const CGAL::Polygon_with_holes_2<EPICK>& cgalPoly) {
-        _rings.push_back(cgalPoly.outer_boundary());
-        for (auto& hole : cgalPoly.holes()) _rings.push_back(hole);
+        m_rings.push_back(cgalPoly.outer_boundary());
+        for (auto& hole : cgalPoly.holes()) m_rings.push_back(hole);
     }
 
-    std::vector<Polygon_2> _rings;
+    std::vector<Polygon_2> m_rings;
 
-    std::vector<Polygon_2>& rings() {return _rings;}
-    const std::vector<Polygon_2>& rings() const {return _rings;}
+    std::vector<Polygon_2>& rings() {return m_rings;}
+    const std::vector<Polygon_2>& rings() const {return m_rings;}
 
     void push_back(Point_2 point) {
-        _rings.front().push_back(point);
+        m_rings.front().push_back(point);
     }
     void push_back(Point_2& point) {
-        _rings.front().push_back(point);
+        m_rings.front().push_back(point);
     }
     bool has_holes() const {
-        if (_rings.size() > 1) return true;
+        if (m_rings.size() > 1) return true;
         return false;
     }
     Polygon_2& outer_boundary() {
-        return _rings.front();
+        return m_rings.front();
     }
     const Polygon_2& outer_boundary() const {
-        return _rings.front();
+        return m_rings.front();
     }
 
     const CGAL::Polygon_with_holes_2<EPICK> get_cgal_type() const {
        CGAL::Polygon_with_holes_2<EPICK> cgalPoly;
-       cgalPoly.outer_boundary() = _rings.front();
-       for (int i = 1; i < _rings.size(); ++i) {
-           cgalPoly.add_hole(_rings[i]);
+       cgalPoly.outer_boundary() = m_rings.front();
+       for (int i = 1; i < m_rings.size(); ++i) {
+           cgalPoly.add_hole(m_rings[i]);
        }
        return cgalPoly;
     }
@@ -103,7 +103,7 @@ struct Polygon_with_holes_2 {
     const CGAL::Polygon_2<EPECK> get_exact_outer_boundary() const {
         Converter<EPICK, EPECK> to_exact;
         CGAL::Polygon_2<EPECK> cgalOuterPoly;
-        for (auto& pt : _rings.front()) {
+        for (auto& pt : m_rings.front()) {
             cgalOuterPoly.push_back(to_exact(pt));
         }
         return cgalOuterPoly;
@@ -124,13 +124,13 @@ struct Polygon_with_holes_2 {
     }
 
     std::vector<Polygon_2>::const_iterator holes_begin() const {
-        if (has_holes()) return _rings.begin() + 1; else return _rings.end();
+        if (has_holes()) return m_rings.begin() + 1; else return m_rings.end();
     }
     std::vector<Polygon_2>::const_iterator holes_end() const {
-        return _rings.end();
+        return m_rings.end();
     }
 
-    CGAL::Bbox_2 bbox() const {return _rings.front().bbox();}
+    CGAL::Bbox_2 bbox() const {return m_rings.front().bbox();}
 };
 
 //- Polygon_with_holes expanded with attributes from GDAL

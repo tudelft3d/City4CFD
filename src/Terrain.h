@@ -66,12 +66,12 @@ public:
     const SurfaceLayersPtr& get_surface_layers() const;
 
 protected:
-    CDT                    _cdt;
-    SurfaceLayersPtr       _surfaceLayersTerrain;
-    vertex_face_map        _vertexFaceMap;
-    SearchTree             _searchTree;
-    std::vector<Polygon_3> _constrainedPolys;
-    std::vector<EPECK::Segment_3> _extraConstrainedEdges;
+    CDT                    m_cdt;
+    SurfaceLayersPtr       m_surfaceLayersTerrain;
+    vertex_face_map        m_vertexFaceMap;
+    SearchTree             m_searchTree;
+    std::vector<Polygon_3> m_constrainedPolys;
+    std::vector<EPECK::Segment_3> m_extraConstrainedEdges;
 };
 
 #endif //CITY4CFD_TERRAIN_H

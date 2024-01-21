@@ -29,58 +29,58 @@
 
 //-- TopoFeature class
 TopoFeature::TopoFeature()
-        : _mesh(), _id(), _f_active(true), _f_imported(false), _outputLayerID(-1) {}
+        : m_mesh(), m_id(), m_f_active(true), m_f_imported(false), m_outputLayerID(-1) {}
 
 TopoFeature::TopoFeature(std::string pid)
-        : _mesh(), _id(std::move(pid)), _f_active(true), _f_imported(false), _outputLayerID(-1) {}
+        : m_mesh(), m_id(std::move(pid)), m_f_active(true), m_f_imported(false), m_outputLayerID(-1) {}
 
 TopoFeature::TopoFeature(int outputLayerID)
-        : _mesh(), _id(), _f_active(true), _f_imported(false), _outputLayerID(outputLayerID) {
-    if (_outputLayerID  >= _numOfOutputLayers) _numOfOutputLayers = _outputLayerID + 1;
+        : m_mesh(), m_id(), m_f_active(true), m_f_imported(false), m_outputLayerID(outputLayerID) {
+    if (m_outputLayerID >= s_numOfOutputLayers) s_numOfOutputLayers = m_outputLayerID + 1;
 }
 
 TopoFeature::~TopoFeature() = default;
 
-int TopoFeature::_numOfOutputLayers = 0;
+int TopoFeature::s_numOfOutputLayers = 0;
 
 void TopoFeature::add_recon_region_output_layers(const int numLayers) {
-    _numOfOutputLayers += numLayers;
+    s_numOfOutputLayers += numLayers;
 }
 
 int TopoFeature::get_num_output_layers() {
-    return _numOfOutputLayers;
+    return s_numOfOutputLayers;
 }
 
 Mesh& TopoFeature::get_mesh() {
-    return _mesh;
+    return m_mesh;
 }
 
 const Mesh& TopoFeature::get_mesh() const {
-    return _mesh;
+    return m_mesh;
 }
 
 void TopoFeature::set_id(unsigned long id) {
-    _id = std::to_string(id);
+    m_id = std::to_string(id);
 }
 
 std::string TopoFeature::get_id() const {
-    return _id;
+    return m_id;
 }
 
 int TopoFeature::get_output_layer_id() const {
-    return _outputLayerID;
+    return m_outputLayerID;
 }
 
 bool TopoFeature::is_active() const {
-    return _f_active;
+    return m_f_active;
 }
 
 bool TopoFeature::is_imported() const {
-    return _f_imported;
+    return m_f_imported;
 }
 
 void TopoFeature::deactivate() {
-    _f_active = false;
+    m_f_active = false;
 }
 
 void TopoFeature::get_cityjson_info(nlohmann::json& j) const {

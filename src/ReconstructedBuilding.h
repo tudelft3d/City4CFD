@@ -47,8 +47,8 @@ public:
     virtual void   get_cityjson_semantics(nlohmann::json& g) const override;
 
 protected:
-    double _attributeHeight;
-    bool   _attributeHeightAdvantage;
+    double m_attributeHeight;
+    bool   m_attributeHeightAdvantage;
 
     void reconstruct_from_attribute();
     bool reconstruct_again_from_attribute(const std::string& reason);

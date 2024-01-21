@@ -57,17 +57,17 @@ public:
     void        deactivate();
 
 protected:
-    static int _numOfOutputLayers;
+    static int s_numOfOutputLayers;
 
-    Mesh           _mesh;
-    std::string    _id;
-    bool           _f_active;
-    bool           _f_imported;
-    int            _outputLayerID; // 0  Terrain
-                                   //    Building regions
-                                   //    Sides
-                                   //    Top
-                                   //    Surface Layers
+    Mesh           m_mesh;
+    std::string    m_id;
+    bool           m_f_active;
+    bool           m_f_imported;
+    int            m_outputLayerID; // 0  Terrain
+                                    //    Building regions
+                                    //    Sides
+                                    //    Top
+                                    //    Surface Layers
 };
 
 #endif //CITY4CFD_TOPOFEATURE_H

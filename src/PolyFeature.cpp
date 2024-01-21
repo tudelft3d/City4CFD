@@ -47,31 +47,31 @@
 #endif
 
 PolyFeature::PolyFeature()
-        : TopoFeature(), _poly(), _groundElevations(), _polyInternalID(new_internal_id()),
-      _groundElevation(-global::largnum), _minBbox() {}
+        : TopoFeature(), m_poly(), m_groundElevations(), m_polyInternalID(new_internal_id()),
+          m_groundElevation(-global::largnum), m_minBbox() {}
 
 PolyFeature::PolyFeature(const int outputLayerID)
-        : TopoFeature(outputLayerID), _poly(), _groundElevations(), _polyInternalID(new_internal_id()),
-      _groundElevation(-global::largnum), _minBbox() {}
+        : TopoFeature(outputLayerID), m_poly(), m_groundElevations(), m_polyInternalID(new_internal_id()),
+          m_groundElevation(-global::largnum), m_minBbox() {}
 
 PolyFeature::PolyFeature(const nlohmann::json& poly, const bool checkSimplicity)
-        : TopoFeature(), _groundElevations(), _polyInternalID(new_internal_id()),
-      _groundElevation(-global::largnum), _minBbox() {
+        : TopoFeature(), m_groundElevations(), m_polyInternalID(new_internal_id()),
+          m_groundElevation(-global::largnum), m_minBbox() {
     this->parse_json_poly(poly, checkSimplicity);
 }
 
 PolyFeature::PolyFeature(const nlohmann::json& poly, const bool checkSimplicity, const int outputLayerID)
         : PolyFeature(poly, checkSimplicity) {
-    _outputLayerID = outputLayerID;
-    if (_outputLayerID  >= _numOfOutputLayers) _numOfOutputLayers = _outputLayerID + 1;
+    m_outputLayerID = outputLayerID;
+    if (m_outputLayerID >= s_numOfOutputLayers) s_numOfOutputLayers = m_outputLayerID + 1;
 }
 
 PolyFeature::PolyFeature(const nlohmann::json& poly, const int outputLayerID)
         : PolyFeature(poly, false, outputLayerID) {}
 
 PolyFeature::PolyFeature(const Polygon_with_attr& poly, const bool checkSimplicity)
-        : TopoFeature(), _groundElevations(), _polyInternalID(new_internal_id()),
-          _groundElevation(-global::largnum), _minBbox() {
+        : TopoFeature(), m_groundElevations(), m_polyInternalID(new_internal_id()),
+          m_groundElevation(-global::largnum), m_minBbox() {
     bool isOuterRing = true;
     for (auto& ring : poly.polygon.rings()) {
         Polygon_2 tempPoly;
@@ -109,14 +109,14 @@ PolyFeature::PolyFeature(const Polygon_with_attr& poly, const bool checkSimplici
                 }
             }
         }
-        _poly._rings.push_back(tempPoly);
+        m_poly.m_rings.push_back(tempPoly);
     }
 }
 
 PolyFeature::PolyFeature(const Polygon_with_attr& poly, const bool checkSimplicity, const int outputLayerID)
         : PolyFeature(poly, checkSimplicity) {
-    _outputLayerID = outputLayerID;
-    if (_outputLayerID  >= _numOfOutputLayers) _numOfOutputLayers = _outputLayerID + 1;
+    m_outputLayerID = outputLayerID;
+    if (m_outputLayerID >= s_numOfOutputLayers) s_numOfOutputLayers = m_outputLayerID + 1;
 }
 
 PolyFeature::PolyFeature(const Polygon_with_attr& poly, const int outputLayerID)
@@ -124,12 +124,12 @@ PolyFeature::PolyFeature(const Polygon_with_attr& poly, const int outputLayerID)
 
 PolyFeature::~PolyFeature() = default;
 
-int PolyFeature::_numOfPolyFeatures = 0;
+int PolyFeature::s_numOfPolyFeatures = 0;
 
 void PolyFeature::calc_footprint_elevation_nni(const DT& dt) {
     typedef std::vector<std::pair<DT::Point, double>> Point_coordinate_vector;
     DT::Face_handle fh = nullptr;
-    for (auto& ring: _poly.rings()) {
+    for (auto& ring: m_poly.rings()) {
         std::vector<double> ringElevations;
         for (auto& polypt: ring) {
             Point_coordinate_vector coords;
@@ -150,14 +150,14 @@ void PolyFeature::calc_footprint_elevation_nni(const DT& dt) {
             }
             ringElevations.push_back(elevation);
         }
-        _groundElevations.push_back(ringElevations);
+        m_groundElevations.push_back(ringElevations);
     }
 }
 
 #ifndef NDEBUG
 void PolyFeature::calc_footprint_elevation_linear(const DT& dt) {
     DT::Face_handle fh = nullptr;
-    for (auto& ring : _poly.rings()) {
+    for (auto& ring : m_poly.rings()) {
         std::vector<double> ringHeights;
         for (auto& polypt : ring) {
             DT::Point pt(polypt.x(), polypt.y(), 0);
@@ -185,19 +185,19 @@ void PolyFeature::calc_footprint_elevation_linear(const DT& dt) {
             }
             ringHeights.push_back(h);
         }
-        _groundElevations.push_back(ringHeights);
+        m_groundElevations.push_back(ringHeights);
     }
 }
 #endif
 
 double PolyFeature::ground_elevation() {
-    if (_groundElevation < -global::largnum + global::smallnum) {
-        if (_groundElevations.empty()) throw std::runtime_error("Polygon elevations missing!"
+    if (m_groundElevation < -global::largnum + global::smallnum) {
+        if (m_groundElevations.empty()) throw std::runtime_error("Polygon elevations missing!"
                                                                 " Cannot calculate average");
         // calculating base elevation as 95 percentile of outer ring
-        _groundElevation = geomutils::percentile(_groundElevations.front(), 0.95);
+        m_groundElevation = geomutils::percentile(m_groundElevations.front(), 0.95);
     }
-    return _groundElevation;
+    return m_groundElevation;
 }
 
 ///*
@@ -205,9 +205,9 @@ double PolyFeature::ground_elevation() {
 // * Calculated on the fly as rarely used
 // */
 //double PolyFeature::slope_height() {
-//    if (_groundElevations.empty())throw std::runtime_error("Polygon elevations missing!"
+//    if (m_groundElevations.empty())throw std::runtime_error("Polygon elevations missing!"
 //                                                           " Cannot perform calculations");
-//    return this->ground_elevation() - geomutils::percentile(_groundElevations.front(), 0.2);
+//    return this->ground_elevation() - geomutils::percentile(m_groundElevations.front(), 0.2);
 //}
 
 bool PolyFeature::flatten_polygon_inner_points(const Point_set_3& pointCloud,
@@ -227,7 +227,7 @@ bool PolyFeature::flatten_polygon_inner_points(const Point_set_3& pointCloud,
     auto building_pt = pointCloud.property_map<std::shared_ptr<Building>>("building_point").first;
     //-- Take tree subset bounded by the polygon
     std::vector<Point_3> subsetPts;
-    Polygon_2 bbox = geomutils::calc_bbox_poly(_poly.rings().front());
+    Polygon_2 bbox = geomutils::calc_bbox_poly(m_poly.rings().front());
     Point_2 bbox1(bbox[0].x(), bbox[0].y());
     Point_2 bbox2(bbox[2].x(), bbox[2].y());
     Fuzzy_iso_box pts_range(bbox1, bbox2);
@@ -237,8 +237,8 @@ bool PolyFeature::flatten_polygon_inner_points(const Point_set_3& pointCloud,
     std::map<int, std::shared_ptr<Building>> overlappingBuildings; //id-building map
     for (auto& pt3 : subsetPts) {
         Point_2 pt(pt3.x(), pt3.y());
-        if (CGAL::bounded_side_2(_poly._rings.front().begin(),
-                                 _poly._rings.front().end(),
+        if (CGAL::bounded_side_2(m_poly.m_rings.front().begin(),
+                                 m_poly.m_rings.front().end(),
                                  pt) != CGAL::ON_UNBOUNDED_SIDE) {
             auto itIdx = pointCloudConnectivity.find(pt3);
             auto pointSetIt = pointCloud.begin();
@@ -292,15 +292,15 @@ bool PolyFeature::flatten_polygon_inner_points(const Point_set_3& pointCloud,
                 return false;
             }
             if (isFirst) {
-                _poly = Polygon_with_holes_2(*(offset_poly.front()));
+                m_poly = Polygon_with_holes_2(*(offset_poly.front()));
                 isFirst = false;
             } else {
                 // Some polys are cut -- save the new resulting polys and add them as new features in Map3D
-                newPolys.emplace_back(Polygon_with_holes_2(*(offset_poly.front())), _outputLayerID);
+                newPolys.emplace_back(Polygon_with_holes_2(*(offset_poly.front())), m_outputLayerID);
             }
         }
     } else {
-        flattenBndPolys.push_back(_poly.outer_boundary());
+        flattenBndPolys.push_back(m_poly.outer_boundary());
     }
     //-- Collect points that have not been already flattened
     for (auto& pt3 : subsetPts) {
@@ -345,7 +345,7 @@ bool PolyFeature::flatten_polygon_inner_points(const Point_set_3& pointCloud,
 }
 
 void PolyFeature::set_zero_borders() {
-    for (auto& ring : _groundElevations) {
+    for (auto& ring : m_groundElevations) {
         for (auto& pt : ring) {
             pt = 0.;
         }
@@ -353,11 +353,11 @@ void PolyFeature::set_zero_borders() {
 }
 
 void PolyFeature::calc_min_bbox() {
-    if (_poly.rings().front().is_empty()) throw std::runtime_error("Missing polygon!");
+    if (m_poly.rings().front().is_empty()) throw std::runtime_error("Missing polygon!");
     //-- Point set needs to be convex for the rotating caliper algorithm
     std::vector<Point_2> chull;
-    CGAL::convex_hull_2(_poly.rings().front().vertices_begin(),
-                        _poly.rings().front().vertices_end(),
+    CGAL::convex_hull_2(m_poly.rings().front().vertices_begin(),
+                        m_poly.rings().front().vertices_end(),
                         std::back_inserter(chull));
 
     std::vector<Point_2> obbPts; obbPts.reserve(4);
@@ -366,48 +366,48 @@ void PolyFeature::calc_min_bbox() {
                           std::back_inserter(obbPts));
     assert(obbPts.size() == 4);
 
-    _minBbox.vec1 = obbPts[1] - obbPts[0];
-    _minBbox.vec2 = obbPts[3] - obbPts[0];
+    m_minBbox.vec1 = obbPts[1] - obbPts[0];
+    m_minBbox.vec2 = obbPts[3] - obbPts[0];
 
-    _minBbox.calc();
+    m_minBbox.calc();
 }
 
 void PolyFeature::clear_feature() {
-    _groundElevations.clear();
-    _mesh.clear();
+    m_groundElevations.clear();
+    m_mesh.clear();
 }
 
 int PolyFeature::new_internal_id() {
-    return ++_numOfPolyFeatures;
+    return ++s_numOfPolyFeatures;
 }
 
 Polygon_with_holes_2& PolyFeature::get_poly() {
-    return _poly;
+    return m_poly;
 }
 
 const Polygon_with_holes_2& PolyFeature::get_poly() const {
-    return _poly;
+    return m_poly;
 }
 
 Polygon_with_attr PolyFeature::get_poly_w_attr() const {
     Polygon_with_attr poly;
-    poly.polygon = _poly;
+    poly.polygon = m_poly;
     return poly;
 }
 
 const std::vector<std::vector<double>>& PolyFeature::get_ground_elevations() const {
-    return _groundElevations;
+    return m_groundElevations;
 }
 
 const int PolyFeature::get_internal_id() const {
-    return _polyInternalID;
+    return m_polyInternalID;
 }
 
 MinBbox& PolyFeature::get_min_bbox() {
-    if (_minBbox.empty()) {
+    if (m_minBbox.empty()) {
         this->calc_min_bbox();
     }
-    return _minBbox;
+    return m_minBbox;
 }
 
 void PolyFeature::parse_json_poly(const nlohmann::json& poly, const bool checkSimplicity) {
@@ -426,7 +426,7 @@ void PolyFeature::parse_json_poly(const nlohmann::json& poly, const bool checkSi
         }
         geomutils::pop_back_if_equal_to_front(tempPoly);
 
-        if (_poly._rings.empty()) {
+        if (m_poly.m_rings.empty()) {
             if (tempPoly.is_clockwise_oriented()) tempPoly.reverse_orientation();
         } else {
             if (tempPoly.is_counterclockwise_oriented()) tempPoly.reverse_orientation();
@@ -445,6 +445,6 @@ void PolyFeature::parse_json_poly(const nlohmann::json& poly, const bool checkSi
                 }
             }
         }
-        _poly._rings.push_back(tempPoly);
+        m_poly.m_rings.push_back(tempPoly);
     }
 }

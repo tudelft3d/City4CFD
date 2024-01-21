@@ -34,8 +34,8 @@
 
 class BoundingRegion {
 public:
-    CDT _projCDT;
-    std::shared_ptr<const Config::ReconRegion> _reconSettings;
+    CDT m_projCDT;
+    std::shared_ptr<const Config::ReconRegion> m_reconSettings;
 
     BoundingRegion();
     BoundingRegion(std::shared_ptr<Config::ReconRegion> reconRegion);
@@ -53,7 +53,7 @@ public:
     const Polygon_2& get_bounding_region() const;
 
 protected:
-    Polygon_2  _boundingRegion;
+    Polygon_2  m_boundingRegion;
 
     Polygon_2  calc_bnd_poly(const std::vector<Point_2>& candidatePts, const double hMax,
                              const double angle, const double enlargeRatio = 1);
