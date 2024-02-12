@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [0.4.5] - 2024-02-12
+### Fixed
+- Dependency hotfix
+
 ## [0.4.4] - 2024-01-13
 ### Changed
 - Improved fallbacks in case building import fails in late stages
