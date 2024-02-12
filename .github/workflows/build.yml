@@ -51,6 +51,7 @@ jobs:
   build_win64:
     if: false
     runs-on: windows-latest
+    if: false
     steps:
       - uses: actions/checkout@v3
       - name: vcpkg build

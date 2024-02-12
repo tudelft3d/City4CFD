@@ -13,6 +13,8 @@
 #ifndef CGAL_INTERNAL_INTERSECTIONS_PLANE_3_TRIANGLE_3_INTERSECTION_H
 #define CGAL_INTERNAL_INTERSECTIONS_PLANE_3_TRIANGLE_3_INTERSECTION_H
 
+#include <boost/next_prior.hpp>
+
 #include <CGAL/Intersection_traits_3.h>
 #include <CGAL/Intersections_3/internal/Line_3_Plane_3_intersection.h>
 
