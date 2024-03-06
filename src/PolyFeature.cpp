@@ -89,12 +89,6 @@ PolyFeature::PolyFeature(const Polygon_with_attr& poly, const bool checkSimplici
             this->deactivate();
             return;
         }
-        if (isOuterRing) {
-            if (tempPoly.is_clockwise_oriented()) tempPoly.reverse_orientation();
-            isOuterRing = false;
-        } else {
-            if (tempPoly.is_counterclockwise_oriented()) tempPoly.reverse_orientation();
-        }
         if (checkSimplicity) {
             if (!tempPoly.is_simple()) {
                 if (Config::get().avoidBadPolys) {
@@ -108,6 +102,12 @@ PolyFeature::PolyFeature(const Polygon_with_attr& poly, const bool checkSimplici
                                  " the import of problematic polygons.\n" << std::endl;
                 }
             }
+        }
+        if (isOuterRing) {
+            if (tempPoly.is_clockwise_oriented()) tempPoly.reverse_orientation();
+            isOuterRing = false;
+        } else {
+            if (tempPoly.is_counterclockwise_oriented()) tempPoly.reverse_orientation();
         }
         _poly._rings.push_back(tempPoly);
     }
@@ -425,11 +425,10 @@ void PolyFeature::parse_json_poly(const nlohmann::json& poly, const bool checkSi
             }
         }
         geomutils::pop_back_if_equal_to_front(tempPoly);
-
-        if (_poly._rings.empty()) {
-            if (tempPoly.is_clockwise_oriented()) tempPoly.reverse_orientation();
-        } else {
-            if (tempPoly.is_counterclockwise_oriented()) tempPoly.reverse_orientation();
+        if (tempPoly.size() < 3) { // Sanity check if it is even a polygon
+            std::cout << "WARNING: Skipping import of a zero-area polygon" << std::endl;
+            this->deactivate();
+            return;
         }
         if (checkSimplicity) {
             if (!tempPoly.is_simple()) {
@@ -444,6 +443,11 @@ void PolyFeature::parse_json_poly(const nlohmann::json& poly, const bool checkSi
                                  " the import of problematic polygons.\n" << std::endl;
                 }
             }
+        }
+        if (_poly._rings.empty()) {
+            if (tempPoly.is_clockwise_oriented()) tempPoly.reverse_orientation();
+        } else {
+            if (tempPoly.is_counterclockwise_oriented()) tempPoly.reverse_orientation();
         }
         _poly._rings.push_back(tempPoly);
     }
