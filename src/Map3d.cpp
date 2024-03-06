@@ -352,10 +352,9 @@ void Map3d::reconstruct_buildings() {
     }
     this->clear_inactives(); // renumber failed and in case of imported-reconstructed fallback
     // Gather failed reconstructions
-    std::cout << "    Number of successfully reconstructed buildings: " << _buildingsPtr.size()
-                                                                           -_failedBuildingsPtr.size() << std::endl;
+    std::cout << "    Number of successfully reconstructed buildings: " << _buildingsPtr.size() << std::endl;
     Config::get().logSummary << "Building reconstruction summary: successfully reconstructed buildings: "
-                             << _buildingsPtr.size() - _failedBuildingsPtr.size() << std::endl;
+                             << _buildingsPtr.size() << std::endl;
     Config::get().logSummary << "                                 num of failed reconstructions: "
                              << _failedBuildingsPtr.size() << std::endl;
 }
