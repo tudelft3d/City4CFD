@@ -272,7 +272,6 @@ template bool geomutils::point_in_poly<Point_3>(const Point_3& pt2, const Polygo
 template <typename T>
 bool geomutils::point_in_poly(const T& pt2, const Polygon_with_holes_2& polygon) {
     Point_2 pt(pt2.x(), pt2.y());
-
     //-- Check if the point falls within the outer surface
     if (point_in_poly(pt, polygon.outer_boundary())) {
         // Check if the point falls within one of the holes
@@ -288,6 +287,38 @@ bool geomutils::point_in_poly(const T& pt2, const Polygon_with_holes_2& polygon)
 //- Explicit template instantiation
 template bool geomutils::point_in_poly<Point_2>(const Point_2& pt2, const Polygon_with_holes_2& polygon);
 template bool geomutils::point_in_poly<Point_3>(const Point_3& pt2, const Polygon_with_holes_2& polygon);
+
+//-- Check if the point is inside a polygon on a 2D projection including polygon boundaries
+template <typename T>
+bool geomutils::point_in_poly_and_boundary(const T& pt2, const Polygon_2& polygon) {
+    Point_2 pt(pt2.x(), pt2.y());
+    if (CGAL::bounded_side_2(polygon.begin(), polygon.end(), pt) != CGAL::ON_UNBOUNDED_SIDE) {
+        return true;
+    }
+    return false;
+}
+//- Explicit template instantiation
+template bool geomutils::point_in_poly_and_boundary<Point_2>(const Point_2& pt2, const Polygon_2& polygon);
+template bool geomutils::point_in_poly_and_boundary<Point_3>(const Point_3& pt2, const Polygon_2& polygon);
+
+template <typename T>
+bool geomutils::point_in_poly_and_boundary(const T& pt2, const Polygon_with_holes_2& polygon) {
+    Point_2 pt(pt2.x(), pt2.y());
+    //-- Check if the point falls within the outer surface
+    if (point_in_poly_and_boundary(pt, polygon.outer_boundary())) {
+        // Check if the point falls within one of the holes
+        for (auto it_hole = polygon.holes_begin(); it_hole != polygon.holes_end(); ++it_hole) {
+            if (point_in_poly_and_boundary(pt, *it_hole)) {
+                return false;
+            }
+        }
+        return true;
+    }
+    return false;
+}
+//- Explicit template instantiation
+template bool geomutils::point_in_poly_and_boundary<Point_2>(const Point_2& pt2, const Polygon_with_holes_2& polygon);
+template bool geomutils::point_in_poly_and_boundary<Point_3>(const Point_3& pt2, const Polygon_with_holes_2& polygon);
 
 template <typename T>
 void geomutils::make_round_poly(const Point_2& centre, double radius, T& poly) {

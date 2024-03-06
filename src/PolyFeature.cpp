@@ -237,9 +237,7 @@ bool PolyFeature::flatten_polygon_inner_points(const Point_set_3& pointCloud,
     std::map<int, std::shared_ptr<Building>> overlappingBuildings; //id-building map
     for (auto& pt3 : subsetPts) {
         Point_2 pt(pt3.x(), pt3.y());
-        if (CGAL::bounded_side_2(_poly._rings.front().begin(),
-                                 _poly._rings.front().end(),
-                                 pt) != CGAL::ON_UNBOUNDED_SIDE) {
+        if (geomutils::point_in_poly_and_boundary(pt, _poly)) {
             auto itIdx = pointCloudConnectivity.find(pt3);
             auto pointSetIt = pointCloud.begin();
             std::advance(pointSetIt, itIdx->second);
@@ -277,7 +275,6 @@ bool PolyFeature::flatten_polygon_inner_points(const Point_set_3& pointCloud,
             flattenCandidatePolys.emplace_back(geomutils::exact_poly_to_poly(flattenBndPoly));
         }
     }
-    std::vector<Polygon_2> flattenBndPolys;
     if (!flattenCandidatePolys.empty()) {
         bool isFirst = true;
         for (auto& poly : flattenCandidatePolys) {
@@ -285,10 +282,10 @@ bool PolyFeature::flatten_polygon_inner_points(const Point_set_3& pointCloud,
             PolygonPtrVectorWH offset_poly =
                     CGAL::create_interior_skeleton_and_offset_polygons_with_holes_2(offsetVal,
                                                                                     poly.get_cgal_type());
-            if (offset_poly.size() == 1) { // make a check whether the offset is successfully created or not
-                flattenBndPolys.push_back(offset_poly.front()->outer_boundary());
+            if (offset_poly.size() > 0) { // make a check whether the offset is successfully created or not
+                poly = *(offset_poly.front());
             } else {
-                std::cout << "Skeleton construction failed!" << std::endl;
+                std::cout << "WARNING: Skeleton construction failed! Some surfaces might not be flattened." << std::endl;
                 return false;
             }
             if (isFirst) {
@@ -300,15 +297,13 @@ bool PolyFeature::flatten_polygon_inner_points(const Point_set_3& pointCloud,
             }
         }
     } else {
-        flattenBndPolys.push_back(_poly.outer_boundary());
+        flattenCandidatePolys.push_back(_poly);
     }
     //-- Collect points that have not been already flattened
     for (auto& pt3 : subsetPts) {
-        for (auto& flattenBndPoly : flattenBndPolys) {
+        for (auto& flattenBndPoly : flattenCandidatePolys) {
             Point_2 pt(pt3.x(), pt3.y());
-            if (CGAL::bounded_side_2(flattenBndPoly.begin(),
-                                     flattenBndPoly.end(),
-                                     pt) != CGAL::ON_UNBOUNDED_SIDE) {
+            if (geomutils::point_in_poly_and_boundary(pt, flattenBndPoly)) {
                 auto itIdx = pointCloudConnectivity.find(pt3);
 
                 auto it = flattenedPts.find(itIdx->second);
@@ -331,16 +326,17 @@ bool PolyFeature::flatten_polygon_inner_points(const Point_set_3& pointCloud,
         flattenedPts[i] = Point_3(pointCloud.point(i).x(), pointCloud.point(i).y(), avgHeight);
     }
     //-- Add additional new segments to constrain
-    if (!flattenBndPolys.empty()) {
-        for (auto& flattenBndPoly : flattenBndPolys) {
-            for (const auto& newEdge: flattenBndPoly.edges()) {
-                ePoint_3 pt1(newEdge.point(0).x(), newEdge.point(0).y(), avgHeight);
-                ePoint_3 pt2(newEdge.point(1).x(), newEdge.point(1).y(), avgHeight);
-                constrainedEdges.emplace_back(pt1, pt2);
+    if (!flattenCandidatePolys.empty()) {
+        for (auto& flattenBndPoly : flattenCandidatePolys) {
+            for (auto& ring: flattenBndPoly.rings()) {
+                for (const auto& newEdge: ring.edges()) {
+                    ePoint_3 pt1(newEdge.point(0).x(), newEdge.point(0).y(), avgHeight);
+                    ePoint_3 pt2(newEdge.point(1).x(), newEdge.point(1).y(), avgHeight);
+                    constrainedEdges.emplace_back(pt1, pt2);
+                }
             }
         }
     }
-
     return true;
 }
 
