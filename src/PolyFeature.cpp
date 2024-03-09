@@ -222,6 +222,15 @@ bool PolyFeature::flatten_polygon_inner_points(const Point_set_3& pointCloud,
     typedef boost::shared_ptr<CGAL::Polygon_with_holes_2<EPICK>> PolygonPtrWH;
     typedef std::vector<PolygonPtrWH> PolygonPtrVectorWH;
 
+#ifdef CITY4CFD_POLYFEATURE_VERBOSE
+    std::cout << "\nINFO: Flattening a polygon..." << std::endl;
+    int nonSimpleRings = 0;
+    for (auto& ring : _poly.rings()) {
+        if (!ring.is_simple()) ++nonSimpleRings;
+    }
+    std::cout << "Non-simple rings: " << nonSimpleRings << std::endl;
+#endif
+
     std::vector<int>    indices;
     std::vector<double> originalHeights;
     auto building_pt = pointCloud.property_map<std::shared_ptr<Building>>("building_point").first;
@@ -256,25 +265,32 @@ bool PolyFeature::flatten_polygon_inner_points(const Point_set_3& pointCloud,
     //-- If next intersecting a building, clip poly with building
     std::vector<Polygon_with_holes_2> flattenCandidatePolys;
     if (!overlappingBuildings.empty()) {
+#ifdef CITY4CFD_POLYFEATURE_VERBOSE
+        std::cout << "Overlapping buildings: " << overlappingBuildings.size() << std::endl;
+#endif
         // Add clipping polys to set
         CGAL::Polygon_set_2<EPECK> polySet;
         Converter<EPICK, EPECK> to_exact;
         for (auto& intersectBuilding : overlappingBuildings) {
-            polySet.insert(intersectBuilding.second->get_poly().get_exact_outer_boundary());
+            polySet.join(intersectBuilding.second->get_poly().get_exact_outer_boundary());
         }
+#ifdef CITY4CFD_POLYFEATURE_VERBOSE
+        std::cout << "Polyset size? " << polySet.number_of_polygons_with_holes() << std::endl;
+#endif
+        CGAL_assertion(polySet.is_valid());
         // Clip with this polygon
         polySet.complement();
-        polySet.intersection(this->get_poly().get_exact());
+        polySet.intersection(_poly.get_exact());
         // Store this as the new polygon
         std::vector<CGAL::Polygon_with_holes_2<EPECK>> resPolys;
         polySet.polygons_with_holes(std::back_inserter(resPolys));
-#ifdef CITY4CFD_POLYFEATURE_VERBOSE
-        std::cout << "After flatten polygon clipping, total new polygons: " << resPolys.size() << std::endl;
-#endif
         for (auto& flattenBndPoly : resPolys) {
             flattenCandidatePolys.emplace_back(geomutils::exact_poly_to_poly(flattenBndPoly));
         }
     }
+#ifdef CITY4CFD_POLYFEATURE_VERBOSE
+    std::cout << "After flatten polygon clipping, total new polygons: " << flattenCandidatePolys.size() << std::endl;
+#endif
     if (!flattenCandidatePolys.empty()) {
         bool isFirst = true;
         for (auto& poly : flattenCandidatePolys) {
@@ -282,7 +298,10 @@ bool PolyFeature::flatten_polygon_inner_points(const Point_set_3& pointCloud,
             PolygonPtrVectorWH offset_poly =
                     CGAL::create_interior_skeleton_and_offset_polygons_with_holes_2(offsetVal,
                                                                                     poly.get_cgal_type());
-            if (offset_poly.size() > 0) { // make a check whether the offset is successfully created or not
+#ifdef CITY4CFD_POLYFEATURE_VERBOSE
+            std::cout << "Offset polygons created: " << offset_poly.size() << std::endl;
+#endif
+            if (!offset_poly.empty()) { // make a check whether the offset is successfully created
                 poly = *(offset_poly.front());
             } else {
                 std::cout << "WARNING: Skeleton construction failed! Some surfaces might not be flattened." << std::endl;
@@ -297,6 +316,11 @@ bool PolyFeature::flatten_polygon_inner_points(const Point_set_3& pointCloud,
             }
         }
     } else {
+        if (!overlappingBuildings.empty()) {
+            std::cout << "WARNING: Polygon ID" << _id << " flattening failed due to unresolved"
+                                                         " intersections with buildings!" << std::endl;
+            return false;
+        }
         flattenCandidatePolys.push_back(_poly);
     }
     //-- Collect points that have not been already flattened
