@@ -1,5 +1,7 @@
 # Changelog
 
+## [Unreleased]
+
 ## [0.4.6] - 2024-03-11
 ### Changed
 - Improved robustness in handling bad polygons
