@@ -4,6 +4,12 @@
 ### Added
 - Multiple reconstruction regions
 
+## [0.4.6] - 2024-03-11
+### Changed
+- Improved robustness in handling bad polygons
+### Fixed
+- Code crashing when flattening specific cases
+
 ## [0.4.5] - 2024-02-12
 ### Fixed
 - Dependency hotfix

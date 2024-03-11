@@ -126,25 +126,27 @@ void BoundingRegion::calc_bnd_bpg(const Polygon_2& influRegionPoly,
     Config::get().topHeight = elevationMax + hMax * (Config::get().bpgDomainSize.back() - 1);
 
     //-- Blockage ratio handling
-    std::cout << "\nCalculating blockage ratio for flow direction (" << Config::get().flowDirection
-              << ")" << std::endl;
+    if (Config::get().bpgBlockageRatioFlag) {
+        std::cout << "\nCalculating blockage ratio for flow direction (" << Config::get().flowDirection
+                  << ")" << std::endl;
 
 //    double blockRatio = this->calc_blockage_ratio_from_chull(buildings, angle, localPoly);
 //    double blockRatio = this->calc_blockage_ratio_from_ashape(buildings, angle, localPoly);
-    double blockRatio = this->calc_blockage_ratio_comb(buildings, angle, localPoly);
+        double blockRatio = this->calc_blockage_ratio_comb(buildings, angle, localPoly);
 //    double blockRatio = this->calc_blockage_ratio_from_ashape_alt(buildings, angle, localPoly);
 //    double blockRatio = this->calc_blockage_ratio_from_edges(buildings, angle, localPoly);
 
-    std::cout << "    Blockage ratio is: " << blockRatio << std::endl;
-    if (Config::get().bpgBlockageRatioFlag && blockRatio > Config::get().bpgBlockageRatio) {
-        std::cout << "INFO: Blockage ratio is more than " << Config::get().bpgBlockageRatio * 100
-                  << "%. Expanding domain cross section to meet the guideline"
-                  << std::endl;
-        double expRatio = std::sqrt(blockRatio / 0.03);
-        //-- Recalculate the bnd poly and height with new values
-        localPoly.clear();
-        localPoly = this->calc_bnd_poly(candidatePts, hMax, angle, expRatio);
-        Config::get().topHeight = hMax * Config::get().bpgDomainSize.back() * expRatio;
+        std::cout << "    Blockage ratio is: " << blockRatio << std::endl;
+        if (blockRatio > Config::get().bpgBlockageRatio) {
+            std::cout << "INFO: Blockage ratio is more than " << Config::get().bpgBlockageRatio * 100
+                      << "%. Expanding domain cross section to meet the guideline"
+                      << std::endl;
+            double expRatio = std::sqrt(blockRatio / 0.03);
+            //-- Recalculate the bnd poly and height with new values
+            localPoly.clear();
+            localPoly = this->calc_bnd_poly(candidatePts, hMax, angle, expRatio);
+            Config::get().topHeight = hMax * Config::get().bpgDomainSize.back() * expRatio;
+        }
     }
     //-- Return the points back to global coordinates
     for (auto& pt : localPoly) m_boundingRegion.push_back(geomutils::rotate_pt(pt, angle));

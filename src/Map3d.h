@@ -57,6 +57,7 @@ private:
 
     TerrainPtr                  m_terrainPtr;
     BuildingsPtr                m_buildingsPtr;
+    BuildingsPtr                m_failedBuildingsPtr;
     ReconstructedBuildingsPtr   m_reconstructedBuildingsPtr;
     ImportedBuildingsPtr        m_importedBuildingsPtr;
     SurfaceLayersPtr            m_surfaceLayersPtr;

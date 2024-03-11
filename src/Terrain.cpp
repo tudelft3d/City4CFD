@@ -102,7 +102,7 @@ void Terrain::constrain_features() {
     }
     IO::print_progress_bar(100); std::clog << std::endl;
     // extra edges to constrain when whole polygons couldn't be added
-    if (!m_extraConstrainedEdges.empty()) std::cout << "\n    Adding extra constrained edges" << std::endl;
+    if (!m_extraConstrainedEdges.empty()) std::cout << "\n    Inserting additional constrained edges" << std::endl;
     for (auto& extraEdge : m_extraConstrainedEdges) {
         m_cdt.insert_constraint(extraEdge.source(), extraEdge.target());
         ++count;
