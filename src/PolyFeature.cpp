@@ -89,12 +89,6 @@ PolyFeature::PolyFeature(const Polygon_with_attr& poly, const bool checkSimplici
             this->deactivate();
             return;
         }
-        if (isOuterRing) {
-            if (tempPoly.is_clockwise_oriented()) tempPoly.reverse_orientation();
-            isOuterRing = false;
-        } else {
-            if (tempPoly.is_counterclockwise_oriented()) tempPoly.reverse_orientation();
-        }
         if (checkSimplicity) {
             if (!tempPoly.is_simple()) {
                 if (Config::get().avoidBadPolys) {
@@ -108,6 +102,12 @@ PolyFeature::PolyFeature(const Polygon_with_attr& poly, const bool checkSimplici
                                  " the import of problematic polygons.\n" << std::endl;
                 }
             }
+        }
+        if (isOuterRing) {
+            if (tempPoly.is_clockwise_oriented()) tempPoly.reverse_orientation();
+            isOuterRing = false;
+        } else {
+            if (tempPoly.is_counterclockwise_oriented()) tempPoly.reverse_orientation();
         }
         _poly._rings.push_back(tempPoly);
     }
@@ -222,6 +222,15 @@ bool PolyFeature::flatten_polygon_inner_points(const Point_set_3& pointCloud,
     typedef boost::shared_ptr<CGAL::Polygon_with_holes_2<EPICK>> PolygonPtrWH;
     typedef std::vector<PolygonPtrWH> PolygonPtrVectorWH;
 
+#ifdef CITY4CFD_POLYFEATURE_VERBOSE
+    std::cout << "\nINFO: Flattening a polygon..." << std::endl;
+    int nonSimpleRings = 0;
+    for (auto& ring : _poly.rings()) {
+        if (!ring.is_simple()) ++nonSimpleRings;
+    }
+    std::cout << "Non-simple rings: " << nonSimpleRings << std::endl;
+#endif
+
     std::vector<int>    indices;
     std::vector<double> originalHeights;
     auto building_pt = pointCloud.property_map<std::shared_ptr<Building>>("building_point").first;
@@ -237,9 +246,7 @@ bool PolyFeature::flatten_polygon_inner_points(const Point_set_3& pointCloud,
     std::map<int, std::shared_ptr<Building>> overlappingBuildings; //id-building map
     for (auto& pt3 : subsetPts) {
         Point_2 pt(pt3.x(), pt3.y());
-        if (CGAL::bounded_side_2(_poly._rings.front().begin(),
-                                 _poly._rings.front().end(),
-                                 pt) != CGAL::ON_UNBOUNDED_SIDE) {
+        if (geomutils::point_in_poly_and_boundary(pt, _poly)) {
             auto itIdx = pointCloudConnectivity.find(pt3);
             auto pointSetIt = pointCloud.begin();
             std::advance(pointSetIt, itIdx->second);
@@ -258,26 +265,32 @@ bool PolyFeature::flatten_polygon_inner_points(const Point_set_3& pointCloud,
     //-- If next intersecting a building, clip poly with building
     std::vector<Polygon_with_holes_2> flattenCandidatePolys;
     if (!overlappingBuildings.empty()) {
+#ifdef CITY4CFD_POLYFEATURE_VERBOSE
+        std::cout << "Overlapping buildings: " << overlappingBuildings.size() << std::endl;
+#endif
         // Add clipping polys to set
         CGAL::Polygon_set_2<EPECK> polySet;
         Converter<EPICK, EPECK> to_exact;
         for (auto& intersectBuilding : overlappingBuildings) {
-            polySet.insert(intersectBuilding.second->get_poly().get_exact_outer_boundary());
+            polySet.join(intersectBuilding.second->get_poly().get_exact_outer_boundary());
         }
+#ifdef CITY4CFD_POLYFEATURE_VERBOSE
+        std::cout << "Polyset size? " << polySet.number_of_polygons_with_holes() << std::endl;
+#endif
+        CGAL_assertion(polySet.is_valid());
         // Clip with this polygon
         polySet.complement();
-        polySet.intersection(this->get_poly().get_exact());
+        polySet.intersection(_poly.get_exact());
         // Store this as the new polygon
         std::vector<CGAL::Polygon_with_holes_2<EPECK>> resPolys;
         polySet.polygons_with_holes(std::back_inserter(resPolys));
-#ifdef CITY4CFD_POLYFEATURE_VERBOSE
-        std::cout << "After flatten polygon clipping, total new polygons: " << resPolys.size() << std::endl;
-#endif
         for (auto& flattenBndPoly : resPolys) {
             flattenCandidatePolys.emplace_back(geomutils::exact_poly_to_poly(flattenBndPoly));
         }
     }
-    std::vector<Polygon_2> flattenBndPolys;
+#ifdef CITY4CFD_POLYFEATURE_VERBOSE
+    std::cout << "After flatten polygon clipping, total new polygons: " << flattenCandidatePolys.size() << std::endl;
+#endif
     if (!flattenCandidatePolys.empty()) {
         bool isFirst = true;
         for (auto& poly : flattenCandidatePolys) {
@@ -285,10 +298,13 @@ bool PolyFeature::flatten_polygon_inner_points(const Point_set_3& pointCloud,
             PolygonPtrVectorWH offset_poly =
                     CGAL::create_interior_skeleton_and_offset_polygons_with_holes_2(offsetVal,
                                                                                     poly.get_cgal_type());
-            if (offset_poly.size() == 1) { // make a check whether the offset is successfully created or not
-                flattenBndPolys.push_back(offset_poly.front()->outer_boundary());
+#ifdef CITY4CFD_POLYFEATURE_VERBOSE
+            std::cout << "Offset polygons created: " << offset_poly.size() << std::endl;
+#endif
+            if (!offset_poly.empty()) { // make a check whether the offset is successfully created
+                poly = *(offset_poly.front());
             } else {
-                std::cout << "Skeleton construction failed!" << std::endl;
+                std::cout << "WARNING: Skeleton construction failed! Some surfaces might not be flattened." << std::endl;
                 return false;
             }
             if (isFirst) {
@@ -300,15 +316,18 @@ bool PolyFeature::flatten_polygon_inner_points(const Point_set_3& pointCloud,
             }
         }
     } else {
-        flattenBndPolys.push_back(_poly.outer_boundary());
+        if (!overlappingBuildings.empty()) {
+            std::cout << "WARNING: Polygon ID" << _id << " flattening failed due to unresolved"
+                                                         " intersections with buildings!" << std::endl;
+            return false;
+        }
+        flattenCandidatePolys.push_back(_poly);
     }
     //-- Collect points that have not been already flattened
     for (auto& pt3 : subsetPts) {
-        for (auto& flattenBndPoly : flattenBndPolys) {
+        for (auto& flattenBndPoly : flattenCandidatePolys) {
             Point_2 pt(pt3.x(), pt3.y());
-            if (CGAL::bounded_side_2(flattenBndPoly.begin(),
-                                     flattenBndPoly.end(),
-                                     pt) != CGAL::ON_UNBOUNDED_SIDE) {
+            if (geomutils::point_in_poly_and_boundary(pt, flattenBndPoly)) {
                 auto itIdx = pointCloudConnectivity.find(pt3);
 
                 auto it = flattenedPts.find(itIdx->second);
@@ -331,16 +350,17 @@ bool PolyFeature::flatten_polygon_inner_points(const Point_set_3& pointCloud,
         flattenedPts[i] = Point_3(pointCloud.point(i).x(), pointCloud.point(i).y(), avgHeight);
     }
     //-- Add additional new segments to constrain
-    if (!flattenBndPolys.empty()) {
-        for (auto& flattenBndPoly : flattenBndPolys) {
-            for (const auto& newEdge: flattenBndPoly.edges()) {
-                ePoint_3 pt1(newEdge.point(0).x(), newEdge.point(0).y(), avgHeight);
-                ePoint_3 pt2(newEdge.point(1).x(), newEdge.point(1).y(), avgHeight);
-                constrainedEdges.emplace_back(pt1, pt2);
+    if (!flattenCandidatePolys.empty()) {
+        for (auto& flattenBndPoly : flattenCandidatePolys) {
+            for (auto& ring: flattenBndPoly.rings()) {
+                for (const auto& newEdge: ring.edges()) {
+                    ePoint_3 pt1(newEdge.point(0).x(), newEdge.point(0).y(), avgHeight);
+                    ePoint_3 pt2(newEdge.point(1).x(), newEdge.point(1).y(), avgHeight);
+                    constrainedEdges.emplace_back(pt1, pt2);
+                }
             }
         }
     }
-
     return true;
 }
 
@@ -425,11 +445,10 @@ void PolyFeature::parse_json_poly(const nlohmann::json& poly, const bool checkSi
             }
         }
         geomutils::pop_back_if_equal_to_front(tempPoly);
-
-        if (_poly._rings.empty()) {
-            if (tempPoly.is_clockwise_oriented()) tempPoly.reverse_orientation();
-        } else {
-            if (tempPoly.is_counterclockwise_oriented()) tempPoly.reverse_orientation();
+        if (tempPoly.size() < 3) { // Sanity check if it is even a polygon
+            std::cout << "WARNING: Skipping import of a zero-area polygon" << std::endl;
+            this->deactivate();
+            return;
         }
         if (checkSimplicity) {
             if (!tempPoly.is_simple()) {
@@ -444,6 +463,11 @@ void PolyFeature::parse_json_poly(const nlohmann::json& poly, const bool checkSi
                                  " the import of problematic polygons.\n" << std::endl;
                 }
             }
+        }
+        if (_poly._rings.empty()) {
+            if (tempPoly.is_clockwise_oriented()) tempPoly.reverse_orientation();
+        } else {
+            if (tempPoly.is_counterclockwise_oriented()) tempPoly.reverse_orientation();
         }
         _poly._rings.push_back(tempPoly);
     }

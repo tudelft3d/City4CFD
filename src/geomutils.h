@@ -50,6 +50,8 @@ namespace geomutils {
     //-- Templated functions
     template <typename T> bool point_in_poly(const T& pt2, const Polygon_with_holes_2& polygon);
     template <typename T> bool point_in_poly(const T& pt2, const Polygon_2& polygon);
+    template <typename T> bool point_in_poly_and_boundary(const T& pt2, const Polygon_with_holes_2& polygon);
+    template <typename T> bool point_in_poly_and_boundary(const T& pt2, const Polygon_2& polygon);
     template <typename T> void make_round_poly(const Point_2& centre, double radius, T& poly);
     template <typename T> void make_round_poly(const Point_2& centre, double radius1, double radius2,
                                                int nPts, double angInt, double ang, T& poly);
