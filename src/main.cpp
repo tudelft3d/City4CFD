@@ -1,6 +1,4 @@
 /*
-  City4CFD
- 
   Copyright (c) 2021-2024, 3D Geoinformation Research Group, TU Delft
 
   This file is part of City4CFD.
@@ -31,7 +29,7 @@
 
 #include  <boost/algorithm/string/predicate.hpp>
 
-std::string CITY4CFD_VERSION = "0.4.5+dev";
+std::string CITY4CFD_VERSION = "0.4.6";
 
 void printWelcome() {
     auto logo{
