@@ -112,7 +112,7 @@ void Map3d::set_features() {
         _buildingsPtr.push_back(building);
         _allFeaturesPtr.push_back(building);
     }
-    if (Config::get().avoidBadPolys) this->clear_inactives(); // Remove buildings that potentially couldn't be imported
+    this->clear_inactives(); // Remove buildings that potentially couldn't be imported
     //- Imported buildings
     if (!_importedBuildingsJSON.empty()) {
         std::cout << "Importing CityJSON geometries" << std::endl;
@@ -170,6 +170,7 @@ void Map3d::set_features() {
             _allFeaturesPtr.push_back(surfacePoly);
         }
     }
+    this->clear_inactives();
     std::cout << "Polygons read: " << _allFeaturesPtr.size() << std::endl;
 
     //-- Set flat terrain or random thin terrain points
@@ -349,15 +350,13 @@ void Map3d::reconstruct_buildings() {
         auto& b = _buildingsPtr[i];
         if (b->is_active()) this->reconstruct_one_building(b);
     }
-    this->clear_inactives(); // in case of imported-reconstructed fallback
+    this->clear_inactives(); // renumber failed and in case of imported-reconstructed fallback
     // Gather failed reconstructions
-    int failed = 0;
-    for (auto&  b : _buildingsPtr) if (b->has_failed_to_reconstruct()) ++failed;
-    std::cout << "    Number of successfully reconstructed buildings: " << _buildingsPtr.size() - failed << std::endl;
+    std::cout << "    Number of successfully reconstructed buildings: " << _buildingsPtr.size() << std::endl;
     Config::get().logSummary << "Building reconstruction summary: successfully reconstructed buildings: "
-                             << _buildingsPtr.size() - failed << std::endl;
+                             << _buildingsPtr.size() << std::endl;
     Config::get().logSummary << "                                 num of failed reconstructions: "
-                             << failed << std::endl;
+                             << _failedBuildingsPtr.size() << std::endl;
 }
 
 void Map3d::reconstruct_one_building(std::shared_ptr<Building>& building) {
@@ -580,7 +579,7 @@ void Map3d::prep_cityjson_output() { // Temp impl, might change
 };
 
 void Map3d::clear_inactives() {
-    for (unsigned long i = 0; i < _reconstructedBuildingsPtr.size();) {
+    for (int i = 0; i < _reconstructedBuildingsPtr.size();) {
         if (_reconstructedBuildingsPtr[i]->is_active()) ++i;
         else {
             _reconstructedBuildingsPtr.erase(_reconstructedBuildingsPtr.begin() + i);
@@ -596,7 +595,7 @@ void Map3d::clear_inactives() {
                     inactiveBuildingIdxs.push_back(importedBuilding->get_id());
             }
         }
-        for (unsigned long i = 0; i < _importedBuildingsPtr.size();) {
+        for (int i = 0; i < _importedBuildingsPtr.size();) {
             auto it = std::find(inactiveBuildingIdxs.begin(), inactiveBuildingIdxs.end(),
                                 _importedBuildingsPtr[i]->get_id());
             if (it == inactiveBuildingIdxs.end()) ++i;
@@ -606,26 +605,27 @@ void Map3d::clear_inactives() {
             }
         }
     } else {
-        for (unsigned long i = 0; i < _importedBuildingsPtr.size();) {
+        for (int i = 0; i < _importedBuildingsPtr.size();) {
             if (_importedBuildingsPtr[i]->is_active()) ++i;
             else {
                 _importedBuildingsPtr.erase(_importedBuildingsPtr.begin() + i);
             }
         }
     }
-    for (unsigned long i = 0; i < _buildingsPtr.size();) {
-        if (_buildingsPtr[i]->is_active() || _buildingsPtr[i]->has_failed_to_reconstruct()) ++i;
+    for (int i = 0; i < _buildingsPtr.size();) {
+        if (_buildingsPtr[i]->is_active()) ++i;
         else {
+            if (_buildingsPtr[i]->has_failed_to_reconstruct()) _failedBuildingsPtr.push_back(_buildingsPtr[i]);
             _buildingsPtr.erase(_buildingsPtr.begin() + i);
         }
     }
-    for (unsigned long i = 0; i < _surfaceLayersPtr.size();) {
+    for (int i = 0; i < _surfaceLayersPtr.size();) {
         if (_surfaceLayersPtr[i]->is_active()) ++i;
         else {
             _surfaceLayersPtr.erase(_surfaceLayersPtr.begin() + i);
         }
     }
-    for (unsigned long i = 0; i < _allFeaturesPtr.size();) {
+    for (int i = 0; i < _allFeaturesPtr.size();) {
         if (_allFeaturesPtr[i]->is_active()) ++i;
         else {
             _allFeaturesPtr.erase(_allFeaturesPtr.begin() + i);
@@ -634,11 +634,7 @@ void Map3d::clear_inactives() {
 }
 
 BuildingsPtr Map3d::get_failed_buildings() const {
-    BuildingsPtr failedBuildings;
-    for (auto& b : _buildingsPtr) {
-        if (b->has_failed_to_reconstruct()) failedBuildings.push_back(b);
-    }
-    return failedBuildings;
+    return _failedBuildingsPtr;
 }
 
 //-- Templated functions
