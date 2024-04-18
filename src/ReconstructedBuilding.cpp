@@ -25,10 +25,13 @@
   Delft University of Technology
 */
 
+#define CITY4CFD_VERBOSE //todo temp
+
 #include "ReconstructedBuilding.h"
 
 #include "geomutils.h"
 #include "LoD12.h"
+#include "LoD22.h"
 #include "ImportedBuilding.h"
 
 ReconstructedBuilding::ReconstructedBuilding()
@@ -144,6 +147,7 @@ double ReconstructedBuilding::get_elevation() {
 
 void ReconstructedBuilding::reconstruct() {
     m_mesh.clear();
+    assert(m_reconSettings);
     if (m_clipBottom || Config::get().intersectBuildingsTerrain) {
         this->translate_footprint(-5);
     }
@@ -168,21 +172,73 @@ void ReconstructedBuilding::reconstruct() {
             throw std::domain_error("Found no points belonging to the building");
         }
     }
-    //-- LoD12 reconstruction
-    if (this->get_height() < Config::get().minHeight) { // elevation calculated here
-        Config::write_to_log("Building ID: " + this->get_id()
-                             + " Height lower than minimum prescribed height of "
-                             + std::to_string(Config::get().minHeight) + " m");
-        m_elevation = this->ground_elevation() + Config::get().minHeight;
+    //todo temp
+    /*
+    std::cout << "Checking if polygon is valid and simple" << std::endl;
+    for (auto& poly : m_poly.rings()) {
+        if (!poly.is_simple() || poly.is_empty() || !poly.is_convex()) {
+            std::cout << "Polygon is not simple, empty or convex" << std::endl;
+            std::cout << "Poly id: " << m_id << std::endl;
+        }
     }
-    LoD12 lod12(m_poly, m_groundElevations, m_elevation);
-    lod12.reconstruct(m_mesh);
+     */
+    if (m_reconSettings->lod == "2.2" || m_reconSettings->lod == "1.3") {
+        try {
+            LoD22 lod22;
+            if (m_reconSettings->lod == "2.2")
+                lod22.reconstruct(m_ptsPtr, nullptr, m_poly, m_groundElevations,
+                                  LoD22::ReconstructionConfig()
+                                          .lod(22)
+                                          .lambda(m_reconSettings->complexityFactor));
+            else
+                lod22.reconstruct(m_ptsPtr, nullptr, m_poly, m_groundElevations,
+                                  LoD22::ReconstructionConfig()
+                                  .lod(13)
+                                  .lambda(m_reconSettings->complexityFactor)
+                                  .lod13_step_height(m_reconSettings->lod13StepHeight));
+
+            //todo add validity check and throw exception if not valid
+
+            // get the new footprint and elevations
+            m_groundElevations = lod22.get_base_elevations();
+            m_poly = lod22.get_footprint();
+            m_mesh = lod22.get_mesh();
+        } catch (const std::exception& e) {
+#ifdef CITY4CFD_VERBOSE
+            std::cout << "LoD2.2/1.3 reconstruction failed!" << std::endl;
+            std::cout << "Reason: " << e.what() << std::endl;
+#endif
+
+            Config::write_to_log("Building ID:" + this->get_id()
+                                 + " Failed to reconstruct at LoD2.2/1.3."
+                                 + " Reason: " + e.what()
+                                 + " Falling back to LoD1.2 reconstruction/alpha wrapping");
+
+            //for now, just reconstruct LoD1.2
+            //todo flow to reconstruct either with alpha or LoD1.2
+            this->reconstruct_lod12();
+        }
+    } else {
+        // just reconstruct LoD22
+        this->reconstruct_lod12();
+    }
 
     if (m_clipBottom || Config::get().intersectBuildingsTerrain) {
         this->translate_footprint(5);
     }
     if (Config::get().refineReconstructed) this->refine();
 }
+
+void ReconstructedBuilding::reconstruct_lod12() {
+        if (this->get_height() < Config::get().minHeight) { // elevation calculated here
+            Config::write_to_log("Building ID: " + this->get_id()
+                                 + " Height lower than minimum prescribed height of "
+                                 + std::to_string(Config::get().minHeight) + " m");
+            m_elevation = this->ground_elevation() + Config::get().minHeight;
+        }
+        LoD12 lod12(m_poly, m_groundElevations, m_elevation);
+        lod12.reconstruct(m_mesh);
+};
 
 void ReconstructedBuilding::reconstruct_flat_terrain() {
     m_mesh.clear();
@@ -220,7 +276,7 @@ void ReconstructedBuilding::get_cityjson_semantics(nlohmann::json& g) const { //
     surfaceId["GroundSurface"] = 1; g["semantics"]["surfaces"][1]["type"] = "GroundSurface";
     surfaceId["WallSurface"]   = 2; g["semantics"]["surfaces"][2]["type"] = "WallSurface";
 
-    for (auto& faceIdx : m_mesh.faces()) {
+    for (auto faceIdx : m_mesh.faces()) {
         auto it = surfaceId.find(semantics[faceIdx]);
         if (it == surfaceId.end()) throw std::runtime_error("Could not find semantic attribute!");
 

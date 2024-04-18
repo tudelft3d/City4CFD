@@ -52,6 +52,7 @@ protected:
 
     void reconstruct_from_attribute();
     bool reconstruct_again_from_attribute(const std::string& reason);
+    void reconstruct_lod12();
 };
 
 

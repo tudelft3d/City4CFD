@@ -104,6 +104,10 @@ void Config::set_config(nlohmann::json& j) {
             reconRegion->importAdvantage = regionJson["import_advantage"];
         if (regionJson.contains("bpg_influence_region_extra"))
             reconRegion->bpgInfluExtra = regionJson["bpg_influence_region_extra"];
+        if (regionJson.contains("complexity_factor"))
+            reconRegion->complexityFactor = regionJson["complexity_factor"];
+        if (regionJson.contains("lod13_step_height"))
+            reconRegion->lod13StepHeight = regionJson["lod13_step_height"];
         // set the building (belonging to recon region) output layer id
         reconRegion->outputLayerID = buildingOutputLayerID;
         ++buildingOutputLayerID;

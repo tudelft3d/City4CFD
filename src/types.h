@@ -75,6 +75,13 @@ typedef enum {
     STL          = 2,
 } GeomFormat;
 
+//-- LoDs
+typedef enum {
+    LoD12_enum = 12,
+    LoD13_enum = 13,
+    LoD22_enum = 22
+} LoD;
+
 //-- Global Constants
 namespace global {
     const double largnum  = 1e7;

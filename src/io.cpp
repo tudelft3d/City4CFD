@@ -444,7 +444,7 @@ void IO::get_obj_pts(const Mesh& mesh,
                      std::string& fs,
                      std::string& bs,
                      std::unordered_map<std::string, int>& dPts) {
-    for (auto& face : mesh.faces()) {
+    for (auto face : mesh.faces()) {
         if (IO::is_degen(mesh, face)) continue;
         std::string bsTemp;
         for (auto index : CGAL::vertices_around_face(mesh.halfedge(face), mesh)) {
@@ -467,7 +467,7 @@ void IO::get_stl_pts(Mesh& mesh, std::string& fs) {
     auto vnormals = mesh.add_property_map<vertex_descriptor, Vector_3>("v:normals", CGAL::NULL_VECTOR).first;
     auto fnormals = mesh.add_property_map<face_descriptor, Vector_3>("f:normals", CGAL::NULL_VECTOR).first;
     PMP::compute_normals(mesh, vnormals, fnormals);
-    for (auto& face : mesh.faces()) {
+    for (auto face : mesh.faces()) {
         if (IO::is_degen(mesh, face)) continue;
         std::vector<std::string> outputPts;
         for (auto index: CGAL::vertices_around_face(mesh.halfedge(face), mesh)) {
@@ -488,7 +488,7 @@ void IO::get_cityjson_geom(const Mesh& mesh, nlohmann::json& g, std::unordered_m
     g["type"] = primitive;
     g["lod"] = "1.2"; //hardcoded for now
     g["boundaries"];
-    for (auto& face: mesh.faces()) {
+    for (auto face: mesh.faces()) {
         if (IO::is_degen(mesh, face)) continue;
         std::vector<int> tempPoly;
         tempPoly.reserve(3);

@@ -156,7 +156,17 @@ namespace jsonschema {
                 "$ref": "#/$defs/influBndStruct"
               },
               "lod": {
-                "type": "string"
+                "type": "string",
+                "enum": ["1.2", "1.3", "2.2"]
+              },
+              "complexity_factor": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "exclusiveMaximum": 1
+              },
+              "lod13_step_height": {
+                "type": "number",
+                "minimum": 0
               },
               "bpg_influence_region_extra": {
                 "type": "number",

@@ -37,6 +37,8 @@
 #include <CGAL/Polygon_mesh_processing/orient_polygon_soup.h>
 #include <CGAL/Polygon_mesh_processing/polygon_soup_to_polygon_mesh.h>
 #include <CGAL/Polygon_mesh_processing/triangulate_faces.h>
+#include <CGAL/Polygon_mesh_processing/compute_normal.h>
+
 
 int ImportedBuilding::noBottom = 0;
 
@@ -252,7 +254,7 @@ ImportedBuilding::ImportedBuilding(Mesh& mesh)
     //-- Shove it back to JSON for now
     m_lodIdx = 0;
     nlohmann::json geom;
-    for (auto& face : mesh.faces()) {
+    for (auto face : mesh.faces()) {
         nlohmann::json faceJson;
         for (auto vert : mesh.vertices_around_face(mesh.halfedge(face))) {
             faceJson.push_back(vert.idx());

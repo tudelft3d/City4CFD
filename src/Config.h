@@ -138,6 +138,9 @@ public:
         double      bpgInfluExtra                   = 0.;
         bool        importAdvantage                 = true;
         int         outputLayerID                   = 0;
+        //lod13-lod22 reconstruction settings
+        double      complexityFactor                = 0.5;
+        double      lod13StepHeight                 = 2.;
     };
 
     std::vector<std::shared_ptr<ReconRegion>> reconRegions;

@@ -132,7 +132,7 @@ void Terrain::prepare_subset() {
 
     //-- Construct vertex-face map used for search
     m_vertexFaceMap.clear();
-    for (auto& face : m_mesh.faces()) {
+    for (auto face : m_mesh.faces()) {
         for (auto vertex : CGAL::vertices_around_face(m_mesh.halfedge(face), m_mesh)) {
             auto pt = m_mesh.point(vertex);
             auto it = m_vertexFaceMap.find(pt);

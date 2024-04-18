@@ -75,7 +75,7 @@ void Building::alpha_wrap(const BuildingsPtr& buildings, Mesh& newMesh) {
     for (auto& b : buildings) {
         if (!b->is_active()) continue; // skip failed reconstructions
         auto& mesh = b->get_mesh();
-        for (auto& face: mesh.faces()) {
+        for (auto face: mesh.faces()) {
             CGAL_Polygon p;
             auto vertices = mesh.vertices_around_face(mesh.halfedge(face));
             for (auto vertex = vertices.begin(); vertex != vertices.end(); ++vertex) {
@@ -181,7 +181,7 @@ void Building::refine() {
             m_mesh.add_property_map<edge_descriptor,bool>("e:is_constrained", false).first;
 
     //-- Detect sharp features
-    for (auto& e : edges(m_mesh)) {
+    for (auto e : edges(m_mesh)) {
         halfedge_descriptor hd = halfedge(e, m_mesh);
         if (!is_border(e, m_mesh)) {
             double angle = CGAL::Mesh_3::dihedral_angle(m_mesh.point(source(hd, m_mesh)),
@@ -311,7 +311,7 @@ void Building::get_cityjson_semantics(nlohmann::json& g) const { // Temp for che
     surfaceId["GroundSurface"] = 1; g["semantics"]["surfaces"][1]["type"] = "GroundSurface";
     surfaceId["WallSurface"]   = 2; g["semantics"]["surfaces"][2]["type"] = "WallSurface";
 
-    for (auto& faceIdx : m_mesh.faces()) {
+    for (auto faceIdx : m_mesh.faces()) {
         auto it = surfaceId.find(semantics[faceIdx]);
         if (it == surfaceId.end()) throw std::runtime_error("Could not find semantic attribute!");
 
