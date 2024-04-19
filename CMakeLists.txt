@@ -5,7 +5,7 @@ project(city4cfd)
 #set( CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS true )
 
 set(CMAKE_CXX_FLAGS "-O3")
-set(CMAKE_BUILD_TYPE "Release")
+#set(CMAKE_BUILD_TYPE "Release")
 
 #if (COMMAND cmake_policy)
 #    cmake_policy(SET CMP0003 NEW)
@@ -30,13 +30,11 @@ endif (WIN32)
 
 # CGAL
 find_package(CGAL REQUIRED QUIET COMPONENTS)
-if (CGAL_VERSION VERSION_GREATER_EQUAL "5.0")
-    message(STATUS "Found CGAL version greater than 5.0")
-    include_directories(${CMAKE_SOURCE_DIR}/thirdparty/CGAL/include)
-    set(CGAL_USE_INCLUDED_HEADERS ON)
+if (CGAL_VERSION VERSION_GREATER_EQUAL "5.4")
+    message(STATUS "Found CGAL version greater than 5.4")
 else()
     message(FATAL_ERROR "Found CGAL version ${CGAL_VERSION} which is not supported!"
-            "Please use CGAL version 5")
+            "Please use CGAL version 5.4 or higher")
     return()
 endif ()
 
@@ -65,6 +63,8 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/thirdparty/CSF/src)
 include_directories(${CMAKE_SOURCE_DIR}/thirdparty)
 include_directories(${CMAKE_SOURCE_DIR}/thirdparty/valijson)
 include_directories(${Boost_INCLUDE_DIR})
+add_subdirectory(${CMAKE_SOURCE_DIR}/thirdparty/roofer/src)
+include_directories(${CMAKE_SOURCE_DIR}/thirdparty/roofer/src)
 
 # Tools
 add_subdirectory(${CMAKE_SOURCE_DIR}/tools/prepare_point_cloud)
@@ -74,7 +74,7 @@ FILE(GLOB SRC_FILES "src/*.cpp")
 add_executable(city4cfd ${SRC_FILES})
 set_target_properties(
         city4cfd
-        PROPERTIES CXX_STANDARD 14
+        PROPERTIES CXX_STANDARD 17
 )
 
 target_link_libraries(city4cfd
@@ -86,6 +86,7 @@ target_link_libraries(city4cfd
         ${Boost_LOCALE_LIBRARY}
         LASlib
         CGAL::Eigen3_support
+        roofer_api
         ${OpenMP_support}
         )
 
