@@ -30,6 +30,7 @@
 //#include <CGAL/compute_average_spacing.h>
 #include <CGAL/Boolean_set_operations_2/do_intersect.h>
 #include <CGAL/Polygon_mesh_processing/repair.h>
+#include <CGAL/approximated_offset_2.h>
 
 double geomutils::avg(const std::vector<double>& values) {
     if (values.empty()) throw std::length_error("Can't calculate average of a zero-sized vector!");
@@ -232,6 +233,60 @@ bool geomutils::polygons_in_contact(const Polygon_with_holes_2& firstPoly, const
         }
     }
     return false;
+}
+
+Polygon_2 geomutils::offset_polygon(const Polygon_2& poly, double offset) {
+    typedef CGAL::Gps_circle_segment_traits_2<EPICK> Gps_traits_2;
+    typedef Gps_traits_2::General_polygon_2 General_polygon_2;
+
+    // offset polygon with Minkowski
+    auto offsetPoly = CGAL::approximated_offset_2(poly, offset, 0.0001); //todo get minkowski sum
+    const General_polygon_2& outerBoundary = offsetPoly.outer_boundary();
+    Polygon_2 offsetOutputPoly;
+    // convert to linear polygon
+    for (auto cit = outerBoundary.curves_begin();
+         cit !=outerBoundary.curves_end();++cit) {
+        auto offsetPt = Point_2((cit->source().x().alpha()) +
+                                (cit->source().x().beta() * CGAL::approximate_sqrt(cit->source().x().gamma())),
+                                (cit->source().y().alpha()) +
+                                (cit->source().y().beta() * CGAL::approximate_sqrt(cit->source().y().gamma())));
+        offsetOutputPoly.push_back(offsetPt);
+    }
+    return offsetOutputPoly;
+}
+
+Polygon_with_holes_2 geomutils::offset_polygon_with_holes(const Polygon_with_holes_2& poly, double offset) {
+    typedef CGAL::Gps_circle_segment_traits_2<EPICK> Gps_traits_2;
+    typedef Gps_traits_2::General_polygon_2 General_polygon_2;
+
+    Polygon_with_holes_2 offsetPolywHoles;
+
+    // offset polygon with Minkowski
+    auto offsetPoly = CGAL::approximated_offset_2(poly.get_cgal_type(), offset, 0.0001);
+    const General_polygon_2& outerBoundary = offsetPoly.outer_boundary();
+    Polygon_2 outerRing;
+    // convert to linear polygon
+    for (auto cit = outerBoundary.curves_begin();
+         cit !=outerBoundary.curves_end();++cit) {
+        auto offsetPt = Point_2((cit->source().x().alpha()) +
+                                (cit->source().x().beta() * CGAL::approximate_sqrt(cit->source().x().gamma())),
+                                (cit->source().y().alpha()) +
+                                (cit->source().y().beta() * CGAL::approximate_sqrt(cit->source().y().gamma())));
+        outerRing.push_back(offsetPt);
+    }
+    offsetPolywHoles.rings().push_back(outerRing);
+    for (auto hit = offsetPoly.holes_begin(); hit != offsetPoly.holes_end(); ++hit) {
+        Polygon_2 hole;
+        for (auto cit = hit->curves_begin(); cit != hit->curves_end(); ++cit) {
+            auto offsetPt = Point_2((cit->source().x().alpha()) +
+                                    (cit->source().x().beta() * CGAL::approximate_sqrt(cit->source().x().gamma())),
+                                    (cit->source().y().alpha()) +
+                                    (cit->source().y().beta() * CGAL::approximate_sqrt(cit->source().y().gamma())));
+            hole.push_back(offsetPt);
+        }
+        offsetPolywHoles.rings().push_back(hole);
+    }
+    return offsetPolywHoles;
 }
 
 Polygon_with_holes_2 geomutils::exact_poly_to_poly(const CGAL::Polygon_with_holes_2<EPECK>& exactPoly) {

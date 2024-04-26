@@ -44,6 +44,8 @@ namespace geomutils {
     Point_3 rotate_pt_xy(const Point_3& pt, const double angle, Point_2 centerPt = Point_2(0, 0));
     void    interpolate_poly_from_pc(const Polygon_2& poly, std::vector<double>& elevations, const Point_set_3& pointCloud);
     bool    polygons_in_contact(const Polygon_with_holes_2& firstPoly, const Polygon_with_holes_2& secondPoly);
+    Polygon_2 offset_polygon(const Polygon_2& poly, double offset);
+    Polygon_with_holes_2 offset_polygon_with_holes(const Polygon_with_holes_2& poly, double offset);
     Polygon_with_holes_2 exact_poly_to_poly(const CGAL::Polygon_with_holes_2<EPECK>& exactPoly);
     void    remove_self_intersections(Mesh& mesh);
 

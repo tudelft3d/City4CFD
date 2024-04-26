@@ -80,6 +80,9 @@ struct Polygon_with_holes_2 {
     void push_back(Point_2& point) {
         m_rings.front().push_back(point);
     }
+    void insert_ring(const Polygon_2& ring) {
+        m_rings.push_back(ring);
+    }
     bool has_holes() const {
         if (m_rings.size() > 1) return true;
         return false;
@@ -91,7 +94,7 @@ struct Polygon_with_holes_2 {
         return m_rings.front();
     }
 
-    const CGAL::Polygon_with_holes_2<EPICK> get_cgal_type() const {
+    CGAL::Polygon_with_holes_2<EPICK> get_cgal_type() const {
        CGAL::Polygon_with_holes_2<EPICK> cgalPoly;
        cgalPoly.outer_boundary() = m_rings.front();
        for (int i = 1; i < m_rings.size(); ++i) {
@@ -100,7 +103,7 @@ struct Polygon_with_holes_2 {
        return cgalPoly;
     }
 
-    const CGAL::Polygon_2<EPECK> get_exact_outer_boundary() const {
+    CGAL::Polygon_2<EPECK> get_exact_outer_boundary() const {
         Converter<EPICK, EPECK> to_exact;
         CGAL::Polygon_2<EPECK> cgalOuterPoly;
         for (auto& pt : m_rings.front()) {
@@ -109,7 +112,7 @@ struct Polygon_with_holes_2 {
         return cgalOuterPoly;
     }
 
-    const CGAL::Polygon_with_holes_2<EPECK> get_exact() const {
+    CGAL::Polygon_with_holes_2<EPECK> get_exact() const {
         Converter<EPICK, EPECK> to_exact;
         CGAL::Polygon_with_holes_2<EPECK> cgalPoly;
         cgalPoly.outer_boundary() = get_exact_outer_boundary();

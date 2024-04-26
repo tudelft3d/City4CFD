@@ -483,3 +483,5 @@ void ImportedBuilding::set_footprint_mesh_connectivity(const std::unordered_map<
         m_footprintPtsIdxList.push_back(ringFootprintIdxs);
     }
 }
+
+void ImportedBuilding::insert_terrain_point(const Point_3& /* pt */) {}

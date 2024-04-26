@@ -44,15 +44,12 @@ void LoD22::reconstruct(const PointSet3Ptr buildingPtsPtr,
     }
 
     // prep ground pts
-    //todo temp until I add ground pts back to building classes
-    /*
     roofer::PointCollection groundPts;
     for (const auto& pt : groundPtsPtr->points()) {
         groundPts.push_back({(float)pt.x(),
-                               (float)pt.y(),
-                               (float)pt.z()});
+                             (float)pt.y(),
+                             (float)pt.z()});
     }
-     */
 
     // prep footprints
     //todo  base_elevations are in for a rewrite

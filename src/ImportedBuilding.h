@@ -45,6 +45,7 @@ public:
     virtual double get_elevation() override;
     virtual void   reconstruct() override;
     virtual void   reconstruct_flat_terrain() override;
+    virtual void   insert_terrain_point(const Point_3& /* pt */) override;
 
     void   append_nonground_part(const std::shared_ptr<ImportedBuilding>& other);
 

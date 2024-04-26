@@ -62,7 +62,8 @@ ReconstructedBuilding::ReconstructedBuilding(const nlohmann::json& poly)
 
 ReconstructedBuilding::ReconstructedBuilding(const nlohmann::json& poly)
         : Building(poly), m_attributeHeight(-global::largnum),
-          m_attributeHeightAdvantage(Config::get().buildingHeightAttrAdv) {
+          m_attributeHeightAdvantage(Config::get().buildingHeightAttrAdv),
+          m_groundPtsPtr(std::make_shared<Point_set_3 >()) {
     if (!Config::get().buildingUniqueId.empty() && poly["properties"].contains(Config::get().buildingUniqueId)) {
         m_id = poly["properties"][Config::get().buildingUniqueId].dump();
     } else {
@@ -86,7 +87,8 @@ ReconstructedBuilding::ReconstructedBuilding(const nlohmann::json& poly)
 
 ReconstructedBuilding::ReconstructedBuilding(const Polygon_with_attr& poly)
         : Building(poly), m_attributeHeight(-global::largnum),
-          m_attributeHeightAdvantage(Config::get().buildingHeightAttrAdv) {
+          m_attributeHeightAdvantage(Config::get().buildingHeightAttrAdv),
+          m_groundPtsPtr(std::make_shared<Point_set_3 >()) {
     // Check for the polygon ID attribute
     auto idIt = poly.attributes.find(Config::get().buildingUniqueId);
     if (idIt != poly.attributes.end()) {
@@ -111,7 +113,8 @@ ReconstructedBuilding::ReconstructedBuilding(const Polygon_with_attr& poly)
 
 ReconstructedBuilding::ReconstructedBuilding(const std::shared_ptr<ImportedBuilding>& importedBuilding)
         : Building(importedBuilding->get_poly_w_attr()),
-          m_attributeHeight(-global::largnum), m_attributeHeightAdvantage(Config::get().buildingHeightAttrAdv) {
+          m_attributeHeight(-global::largnum), m_attributeHeightAdvantage(Config::get().buildingHeightAttrAdv),
+          m_groundPtsPtr(std::make_shared<Point_set_3 >()) {
     m_ptsPtr = importedBuilding->get_points();
     m_groundElevations = importedBuilding->get_ground_elevations();
     m_id = importedBuilding->get_id();
@@ -186,12 +189,12 @@ void ReconstructedBuilding::reconstruct() {
         try {
             LoD22 lod22;
             if (m_reconSettings->lod == "2.2")
-                lod22.reconstruct(m_ptsPtr, nullptr, m_poly, m_groundElevations,
+                lod22.reconstruct(m_ptsPtr, m_groundPtsPtr, m_poly, m_groundElevations,
                                   LoD22::ReconstructionConfig()
                                           .lod(22)
                                           .lambda(m_reconSettings->complexityFactor));
             else
-                lod22.reconstruct(m_ptsPtr, nullptr, m_poly, m_groundElevations,
+                lod22.reconstruct(m_ptsPtr, m_groundPtsPtr, m_poly, m_groundElevations,
                                   LoD22::ReconstructionConfig()
                                   .lod(13)
                                   .lambda(m_reconSettings->complexityFactor)
@@ -216,6 +219,7 @@ void ReconstructedBuilding::reconstruct() {
 
             //for now, just reconstruct LoD1.2
             //todo flow to reconstruct either with alpha or LoD1.2
+            //todo more points are now included, need to remove extra
             this->reconstruct_lod12();
         }
     } else {
@@ -239,6 +243,10 @@ void ReconstructedBuilding::reconstruct_lod12() {
         LoD12 lod12(m_poly, m_groundElevations, m_elevation);
         lod12.reconstruct(m_mesh);
 };
+
+void ReconstructedBuilding::insert_terrain_point(const Point_3& pt) {
+    m_groundPtsPtr->insert(pt); //todo sort out terrain pts
+}
 
 void ReconstructedBuilding::reconstruct_flat_terrain() {
     m_mesh.clear();

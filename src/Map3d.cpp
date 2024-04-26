@@ -213,7 +213,7 @@ void Map3d::add_building_pts() {
 
     //-- Find points belonging to individual buildings
     for (auto& b: m_reconstructedBuildingsPtr) {
-        auto& poly = b->get_poly();
+        Polygon_with_holes_2 poly = geomutils::offset_polygon_with_holes(b->get_poly(), 2);
 
         std::vector<Point_3> subsetPts;
         Point_2 bbox1(poly.bbox().xmin(), poly.bbox().ymin());
@@ -223,7 +223,7 @@ void Map3d::add_building_pts() {
 
         //-- Check if subset point lies inside the polygon
         for (auto& pt : subsetPts) {
-            if (geomutils::point_in_poly(pt, poly)) {
+            if (geomutils::point_in_poly_and_boundary(pt, poly)) {
                 b->insert_point(pt);
             }
         }

@@ -42,6 +42,7 @@ public:
 
     virtual double get_elevation() override;
     virtual void   reconstruct() override;
+    virtual void   insert_terrain_point(const Point_3& pt) override;
     virtual void   reconstruct_flat_terrain() override;
     virtual void   get_cityjson_info(nlohmann::json& b) const override;
     virtual void   get_cityjson_semantics(nlohmann::json& g) const override;
@@ -49,6 +50,7 @@ public:
 protected:
     double m_attributeHeight;
     bool   m_attributeHeightAdvantage;
+    PointSet3Ptr m_groundPtsPtr;
 
     void reconstruct_from_attribute();
     bool reconstruct_again_from_attribute(const std::string& reason);
