@@ -478,7 +478,7 @@ namespace arragementsnapper {
 
             if (auto f = boost::get<Face_const_handle>(&obj)) { // located inside a face
               // arrFace->data() = (*f)->data();
-              canidate_faces[arr.non_const_handle(*f)] += CGAL::to_double(cdt.triangle(fit).area());
+              canidate_faces[arr.non_const_handle(*f)] += cdt.triangle(fit).area();
             }
             // break;
           }

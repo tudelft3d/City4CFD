@@ -27,31 +27,15 @@
 
 namespace roofer {
 
-struct Array_traits {
-    typedef std::array<EPICK::FT, 3>  Custom_point;
-    struct Equal_3 {
-        bool operator()(const Custom_point& p, const Custom_point& q) const {
-            return (p == q);
-        }
-    };
-    struct Less_xyz_3 {
-        bool operator()(const Custom_point& p, const Custom_point& q) const {
-            return std::lexicographical_compare(p.begin(), p.end(), q.begin(), q.end());
-        }
-    };
-    Equal_3 equal_3_object() const { return Equal_3(); }
-    Less_xyz_3 less_xyz_3_object() const { return Less_xyz_3(); }
-};
-
-
 template <typename Point>
 CGAL::Surface_mesh<Point> Mesh2CGALSurfaceMesh(const roofer::Mesh& gfmesh) {
   typedef typename CGAL::Surface_mesh<Point> SurfaceMesh;
   typedef typename SurfaceMesh::Vertex_index VertexIndex;
+  typedef typename Point::FT FT;
   namespace PMP = CGAL::Polygon_mesh_processing;
 
   SurfaceMesh smesh;
-    typename std::vector<std::array<typename Point::FT, 3>> points;
+  typename std::vector<Point> points;
 
     // method of triangulating everything
     /*
@@ -80,7 +64,7 @@ CGAL::Surface_mesh<Point> Mesh2CGALSurfaceMesh(const roofer::Mesh& gfmesh) {
             std::vector<std::size_t> rindices;
             rindices.reserve(ring.vertex_count());
             for (auto& v: ring) {
-                points.push_back(CGAL::make_array<typename Point::FT>(v[0], v[1], v[2]));
+                points.push_back(Point(v[0], v[1], v[2]));
                 rindices.push_back(points.size() - 1);
             }
             polygons.push_back(rindices);
@@ -93,7 +77,7 @@ CGAL::Surface_mesh<Point> Mesh2CGALSurfaceMesh(const roofer::Mesh& gfmesh) {
                 std::vector<std::size_t> rindices; rindices.reserve(3);
                 for (auto &v : tri)
                 {
-                    points.push_back(CGAL::make_array<typename Point::FT>(v[0], v[1], v[2]));
+                    points.push_back(Point(v[0], v[1], v[2]));
                     rindices.push_back(points.size() - 1);
                 }
                 polygons.push_back(rindices);
@@ -103,7 +87,7 @@ CGAL::Surface_mesh<Point> Mesh2CGALSurfaceMesh(const roofer::Mesh& gfmesh) {
 
 
   // turn polygon soup into polygon mesh
-  PMP::repair_polygon_soup(points, polygons, CGAL::parameters::geom_traits(roofer::Array_traits()));
+  PMP::repair_polygon_soup(points, polygons);
   PMP::orient_polygon_soup(points, polygons);
   PMP::duplicate_non_manifold_edges_in_polygon_soup(points, polygons);
   PMP::polygon_soup_to_polygon_mesh(points, polygons, smesh);

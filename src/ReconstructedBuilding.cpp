@@ -131,18 +131,20 @@ double ReconstructedBuilding::get_elevation() {
     if (m_elevation < -global::largnum + global::smallnum) { // calculate if not already available
         if (m_attributeHeightAdvantage && m_attributeHeight > 0) { // get height from attribute
             m_elevation = this->ground_elevation() + m_attributeHeight;
-        } else if (m_ptsPtr->empty()) { // set height as minimum if not able to calculate
-            m_elevation = this->ground_elevation();
-            Config::write_to_log("Building ID: " + this->get_id() + " Missing points for elevation calculation."
-                                 + "Using minimum of " + std::to_string(Config::get().minHeight) + "m");
         } else { // else calculate as a percentile from config
             // gather all building elevations
             std::vector<double> buildingElevations;
             for (auto& pt : m_ptsPtr->points()) {
-                buildingElevations.push_back(pt.z());
+                if (geomutils::point_in_poly_and_boundary(pt, m_poly))
+                    buildingElevations.push_back(pt.z());
             }
-            // calculate percentile
-            m_elevation = geomutils::percentile(buildingElevations, Config::get().buildingPercentile);
+            if (buildingElevations.empty()) { // set height as minimum if not able to calculate percentile
+                m_elevation = this->ground_elevation();
+                Config::write_to_log("Building ID: " + this->get_id() + " Missing points for elevation calculation."
+                                     + "Using minimum of " + std::to_string(Config::get().minHeight) + "m");
+            } else { // calculate percentile
+                m_elevation = geomutils::percentile(buildingElevations, Config::get().buildingPercentile);
+            }
         }
     }
     return m_elevation;
