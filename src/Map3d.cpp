@@ -61,7 +61,8 @@ void Map3d::reconstruct() {
         this->shorten_polygons(m_allFeaturesPtr);
 
         //-- Find footprint elevation of all polygons using smoothed DT
-        this->set_footprint_elevation(m_allFeaturesPtr);
+        this->set_footprint_elevation(m_surfaceLayersPtr);
+        this->set_footprint_elevation(m_buildingsPtr);
 
         //-- Reconstruct buildings in the influ region
         this->reconstruct_buildings();
@@ -213,7 +214,7 @@ void Map3d::add_building_pts() {
 
     //-- Find points belonging to individual buildings
     for (auto& b: m_reconstructedBuildingsPtr) {
-        Polygon_with_holes_2 poly = geomutils::offset_polygon_with_holes(b->get_poly(), 2);
+        Polygon_with_holes_2 poly = geomutils::offset_polygon_with_holes(b->get_poly(), 2.);
 
         std::vector<Point_3> subsetPts;
         Point_2 bbox1(poly.bbox().xmin(), poly.bbox().ymin());
@@ -361,11 +362,27 @@ void Map3d::reconstruct_buildings() {
                   << ". If I cannot find a geometry with that LoD, I will reconstruct in the highest LoD available"
                   << std::endl;
     }
-    # pragma omp parallel for
+   # pragma omp parallel for
     for (int i = 0; i < m_buildingsPtr.size(); ++i) {
     //for (auto& f : m_buildingsPtr) { // MSVC doesn't like range loops with OMP
         auto& b = m_buildingsPtr[i];
         if (b->is_active()) this->reconstruct_one_building(b);
+    }
+    // handle cases when a building is a multipart from roofer
+    # pragma omp parallel for
+    for (int i = 0; i < m_buildingsPtr.size(); ++i) {
+        auto& b = m_buildingsPtr[i];
+        if (!b->is_active()) continue;
+        auto reconBuilding = std::dynamic_pointer_cast<ReconstructedBuilding>(b);
+        if (reconBuilding) {
+            auto& reconBuildingMeshes = reconBuilding->get_roofer_meshes();
+            for (int j = 1; j < reconBuildingMeshes.size(); ++j) {
+                auto newBuilding = std::make_shared<ReconstructedBuilding>(reconBuildingMeshes[j], reconBuilding);
+                m_reconstructedBuildingsPtr.push_back(newBuilding);
+                m_buildingsPtr.push_back(newBuilding);
+                m_allFeaturesPtr.push_back(newBuilding);
+            }
+        }
     }
     this->clear_inactives(); // renumber failed and in case of imported-reconstructed fallback
     // Gather failed reconstructions

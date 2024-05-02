@@ -34,6 +34,9 @@
 class LoD22 {
 public:
     LoD22() = default;
+
+    LoD22(roofer::Mesh rooferMesh);
+
     ~LoD22() = default;
 
     struct ReconstructionConfig {
@@ -52,8 +55,8 @@ public:
         ReconstructionConfig& lod13_step_height(float lod13_step_height) { m_lod13_step_height = lod13_step_height; return *this; };
     };
 
-    void reconstruct(const PointSet3Ptr buildingPtsPtr,
-                     const PointSet3Ptr groundPtsPtr,
+    void reconstruct(const PointSet3Ptr& buildingPtsPtr,
+                     const PointSet3Ptr& groundPtsPtr,
                      const Polygon_with_holes_2& footprint,
                      const std::vector<std::vector<double>>& base_elevations,
                      ReconstructionConfig config = ReconstructionConfig()
@@ -62,12 +65,17 @@ public:
     Polygon_with_holes_2              get_footprint() const;
     std::vector<std::vector<double>>  get_base_elevations() const;
     Mesh                              get_mesh() const;
+    std::vector<roofer::Mesh>         get_roofer_meshes() const;
 
 
 private:
     Mesh                                     m_mesh;
+    std::vector<roofer::Mesh>                m_roofer_meshes;
     Polygon_with_holes_2                     m_footprint;
     std::vector<std::vector<double>>         m_baseElevations;
+
+    void shorten_mesh_edges(roofer::Mesh& mesh, const double sq_maxdist) const;
+    void get_footprint_from_mesh(const roofer::Mesh& roofer_mesh, Polygon_with_holes_2& footprint, std::vector<std::vector<double>>& baseElevations);
 };
 
 

@@ -29,16 +29,20 @@
 #define CITY4CFD_RECONSTRUCTEDBUILDING_H
 
 #include "Building.h"
+#include "roofer.h"
 
 class ReconstructedBuilding : public Building {
 public:
     ReconstructedBuilding();
     ReconstructedBuilding(const Mesh& mesh);
+    ReconstructedBuilding(const roofer::Mesh& rooferMesh, const ReconstructedBuildingPtr& other);
 //    ReconstructedBuilding(const nlohmann::json& poly);
     ReconstructedBuilding(const nlohmann::json& poly);
     ReconstructedBuilding(const Polygon_with_attr& poly);
     ReconstructedBuilding(const std::shared_ptr<ImportedBuilding>& importedBuilding);
     ~ReconstructedBuilding();
+
+    const std::vector<roofer::Mesh>& get_roofer_meshes() const;
 
     virtual double get_elevation() override;
     virtual void   reconstruct() override;
@@ -51,6 +55,7 @@ protected:
     double m_attributeHeight;
     bool   m_attributeHeightAdvantage;
     PointSet3Ptr m_groundPtsPtr;
+    std::vector<roofer::Mesh> m_roofer_meshes;
 
     void reconstruct_from_attribute();
     bool reconstruct_again_from_attribute(const std::string& reason);

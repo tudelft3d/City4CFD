@@ -43,6 +43,26 @@ ReconstructedBuilding::ReconstructedBuilding(const Mesh& mesh)
     m_mesh = mesh;
 }
 
+ReconstructedBuilding::ReconstructedBuilding(const roofer::Mesh& rooferMesh, const ReconstructedBuildingPtr& other)
+        : ReconstructedBuilding() {
+    if (!other) throw std::runtime_error("Trying to pass a nullptr to ReconstructedBuilding!");
+    // create new LoD22 object
+    LoD22 lod22(rooferMesh);
+    m_mesh = lod22.get_mesh();
+    m_poly = lod22.get_footprint();
+    m_groundElevations = lod22.get_base_elevations();
+
+    // transfer other attributes from the original
+    m_id = std::string(other->m_id + "_1");
+    m_reconSettings = other->m_reconSettings;
+    m_outputLayerID = other->m_outputLayerID;
+    m_attributeHeight = other->m_attributeHeight;
+    m_attributeHeightAdvantage = other->m_attributeHeightAdvantage;
+    m_groundPtsPtr = other->m_groundPtsPtr;
+    m_ptsPtr = other->m_ptsPtr;
+    m_clipBottom = other->m_clipBottom;
+}
+
 /*
 ReconstructedBuilding::ReconstructedBuilding(const nlohmann::json& poly)
         : Building(poly), m_searchTree(nullptr),
@@ -248,6 +268,10 @@ void ReconstructedBuilding::reconstruct_lod12() {
 
 void ReconstructedBuilding::insert_terrain_point(const Point_3& pt) {
     m_groundPtsPtr->insert(pt); //todo sort out terrain pts
+}
+
+const std::vector<roofer::Mesh>& ReconstructedBuilding::get_roofer_meshes() const {
+    return m_roofer_meshes;
 }
 
 void ReconstructedBuilding::reconstruct_flat_terrain() {

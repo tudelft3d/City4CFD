@@ -128,17 +128,18 @@ void PointCloud::remove_points_in_polygon(BuildingsPtr& features) {
     //-- Find points belonging to individual buildings
     for (auto& f: features) {
         auto& poly = f->get_poly();
+        auto offsetPoly = geomutils::offset_polygon_with_holes(poly, 1.);
 
-        std::vector<Point_index *> intersected_nodes;
-        pointCloudIndex.find_intersections(intersected_nodes, poly.bbox().xmin(), poly.bbox().xmax(),
-                                           poly.bbox().ymin(), poly.bbox().ymax());
+        std::vector<Point_index*> intersected_nodes;
+        pointCloudIndex.find_intersections(intersected_nodes, offsetPoly.bbox().xmin(), offsetPoly.bbox().xmax(),
+                                           offsetPoly.bbox().ymin(), offsetPoly.bbox().ymax());
         for (auto const &node: intersected_nodes) {
             for (auto const &point_index: node->points) {
-                if (geomutils::point_in_poly(pointCloud.point(point_index), poly)) {
+                if (geomutils::point_in_poly_and_boundary(pointCloud.point(point_index), poly)) {
                     pointCloud.remove(point_index);
-                    //todo temp add to building
                 }
-                f->insert_terrain_point(pointCloud.point(point_index));
+                //todo temp add to building
+                f->insert_terrain_point(pointCloud.point(point_index)); //use bbox for roofer
             }
         }
     }

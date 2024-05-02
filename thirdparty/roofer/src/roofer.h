@@ -65,10 +65,10 @@ namespace roofer {
    * //todo doc
    */
   template <typename Footprint>
-  Mesh reconstruct_single_instance(const PointCollection& points_roof,
-                                   const PointCollection& points_ground,
-                                   Footprint& footprint,
-                                   ReconstructionConfig cfg=ReconstructionConfig())
+  std::vector<Mesh> reconstruct_single_instance(const PointCollection& points_roof,
+                                               const PointCollection& points_ground,
+                                               Footprint& footprint,
+                                               ReconstructionConfig cfg=ReconstructionConfig())
   {
     try {
       // check if configuration is valid
@@ -214,12 +214,11 @@ namespace roofer {
                                    *elevation_provider,
                                    {.LoD2 = cfg.lod == 22});
 
-//      assert(ArrangementExtruder->meshes.size() == 1);
-      //todo temp
-      if (ArrangementExtruder->meshes.size() != 1) {
-        throw rooferException("More than one output mesh!");
+      if (ArrangementExtruder->meshes.empty()) {
+        throw rooferException("Reconstruction failed; no meshes generated");
       }
-      return ArrangementExtruder->meshes.front();
+      return ArrangementExtruder->meshes;
+
     } catch (const std::exception& e) {
 #ifdef ROOFER_VERBOSE
       std::cout << "Reconstruction failed, exception thrown: " << e.what() << std::endl;
@@ -236,9 +235,9 @@ namespace roofer {
    * //todo doc
    */
   template <typename Footprint>
-  Mesh reconstruct_single_instance(const PointCollection& points_roof,
-                                   Footprint& footprint,
-                                   ReconstructionConfig cfg=ReconstructionConfig())
+  std::vector<Mesh> reconstruct_single_instance(const PointCollection& points_roof,
+                                                Footprint& footprint,
+                                                ReconstructionConfig cfg=ReconstructionConfig())
   {
     PointCollection points_ground = PointCollection();
     return reconstruct_single_instance(points_roof, points_ground, footprint, cfg);

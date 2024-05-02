@@ -176,6 +176,9 @@ namespace roofer::detection {
             if(cfg.LoD2) {
               auto& plane = f->data().plane;
               h = (plane.a()*CGAL::to_double(p.x()) + plane.b()*CGAL::to_double(p.y()) + plane.d()) / (-plane.c());
+              auto h_min = elevation_provider.get(p);
+              if (h < h_min)
+                  h = h_min;
             } else {
               if (cfg.lod1_extrude_to_max_)
                 h = f->data().elevation_97p;
