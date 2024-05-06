@@ -27,9 +27,6 @@ endif(MSVC)
 find_package( CGAL QUIET COMPONENTS )
 if ( CGAL_FOUND )
   include( ${CGAL_USE_FILE} )
-  message(STATUS "CGAL found")
-  message(STATUS ${CGAL_LIBRARIES})
-  message(STATUS ${CGAL_3RD_PARTY_LIBRARIES})
 else()
   message(SEND_ERROR "val3dity requires the CGAL library")
   return()  
@@ -43,7 +40,7 @@ include(CGAL_Eigen3_support)
 
 
 # Boost
-find_package( Boost REQUIRED COMPONENTS filesystem)
+find_package( Boost REQUIRED COMPONENTS filesystem QUIET)
 
 if ( NOT Boost_FOUND )
   message(SEND_ERROR "val3dity requires the Boost library")
@@ -62,7 +59,7 @@ include_directories( ${GEOS_INCLUDE_DIR} )
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty )
 
 FILE(GLOB_RECURSE THIRDPARTY thirdparty/*.cpp)
-add_library(thirdparty STATIC ${THIRDPARTY})
+add_library(val3dity_thirdparty STATIC ${THIRDPARTY})
 
 FILE(GLOB SRC_FILES src/*.cpp)
 
@@ -70,11 +67,11 @@ message(STATUS "Building val3dity library")
 list(REMOVE_ITEM SRC_FILES src/main.cpp)
 add_library(val3dity STATIC ${SRC_FILES})
 target_include_directories(val3dity PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty)
-set_property(TARGET thirdparty PROPERTY POSITION_INDEPENDENT_CODE ON)
+set_property(TARGET val3dity_thirdparty PROPERTY POSITION_INDEPENDENT_CODE ON)
 set_property(TARGET val3dity PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 
-target_link_libraries(val3dity CGAL::CGAL CGAL::Eigen3_support GEOS::geos_c thirdparty Boost::filesystem)
+target_link_libraries(val3dity CGAL::CGAL CGAL::Eigen3_support GEOS::geos_c val3dity_thirdparty Boost::filesystem)
 # if linux complains: 
 # target_link_libraries(val3dity CGAL::CGAL CGAL::Eigen3_support ${GEOS_LIBRARY} thirdparty Boost::filesystem)
 
