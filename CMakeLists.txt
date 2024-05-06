@@ -60,10 +60,11 @@ endif()
 # Third-party
 add_subdirectory(${CMAKE_SOURCE_DIR}/thirdparty/LAStools)
 add_subdirectory(${CMAKE_SOURCE_DIR}/thirdparty/CSF/src)
+add_subdirectory(${CMAKE_SOURCE_DIR}/thirdparty/roofer/src)
+add_subdirectory(${CMAKE_SOURCE_DIR}/thirdparty/val3dity)
 include_directories(${CMAKE_SOURCE_DIR}/thirdparty)
 include_directories(${CMAKE_SOURCE_DIR}/thirdparty/valijson)
 include_directories(${Boost_INCLUDE_DIR})
-add_subdirectory(${CMAKE_SOURCE_DIR}/thirdparty/roofer/src)
 include_directories(${CMAKE_SOURCE_DIR}/thirdparty/roofer/src)
 
 # Tools
@@ -87,6 +88,7 @@ target_link_libraries(city4cfd
         LASlib
         CGAL::Eigen3_support
         roofer_api
+        val3dity
         ${OpenMP_support}
         )
 

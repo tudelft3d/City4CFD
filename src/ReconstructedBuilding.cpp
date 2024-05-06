@@ -34,6 +34,10 @@
 #include "LoD22.h"
 #include "ImportedBuilding.h"
 
+#include "val3dity/src/val3dity.h"
+#include <CGAL/Polygon_mesh_processing/triangulate_hole.h>
+#include <CGAL/Polygon_mesh_processing/polygon_mesh_to_polygon_soup.h>
+
 ReconstructedBuilding::ReconstructedBuilding()
         : Building(), m_attributeHeight(-global::largnum),
           m_attributeHeightAdvantage(Config::get().buildingHeightAttrAdv) {}
@@ -222,12 +226,30 @@ void ReconstructedBuilding::reconstruct() {
                                   .lambda(m_reconSettings->complexityFactor)
                                   .lod13_step_height(m_reconSettings->lod13StepHeight));
 
-            //todo add validity check and throw exception if not valid
+            auto mesh = lod22.get_mesh();
+
+            // try easy hole plugging fix just in case
+            if (!CGAL::is_closed(mesh)) {
+                // collect boundary halfedges
+                typedef boost::graph_traits<Mesh>::halfedge_descriptor halfedge_descriptor;
+                std::vector<halfedge_descriptor> border_cycles;
+                PMP::extract_boundary_cycles(mesh, std::back_inserter(border_cycles));
+                // fill using boundary halfedges
+                for(halfedge_descriptor h : border_cycles)
+                    PMP::triangulate_hole(mesh, h);
+            }
+            //-- Validity check
+            std::vector<std::array<double, 3>> points;
+            std::vector<std::vector<int>> polys;
+            PMP::polygon_mesh_to_polygon_soup(mesh, points, polys);
+
+            auto validity = val3dity::validate(points, polys, val3dity::Parameters().terminal_output(false));
+            //todo add checks I wanna do and throw exception if...
 
             // get the new footprint and elevations
             m_groundElevations = lod22.get_base_elevations();
             m_poly = lod22.get_footprint();
-            m_mesh = lod22.get_mesh();
+            m_mesh = mesh;
         } catch (const std::exception& e) {
 #ifdef CITY4CFD_VERBOSE
             std::cout << "LoD2.2/1.3 reconstruction failed!" << std::endl;

@@ -46,7 +46,7 @@ void LoD22::reconstruct(const PointSet3Ptr& buildingPtsPtr,
                         const Polygon_with_holes_2& footprint,
                         const std::vector<std::vector<double>>& base_elevations,
                         ReconstructionConfig config
-                         ) {
+                        ) {
 
     // prep building pts
     roofer::PointCollection buildingPts;
@@ -110,7 +110,6 @@ void LoD22::reconstruct(const PointSet3Ptr& buildingPtsPtr,
 
     // sort out the mesh
     m_mesh = roofer::Mesh2CGALSurfaceMesh<Point_3>(roofer_mesh);
-//    PMP::split_long_edges(CGAL::edges(m_mesh), 10. * Config::get().edgeMaxLen, m_mesh);
 }
 
 void LoD22::shorten_mesh_edges(roofer::Mesh& roofer_mesh, const double sq_maxdist) const{
@@ -182,16 +181,16 @@ void LoD22::get_footprint_from_mesh(const roofer::Mesh& roofer_mesh, Polygon_wit
 }
 
 Polygon_with_holes_2 LoD22::get_footprint() const {
-    if (m_footprint.rings().empty()) std::runtime_error("No footprint found!");
+    if (m_footprint.rings().empty()) throw std::runtime_error("No footprint found!");
     return m_footprint;
 }
 
 std::vector<std::vector<double>> LoD22::get_base_elevations() const {
-    if (m_baseElevations.empty()) std::runtime_error("No base elevations found!");
+    if (m_baseElevations.empty()) throw std::runtime_error("No base elevations found!");
     return m_baseElevations;
 }
 
 Mesh LoD22::get_mesh() const {
-    if (m_mesh.is_empty()) std::runtime_error("No mesh found!");
+    if (m_mesh.is_empty()) throw std::runtime_error("No mesh found!");
     return m_mesh;
 }
