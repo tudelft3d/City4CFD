@@ -48,7 +48,7 @@ if ( NOT Boost_FOUND )
 endif()
 
 # GEOS
-find_package( GEOS REQUIRED CONFIG)
+find_package( GEOS REQUIRED )
 # if linux complains: 
 # find_package( GEOS )
 if ( NOT GEOS_FOUND )
@@ -63,7 +63,6 @@ add_library(val3dity_thirdparty STATIC ${THIRDPARTY})
 
 FILE(GLOB SRC_FILES src/*.cpp)
 
-message(STATUS "Building val3dity library")
 list(REMOVE_ITEM SRC_FILES src/main.cpp)
 add_library(val3dity STATIC ${SRC_FILES})
 target_include_directories(val3dity PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty)
@@ -71,8 +70,7 @@ set_property(TARGET val3dity_thirdparty PROPERTY POSITION_INDEPENDENT_CODE ON)
 set_property(TARGET val3dity PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 
-target_link_libraries(val3dity CGAL::CGAL CGAL::Eigen3_support GEOS::geos_c val3dity_thirdparty Boost::filesystem)
-# if linux complains: 
-# target_link_libraries(val3dity CGAL::CGAL CGAL::Eigen3_support ${GEOS_LIBRARY} thirdparty Boost::filesystem)
+#target_link_libraries(val3dity CGAL::CGAL CGAL::Eigen3_support GEOS::geos_c val3dity_thirdparty Boost::filesystem)
+target_link_libraries(val3dity CGAL::CGAL CGAL::Eigen3_support ${GEOS_LIBRARY} val3dity_thirdparty Boost::filesystem)
 
 install(TARGETS val3dity DESTINATION bin)
