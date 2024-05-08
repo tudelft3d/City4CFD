@@ -2,7 +2,9 @@
 
 ## [Unreleased] - breaking changes
 ### Added
+- LoD2.2 and LoD1.3 reconstruction
 - Multiple reconstruction regions
+- Geometric validity check
 
 ## [0.4.6] - 2024-03-11
 ### Changed
