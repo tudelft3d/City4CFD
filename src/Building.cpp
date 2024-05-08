@@ -92,31 +92,6 @@ void Building::alpha_wrap(const BuildingsPtr& buildings, Mesh& newMesh) {
     PMP::polygon_soup_to_polygon_mesh(points, polygons, newMesh);
     PMP::triangulate_faces(newMesh);
 
-    /*
-    typedef Mesh::Halfedge_index           halfedge_descriptor;
-    typedef Mesh::Edge_index               edge_descriptor;
-    //-- Set the property map for constrained edges
-    Mesh::Property_map<edge_descriptor,bool> is_constrained =
-            newMesh.add_property_map<edge_descriptor,bool>("e:is_constrained",false).first;
-
-    //-- Detect sharp features
-    for (auto& e : edges(newMesh)) {
-        halfedge_descriptor hd = halfedge(e,newMesh);
-        if (!is_border(e,newMesh)) {
-            double angle = CGAL::Mesh_3::dihedral_angle(newMesh.point(source(hd,newMesh)),
-                                                        newMesh.point(target(hd,newMesh)),
-                                                        newMesh.point(target(next(hd,newMesh),newMesh)),
-                                                        newMesh.point(target(next(opposite(hd,newMesh),newMesh),newMesh)));
-            if (CGAL::abs(angle)<179.5)
-                is_constrained[e]=true;
-        }
-    }
-
-    Mesh wrap;
-    CGAL::alpha_wrap_3(newMesh, 0.1, 0.01, wrap,
-                             CGAL::parameters::edge_is_constrained_map(is_constrained));
-    */
-
     //-- Perform CGAL's alpha wrapping
     const double relative_alpha = 2000.; //1000.
     const double relative_offset = 7000.; // 12000.

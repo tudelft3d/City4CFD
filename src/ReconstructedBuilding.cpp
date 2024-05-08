@@ -165,7 +165,7 @@ double ReconstructedBuilding::get_elevation() {
             if (buildingElevations.empty()) { // set height as minimum if not able to calculate percentile
                 m_elevation = this->ground_elevation();
                 Config::write_to_log("Building ID: " + this->get_id() + " Missing points for elevation calculation."
-                                     + "Using minimum of " + std::to_string(Config::get().minHeight) + "m");
+                                     + " Using minimum of " + std::to_string(Config::get().minHeight) + "m");
             } else { // calculate percentile
                 m_elevation = geomutils::percentile(buildingElevations, Config::get().buildingPercentile);
             }
@@ -229,7 +229,7 @@ void ReconstructedBuilding::reconstruct() {
             auto mesh = lod22.get_mesh();
 
             // try easy hole plugging fix just in case
-            if (!CGAL::is_closed(mesh)) {
+            if (!m_reconSettings->skipGapClosing && !CGAL::is_closed(mesh)) {
                 // collect boundary halfedges
                 typedef boost::graph_traits<Mesh>::halfedge_descriptor halfedge_descriptor;
                 std::vector<halfedge_descriptor> border_cycles;
@@ -239,13 +239,30 @@ void ReconstructedBuilding::reconstruct() {
                     PMP::triangulate_hole(mesh, h);
             }
             //-- Validity check
-            std::vector<std::array<double, 3>> points;
-            std::vector<std::vector<int>> polys;
-            PMP::polygon_mesh_to_polygon_soup(mesh, points, polys);
+            if (m_reconSettings->validate) {
+                std::vector<std::array<double, 3>> points;
+                std::vector<std::vector<int>> polys;
+                PMP::polygon_mesh_to_polygon_soup(mesh, points, polys);
 
-            auto validity = val3dity::validate(points, polys, val3dity::Parameters().terminal_output(false));
-            //todo add checks I wanna do and throw exception if...
-
+                auto validity = val3dity::validate(points, polys, val3dity::Parameters().terminal_output(false));
+                if (!validity["validity"]) {
+                    std::string valdtyReport = " Invalid geometry, errors: " + nlohmann::to_string(validity["all_errors"]);
+                    if (m_reconSettings->enforceValidity.empty()) {
+                        Config::write_to_log("Building ID: " + this->get_id()
+                                             + valdtyReport);
+                    } else if (m_reconSettings->enforceValidity == "surface_wrap") {
+                        // gather mesh information before sending to alpha wrap
+                        m_groundElevations = lod22.get_base_elevations();
+                        m_poly = lod22.get_footprint();
+                        m_mesh = mesh;
+                        throw std::runtime_error(valdtyReport);
+                    } else {
+                        // for lod1.2 don't use mesh, polygon, and elevations from
+                        // higher lod reconstruction
+                        throw std::runtime_error(valdtyReport);
+                    }
+                }
+            }
             // get the new footprint and elevations
             m_groundElevations = lod22.get_base_elevations();
             m_poly = lod22.get_footprint();
@@ -256,15 +273,15 @@ void ReconstructedBuilding::reconstruct() {
             std::cout << "Reason: " << e.what() << std::endl;
 #endif
 
-            Config::write_to_log("Building ID:" + this->get_id()
+            Config::write_to_log("Building ID: " + this->get_id()
                                  + " Failed to reconstruct at LoD2.2/1.3."
                                  + " Reason: " + e.what()
-                                 + " Falling back to LoD1.2 reconstruction/alpha wrapping");
+                                 + ". Falling back to LoD1.2 reconstruction/alpha wrapping");
 
-            //for now, just reconstruct LoD1.2
-            //todo flow to reconstruct either with alpha or LoD1.2
-            //todo more points are now included, need to remove extra
-            this->reconstruct_lod12();
+            if (m_reconSettings->enforceValidity.empty() || m_reconSettings->enforceValidity == "lod1.2")
+                this->reconstruct_lod12();
+            else
+                this->reconstruct_lod12();//todo per building alpha wrap
         }
     } else {
         // just reconstruct LoD22
@@ -278,6 +295,7 @@ void ReconstructedBuilding::reconstruct() {
 }
 
 void ReconstructedBuilding::reconstruct_lod12() {
+        m_mesh.clear();
         if (this->get_height() < Config::get().minHeight) { // elevation calculated here
             Config::write_to_log("Building ID: " + this->get_id()
                                  + " Height lower than minimum prescribed height of "

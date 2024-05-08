@@ -141,6 +141,9 @@ public:
         //lod13-lod22 reconstruction settings
         double      complexityFactor                = 0.5;
         double      lod13StepHeight                 = 2.;
+        bool        validate                        = false;
+        std::string enforceValidity; // Handled by schema
+        bool        skipGapClosing                  = false;
     };
 
     std::vector<std::shared_ptr<ReconRegion>> reconRegions;

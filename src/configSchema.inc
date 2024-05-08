@@ -168,6 +168,16 @@ namespace jsonschema {
                 "type": "number",
                 "minimum": 0
               },
+              "validate": {
+                "type": "boolean"
+              },
+              "enforce_validity": {
+                "type": "string",
+                "enum": ["lod1.2", "surface_wrap"]
+              },
+              "skip_gap_closing": {
+                "type": "boolean"
+              },
               "bpg_influence_region_extra": {
                 "type": "number",
                 "minimum": 0

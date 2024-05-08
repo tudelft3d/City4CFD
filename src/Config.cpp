@@ -108,6 +108,16 @@ void Config::set_config(nlohmann::json& j) {
             reconRegion->complexityFactor = regionJson["complexity_factor"];
         if (regionJson.contains("lod13_step_height"))
             reconRegion->lod13StepHeight = regionJson["lod13_step_height"];
+        if (regionJson.contains("validate"))
+            reconRegion->validate = regionJson["validate"];
+        if (regionJson.contains("enforce_validity"))
+            reconRegion->enforceValidity = regionJson["enforce_validity"];
+        if (regionJson.contains("skip_gap_closing"))
+            reconRegion->skipGapClosing = regionJson["skip_gap_closing"];
+
+        // validate regardless if enforce_validity is present
+        if (!reconRegion->enforceValidity.empty()) reconRegion->validate = true;
+
         // set the building (belonging to recon region) output layer id
         reconRegion->outputLayerID = buildingOutputLayerID;
         ++buildingOutputLayerID;

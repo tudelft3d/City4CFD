@@ -51,7 +51,7 @@ void IO::read_config(std::string& config_path) {
     //-- Filepaths in the json file are relative to the location of the json file
     Config::get().workDir = fs::path(config_path).parent_path();
     fs::current_path(Config::get().workDir);
-    std::cout << "Work directory: " << fs::canonical(Config::get().workDir) << std::endl;
+    std::cout << "Working directory: " << fs::canonical(Config::get().workDir) << std::endl;
 
     nlohmann::json j;
     try {
