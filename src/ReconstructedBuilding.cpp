@@ -163,7 +163,7 @@ double ReconstructedBuilding::get_elevation() {
                     buildingElevations.push_back(pt.z());
             }
             if (buildingElevations.empty()) { // set height as minimum if not able to calculate percentile
-                m_elevation = this->ground_elevation();
+                m_elevation = this->ground_elevation() + Config::get().minHeight + 0.001;
                 Config::write_to_log("Building ID: " + this->get_id() + " Missing points for elevation calculation."
                                      + " Using minimum of " + std::to_string(Config::get().minHeight) + "m");
             } else { // calculate percentile
@@ -278,6 +278,7 @@ void ReconstructedBuilding::reconstruct() {
                                  + " Reason: " + e.what()
                                  + ". Falling back to LoD1.2 reconstruction/alpha wrapping");
 
+            //todo flow needs fixing
             if (m_reconSettings->enforceValidity.empty() || m_reconSettings->enforceValidity == "lod1.2")
                 this->reconstruct_lod12();
             else
