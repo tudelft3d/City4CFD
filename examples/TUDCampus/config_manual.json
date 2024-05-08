@@ -1,8 +1,8 @@
 {
   "point_clouds" :
   {
-    "ground": "point_cloud/sampled_ground_1m.ply",
-    "buildings" : "point_cloud/sampled_buildings_1m.ply"
+    "ground": "point_cloud/sampled_ground_1m.laz",
+    "buildings" : "point_cloud/sampled_buildings.laz"
   },
   "polygons" : [
     {
@@ -24,7 +24,7 @@
   "reconstruction_regions": [
     {
       "influence_region":  30,
-      "lod": "1.2"
+      "lod": "2.2"
     },
     {
       "influence_region":  "polygons/influRegion.geojson",

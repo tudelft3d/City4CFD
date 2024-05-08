@@ -2,8 +2,8 @@
 {
   "point_clouds" :
   {
-    "ground": "point_cloud/sampled_ground_1m.ply",
-    "buildings" : "point_cloud/sampled_buildings_1m.ply"
+    "ground": "point_cloud/sampled_ground_1m.laz",
+    "buildings" : "point_cloud/sampled_buildings.laz"
   },
   "polygons" : [
     {
