@@ -64,7 +64,7 @@ LABEL org.opencontainers.image.source="https://github.com/tudelft3d/city4cfd"
 LABEL org.opencontainers.image.vendor="Tudelft3D"
 LABEL org.opencontainers.image.title="City4CFD"
 LABEL org.opencontainers.image.description="City4CFD image"
-LABEL org.opencontainers.image.licenses="GPL-3.0"
+LABEL org.opencontainers.image.licenses="AGPL-3.0"
 LABEL org.opencontainers.image.url="https://github.com/tudelft3d/city4cfd"
 LABEL org.opencontainers.image.version=$VERSION
 

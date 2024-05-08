@@ -74,8 +74,8 @@ ELSE(WIN32)
 
       IF (GEOS_CONFIG)
       
-        EXEC_PROGRAM(${GEOS_CONFIG}
-            ARGS --version
+        EXECUTE_PROCESS(COMMAND ${GEOS_CONFIG}
+            --version
             OUTPUT_VARIABLE GEOS_VERSION)
         STRING(REGEX REPLACE "([0-9]+)\\.([0-9]+)\\.([0-9]+)" "\\1" GEOS_VERSION_MAJOR "${GEOS_VERSION}")
         STRING(REGEX REPLACE "([0-9]+)\\.([0-9]+)\\.([0-9]+)" "\\2" GEOS_VERSION_MINOR "${GEOS_VERSION}")
@@ -85,8 +85,8 @@ ELSE(WIN32)
         ENDIF (GEOS_VERSION_MAJOR LESS 3)
      
         # set INCLUDE_DIR to prefix+include
-        EXEC_PROGRAM(${GEOS_CONFIG}
-            ARGS --prefix
+        EXECUTE_PROCESS(COMMAND ${GEOS_CONFIG}
+            --prefix
             OUTPUT_VARIABLE GEOS_PREFIX)
 
         FIND_PATH(GEOS_INCLUDE_DIR 
@@ -97,8 +97,8 @@ ELSE(WIN32)
             )
 
         ## extract link dirs for rpath  
-        EXEC_PROGRAM(${GEOS_CONFIG}
-            ARGS --libs
+        EXECUTE_PROCESS(COMMAND ${GEOS_CONFIG}
+            --libs
             OUTPUT_VARIABLE GEOS_CONFIG_LIBS )
 
         ## split off the link dirs (for rpath)
