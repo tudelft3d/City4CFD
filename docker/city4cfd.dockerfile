@@ -49,7 +49,7 @@ RUN bash /tmp/strip-docker-image-export \
     -f /etc/passwd \
     -f /bin/ls \
     -f /data \
-    -f /usr/local/share/proj/proj.db \
+    -f /usr/share/proj/proj.db \
     -f /usr/local/bin/city4cfd_pcprep \
     -f /usr/local/bin/city4cfd_las2las \
     -f /usr/local/bin/city4cfd
