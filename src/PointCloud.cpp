@@ -112,7 +112,7 @@ void PointCloud::smooth_terrain() {
     }
 }
 
-void PointCloud::remove_points_in_polygon(BuildingsPtr& features) {
+void PointCloud::terrain_points_in_polygon(BuildingsPtr& features) {
     typedef Quadtree_node<EPICK, Point_set_3> Point_index;
     Point_index pointCloudIndex;
     auto& pointCloud = m_pointCloudTerrain;
@@ -139,7 +139,7 @@ void PointCloud::remove_points_in_polygon(BuildingsPtr& features) {
                     pointCloud.remove(point_index);
                 }
                 //todo temp add to building
-                f->insert_terrain_point(pointCloud.point(point_index)); //use bbox for roofer
+//                f->insert_terrain_point(pointCloud.point(point_index)); //use bbox for roofer
             }
         }
     }

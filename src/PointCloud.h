@@ -43,7 +43,7 @@ public:
     void create_flat_terrain(const PolyFeaturesPtr& lsFeatures);
     void set_flat_terrain();
     void smooth_terrain();
-    void remove_points_in_polygon(BuildingsPtr& features);
+    void terrain_points_in_polygon(BuildingsPtr& features);
     void flatten_polygon_pts(const PolyFeaturesPtr& lsFeatures, std::vector<EPECK::Segment_3>& constrainedEdges,
                              std::vector<std::pair<Polygon_with_holes_2, int>>& newPolys);
     void buffer_flat_edges(const PolyFeaturesPtr& avgFeatures, std::vector<EPECK::Segment_3>& constrainedEdges);

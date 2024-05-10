@@ -233,8 +233,8 @@ void Map3d::add_building_pts() {
 
 void Map3d::remove_extra_terrain_pts() {
     std::cout << "\nRemoving extra terrain points" << std::endl;
-    //-- Remove terrain points that lay in buildings
-    m_pointCloud.remove_points_in_polygon(m_buildingsPtr);
+    //-- Handle terrain points that lay in buildings
+    m_pointCloud.terrain_points_in_polygon(m_buildingsPtr);
     //-- Update DT for interpolation
     m_dt.clear();
     m_dt.insert(m_pointCloud.get_terrain().points().begin(),
@@ -242,7 +242,6 @@ void Map3d::remove_extra_terrain_pts() {
 }
 
 void Map3d::set_influ_region() {
-    //todo still to decide which parameters will be region-based and which global
     std::cout << "\nDefining influence region" << std::endl;
     //-- Set the reconstruction (influence) regions --//
     double maxDim = -1.; // this works if there's one point of interest
