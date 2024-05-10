@@ -227,6 +227,7 @@ void ReconstructedBuilding::reconstruct() {
                                   .lod13_step_height(m_reconSettings->lod13StepHeight));
 
             auto mesh = lod22.get_mesh();
+            if (mesh.is_empty()) throw std::runtime_error("Unsuccessful mesh reconstruction.");
 
             // try easy hole plugging fix just in case
             if (!m_reconSettings->skipGapClosing && !CGAL::is_closed(mesh)) {
@@ -278,11 +279,14 @@ void ReconstructedBuilding::reconstruct() {
                                  + " Reason: " + e.what()
                                  + ". Falling back to LoD1.2 reconstruction/alpha wrapping");
 
-            //todo flow needs fixing
-            if (m_reconSettings->enforceValidity.empty() || m_reconSettings->enforceValidity == "lod1.2")
+            if (m_mesh.is_empty() ||
+                m_reconSettings->enforceValidity.empty() ||
+                m_reconSettings->enforceValidity == "lod1.2")
                 this->reconstruct_lod12();
-            else
+            else if (m_reconSettings->enforceValidity == "surface_wrap") // only alpha wrap if 1. mesh was reconstructed and 2. validity is enforced
                 this->reconstruct_lod12();//todo per building alpha wrap
+            else
+                throw std::runtime_error("Error with reconstruction fallback!");
         }
     } else {
         // just reconstruct LoD22

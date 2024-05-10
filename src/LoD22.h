@@ -34,9 +34,7 @@
 class LoD22 {
 public:
     LoD22() = default;
-
     LoD22(roofer::Mesh rooferMesh);
-
     ~LoD22() = default;
 
     struct ReconstructionConfig {
