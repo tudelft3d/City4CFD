@@ -49,7 +49,7 @@ ReconstructedBuilding::ReconstructedBuilding(const Mesh& mesh)
 
 ReconstructedBuilding::ReconstructedBuilding(const roofer::Mesh& rooferMesh, const ReconstructedBuildingPtr& other)
         : ReconstructedBuilding() {
-    if (!other) throw std::runtime_error("Trying to pass a nullptr to ReconstructedBuilding!");
+    if (!other) throw city4cfd_error("Trying to pass a nullptr to ReconstructedBuilding!");
     // create new LoD22 object
     LoD22 lod22(rooferMesh);
     m_mesh = lod22.get_mesh();
@@ -198,7 +198,7 @@ void ReconstructedBuilding::reconstruct() {
             m_elevation = this->ground_elevation() + Config::get().minHeight;
         } else { // exception handling when cannot reconstruct
             this->deactivate();
-            throw std::domain_error("Found no points belonging to the building");
+            throw city4cfd_error("Found no points belonging to the building");
         }
     }
     //todo temp
@@ -227,7 +227,7 @@ void ReconstructedBuilding::reconstruct() {
                                   .lod13_step_height(m_reconSettings->lod13StepHeight));
 
             auto mesh = lod22.get_mesh();
-            if (mesh.is_empty()) throw std::runtime_error("Unsuccessful mesh reconstruction.");
+            if (mesh.is_empty()) throw city4cfd_error("Unsuccessful mesh reconstruction.");
 
             // try easy hole plugging fix just in case
             if (!m_reconSettings->skipGapClosing && !CGAL::is_closed(mesh)) {
@@ -256,11 +256,11 @@ void ReconstructedBuilding::reconstruct() {
                         m_groundElevations = lod22.get_base_elevations();
                         m_poly = lod22.get_footprint();
                         m_mesh = mesh;
-                        throw std::runtime_error(valdtyReport);
+                        throw city4cfd_error(valdtyReport);
                     } else {
                         // for lod1.2 don't use mesh, polygon, and elevations from
                         // higher lod reconstruction
-                        throw std::runtime_error(valdtyReport);
+                        throw city4cfd_error(valdtyReport);
                     }
                 }
             }
@@ -286,7 +286,7 @@ void ReconstructedBuilding::reconstruct() {
             else if (m_reconSettings->enforceValidity == "surface_wrap") // only alpha wrap if 1. mesh was reconstructed and 2. validity is enforced
                 this->reconstruct_lod12();//todo per building alpha wrap
             else
-                throw std::runtime_error("Error with reconstruction fallback!");
+                throw city4cfd_error("Error with reconstruction fallback!");
         }
     } else {
         // just reconstruct LoD22
@@ -348,7 +348,7 @@ void ReconstructedBuilding::get_cityjson_semantics(nlohmann::json& g) const { //
     bool foundProperty;
     boost::tie(semantics, foundProperty) = m_mesh.property_map<face_descriptor, std::string>("f:semantics");
     //   auto semantics = m_mesh.property_map<face_descriptor, std::string>("f:semantics");
-    if (!foundProperty) throw std::runtime_error("Semantic property map not found!");
+    if (!foundProperty) throw city4cfd_error("Semantic property map not found!");
 
     std::unordered_map<std::string, int> surfaceId;
     surfaceId["RoofSurface"]   = 0; g["semantics"]["surfaces"][0]["type"] = "RoofSurface";
@@ -357,7 +357,7 @@ void ReconstructedBuilding::get_cityjson_semantics(nlohmann::json& g) const { //
 
     for (auto faceIdx : m_mesh.faces()) {
         auto it = surfaceId.find(semantics[faceIdx]);
-        if (it == surfaceId.end()) throw std::runtime_error("Could not find semantic attribute!");
+        if (it == surfaceId.end()) throw city4cfd_error("Could not find semantic attribute!");
 
         g["semantics"]["values"][faceIdx.idx()] = it->second;
     }
@@ -367,7 +367,7 @@ void ReconstructedBuilding::reconstruct_from_attribute() {
     //-- Check attribute height
     if (m_attributeHeight <= 0) {
         this->deactivate();
-        throw std::runtime_error("Attribute height from geojson file is invalid!");
+        throw city4cfd_error("Attribute height from geojson file is invalid!");
     }
     //-- Set the height from attribute and reconstruct
     if (m_attributeHeight < Config::get().minHeight) { // in case of a small height

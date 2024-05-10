@@ -154,7 +154,7 @@ void LoD22::get_footprint_from_mesh(const roofer::Mesh& roofer_mesh, Polygon_wit
             roofer_new_footprint = roofer_mesh.get_polygons()[i];
             break;
         }
-        throw std::runtime_error("No footprint found in the reconstructed mesh!");
+        throw city4cfd_error("No footprint found in the reconstructed mesh!");
     }
     Polygon_2 poly2;
     std::vector<double> outer_base_elevations;
@@ -181,16 +181,16 @@ void LoD22::get_footprint_from_mesh(const roofer::Mesh& roofer_mesh, Polygon_wit
 }
 
 Polygon_with_holes_2 LoD22::get_footprint() const {
-    if (m_footprint.rings().empty()) throw std::runtime_error("No footprint found!");
+    if (m_footprint.rings().empty()) throw city4cfd_error("No footprint found!");
     return m_footprint;
 }
 
 std::vector<std::vector<double>> LoD22::get_base_elevations() const {
-    if (m_baseElevations.empty()) throw std::runtime_error("No base elevations found!");
+    if (m_baseElevations.empty()) throw city4cfd_error("No base elevations found!");
     return m_baseElevations;
 }
 
 Mesh LoD22::get_mesh() const {
-    if (m_mesh.is_empty()) throw std::runtime_error("No mesh found!");
+    if (m_mesh.is_empty()) throw city4cfd_error("No mesh found!");
     return m_mesh;
 }

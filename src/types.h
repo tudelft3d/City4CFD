@@ -38,6 +38,21 @@
 #define M_PI_2 1.57079632679489661923132169163975144
 #endif
 
+//-- Exceptions
+class city4cfd_error: public std::exception
+{
+public:
+    explicit city4cfd_error(const std::string& message):
+        msg_("Error: " + message)
+    {}
+    virtual const char* what() const throw (){
+        return msg_.c_str();
+    }
+
+protected:
+    std::string msg_;
+};
+
 //-- Typedefs for smart pointers
 class Building;    class Boundary; class TopoFeature;
 class PolyFeature; class Terrain;  class SurfaceLayer;

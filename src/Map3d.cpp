@@ -280,7 +280,7 @@ void Map3d::set_influ_region() {
 
     std::cout << "    Number of building geometries in the influence region: " << m_buildingsPtr.size() << std::endl;
     if (m_buildingsPtr.empty()) {
-        throw std::runtime_error("No buildings were reconstructed in the influence region!"
+        throw city4cfd_error("No buildings were reconstructed in the influence region!"
                                  " If using polygons and point cloud, make sure they are aligned.");
     }
 }
@@ -323,7 +323,7 @@ void Map3d::bnd_sanity_check() {
     auto& domainBndPoly = m_domainBnd.get_bounding_region();
     for (auto& pt : m_reconRegions.back().get_bounding_region()) {
         if (!geomutils::point_in_poly(pt, domainBndPoly))
-            throw std::domain_error("The influence region is larger than the domain boundary!");
+            throw city4cfd_error("The influence region is larger than the domain boundary!");
     }
 }
 
@@ -554,7 +554,7 @@ void Map3d::read_data() {
                    IO::has_substr(inputfile, ".off")) {
             IO::read_other_geometries(inputfile, m_importedBuildingsOther);
         } else {
-            throw std::runtime_error(std::string("File " + inputfile + "contains unknown import format."
+            throw city4cfd_error(std::string("File " + inputfile + "contains unknown import format."
                                                                   " Available inputs: .obj, .stl, .vtp, "
                                                                   ".ply. .off, or .json (CityJSON)"));
         }

@@ -128,7 +128,7 @@ void Terrain::create_mesh(const PolyFeaturesPtr& features) {
 void Terrain::prepare_subset() {
     //-- Make terrain mesh without surface layers marked
     geomutils::cdt_to_mesh(m_cdt, m_mesh);
-    if (m_mesh.is_empty()) throw std::runtime_error("Cannot create vertex-face map of empty mesh!");
+    if (m_mesh.is_empty()) throw city4cfd_error("Cannot create vertex-face map of empty mesh!");
 
     //-- Construct vertex-face map used for search
     m_vertexFaceMap.clear();

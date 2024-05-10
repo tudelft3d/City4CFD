@@ -139,7 +139,7 @@ void PolyFeature::calc_footprint_elevation_nni(const DT& dt) {
                     CGAL::natural_neighbor_coordinates_2(dt, pt, std::back_inserter(coords), fh);
 
             if (!result.third) {
-//                throw std::runtime_error("Trying to interpolate the point that lies outside the convex hull!");
+//                throw city4cfd_error("Trying to interpolate the point that lies outside the convex hull!");
                 this->deactivate();
                 return;
             }
@@ -192,7 +192,7 @@ void PolyFeature::calc_footprint_elevation_linear(const DT& dt) {
 
 double PolyFeature::ground_elevation() {
     if (m_groundElevation < -global::largnum + global::smallnum) {
-        if (m_groundElevations.empty()) throw std::runtime_error("Polygon elevations missing!"
+        if (m_groundElevations.empty()) throw city4cfd_error("Polygon elevations missing!"
                                                                 " Cannot calculate average");
         // calculating base elevation as 95 percentile of outer ring
         m_groundElevation = geomutils::percentile(m_groundElevations.front(), 0.95);
@@ -205,7 +205,7 @@ double PolyFeature::ground_elevation() {
 // * Calculated on the fly as rarely used
 // */
 //double PolyFeature::slope_height() {
-//    if (m_groundElevations.empty())throw std::runtime_error("Polygon elevations missing!"
+//    if (m_groundElevations.empty())throw city4cfd_error("Polygon elevations missing!"
 //                                                           " Cannot perform calculations");
 //    return this->ground_elevation() - geomutils::percentile(m_groundElevations.front(), 0.2);
 //}
@@ -373,7 +373,7 @@ void PolyFeature::set_zero_borders() {
 }
 
 void PolyFeature::calc_min_bbox() {
-    if (m_poly.rings().front().is_empty()) throw std::runtime_error("Missing polygon!");
+    if (m_poly.rings().front().is_empty()) throw city4cfd_error("Missing polygon!");
     //-- Point set needs to be convex for the rotating caliper algorithm
     std::vector<Point_2> chull;
     CGAL::convex_hull_2(m_poly.rings().front().vertices_begin(),

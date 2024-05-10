@@ -115,7 +115,7 @@ void Building::alpha_wrap(const BuildingsPtr& buildings, Mesh& newMesh) {
 void Building::clip_bottom(const TerrainPtr& terrain) {
     if (!m_clipBottom) return;
     if (this->has_self_intersections() && !Config::get().handleSelfIntersect) throw
-                std::runtime_error(std::string("Clip error in building ID " + this->get_id() +
+                city4cfd_error(std::string("Clip error in building ID " + this->get_id() +
                                                + ". Cannot clip if there are self intersections!"));
     //-- Get terrain subset
     Mesh terrainSubsetMesh = terrain->mesh_subset(m_poly);
@@ -198,7 +198,7 @@ void Building::remove_reconstruction_rules() {
 
 std::shared_ptr<const Config::ReconRegion> Building::get_reconstruction_settings() const {
     if (!m_reconSettings)
-        throw std::runtime_error("Building " + m_id + " missing reconstruction settings."
+        throw city4cfd_error("Building " + m_id + " missing reconstruction settings."
                                  " Imported building? " + std::to_string(m_f_imported));
     return m_reconSettings;
 }
@@ -279,7 +279,7 @@ void Building::get_cityjson_semantics(nlohmann::json& g) const { // Temp for che
     bool foundProperty;
     boost::tie(semantics, foundProperty) = m_mesh.property_map<face_descriptor, std::string>("f:semantics");
     //   auto semantics = m_mesh.property_map<face_descriptor, std::string>("f:semantics");
-    if (!foundProperty) throw std::runtime_error("Semantic property map not found!");
+    if (!foundProperty) throw city4cfd_error("Semantic property map not found!");
 
     std::unordered_map<std::string, int> surfaceId;
     surfaceId["RoofSurface"]   = 0; g["semantics"]["surfaces"][0]["type"] = "RoofSurface";
@@ -288,7 +288,7 @@ void Building::get_cityjson_semantics(nlohmann::json& g) const { // Temp for che
 
     for (auto faceIdx : m_mesh.faces()) {
         auto it = surfaceId.find(semantics[faceIdx]);
-        if (it == surfaceId.end()) throw std::runtime_error("Could not find semantic attribute!");
+        if (it == surfaceId.end()) throw city4cfd_error("Could not find semantic attribute!");
 
         g["semantics"]["values"][faceIdx.idx()] = it->second;
     }

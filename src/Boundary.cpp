@@ -151,7 +151,7 @@ void Boundary::prep_output(Vector_2 edge) {
             return;
         }
     }
-    throw std::runtime_error("Cannot find side for output!");
+    throw city4cfd_error("Cannot find side for output!");
 }
 
 std::vector<double> Boundary::get_domain_bbox() {

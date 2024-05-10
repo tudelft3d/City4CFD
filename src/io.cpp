@@ -73,7 +73,7 @@ bool IO::read_point_cloud(std::string& file, Point_set_3& pc) {
     std::ifstream ifile(file, std::ios_base::binary);
     if (IO::has_substr(file, ".las") || IO::has_substr(file, ".laz")) {
         if (!CGAL::IO::read_LAS(ifile, pc.point_back_inserter())) {
-            throw std::runtime_error("Error reading LAS point cloud!");
+            throw city4cfd_error("Error reading LAS point cloud!");
         }
     } else {
         ifile >> pc;
@@ -114,7 +114,7 @@ void IO::read_geojson_polygons(std::string& file, JsonVectorPtr& jsonPolygons) {
 //            ++count;
         }
     } catch (std::exception& e) {
-        throw std::runtime_error(std::string("Error parsing JSON file '" + file + "'. Details: " + e.what()));
+        throw city4cfd_error(std::string("Error parsing JSON file '" + file + "'. Details: " + e.what()));
     }
 }
 
@@ -123,7 +123,7 @@ void IO::read_polygons(std::string& file, PolyVecPtr& polygons, std::string* crs
     GDALAllRegister();
     GDALDataset *inputMapDataset = (GDALDataset*) GDALOpenEx(file.c_str(), GDAL_OF_READONLY, NULL, NULL, NULL);
     if (inputMapDataset == NULL) {
-        throw std::runtime_error("Error: Could not open input polygon");
+        throw city4cfd_error("Error: Could not open input polygon");
     }
     std::cout << "    Reading polygon file: " << file << " type: " << inputMapDataset->GetDriverName() << std::endl;
 
@@ -267,7 +267,7 @@ void IO::read_other_geometries(std::string& file, std::vector<Mesh>& meshes) {
 
     Mesh mesh;
     if(!PMP::IO::read_polygon_mesh(file, mesh)) {
-        throw std::runtime_error("Error parsing file '" + file);
+        throw city4cfd_error("Error parsing file '" + file);
     }
     PMP::transform(Affine_transformation_3(CGAL::Translation(),
                                            Vector_3(-Config::get().pointOfInterest.x(),
@@ -301,7 +301,7 @@ void IO::read_cityjson_geometries(std::string& file, JsonVectorPtr& importedBuil
             }
         }
     } catch (std::exception& e) {
-        throw std::runtime_error(std::string("Error parsing JSON file '" + file + "'. Details: " + e.what()));
+        throw city4cfd_error(std::string("Error parsing JSON file '" + file + "'. Details: " + e.what()));
     }
 }
 

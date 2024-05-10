@@ -33,7 +33,7 @@
 #include <CGAL/approximated_offset_2.h>
 
 double geomutils::avg(const std::vector<double>& values) {
-    if (values.empty()) throw std::length_error("Can't calculate average of a zero-sized vector!");
+    if (values.empty()) throw city4cfd_error("Can't calculate average of a zero-sized vector!");
     double average = 0;
     for (auto& value : values) {
         average += value;
@@ -43,7 +43,7 @@ double geomutils::avg(const std::vector<double>& values) {
 
 double geomutils::percentile(std::vector<double> values, const double percentile) {
     assert(percentile >= 0 && percentile <= 1);
-    if (values.empty()) throw std::length_error("Can't calculate percentile of a zero-sized vector!");
+    if (values.empty()) throw city4cfd_error("Can't calculate percentile of a zero-sized vector!");
     std::sort(values.begin(), values.end());
     int i = values.size() * percentile;
     return values[i];
@@ -216,7 +216,7 @@ void geomutils::remove_self_intersections(Mesh& mesh) {
 #ifndef __clang__
     PMP::experimental::remove_self_intersections(mesh);
 #else
-    throw std::runtime_error(std::string("Function remove_self_intersections() does not work with clang compiler!"
+    throw city4cfd_error(std::string("Function remove_self_intersections() does not work with clang compiler!"
                                          " Set 'handle_self_intersections' to false"
                                          " or recompile the program again using gcc"));
 #endif

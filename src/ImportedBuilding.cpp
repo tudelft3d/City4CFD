@@ -97,7 +97,7 @@ ImportedBuilding::ImportedBuilding(std::unique_ptr<nlohmann::json>& buildingJson
     //todo exception handling
     // if CityJSON is turned to mesh here, I can use the footprint extraction algorithm from CAD as a
     // workaround
-    if (groundSemanticIdx == -9999) throw std::runtime_error("Cannot find 'GroundSurface' in imported buildings CityJSON file!");
+    if (groundSemanticIdx == -9999) throw city4cfd_error("Cannot find 'GroundSurface' in imported buildings CityJSON file!");
 
     //- Find boundary ID of the footprint
     nlohmann::json& semanticValues = geometry["semantics"]["values"].front();
@@ -278,7 +278,7 @@ double ImportedBuilding::get_elevation() {
         if (m_height > 0) {
             m_elevation = m_height - this->ground_elevation();
         } else {
-            if (m_ptMap.empty()) throw std::runtime_error("Building missing points!");
+            if (m_ptMap.empty()) throw city4cfd_error("Building missing points!");
             // loop over all points and find the highest one
             for (auto& pt: m_ptMap) {
                 if (pt.second.z() > m_elevation) m_elevation = pt.second.z();
@@ -355,7 +355,7 @@ void ImportedBuilding::reconstruct() {
     if (this->get_height() < Config::get().minHeight) {
         // Store points to ptsPtr so that it might be used for LoD1 reconstruction
         for (auto& pt : m_ptMap) m_ptsPtr->insert(pt.second);
-        throw std::runtime_error("Importing failed. It could be that the height is"
+        throw city4cfd_error("Importing failed. It could be that the height is"
                                  "\n             lower than minimum, or the mesh connectivity is broken."
                                  "\n             Trying to reconstruct LoD1.2 from building points");
     }

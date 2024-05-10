@@ -77,7 +77,7 @@ void Config::validate(nlohmann::json& j) {
                     << "  desc:    " << error.description << std::endl;
             ++error_num;
         }
-        throw std::runtime_error(err_oss.str());
+        throw city4cfd_error(err_oss.str());
     }
 }
 

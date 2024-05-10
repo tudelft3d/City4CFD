@@ -67,7 +67,7 @@ BoundingRegion::calc_influ_region_bpg(const DT& dt, BuildingsPtr& buildings) {
                 f->remove_reconstruction_rules();
             } catch (std::exception& e) {
                 std::cerr << std::endl << "Error: " << e.what() << std::endl;
-                throw std::runtime_error("Impossible to automatically determine influence region");
+                throw city4cfd_error("Impossible to automatically determine influence region");
             }
             double maxDim = sqrt(f->sq_max_dim());
             influRegionRadius = maxDim * (3. + m_reconSettings->bpgInfluExtra); //- BPG by Liu hardcoded
