@@ -361,12 +361,23 @@ void Map3d::reconstruct_buildings() {
                   << ". If I cannot find a geometry with that LoD, I will reconstruct in the highest LoD available"
                   << std::endl;
     }
-   # pragma omp parallel for
+    int count = 0;
+    int tenPercent = m_buildingsPtr.size() / 10;
+    #pragma omp parallel for
     for (int i = 0; i < m_buildingsPtr.size(); ++i) {
     //for (auto& f : m_buildingsPtr) { // MSVC doesn't like range loops with OMP
         auto& b = m_buildingsPtr[i];
         if (b->is_active()) this->reconstruct_one_building(b);
+
+        if ((count % tenPercent) == 0)
+            #pragma omp critical
+            IO::print_progress_bar(100 * count / m_buildingsPtr.size());
+
+        #pragma omp atomic
+        ++count;
     }
+    IO::print_progress_bar(100); std::cout << std::endl;
+    /* //todo for groundPts
     // handle cases when a building is a multipart from roofer
     # pragma omp parallel for
     for (int i = 0; i < m_buildingsPtr.size(); ++i) {
@@ -383,6 +394,7 @@ void Map3d::reconstruct_buildings() {
             }
         }
     }
+    */
     this->clear_inactives(); // renumber failed and in case of imported-reconstructed fallback
     // Gather failed reconstructions
     std::cout << "    Number of successfully reconstructed buildings: " << m_buildingsPtr.size() << std::endl;
@@ -568,7 +580,17 @@ void Map3d::output() {
 //    std::cout << "    Format: " << Config::get().outputFormat << std::endl; //todo
 
     //-- Group all features for output
-    this->prep_feature_output();
+    m_outputFeaturesPtr.push_back(m_terrainPtr);
+    for (auto& f : m_buildingsPtr) {
+        if (!f->is_active()) continue; // skip failed reconstructions
+        m_outputFeaturesPtr.push_back(f);
+    }
+    for (auto& b : m_boundariesPtr) {
+        m_outputFeaturesPtr.push_back(b);
+    }
+    for (auto& l : m_terrainPtr->get_surface_layers()) { // Surface layers are grouped in terrain
+        m_outputFeaturesPtr.push_back(l);
+    }
 
     switch (Config::get().outputFormat) {
         case OBJ:
@@ -583,20 +605,6 @@ void Map3d::output() {
             this->prep_cityjson_output();
             IO::output_cityjson(m_outputFeaturesPtr);
             break;
-    }
-}
-
-void Map3d::prep_feature_output() {
-    m_outputFeaturesPtr.push_back(m_terrainPtr);
-    for (auto& f : m_buildingsPtr) {
-        if (!f->is_active()) continue; // skip failed reconstructions
-        m_outputFeaturesPtr.push_back(f);
-    }
-    for (auto& b : m_boundariesPtr) {
-        m_outputFeaturesPtr.push_back(b);
-    }
-    for (auto& l : m_terrainPtr->get_surface_layers()) { // Surface layers are grouped in terrain
-        m_outputFeaturesPtr.push_back(l);
     }
 }
 

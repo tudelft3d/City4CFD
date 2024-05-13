@@ -87,7 +87,6 @@ private:
     void clip_buildings();
     void wrap();
 
-    void prep_feature_output();
     void prep_cityjson_output();
 
     void clear_inactives();
