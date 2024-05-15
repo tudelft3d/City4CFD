@@ -85,7 +85,7 @@ PolyFeature::PolyFeature(const Polygon_with_attr& poly, const bool checkSimplici
         }
         geomutils::pop_back_if_equal_to_front(tempPoly);
         if (tempPoly.size() < 3) { // Sanity check if it is even a polygon
-            std::cout << "WARNING: Skipping import of a zero-area polygon" << std::endl;
+            std::cout << "WARNING: Polygon ID" << m_id << " Skipping import of a zero-area polygon in polygon ID: " << m_id << std::endl;
             this->deactivate();
             return;
         }
@@ -95,7 +95,7 @@ PolyFeature::PolyFeature(const Polygon_with_attr& poly, const bool checkSimplici
                     this->deactivate();
                     return;
                 } else {
-                    std::cout << "WARNING: Bad building polygon found! This might effect reconstruction quality! "
+                    std::cout << "WARNING: Polygon ID" << m_id << " Bad building polygon found! This might effect reconstruction quality! "
                                  "If you end up having problems, try to fix the dataset with GIS software or 'pprepair'."
                               << std::endl;
                     std::cout << "    Alternatively, you can use the 'avoid_bad_polys' flag to skip"
@@ -304,7 +304,7 @@ bool PolyFeature::flatten_polygon_inner_points(const Point_set_3& pointCloud,
             if (!offset_poly.empty()) { // make a check whether the offset is successfully created
                 poly = *(offset_poly.front());
             } else {
-                std::cout << "WARNING: Skeleton construction failed! Some polygons will not be flattened." << std::endl;
+                std::cout << "WARNING: Polygon ID" << m_id << " Skeleton construction failed! Some polygons will not be flattened." << std::endl;
                 return false;
             }
             if (isFirst) {
@@ -446,7 +446,7 @@ void PolyFeature::parse_json_poly(const nlohmann::json& poly, const bool checkSi
         }
         geomutils::pop_back_if_equal_to_front(tempPoly);
         if (tempPoly.size() < 3) { // Sanity check if it is even a polygon
-            std::cout << "WARNING: Skipping import of a zero-area polygon" << std::endl;
+            std::cout << "WARNING: Polygon ID" << m_id << "  Skipping import of a zero-area polygon" << std::endl;
             this->deactivate();
             return;
         }
@@ -456,7 +456,7 @@ void PolyFeature::parse_json_poly(const nlohmann::json& poly, const bool checkSi
                     this->deactivate();
                     return;
                 } else {
-                    std::cout << "WARNING: Bad building polygon found! This might effect reconstruction quality! "
+                    std::cout << "WARNING: Polygon ID" << m_id << " Bad building polygon found! This might effect reconstruction quality! "
                                  "If you end up having problems, try to fix the dataset with GIS software or 'pprepair'."
                               << std::endl;
                     std::cout << "    Alternatively, you can use the 'avoid_bad_polys' flag to skip"
