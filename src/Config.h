@@ -126,7 +126,7 @@ public:
     //-- Experimental
     bool       clip                             = false;
     bool       handleSelfIntersect              = false;
-    bool       alphaWrap                        = false;
+    bool       alphaWrapAll                     = false;
 
     //-- Other settings
     const int searchtree_bucket_size = 100; // hardcoded
@@ -143,6 +143,8 @@ public:
         double      lod13StepHeight                 = 2.;
         bool        validate                        = false;
         std::string enforceValidity; // Handled by schema
+        double      relativeAlpha                   = -1.; // Handled by schema
+        double      relativeOffset                  = -1.; // Handled by schema
         bool        skipGapClosing                  = false;
     };
 

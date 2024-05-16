@@ -112,6 +112,10 @@ void Config::set_config(nlohmann::json& j) {
             reconRegion->validate = regionJson["validate"];
         if (regionJson.contains("enforce_validity"))
             reconRegion->enforceValidity = regionJson["enforce_validity"];
+        if (regionJson.contains("relative_alpha"))
+            reconRegion->relativeAlpha = regionJson["relative_alpha"];
+        if (regionJson.contains("relative_offset"))
+            reconRegion->relativeOffset = regionJson["relative_offset"];
         if (regionJson.contains("skip_gap_closing"))
             reconRegion->skipGapClosing = regionJson["skip_gap_closing"];
 
@@ -318,8 +322,8 @@ void Config::set_config(nlohmann::json& j) {
             clip = j["experimental"]["clip"];
         if (j["experimental"].contains("handle_self_intersections"))
             handleSelfIntersect = j["experimental"]["handle_self_intersections"];
-        if (j["experimental"].contains("alpha_wrap"))
-            alphaWrap = j["experimental"]["alpha_wrap"];
+        if (j["experimental"].contains("alpha_wrap_all"))
+            alphaWrapAll = j["experimental"]["alpha_wrap_all"];
     }
 }
 

@@ -282,7 +282,7 @@ void ReconstructedBuilding::reconstruct() {
                 m_reconSettings->enforceValidity == "lod1.2")
                 this->reconstruct_lod12();
             else if (m_reconSettings->enforceValidity == "surface_wrap") // only alpha wrap if 1. mesh was reconstructed and 2. validity is enforced
-                this->reconstruct_lod12();//todo per building alpha wrap
+                this->alpha_wrap(m_reconSettings->relativeAlpha, m_reconSettings->relativeOffset);
             else
                 throw city4cfd_error("Error with reconstruction fallback!");
         }

@@ -175,6 +175,14 @@ namespace jsonschema {
                 "type": "string",
                 "enum": ["lod1.2", "surface_wrap"]
               },
+              "relative_alpha": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "relative_offset": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
               "skip_gap_closing": {
                 "type": "boolean"
               },
@@ -189,7 +197,17 @@ namespace jsonschema {
                 "type": "boolean"
               }
             },
-            "required": ["influence_region", "lod"]
+            "required": ["influence_region", "lod"],
+            "if": {
+                "properties": {
+                  "enforce_validity": {
+                    "const": "surface_wrap"
+                  }
+                }
+              },
+            "then": {
+              "required": ["relative_alpha", "relative_offset"]
+            }
           }
         },
         "import_geometries": {

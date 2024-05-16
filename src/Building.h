@@ -39,7 +39,7 @@ public:
     Building(const Polygon_with_attr& poly);
     ~Building();
 
-    static void alpha_wrap(const BuildingsPtr& buildings, Mesh& newMesh);
+    static void alpha_wrap_all(const BuildingsPtr& buildings, Mesh& newMesh);
 
     virtual double get_elevation() = 0;
     virtual void   reconstruct() = 0;
@@ -50,6 +50,7 @@ public:
     void   insert_point(const Point_3& pt);
     void   clip_bottom(const TerrainPtr& terrain);
     void   refine();
+    void   alpha_wrap(double relative_alpha, double relative_offset);
     void   translate_footprint(const double h);
     bool   is_part_of(const Polygon_2& otherPoly) const;
     void   set_reconstruction_rules(const BoundingRegion& reconRegion);

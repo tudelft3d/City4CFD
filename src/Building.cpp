@@ -65,7 +65,7 @@ double Building::get_height() {
     return m_height;
 }
 
-void Building::alpha_wrap(const BuildingsPtr& buildings, Mesh& newMesh) {
+void Building::alpha_wrap_all(const BuildingsPtr& buildings, Mesh& newMesh) {
     typedef EPICK::FT                 FT;
     typedef std::vector<std::size_t>  CGAL_Polygon;
 
@@ -173,6 +173,19 @@ void Building::refine() {
                                      .edge_is_constrained_map(is_constrained));
 
 //    PMP::remove_self_intersections(m_mesh);
+}
+
+void Building::alpha_wrap(double relative_alpha, double relative_offset) {
+    typedef EPICK::FT                 FT;
+
+    //-- Perform CGAL's alpha wrapping
+    CGAL::Bbox_3 bbox = CGAL::Polygon_mesh_processing::bbox(m_mesh);
+    const double diag_length = std::sqrt(CGAL::square(bbox.xmax() - bbox.xmin()) +
+                                         CGAL::square(bbox.ymax() - bbox.ymin()) +
+                                         CGAL::square(bbox.zmax() - bbox.zmin()));
+    const double alpha = diag_length / relative_alpha;
+    const double offset = diag_length / relative_offset;
+    CGAL::alpha_wrap_3(m_mesh, alpha, offset, m_mesh);
 }
 
 void Building::translate_footprint(const double h) {

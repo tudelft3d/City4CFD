@@ -95,7 +95,7 @@ void Map3d::reconstruct() {
     this->reconstruct_terrain();
 
     //-- Geometry wrap (experimental)
-    if (Config::get().alphaWrap) this->wrap();
+    if (Config::get().alphaWrapAll) this->wrap();
 
     //-- Generate side and top boundaries
     if (Config::get().reconstructBoundaries) this->reconstruct_boundaries();
@@ -527,7 +527,7 @@ void Map3d::wrap() {
     Mesh newMesh;
 
     //-- Perform alpha wrapping
-    Building::alpha_wrap(m_buildingsPtr, newMesh);
+    Building::alpha_wrap_all(m_buildingsPtr, newMesh);
 
     //-- Deactivate all individual buildings and add the new mesh
     for (auto& b : m_buildingsPtr) b->deactivate();
