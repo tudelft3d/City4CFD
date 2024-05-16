@@ -214,7 +214,8 @@ void Map3d::add_building_pts() {
 
     //-- Find points belonging to individual buildings
     for (auto& b: m_reconstructedBuildingsPtr) {
-        Polygon_with_holes_2 poly = geomutils::offset_polygon_with_holes(b->get_poly(), 2.);
+        auto cgalPoly = b->get_poly().get_cgal_type();
+        auto poly = geomutils::offset_polygon_geos(cgalPoly, 2.);
 
         std::vector<Point_3> subsetPts;
         Point_2 bbox1(poly.bbox().xmin(), poly.bbox().ymin());
@@ -222,7 +223,7 @@ void Map3d::add_building_pts() {
         Fuzzy_iso_box pts_range(bbox1, bbox2);
         searchTree.search(std::back_inserter(subsetPts), pts_range);
 
-        //-- Check if subset point lies inside the polygon
+        //-- Check if subset point lies inside the offset polygon
         for (auto& pt : subsetPts) {
             if (geomutils::point_in_poly_and_boundary(pt, poly)) {
                 b->insert_point(pt);

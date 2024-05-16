@@ -85,7 +85,7 @@ PolyFeature::PolyFeature(const Polygon_with_attr& poly, const bool checkSimplici
         }
         geomutils::pop_back_if_equal_to_front(tempPoly);
         if (tempPoly.size() < 3) { // Sanity check if it is even a polygon
-            std::cout << "WARNING: Polygon ID" << m_id << " Skipping import of a zero-area polygon in polygon ID: " << m_id << std::endl;
+            std::cout << "WARNING: Polygon ID" << m_id << " Skipping import of a zero-area polygon" << std::endl;
             this->deactivate();
             return;
         }

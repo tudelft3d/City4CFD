@@ -59,6 +59,7 @@ namespace geomutils {
                                                int nPts, double angInt, double ang, T& poly);
 //    template <typename T, typename U> void smooth_dt (const Point_set_3& pointCloud, T& dt);
     template <typename T> Polygon_2 calc_bbox_poly(const T& inputPts);
+    template <typename T> T offset_polygon_geos(T poly, double offset);
     template <typename T> void pop_back_if_equal_to_front(CGAL::Polygon_2<T>& poly);
 
     struct Array_traits {

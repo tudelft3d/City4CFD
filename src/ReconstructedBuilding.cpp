@@ -25,8 +25,6 @@
   Delft University of Technology
 */
 
-#define CITY4CFD_VERBOSE //todo temp
-
 #include "ReconstructedBuilding.h"
 
 #include "geomutils.h"

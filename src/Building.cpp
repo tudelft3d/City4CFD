@@ -296,7 +296,7 @@ void Building::get_cityjson_semantics(nlohmann::json& g) const { // Temp for che
 
 std::string Building::get_cityjson_primitive() const {
     return "MultiSurface";
-};
+}
 
 TopoClass Building::get_class() const {
     return BUILDING;

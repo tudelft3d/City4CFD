@@ -31,6 +31,8 @@
 #include <CGAL/Boolean_set_operations_2/do_intersect.h>
 #include <CGAL/Polygon_mesh_processing/repair.h>
 #include <CGAL/approximated_offset_2.h>
+#include <CGAL/IO/WKT.h>
+#include <geos_c.h>
 
 double geomutils::avg(const std::vector<double>& values) {
     if (values.empty()) throw city4cfd_error("Can't calculate average of a zero-sized vector!");
@@ -262,7 +264,8 @@ Polygon_with_holes_2 geomutils::offset_polygon_with_holes(const Polygon_with_hol
     Polygon_with_holes_2 offsetPolywHoles;
 
     // offset polygon with Minkowski
-    auto offsetPoly = CGAL::approximated_offset_2(poly.get_cgal_type(), offset, 0.0001);
+    auto cgalPoly = poly.get_cgal_type();
+    auto offsetPoly = CGAL::approximated_offset_2(cgalPoly, offset, 0.0001);
     const General_polygon_2& outerBoundary = offsetPoly.outer_boundary();
     Polygon_2 outerRing;
     // convert to linear polygon
@@ -464,6 +467,63 @@ Polygon_2 geomutils::calc_bbox_poly(const T& inputPts) {
 //- Explicit template instantiation
 template Polygon_2 geomutils::calc_bbox_poly<std::vector<Point_2>>(const std::vector<Point_2>& inputPts);
 template Polygon_2 geomutils::calc_bbox_poly<Polygon_2>(const Polygon_2& inputPts);
+
+template <typename T>
+T geomutils::offset_polygon_geos(T poly, double offset) {
+    // add the first point to end to fulfil ogc simple feature requirements
+    if constexpr (std::is_same_v<T, Polygon_2>) {
+        poly.push_back(*poly.begin());
+    } else if constexpr (std::is_same_v<T, CGAL::Polygon_with_holes_2<EPICK>>) {
+        poly.outer_boundary().push_back(*poly.outer_boundary().begin());
+        for (auto& hole : poly.holes()) {
+            hole.push_back(*hole.begin());
+        }
+    }
+
+    // start geos
+    initGEOS(NULL, NULL);
+    // use wkt as an adapter from cgal to geos
+    std::stringstream wkt;
+    wkt << std::setprecision(10);
+    CGAL::IO::write_polygon_WKT(wkt, poly);
+    auto mygeom = GEOSGeomFromWKT(wkt.str().c_str());
+
+    if (!mygeom) {
+        // free memory before throwing exception
+        GEOSGeom_destroy(mygeom);
+        finishGEOS();
+        throw city4cfd_error("Error in converting CGAL polygon to GEOS through WKT");
+    }
+
+    // use geos to buffer the polygon
+    auto bufferParams = GEOSBufferParams_create();
+    GEOSBufferParams_setEndCapStyle(bufferParams, GEOSBUF_CAP_SQUARE);
+    auto buffer = GEOSBufferWithParams(mygeom, bufferParams, offset);
+
+    // transfer back to CGAL
+    auto bufferedWKT = GEOSGeomToWKT(buffer);
+
+    // convert char* to stringstream
+    std::stringstream bufferedWKTss;
+    bufferedWKTss << bufferedWKT;
+    // convert back to CGAL form
+    T offsetPoly;
+    CGAL::read_polygon_WKT(bufferedWKTss, offsetPoly); // the function does pop_back_if_equal_to_front internally
+
+    // geos cleanup
+    GEOSGeom_destroy(mygeom);
+    GEOSGeom_destroy(buffer);
+    GEOSBufferParams_destroy(bufferParams);
+    GEOSFree(bufferedWKT);
+    finishGEOS();
+
+    return offsetPoly;
+}
+//- Explicit template instantiation
+template Polygon_2 geomutils::offset_polygon_geos<Polygon_2>(Polygon_2 poly, double offset);
+template CGAL::Polygon_with_holes_2<EPICK>
+        geomutils::offset_polygon_geos<CGAL::Polygon_with_holes_2<EPICK>>
+        (CGAL::Polygon_with_holes_2<EPICK> poly, double offset);
 
 template <typename T>
 void geomutils::pop_back_if_equal_to_front(CGAL::Polygon_2<T>& poly)
