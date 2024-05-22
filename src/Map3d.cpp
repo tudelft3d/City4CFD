@@ -619,7 +619,7 @@ void Map3d::prep_cityjson_output() { // Temp impl, might change
             m_outputFeaturesPtr.erase(m_outputFeaturesPtr.begin() + i);
         }
     }
-};
+}
 
 void Map3d::clear_inactives() {
     for (unsigned long i = 0; i < m_reconstructedBuildingsPtr.size();) {

@@ -284,10 +284,10 @@ void PointCloud::buffer_flat_edges(const PolyFeaturesPtr& avgFeatures,
                 // with the largetst unsigned area.
                 auto offsend = offset_contours.end();
                 double lLargestArea = 0.0;
-                for (auto i = offset_contours.begin(); i != offset_contours.end(); ++i) {
-                    double lArea = CGAL_NTS abs((*i)->area()); //Take abs() as  Polygon_2::area() is signed.
+                for (auto j = offset_contours.begin(); j != offset_contours.end(); ++j) {
+                    double lArea = CGAL_NTS abs((*j)->area()); //Take abs() as  Polygon_2::area() is signed.
                     if (lArea > lLargestArea) {
-                        offsend = i;
+                        offsend = j;
                         lLargestArea = lArea;
                     }
                 }

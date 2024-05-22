@@ -65,23 +65,6 @@ ReconstructedBuilding::ReconstructedBuilding(const roofer::Mesh& rooferMesh, con
     m_clipBottom = other->m_clipBottom;
 }
 
-/*
-ReconstructedBuilding::ReconstructedBuilding(const nlohmann::json& poly)
-        : Building(poly), m_searchTree(nullptr),
-          m_attributeHeight(-9999), m_attributeHeightAdvantage(Config::get().buildingHeightAttrAdv) {
-    if (!Config::get().buildingUniqueId.empty()) {
-        m_id = poly["properties"][Config::get().buildingUniqueId].dump();
-    }
-    if (poly["properties"].contains(Config::get().buildingHeightAttribute)) {
-        if (poly["properties"][Config::get().buildingHeightAttribute].is_number()) {
-            m_attributeHeight = poly["properties"][Config::get().buildingHeightAttribute];
-        }
-    } else if (poly["properties"].contains(Config::get().floorAttribute)) {
-        m_attributeHeight = (double)poly["properties"][Config::get().floorAttribute] * Config::get().floorHeight;
-    }
-}
-*/
-
 ReconstructedBuilding::ReconstructedBuilding(const nlohmann::json& poly)
         : Building(poly), m_attributeHeight(-global::largnum),
           m_attributeHeightAdvantage(Config::get().buildingHeightAttrAdv),
@@ -245,7 +228,7 @@ void ReconstructedBuilding::reconstruct() {
 
                 auto validity = val3dity::validate(points, polys);
                 if (!validity["validity"]) {
-                    std::string valdtyReport = " Invalid geometry, errors: " + nlohmann::to_string(validity["all_errors"]);
+                    std::string valdtyReport = "Invalid geometry, errors: " + nlohmann::to_string(validity["all_errors"]);
                     if (m_reconSettings->enforceValidity.empty()) {
                         Config::write_to_log("Building ID: " + this->get_id()
                                              + valdtyReport);
@@ -307,7 +290,7 @@ void ReconstructedBuilding::reconstruct_lod12() {
         }
         LoD12 lod12(m_poly, m_groundElevations, m_elevation);
         lod12.reconstruct(m_mesh);
-};
+}
 
 void ReconstructedBuilding::insert_terrain_point(const Point_3& pt) {
     m_groundPtsPtr->insert(pt); //todo sort out terrain pts

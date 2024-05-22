@@ -36,7 +36,6 @@ public:
     ReconstructedBuilding();
     ReconstructedBuilding(const Mesh& mesh);
     ReconstructedBuilding(const roofer::Mesh& rooferMesh, const ReconstructedBuildingPtr& other);
-//    ReconstructedBuilding(const nlohmann::json& poly);
     ReconstructedBuilding(const nlohmann::json& poly);
     ReconstructedBuilding(const Polygon_with_attr& poly);
     ReconstructedBuilding(const std::shared_ptr<ImportedBuilding>& importedBuilding);
