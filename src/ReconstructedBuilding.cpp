@@ -243,7 +243,7 @@ void ReconstructedBuilding::reconstruct() {
                 std::vector<std::vector<int>> polys;
                 PMP::polygon_mesh_to_polygon_soup(mesh, points, polys);
 
-                auto validity = val3dity::validate(points, polys, val3dity::Parameters().terminal_output(false));
+                auto validity = val3dity::validate(points, polys);
                 if (!validity["validity"]) {
                     std::string valdtyReport = " Invalid geometry, errors: " + nlohmann::to_string(validity["all_errors"]);
                     if (m_reconSettings->enforceValidity.empty()) {

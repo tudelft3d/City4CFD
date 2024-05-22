@@ -1,7 +1,7 @@
 /*
   val3dity 
 
-  Copyright (c) 2011-2022, 3D geoinformation research group, TU Delft  
+  Copyright (c) 2011-2024, 3D geoinformation research group, TU Delft  
 
   This file is part of val3dity.
 
@@ -44,8 +44,8 @@ namespace val3dity
 class Solid : public Primitive
 {
 public:
-  Solid(std::string id = "");
-  ~Solid();
+                  Solid(std::string id = "");
+                  ~Solid();
   
   Surface*        get_oshell();
   void            set_oshell(Surface* sh);
@@ -55,12 +55,13 @@ public:
   int             num_ishells();
   int             num_faces();
   int             num_vertices();
+
+  std::vector<json> get_errors();
  
   bool            validate(double tol_planarity_d2p, double tol_planarity_normals, double tol_overlap = -1);
   Nef_polyhedron* get_nef_polyhedron();
   void            get_min_bbox(double& x, double& y);
   void            translate_vertices();
-  json            get_report_json(std::string preid = "");
   std::string     get_poly_representation();
   std::string     get_off_representation(int shellno = 0);
   int             is_valid();

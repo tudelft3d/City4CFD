@@ -1,7 +1,7 @@
 /*
   val3dity 
 
-  Copyright (c) 2011-2022, 3D geoinformation research group, TU Delft  
+  Copyright (c) 2011-2024, 3D geoinformation research group, TU Delft  
 
   This file is part of val3dity.
 
@@ -46,6 +46,8 @@
 #include <CGAL/Aff_transformation_3.h>
 
 #include <string>
+#include "spdlog/spdlog.h"
+#include "spdlog/sinks/stdout_color_sinks.h"
 
 namespace val3dity
 {
@@ -112,7 +114,8 @@ typedef enum
   OBJ   = 3,
   POLY  = 4,
   OFF   = 5,
-  OTHER = 6,
+  STDIN = 6,
+  OTHER = 7,
 } InputTypes;
 
 
@@ -168,6 +171,7 @@ static std::map<int,std::string> ALL_ERRORS = {
   {902, "EMPTY_PRIMITIVE"}, 
   {903, "WRONG_INPUT_PARAMETERS"}, 
   {904, "FORMAT_NOT_SUPPORTED"}, 
+  {905, "INVALID_JSON"}, 
   {906, "PRIMITIVE_NO_GEOMETRY"}, 
   {999, "UNKNOWN_ERROR"} 
 };

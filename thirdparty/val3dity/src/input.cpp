@@ -1,7 +1,7 @@
 /*
   val3dity 
 
-  Copyright (c) 2011-2023, 3D geoinformation research group, TU Delft
+  Copyright (c) 2011-2024, 3D geoinformation research group, TU Delft
 
   This file is part of val3dity.
 
@@ -40,7 +40,6 @@
 #include "CompositeSolid.h"
 #include "MultiSolid.h"
 #include "GeometryTemplate.h"
-#include "val3dity_ostream.h"
 
 
 using namespace std;
@@ -84,7 +83,7 @@ std::set<int> IOErrors::get_unique_error_codes()
 void IOErrors::add_error(int code, std::string info)
 {
   _errors[code].push_back(info);
-  *val3ditycout << "ERROR " << code << " : " << info << std::endl;
+  spdlog::info("e{}-{} ({}", code, ALL_ERRORS[code], info);
 }
 
 
@@ -203,7 +202,7 @@ Surface* process_gml_surface(const pugi::xml_node& n, int id, std::map<std::stri
 {
   std::string s = ".//" + NS["gml"] + "surfaceMember";
   pugi::xpath_node_set nsm = n.select_nodes(s.c_str());
-  Surface* sh = new Surface(id, tol_snap);
+  Surface* sh = new Surface(std::to_string(id), tol_snap);
   int i = 0;
   for (pugi::xpath_node_set::const_iterator it = nsm.begin(); it != nsm.end(); ++it)
   {
@@ -319,7 +318,7 @@ Surface* process_gml_surface(const pugi::xml_node& n, int id, std::map<std::stri
 Solid* process_gml_solid(const pugi::xml_node& nsolid, std::map<std::string, pugi::xpath_node>& dallpoly, double tol_snap, IOErrors& errs)
 {
   //-- exterior shell
-  Solid* sol = new Solid;
+  Solid* sol = new Solid();
   if (nsolid.attribute("gml:id") != 0)
     sol->set_id(std::string(nsolid.attribute("gml:id").value()));
   std::string s = "./" + NS["gml"] + "exterior";
@@ -340,7 +339,7 @@ Solid* process_gml_solid(const pugi::xml_node& nsolid, std::map<std::string, pug
 
 MultiSolid* process_gml_multisolid(const pugi::xml_node& nms, std::map<std::string, pugi::xpath_node>& dallpoly, double tol_snap, IOErrors& errs)
 {
-  MultiSolid* ms = new MultiSolid;
+  MultiSolid* ms = new MultiSolid();
   if (nms.attribute("gml:id") != 0)
     ms->set_id(std::string(nms.attribute("gml:id").value()));
   std::string s = ".//" + NS["gml"] + "Solid";
@@ -358,7 +357,7 @@ MultiSolid* process_gml_multisolid(const pugi::xml_node& nms, std::map<std::stri
 
 CompositeSolid* process_gml_compositesolid(const pugi::xml_node& nms, std::map<std::string, pugi::xpath_node>& dallpoly, double tol_snap, IOErrors& errs)
 {
-  CompositeSolid* cs = new CompositeSolid;
+  CompositeSolid* cs = new CompositeSolid();
   if (nms.attribute("gml:id") != 0)
     cs->set_id(std::string(nms.attribute("gml:id").value()));
   std::string s = ".//" + NS["gml"] + "Solid";
@@ -377,7 +376,7 @@ CompositeSolid* process_gml_compositesolid(const pugi::xml_node& nms, std::map<s
 
 MultiSurface* process_gml_multisurface(const pugi::xml_node& nms, std::map<std::string, pugi::xpath_node>& dallpoly, double tol_snap, IOErrors& errs)
 {
-  MultiSurface* ms = new MultiSurface;
+  MultiSurface* ms = new MultiSurface();
   if (nms.attribute("gml:id") != 0)
     ms->set_id(std::string(nms.attribute("gml:id").value()));
   Surface* s = process_gml_surface(nms, 0, dallpoly, tol_snap, errs);
@@ -388,7 +387,7 @@ MultiSurface* process_gml_multisurface(const pugi::xml_node& nms, std::map<std::
 
 CompositeSurface* process_gml_compositesurface(const pugi::xml_node& nms, std::map<std::string, pugi::xpath_node>& dallpoly, double tol_snap, IOErrors& errs)
 {
-  CompositeSurface* cs = new CompositeSurface;
+  CompositeSurface* cs = new CompositeSurface();
   if (nms.attribute("gml:id") != 0)
     cs->set_id(std::string(nms.attribute("gml:id").value()));
   Surface* s = process_gml_surface(nms, 0, dallpoly, tol_snap, errs);
@@ -456,12 +455,12 @@ void process_jsonfg_surface(std::vector<std::vector<std::vector<double>>>& pgn, 
 
 void process_json_geometries_of_co(json& jco, CityObject* co, std::vector<GeometryTemplate*>& lsGTs, json& j, double tol_snap)
 {
-  int idgeom = co->number_of_primitives();
+  int idgeom = 0;
   for (auto& g : jco["geometry"]) {
-    std::string theid = std::to_string(idgeom);
+    std::string gid = "geom=" + std::to_string(idgeom);
     if  (g["type"] == "Solid")
     {
-      Solid* s = new Solid(theid);
+      Solid* s = new Solid(gid);
       std::string thelod = "";
       if (g["lod"].is_number()) {
         thelod = std::to_string(g["lod"].get<double>());
@@ -470,11 +469,11 @@ void process_json_geometries_of_co(json& jco, CityObject* co, std::vector<Geomet
       }
       s->set_lod(thelod);
       bool oshell = true;
-      int c = 0;
+      int no_shell = 0;
       for (auto& shell : g["boundaries"]) 
       {
-        Surface* sh = new Surface(c, tol_snap);
-        c++;
+        std::string shid = gid + "|" + "shell=" + std::to_string(no_shell);
+        Surface* sh = new Surface(shid, tol_snap);
         for (auto& polygon : shell) { 
           std::vector< std::vector<int> > pa = polygon;
           process_json_surface(pa, j, sh);
@@ -484,14 +483,16 @@ void process_json_geometries_of_co(json& jco, CityObject* co, std::vector<Geomet
           oshell = false;
           s->set_oshell(sh);
         }
-        else
+        else {
           s->add_ishell(sh);
+        }
+        no_shell++;
       }
       co->add_primitive(s);
     }
     else if ( (g["type"] == "MultiSurface") || (g["type"] == "CompositeSurface") ) 
     {
-      Surface* sh = new Surface(-1, tol_snap);
+      Surface* sh = new Surface(std::to_string(-1), tol_snap);
       for (auto& p : g["boundaries"]) 
       { 
         std::vector< std::vector<int> > pa = p;
@@ -505,14 +506,14 @@ void process_json_geometries_of_co(json& jco, CityObject* co, std::vector<Geomet
       }
       if (g["type"] == "MultiSurface")
       {
-        MultiSurface* ms = new MultiSurface(theid);
+        MultiSurface* ms = new MultiSurface(gid);
         ms->set_lod(thelod);
         ms->set_surface(sh);
         co->add_primitive(ms);
       }
       else
       {
-        CompositeSurface* cs = new CompositeSurface(theid);
+        CompositeSurface* cs = new CompositeSurface(gid);
         cs->set_lod(thelod);
         cs->set_surface(sh);
         co->add_primitive(cs);
@@ -520,7 +521,7 @@ void process_json_geometries_of_co(json& jco, CityObject* co, std::vector<Geomet
     }
     else if (g["type"] == "MultiSolid") 
     {
-      MultiSolid* ms = new MultiSolid(theid);
+      MultiSolid* ms = new MultiSolid(gid);
       std::string thelod = "";
       if (g["lod"].is_number()) {
         thelod = std::to_string(g["lod"].get<double>());
@@ -528,13 +529,17 @@ void process_json_geometries_of_co(json& jco, CityObject* co, std::vector<Geomet
         thelod = g["lod"].get<std::string>();
       }
       ms->set_lod(thelod);
+      int no_solid = 0;
       for (auto& solid : g["boundaries"]) 
       {
-        Solid* s = new Solid();
+        std::string id2 = gid + "|" + "solid=" + std::to_string(no_solid);
+        Solid* s = new Solid(id2);
         bool oshell = true;
+        int no_shell = 0;
         for (auto& shell : solid) 
         {
-          Surface* sh = new Surface(-1, tol_snap);
+          std::string shid = id2 + "|" + "shell=" + std::to_string(no_shell);
+          Surface* sh = new Surface(shid, tol_snap);
           for (auto& polygon : shell) { 
             std::vector< std::vector<int> > pa = polygon;
             process_json_surface(pa, j, sh);
@@ -544,16 +549,19 @@ void process_json_geometries_of_co(json& jco, CityObject* co, std::vector<Geomet
             oshell = false;
             s->set_oshell(sh);
           }
-          else
+          else {
             s->add_ishell(sh);
+          }
+          no_shell++;
         }
         ms->add_solid(s);
+        no_solid++;
       }
       co->add_primitive(ms);
     }
     else if (g["type"] == "CompositeSolid") 
     {
-      CompositeSolid* cs = new CompositeSolid(theid);
+      CompositeSolid* cs = new CompositeSolid(gid);
       std::string thelod = "";
       if (g["lod"].is_number()) {
         thelod = std::to_string(g["lod"].get<double>());
@@ -561,13 +569,17 @@ void process_json_geometries_of_co(json& jco, CityObject* co, std::vector<Geomet
         thelod = g["lod"].get<std::string>();
       }
       cs->set_lod(thelod);
+      int no_solid = 0;
       for (auto& solid : g["boundaries"]) 
       {
-        Solid* s = new Solid();
+        std::string id2 = gid + "|" + "solid=" + std::to_string(no_solid);
+        Solid* s = new Solid(id2);
         bool oshell = true;
+        int no_shell = 0;
         for (auto& shell : solid) 
         {
-          Surface* sh = new Surface(-1, tol_snap);
+          std::string shid = id2 + "|" + "shell=" + std::to_string(no_shell);
+          Surface* sh = new Surface(shid, tol_snap);
           for (auto& polygon : shell) { 
             std::vector< std::vector<int> > pa = polygon;
             process_json_surface(pa, j, sh);
@@ -577,10 +589,13 @@ void process_json_geometries_of_co(json& jco, CityObject* co, std::vector<Geomet
             oshell = false;
             s->set_oshell(sh);
           }
-          else
+          else {
             s->add_ishell(sh);
+          }
+          no_shell++;
         }
         cs->add_solid(s);
+        no_solid++;
       }
       co->add_primitive(cs);
     }
@@ -614,17 +629,17 @@ void read_file_json(std::string &ifile, std::vector<Feature*>& lsFeatures, IOErr
   } 
   else if (j["type"] == "tu3djson") {
     errs.set_input_file_type("tu3djson");
-    *val3ditycout << "tu3djson input file" << std::endl;
-    *val3ditycout << "# Features found: " << j["features"].size() << std::endl;
+    std::cout << "tu3djson input file" << std::endl;
+    std::cout << "# Features found: " << j["features"].size() << std::endl;
     parse_tu3djson(j, lsFeatures, tol_snap);
   }
   else if ( (j["type"] == "Feature") || (j["type"] == "FeatureCollection") ) {
     errs.set_input_file_type("JSON-FG");
-    *val3ditycout << "JSON-FG input file" << std::endl;
+    std::cout << "JSON-FG input file" << std::endl;
     if (j["type"] == "Feature")
-      *val3ditycout << "# Features found: " << j["features"].size() << std::endl;
+      std::cout << "# Features found: " << j["features"].size() << std::endl;
     else
-      *val3ditycout << "# Features found: " << j["features"].size() << std::endl;
+      std::cout << "# Features found: " << j["features"].size() << std::endl;
     parse_jsonfg(j, lsFeatures, tol_snap, errs);
   }
   else {
@@ -633,9 +648,9 @@ void read_file_json(std::string &ifile, std::vector<Feature*>& lsFeatures, IOErr
   }
 }
 
-void read_file_jsonl(std::string &ifile, std::vector<Feature*>& lsFeatures, IOErrors& errs, double tol_snap)
+void read_file_cjseq(std::string &ifile, std::vector<Feature*>& lsFeatures, IOErrors& errs, double tol_snap)
 {
-  *val3ditycout << "CityJSONL input file" << std::endl;
+  std::cout << "CityJSONSeq input file" << std::endl;
   std::ifstream infile(ifile.c_str(), std::ifstream::in);
   if (!infile)
   {
@@ -674,9 +689,9 @@ void read_file_jsonl(std::string &ifile, std::vector<Feature*>& lsFeatures, IOEr
       }
     }
     if (j["type"] == "CityJSONFeature") {
-      errs.set_input_file_type("CityJSONL");
+      errs.set_input_file_type("CityJSONSeq");
       j["transform"] = jtransform; //-- add transform b/c BuildingPart overlap uses a tolerance
-      parse_cityjsonl(j, lsFeatures, tol_snap, lsGTs);
+      parse_cjseq(j, lsFeatures, tol_snap, lsGTs);
     }
     linecount++;
   }
@@ -684,8 +699,8 @@ void read_file_jsonl(std::string &ifile, std::vector<Feature*>& lsFeatures, IOEr
 
 void parse_cityjson(json& j, std::vector<Feature*>& lsFeatures, double tol_snap)
 {
-  *val3ditycout << "CityJSON input file" << std::endl;
-  *val3ditycout << "# City Objects found: " << j["CityObjects"].size() << std::endl;
+  std::cout << "CityJSON input file" << std::endl;
+  std::cout << "# City Objects found: " << j["CityObjects"].size() << std::endl;
   //-- compute (_minx, _miny)
   compute_min_xy(j);
   //-- read and store the GeometryTemplates
@@ -714,7 +729,7 @@ void parse_cityjson(json& j, std::vector<Feature*>& lsFeatures, double tol_snap)
   }
 }
 
-void parse_cityjsonl(json& j, std::vector<Feature*>& lsFeatures, double tol_snap, std::vector<GeometryTemplate*>& lsGTs)
+void parse_cjseq(json& j, std::vector<Feature*>& lsFeatures, double tol_snap, std::vector<GeometryTemplate*>& lsGTs)
 {
   //-- compute (_minx, _miny)
   compute_min_xy(j);
@@ -752,7 +767,7 @@ void process_cityjson_geometrytemplates(json& j, std::vector<GeometryTemplate*>&
       int c = 0;
       for (auto& shell : jt["boundaries"]) 
       {
-        Surface* sh = new Surface(c, tol_snap);
+        Surface* sh = new Surface(std::to_string(c), tol_snap);
         c++;
         for (auto& polygon : shell) { 
           std::vector< std::vector<int> > pa = polygon;
@@ -770,7 +785,7 @@ void process_cityjson_geometrytemplates(json& j, std::vector<GeometryTemplate*>&
     }
     else if ( (jt["type"] == "MultiSurface") || (jt["type"] == "CompositeSurface") ) 
     {
-      Surface* sh = new Surface(-1, tol_snap);
+      Surface* sh = new Surface(std::to_string(-1), tol_snap);
       for (auto& p : jt["boundaries"]) 
       { 
         std::vector< std::vector<int> > pa = p;
@@ -841,7 +856,7 @@ void process_gml_file_indoorgml(pugi::xml_document& doc, std::vector<Feature*>& 
     std::string duality = "";
     //-- get the ID
     if (cs.attribute("gml:id") != 0) {
-      // *val3ditycout << "\t" << it->node().attribute("gml:id").value() << std::endl;
+      // std::cout << "\t" << it->node().attribute("gml:id").value() << std::endl;
       theid = cs.attribute("gml:id").value();
     }
     else 
@@ -869,7 +884,7 @@ void process_gml_file_indoorgml(pugi::xml_document& doc, std::vector<Feature*>& 
         s = NS["gml"] + "Solid";
         for (pugi::xml_node child3 : child2.children(s.c_str()))
         {
-          // *val3ditycout << "Solid: " << child3.attribute("gml:id").value() << std::endl;
+          // std::cout << "Solid: " << child3.attribute("gml:id").value() << std::endl;
           sol = process_gml_solid(child3, dallpoly, tol_snap, errs);
           if (sol->get_id() == "")
             sol->set_id("MISSING_ID");
@@ -920,7 +935,7 @@ void process_gml_file_indoorgml(pugi::xml_document& doc, std::vector<Feature*>& 
 //    pugi::xpath_node_set nstate = doc.select_nodes(s.c_str());
     for (pugi::xpath_node_set::const_iterator it = nstate.begin(); it != nstate.end(); ++it)
     {
-      // *val3ditycout << "---\n" << it->node().attribute("gml:id").value() << std::endl;
+      // std::cout << "---\n" << it->node().attribute("gml:id").value() << std::endl;
       std::string vid = it->node().attribute("gml:id").value();
       s = NS["indoorgml"] + "duality";
       std::string vdual;
@@ -929,7 +944,7 @@ void process_gml_file_indoorgml(pugi::xml_document& doc, std::vector<Feature*>& 
         vdual = child.attribute("xlink:href").value();
         if (vdual[0] == '#')
           vdual = vdual.substr(1);
-        // *val3ditycout << "dual node: " << vdual << std::endl;
+        // std::cout << "dual node: " << vdual << std::endl;
       }
       s = NS["indoorgml"] + "connects";
       std::vector<std::string> vadj;
@@ -945,7 +960,7 @@ void process_gml_file_indoorgml(pugi::xml_document& doc, std::vector<Feature*>& 
       }
       s = ".//" + NS["gml"] + "pos";
       pugi::xpath_node n = it->node().select_node(s.c_str());
-      // *val3ditycout << n.node().child_value() << std::endl;
+      // std::cout << n.node().child_value() << std::endl;
       
       std::string buf;
       std::stringstream ss(n.node().child_value());
@@ -966,7 +981,7 @@ void process_gml_file_indoorgml(pugi::xml_document& doc, std::vector<Feature*>& 
     im->add_graph(ig);
   }
   // if (im->get_number_graphs() == 0)
-  //   *val3ditycout << "\t!!! No dual graph was found in the input file" << std::endl;
+  //   std::cout << "\t!!! No dual graph was found in the input file" << std::endl;
 }
 
 
@@ -974,7 +989,7 @@ void set_min_xy(double minx, double miny)
 {
   _minx = minx;
   _miny = miny;
-  // *val3ditycout << "Translating all coordinates by (-" << _minx << ", -" << _miny << ")" << std::endl;
+  // std::cout << "Translating all coordinates by (-" << _minx << ", -" << _miny << ")" << std::endl;
   Primitive::set_translation_min_values(_minx, _miny);
   Surface::set_translation_min_values(_minx, _miny);
 }
@@ -993,7 +1008,7 @@ void compute_min_xy(json& j)
     _minx = (_minx * double(j["transform"]["scale"][0])) + double(j["transform"]["translate"][0]);
     _miny = (_miny * double(j["transform"]["scale"][1])) + double(j["transform"]["translate"][1]);
   }
-  // *val3ditycout << "Translating all coordinates by (-" << _minx << ", -" << _miny << ")" << std::endl;
+  // std::cout << "Translating all coordinates by (-" << _minx << ", -" << _miny << ")" << std::endl;
   Primitive::set_translation_min_values(_minx, _miny);
   Surface::set_translation_min_values(_minx, _miny);
 }
@@ -1032,7 +1047,7 @@ void compute_min_xy(pugi::xml_document& doc)
     if (std::stod(tokens[1]) < _miny)
       _miny = std::stod(tokens[1]);
   }
-  // *val3ditycout << "Translating all coordinates by (-" << _minx << ", -" << _miny << ")" << std::endl;
+  // std::cout << "Translating all coordinates by (-" << _minx << ", -" << _miny << ")" << std::endl;
   Primitive::set_translation_min_values(_minx, _miny);
   Surface::set_translation_min_values(_minx, _miny);
 }
@@ -1040,7 +1055,7 @@ void compute_min_xy(pugi::xml_document& doc)
 
 void read_file_gml(std::string &ifile, std::vector<Feature*>& lsFeatures, IOErrors& errs, double tol_snap)
 {
-  *val3ditycout << "Reading file: " << ifile << std::endl;
+  std::cout << "Reading file: " << ifile << std::endl;
   pugi::xml_document doc;
   pugi::xml_parse_result result = doc.load_file(ifile.c_str());
   if (!result) {
@@ -1054,7 +1069,7 @@ void read_file_gml(std::string &ifile, std::vector<Feature*>& lsFeatures, IOErro
   pugi::xml_node ncm = doc.first_child();
   get_namespaces(ncm); //-- results in global variable NS in this unit
   if ( (NS.count("indoorgml") != 0) && (ncm.name() == (NS["indoorgml"] + "IndoorFeatures")) ) {
-    *val3ditycout << "IndoorGML input file" << std::endl;
+    std::cout << "IndoorGML input file" << std::endl;
     //-- find (_minx, _miny)
     compute_min_xy(doc);
     //-- build dico of xlinks for <gml:Polygon>
@@ -1073,7 +1088,7 @@ std::map<std::string, std::string> get_namespaces(pugi::xml_node& root) {
   for (pugi::xml_attribute attr = root.first_attribute(); attr; attr = attr.next_attribute()) {
     std::string name = attr.name();
     if (name.find("xmlns") != std::string::npos) {
-      // *val3ditycout << attr.name() << "=" << attr.value() << std::endl;
+      // std::cout << attr.name() << "=" << attr.value() << std::endl;
       std::string value = attr.value();
       std::string sns;
       if (value.find("http://www.opengis.net/citygml/") != std::string::npos) {
@@ -1110,7 +1125,7 @@ void build_dico_xlinks(pugi::xml_document& doc, std::map<std::string, pugi::xpat
   std::string s = "//" + NS["gml"] + "Polygon" + "[@" + NS["gml"] + "id]";
   pugi::xpath_node_set nallpoly = doc.select_nodes(s.c_str());
   if (nallpoly.size() > 0)
-   *val3ditycout << "XLinks found, resolving them..." << std::flush;
+   std::cout << "XLinks found, resolving them..." << std::flush;
   for (pugi::xpath_node_set::const_iterator it = nallpoly.begin(); it != nallpoly.end(); ++it)
     dallpoly[it->node().attribute("gml:id").value()] = *it;
   //-- for <gml:OrientableSurface>
@@ -1136,7 +1151,7 @@ void build_dico_xlinks(pugi::xml_document& doc, std::map<std::string, pugi::xpat
     }
   }
   if (nallpoly.size() > 0)
-    *val3ditycout << "done." << std::endl;
+    std::cout << "done." << std::endl;
 }
 
 
@@ -1156,14 +1171,14 @@ Surface* parse_poly(std::istream &input, int shellid, IOErrors& errs)
     if (y < _miny)
       _miny = y;
   }
-  *val3ditycout << "Translating all coordinates by (-" << _minx << ", -" << _miny << ")" << std::endl;
+  // std::cout << "Translating all coordinates by (-" << _minx << ", -" << _miny << ")" << std::endl;
   Primitive::set_translation_min_values(_minx, _miny);
   Surface::set_translation_min_values(_minx, _miny);
   input.clear();
   input.seekg(0);
   input >> num >> tmpint >> tmpint >> tmpint;
   //-- read verticess
-  Surface* sh = new Surface(shellid);  
+  Surface* sh = new Surface("");  
   for (int i = 0; i < num; i++)
   {
     input >> tmpint >> x >> y >> z;
@@ -1233,9 +1248,9 @@ void printProgressBar(int percent) {
       bar.replace(i, 1, " ");
     }
   }
-  *val3ditycout << "\r" "[" << bar << "] ";
-  (*val3ditycout).width(3);
-  *val3ditycout << percent << "%     " << std::flush;
+  std::cout << "\r" "[" << bar << "] ";
+  std::cout.width(3);
+  std::cout << percent << "%     " << std::flush;
 }
 
 
@@ -1260,7 +1275,7 @@ Surface* parse_off(std::istream &input, int shellid, IOErrors& errs, double tol_
     if (y < _miny)
       _miny = y;
   }
-  *val3ditycout << "Translating all coordinates by (-" << _minx << ", -" << _miny << ")" << std::endl;
+  // std::cout << "Translating all coordinates by (-" << _minx << ", -" << _miny << ")" << std::endl;
   Primitive::set_translation_min_values(_minx, _miny);
   Surface::set_translation_min_values(_minx, _miny);
   //-- reset the file
@@ -1270,7 +1285,7 @@ Surface* parse_off(std::istream &input, int shellid, IOErrors& errs, double tol_
   input >> numpt >> numf >> tmpint;
   //-- read the points
   std::vector<int> newi;
-  Surface* sh = new Surface(shellid, tol_snap);
+  Surface* sh = new Surface("", tol_snap);
   for (int i = 0; i < numpt; i++)
   {
     double x, y, z;
@@ -1320,17 +1335,16 @@ void parse_obj(std::istream &input, std::vector<Feature*>& lsFeatures, Primitive
         _miny = y;
     }
   }
-  *val3ditycout << "Translating all coordinates by (-" << _minx << ", -" << _miny << ")" << std::endl;
+  // std::cout << "Translating all coordinates by (-" << _minx << ", -" << _miny << ")" << std::endl;
   Primitive::set_translation_min_values(_minx, _miny);
   Surface::set_translation_min_values(_minx, _miny);
   //-- read again file and parse everything
   input.clear();
   input.seekg(0);
-  int primid = 0;
-  std::string primids = "";
-  Surface* sh = new Surface(0, tol_snap);
+  std::string oid = "none";
+  GenericObject* o = new GenericObject(oid);
+  Surface* sh = new Surface("", tol_snap);
   std::vector<Point3*> allvertices;
-  GenericObject* o = new GenericObject("none");
   while (std::getline(input, l)) {
     std::istringstream iss(l);
     if (l.substr(0, 2) == "v ") {
@@ -1345,36 +1359,33 @@ void parse_obj(std::istream &input, std::vector<Feature*>& lsFeatures, Primitive
     else if (l.substr(0, 2) == "o ") {
       if (sh->is_empty() == true) { //-- for the first "o" before any faces
         std::string tmp;
-        iss >> tmp >> primids; 
+        iss >> tmp >> oid; 
+        o->set_id(oid);
       }
       else{
-        std::string theid = "";
-        if (primids != "")
-          theid = primids;
-        else
-          theid = std::to_string(primid);
         if (prim3d == SOLID)
         {
-          Solid* sol = new Solid(theid);
+          Solid* sol = new Solid("");
           sol->set_oshell(sh);
           o->add_primitive(sol);
         }
         else if ( prim3d == COMPOSITESURFACE)
         {
-          CompositeSurface* cs = new CompositeSurface(theid);
+          CompositeSurface* cs = new CompositeSurface("");
           cs->set_surface(sh);
           o->add_primitive(cs);
         }
         else if (prim3d == MULTISURFACE)
         {
-          MultiSurface* ms = new MultiSurface(theid);
+          MultiSurface* ms = new MultiSurface("");
           ms->set_surface(sh);
           o->add_primitive(ms);
         }
-        primid++;
+        lsFeatures.push_back(o);
         std::string tmp;
-        iss >> tmp >> primids; 
-        sh = new Surface(0, tol_snap);
+        iss >> tmp >> oid; 
+        o = new GenericObject(oid);
+        sh = new Surface("", tol_snap);
       }
     }
     else if (l.substr(0, 2) == "f ") {
@@ -1417,26 +1428,21 @@ void parse_obj(std::istream &input, std::vector<Feature*>& lsFeatures, Primitive
     errs.add_error(902, "Some surfaces are not defined correctly or are empty");
     return;
   }
-  std::string theid = "";
-  if (primids != "")
-    theid = primids;
-  else
-    theid = std::to_string(primid);
   if (prim3d == SOLID)
   {
-    Solid* sol = new Solid(theid);
+    Solid* sol = new Solid("");
     sol->set_oshell(sh);
     o->add_primitive(sol);
   }
   else if ( prim3d == COMPOSITESURFACE)
   {
-    CompositeSurface* cs = new CompositeSurface(theid);
+    CompositeSurface* cs = new CompositeSurface("");
     cs->set_surface(sh);
     o->add_primitive(cs);
   }
   else if (prim3d == MULTISURFACE)
   {
-    MultiSurface* ms = new MultiSurface(theid);
+    MultiSurface* ms = new MultiSurface("");
     ms->set_surface(sh);
     o->add_primitive(ms);
   }
@@ -1483,7 +1489,7 @@ void parse_jsonfg_onefeature(json& j, std::vector<Feature*>& lsFeatures, double 
     int c = 0;
     for (auto& shell : j["place"]["coordinates"]) 
     {
-      Surface* sh = new Surface(c, tol_snap);
+      Surface* sh = new Surface(std::to_string(c), tol_snap);
       c++;
       for (auto& polygon : shell) { 
         std::vector<std::vector<std::vector<double>>> pa = polygon;
@@ -1507,7 +1513,7 @@ void parse_jsonfg_onefeature(json& j, std::vector<Feature*>& lsFeatures, double 
       bool oshell = true;
       for (auto& shell : solid) 
       {
-        Surface* sh = new Surface(-1, tol_snap);
+        Surface* sh = new Surface(std::to_string(-1), tol_snap);
         for (auto& polygon : shell) { 
           std::vector<std::vector<std::vector<double>>> pa = polygon;
           process_jsonfg_surface(pa, sh, errs);
@@ -1543,7 +1549,7 @@ void parse_tu3djson(json& j, std::vector<Feature*>& lsFeatures, double tol_snap)
       int c = 0;
       for (auto& shell : f["geometry"]["boundaries"]) 
       {
-        Surface* sh = new Surface(c, tol_snap);
+        Surface* sh = new Surface(std::to_string(c), tol_snap);
         c++;
         for (auto& polygon : shell) { 
           std::vector< std::vector<int> > pa = polygon;
@@ -1561,7 +1567,7 @@ void parse_tu3djson(json& j, std::vector<Feature*>& lsFeatures, double tol_snap)
     }
     else if ( (f["geometry"]["type"] == "MultiSurface") || (f["geometry"]["type"] == "CompositeSurface") ) 
     {
-      Surface* sh = new Surface(-1, tol_snap);
+      Surface* sh = new Surface(std::to_string(-1), tol_snap);
       for (auto& p : f["geometry"]["boundaries"]) 
       { 
         std::vector< std::vector<int> > pa = p;
@@ -1589,7 +1595,7 @@ void parse_tu3djson(json& j, std::vector<Feature*>& lsFeatures, double tol_snap)
         bool oshell = true;
         for (auto& shell : solid) 
         {
-          Surface* sh = new Surface(-1, tol_snap);
+          Surface* sh = new Surface(std::to_string(-1), tol_snap);
           for (auto& polygon : shell) { 
             std::vector< std::vector<int> > pa = polygon;
             process_json_surface(pa, f["geometry"], sh);
@@ -1615,7 +1621,7 @@ void parse_tu3djson(json& j, std::vector<Feature*>& lsFeatures, double tol_snap)
         bool oshell = true;
         for (auto& shell : solid) 
         {
-          Surface* sh = new Surface(-1, tol_snap);
+          Surface* sh = new Surface(std::to_string(-1), tol_snap);
           for (auto& polygon : shell) { 
             std::vector< std::vector<int> > pa = polygon;
             process_json_surface(pa, f["geometry"], sh);
@@ -1649,7 +1655,7 @@ void parse_tu3djson_onegeom(json& j, std::vector<Feature*>& lsFeatures, double t
     int c = 0;
     for (auto& shell : j["boundaries"]) 
     {
-      Surface* sh = new Surface(c, tol_snap);
+      Surface* sh = new Surface(std::to_string(c), tol_snap);
       c++;
       for (auto& polygon : shell) { 
         std::vector< std::vector<int> > pa = polygon;
@@ -1667,7 +1673,7 @@ void parse_tu3djson_onegeom(json& j, std::vector<Feature*>& lsFeatures, double t
   }
   else if ( (j["type"] == "MultiSurface") || (j["type"] == "CompositeSurface") ) 
   {
-    Surface* sh = new Surface(-1, tol_snap);
+    Surface* sh = new Surface(std::to_string(-1), tol_snap);
     for (auto& p : j["boundaries"]) 
     { 
       std::vector< std::vector<int> > pa = p;
@@ -1695,7 +1701,7 @@ void parse_tu3djson_onegeom(json& j, std::vector<Feature*>& lsFeatures, double t
       bool oshell = true;
       for (auto& shell : solid) 
       {
-        Surface* sh = new Surface(-1, tol_snap);
+        Surface* sh = new Surface(std::to_string(-1), tol_snap);
         for (auto& polygon : shell) { 
           std::vector< std::vector<int> > pa = polygon;
           process_json_surface(pa, j, sh);
@@ -1721,7 +1727,7 @@ void parse_tu3djson_onegeom(json& j, std::vector<Feature*>& lsFeatures, double t
       bool oshell = true;
       for (auto& shell : solid) 
       {
-        Surface* sh = new Surface(-1, tol_snap);
+        Surface* sh = new Surface(std::to_string(-1), tol_snap);
         for (auto& polygon : shell) { 
           std::vector< std::vector<int> > pa = polygon;
           process_json_surface(pa, j, sh);

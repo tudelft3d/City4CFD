@@ -1,7 +1,7 @@
 /*
   val3dity 
 
-  Copyright (c) 2011-2022, 3D geoinformation research group, TU Delft  
+  Copyright (c) 2011-2024, 3D geoinformation research group, TU Delft  
 
   This file is part of val3dity.
 
@@ -45,14 +45,14 @@ namespace val3dity
 class Primitive
 {
 public:
-  Primitive  ();
-  ~Primitive ();
+                        Primitive  ();
+  virtual               ~Primitive ();
 
   virtual bool          validate(double tol_planarity_d2p, double tol_planarity_normals, double tol_overlap = -1) = 0;
   virtual int           is_valid() = 0;
   virtual bool          is_empty() = 0;
-  virtual json          get_report_json(std::string preid = "") = 0;
   virtual Primitive3D   get_type() = 0;
+  virtual std::vector<json> get_errors() = 0;
 
   virtual void          get_min_bbox(double& x, double& y) = 0;
   virtual void          translate_vertices() = 0;

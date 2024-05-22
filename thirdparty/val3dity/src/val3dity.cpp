@@ -1,7 +1,7 @@
 /*
   val3dity 
 
-  Copyright (c) 2011-2023, 3D geoinformation research group, TU Delft
+  Copyright (c) 2011-2024, 3D geoinformation research group, TU Delft
 
   This file is part of val3dity.
 
@@ -33,17 +33,17 @@
 #include "Solid.h"
 #include "Surface.h"
 #include "input.h"
-#include "val3dity_ostream.h"
 
+#include <iostream>
 #include <exception>      // std::exception
+
 
 namespace val3dity
 {
 
-std::string VAL3DITY_VERSION = "2.4.1b0";
+std::string VAL3DITY_VERSION = "2.5.0b1";
 
-struct verror : std::exception
-{
+struct verror : std::exception {
   std::string whattext;
   verror(std::string s) : whattext(s){};
   const char* what() const noexcept {return whattext.c_str();}
@@ -307,22 +307,22 @@ validate_off(std::string& input,
   GenericObject* o = new GenericObject("none");
   std::istringstream iss(input);
   Surface* sh = parse_off(iss, 0, ioerrs, params._tol_snap);
-  *val3ditycout << "1" << std::endl;
+  std::cout << "1" << std::endl;
   Solid* s = new Solid;
   s->set_oshell(sh);
   o->add_primitive(s);
   lsFeatures.push_back(o);
   //-- start the validation
-  // *val3ditycout << "errors: " << ioerrs.has_errors() << std::endl;
+  // std::cout << "errors: " << ioerrs.has_errors() << std::endl;
   for (auto& each : ioerrs.get_unique_error_codes())
-      *val3ditycout << each << std::endl;
+      std::cout << each << std::endl;
 
   // if (ioerrs.has_errors() == false) {
   //-- validate
   for (auto& f : lsFeatures)
       f->validate(params._planarity_d2p_tol, params._planarity_n_tol, params._overlap_tol);
   // }
-  *val3ditycout << "2" << std::endl;
+  std::cout << "2" << std::endl;
   //-- get report in json
   json jr = get_report_json("OFF object",
                             lsFeatures,
@@ -332,7 +332,7 @@ validate_off(std::string& input,
                             params._planarity_d2p_tol,
                             params._planarity_n_tol,
                             ioerrs);
-  *val3ditycout << "3" << std::endl;
+  std::cout << "3" << std::endl;
   return jr;
 }
 
@@ -348,7 +348,7 @@ json
 validate(json& j,
          Parameters params)
 {
-  terminal_output(params._terminal_output);
+  spdlog::set_level(spdlog::level::off);
   json re;
   //-- CityJSON
   if (j["type"] == "CityJSON") {
@@ -403,7 +403,7 @@ validate(const std::vector<std::array<double, 3>>& vertices,
          const std::vector<std::vector<int>>& faces,
          Parameters params)
 {
-  terminal_output(params._terminal_output);
+  spdlog::set_level(spdlog::level::off);
   double _minx = 9e15;
   double _miny = 9e15; 
   //-- find (minx, miny)
@@ -414,7 +414,7 @@ validate(const std::vector<std::array<double, 3>>& vertices,
       _miny = v[1];
   }
   //-- create a Surface (a 2-manifold)
-  Surface* sh = new Surface(0, params._tol_snap);
+  Surface* sh = new Surface("0", params._tol_snap);
   std::vector<Point3*> allvertices;
   GenericObject* o = new GenericObject("none");
   //-- read all the vertices
@@ -422,6 +422,7 @@ validate(const std::vector<std::array<double, 3>>& vertices,
     Point3 *p = new Point3(v[0] - _minx, v[1] - _miny, v[2]);
     allvertices.push_back(p);
   }
+
   //-- read all the faces (0-indexed!)
   for (auto& vids: faces) {
     std::vector<int> r;
@@ -468,7 +469,7 @@ validate(std::string& input,
          std::string format,
          Parameters params)
 {
-  terminal_output(params._terminal_output);
+  spdlog::set_level(spdlog::level::off);
   json re;
   if (format == "IndoorGML") {
     json j = validate_indoorgml(input, params);
@@ -488,4 +489,4 @@ validate(std::string& input,
   return re;
 }
 
-} // namespace val3dity
+}

@@ -1,7 +1,7 @@
 /*
   val3dity 
 
-  Copyright (c) 2011-2022, 3D geoinformation research group, TU Delft  
+  Copyright (c) 2011-2024, 3D geoinformation research group, TU Delft  
 
   This file is part of val3dity.
 
@@ -83,16 +83,9 @@ bool GeometryTemplate::is_empty()
 }
 
 
-json GeometryTemplate::get_report_json(std::string preid)
+std::vector<json> GeometryTemplate::get_errors()
 {
-  json j;
-  bool isValid = true;
-  j["type"] = "GeometryTemplate";
-  if (this->get_id() != "")
-    j["id"] = this->_id;
-  else
-    j["id"] = "none";
-  j["errors"] = json::array();
+  std::vector<json> js;
   for (auto& err : _errors)
   {
     for (auto& e : _errors[std::get<0>(err)])
@@ -103,20 +96,16 @@ json GeometryTemplate::get_report_json(std::string preid)
       jj["description"] = ALL_ERRORS[std::get<0>(err)];
       jj["id"] = std::get<0>(e);
       jj["info"] = std::get<1>(e);
-      j["errors"].push_back(jj);
-      isValid = false;
+      js.push_back(jj);
     }
   }
   for (auto& p : _lsPrimitives) //-- there should be just one by definition
   {
-    j["template"].push_back(p->get_report_json());
-    if (p->is_valid() == false)
-      isValid = false;
+    auto e = p->get_errors();
+    js.insert(js.end(), e.begin(), e.end());
   }
-  j["validity"] = isValid;
-  return j;
+  return js;
 }
-
 
 
 bool GeometryTemplate::add_primitive(Primitive* s) {

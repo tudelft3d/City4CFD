@@ -1,7 +1,7 @@
 /*
   val3dity 
 
-  Copyright (c) 2011-2022, 3D geoinformation research group, TU Delft  
+  Copyright (c) 2011-2024, 3D geoinformation research group, TU Delft  
 
   This file is part of val3dity.
 
@@ -46,8 +46,9 @@ public:
   bool          validate(double tol_planarity_d2p, double tol_planarity_normals, double tol_overlap = -1);
   int           is_valid();
   bool          is_empty();
-  json          get_report_json(std::string preid = "");
   Primitive3D   get_type();
+
+  std::vector<json> get_errors();
 
   void          get_min_bbox(double& x, double& y);
   void          translate_vertices();

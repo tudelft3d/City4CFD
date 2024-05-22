@@ -1,7 +1,7 @@
 /*
   val3dity 
 
-  Copyright (c) 2011-2022, 3D geoinformation research group, TU Delft  
+  Copyright (c) 2011-2024, 3D geoinformation research group, TU Delft  
 
   This file is part of val3dity.
 
@@ -28,7 +28,7 @@
 
 #include "Primitive.h"
 #include "input.h"
-#include "val3dity_ostream.h"
+#include <iostream>
 
 namespace val3dity
 {
@@ -76,12 +76,7 @@ void Primitive::add_error(int code, std::string whichgeoms, std::string info)
   _is_valid = 0;
   std::tuple<std::string, std::string> a(whichgeoms, info);
   _errors[code].push_back(a);
-  *val3dityclog << "\tERROR " << code << ": " << ALL_ERRORS[code];
-  if (whichgeoms.empty() == false)
-    *val3dityclog << " (id: " << whichgeoms << ")";
-  *val3dityclog << std::endl;
-  if (info.empty() == false)
-    *val3dityclog << "\t[" << info << "]" << std::endl;
+  spdlog::info("e{}-{} (id={}; {})", code, ALL_ERRORS[code], whichgeoms, info);
 }
 
 std::set<int> Primitive::get_unique_error_codes()

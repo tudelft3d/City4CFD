@@ -1,7 +1,7 @@
 /*
   val3dity 
 
-  Copyright (c) 2011-2022, 3D geoinformation research group, TU Delft  
+  Copyright (c) 2011-2024, 3D geoinformation research group, TU Delft  
 
   This file is part of val3dity.
 
@@ -45,6 +45,8 @@ namespace val3dity
 class Feature
 {
 public:
+                          Feature  ();
+  virtual                 ~Feature ();
 
   virtual bool            validate(double tol_planarity_d2p, double tol_planarity_normals, double tol_overlap = -1) = 0;
   virtual bool            is_valid() = 0;

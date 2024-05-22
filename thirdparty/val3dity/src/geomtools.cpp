@@ -1,7 +1,7 @@
 /*
   val3dity 
 
-  Copyright (c) 2011-2022, 3D geoinformation research group, TU Delft  
+  Copyright (c) 2011-2024, 3D geoinformation research group, TU Delft  
 
   This file is part of val3dity.
 
@@ -199,10 +199,10 @@ Nef_polyhedron* erode_nef_polyhedron(Nef_polyhedron* nef, float r)
   Nef_polyhedron tmp = CGAL::minkowski_sum_3(complement, *se);
   *output = *nef - tmp;
   output->regularization();
-  // *val3ditycout << "#volume " << output->number_of_volumes() << std::endl;
+  // std::cout << "#volume " << output->number_of_volumes() << std::endl;
   // Nef_polyhedron::Vertex_const_iterator v;
   // for (v = output->vertices_begin(); v != output->vertices_end(); v++)
-  //   *val3ditycout << v->point() << std::endl;
+  //   std::cout << v->point() << std::endl;
   return output;
 }
 

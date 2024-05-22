@@ -1,7 +1,7 @@
 /*
   val3dity 
 
-  Copyright (c) 2011-2022, 3D geoinformation research group, TU Delft  
+  Copyright (c) 2011-2024, 3D geoinformation research group, TU Delft  
 
   This file is part of val3dity.
 
@@ -37,7 +37,11 @@ MultiSolid::MultiSolid(std::string id) {
   _is_valid = -1;
 }
 
-MultiSolid::~MultiSolid() {
+MultiSolid::~MultiSolid() 
+{
+  for (auto& sol : _lsSolids) {
+    delete sol;
+  }
 }
 
 Primitive3D MultiSolid::get_type() 
@@ -96,53 +100,30 @@ bool MultiSolid::is_empty()
   return _lsSolids.empty();
 }
 
-
-json MultiSolid::get_report_json(std::string preid)
+std::vector<json> MultiSolid::get_errors()
 {
-  json j;
-  bool isValid = true;
-  j["type"] = "MultiSolid";
-  if (this->get_id() != "")
-    j["id"] = this->_id;
-  else
-    j["id"] = "none";
-  j["numbersolids"] = this->number_of_solids();
-  j["errors"]  = json::array();
+  std::vector<json> js;
   for (auto& err : _errors)
   {
     for (auto& e : _errors[std::get<0>(err)])
     {
-      json jj;
-      jj["type"] = "Error";
-      jj["code"] = std::get<0>(err);
-      jj["description"] = ALL_ERRORS[std::get<0>(err)];
-      jj["id"] = std::get<0>(e);
-      jj["info"] = std::get<1>(e);
-      j["errors"].push_back(jj);
-      isValid = false;
+      json j;
+      j["code"] = std::get<0>(err);
+      j["description"] = ALL_ERRORS[std::get<0>(err)];
+      j["id"] = std::get<0>(e);
+      j["info"] = std::get<1>(e);
+      js.push_back(j);
     }
   }
   int solid = 0;
   for (auto& sol : _lsSolids)
   {
-    std::string t = "solid: " + std::to_string(solid);
-    int shid = 0;
-    for (auto& sh : sol->get_shells()) {
-      std::string t = "solid:" + std::to_string(solid) + " | shell:" + std::to_string(shid);
-      for (auto& each: sh->get_report_json(t)) {
-        j["errors"].push_back(each);
-      }
-      if (sol->is_valid() == false)
-        isValid = false;
-      shid++;
-    }
+    auto e = sol->get_errors();
+    js.insert(js.end(), e.begin(), e.end());    
     solid++;
   }
-  j["validity"] = isValid;
-  return j;
+  return js;
 }
-
-
 
 bool MultiSolid::add_solid(Solid* s) {
   _lsSolids.push_back(s);

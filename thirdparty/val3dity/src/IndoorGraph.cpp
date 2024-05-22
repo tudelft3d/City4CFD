@@ -1,7 +1,7 @@
 /*
   val3dity 
 
-  Copyright (c) 2011-2022, 3D geoinformation research group, TU Delft
+  Copyright (c) 2011-2024, 3D geoinformation research group, TU Delft
 
   This file is part of val3dity.
 
@@ -30,7 +30,6 @@
 #include "IndoorGraph.h"
 #include "definitions.h"
 #include "input.h"
-#include "val3dity_ostream.h"
 
 namespace val3dity
 {
@@ -51,7 +50,7 @@ IndoorGraph::~IndoorGraph()
 
 void IndoorGraph::add_vertex(std::string theid, double x, double y, double z, std::string dual, std::vector<std::string> vadj)
 {
-  // *val3ditycout << "ADDING VERTEX" << std::endl;
+  // std::cout << "ADDING VERTEX" << std::endl;
   Point3 v(x, y, z);
   _vertices[theid] = std::make_tuple(v, dual, vadj);
 }
@@ -59,7 +58,7 @@ void IndoorGraph::add_vertex(std::string theid, double x, double y, double z, st
 
 bool IndoorGraph::validate() 
 {
-  *val3ditycout << "VALIDATE IndoorGraph" << std::endl;
+  // std::cout << "VALIDATE IndoorGraph" << std::endl;
   return true;
   // if (_is_valid != -1)
   //   return _is_valid;

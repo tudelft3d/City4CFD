@@ -1,7 +1,7 @@
 /*
   val3dity 
 
-  Copyright (c) 2011-2023, 3D geoinformation research group, TU Delft  
+  Copyright (c) 2011-2024, 3D geoinformation research group, TU Delft  
 
   This file is part of val3dity.
 
@@ -106,7 +106,7 @@ struct primitives_walker: pugi::xml_tree_walker
   virtual bool for_each(pugi::xml_node& node)
   { 
     const char *nodeType = node.name();
-    // *val3ditycout << node.name() << std::endl;
+    // std::cout << node.name() << std::endl;
     const char *namespaceSeparator = strchr(nodeType, ':');
     bool gmlboundedBy = false;
     //-- hack with namespace "gml:" hardcoded... with namespace list == I don't know how
@@ -117,7 +117,7 @@ struct primitives_walker: pugi::xml_tree_walker
     }
     if (depth() == depthprim)
     {
-      // *val3ditycout << "back to reading mode -- " << node.name() << std::endl;
+      // std::cout << "back to reading mode -- " << node.name() << std::endl;
       depthprim = 999;
     }
     if ((strcmp(nodeType, "boundedBy") == 0) && (gmlboundedBy == false))
@@ -130,8 +130,8 @@ struct primitives_walker: pugi::xml_tree_walker
            ( (strcmp(nodeType, "boundedBy") == 0) && (gmlboundedBy == false) )||
            (strcmp(nodeType, "CompositeSurface") == 0) ) )
     {
-      // *val3ditycout << "----" << node.name() << std::endl;
-      // *val3ditycout << "depth " << depth() << std::endl;
+      // std::cout << "----" << node.name() << std::endl;
+      // std::cout << "depth " << depth() << std::endl;
       depthprim = depth();
       lsNodes.push_back(node);
     }
@@ -161,14 +161,14 @@ std::map<std::string, std::string>
                   get_namespaces(pugi::xml_node& root);
 
 void              read_file_json(std::string &ifile, std::vector<Feature*>& lsFeatures, IOErrors& errs, double tol_snap);
-void              read_file_jsonl(std::string &ifile, std::vector<Feature*>& lsFeatures, IOErrors& errs, double tol_snap);
+void              read_file_cjseq(std::string &ifile, std::vector<Feature*>& lsFeatures, IOErrors& errs, double tol_snap);
 
 void              parse_obj(std::istream &input, std::vector<Feature*>& lsFeatures, Primitive3D prim3d, IOErrors& errs, double tol_snap);
 Surface*          parse_poly(std::istream &input, int shellid, IOErrors& errs);
 Surface*          parse_off(std::istream &input, int shellid, IOErrors& errs, double tol_snap);
 
 void              parse_cityjson(json& j, std::vector<Feature*>& lsFeatures, double tol_snap);
-void              parse_cityjsonl(json& j, std::vector<Feature*>& lsFeatures, double tol_snap, std::vector<GeometryTemplate*>& lsGTs);
+void              parse_cjseq(json& j, std::vector<Feature*>& lsFeatures, double tol_snap, std::vector<GeometryTemplate*>& lsGTs);
 void              parse_tu3djson(json& j, std::vector<Feature*>& lsFeatures, double tol_snap);
 void              parse_tu3djson_onegeom(json& j, std::vector<Feature*>& lsFeatures, double tol_snap);
 void              parse_jsonfg(json& j, std::vector<Feature*>& lsFeatures, double tol_snap, IOErrors& errs);

@@ -5,6 +5,7 @@
 - LoD2.2 and LoD1.3 reconstruction
 - Multiple reconstruction regions
 - Geometric validity check
+- Fallbacks for failed reconstructions
 
 ## [0.4.6] - 2024-03-11
 ### Changed

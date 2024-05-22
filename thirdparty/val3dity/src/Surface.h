@@ -1,7 +1,7 @@
 /*
   val3dity 
 
-  Copyright (c) 2011-2023, 3D geoinformation research group, TU Delft  
+  Copyright (c) 2011-2024, 3D geoinformation research group, TU Delft  
 
   This file is part of val3dity.
 
@@ -44,7 +44,7 @@ namespace val3dity
 class Surface
 {
 public:
-  Surface  (int id = -1, double tol_snap = 0.0);
+  Surface  (std::string id = "", double tol_snap = 0.0);
   ~Surface ();
   
   bool validate_as_shell(double tol_planarity_d2p, double tol_planarity_normals);
@@ -55,17 +55,18 @@ public:
 
   CgalPolyhedron* get_cgal_polyhedron();
 
-  int    number_vertices();
-  int    number_faces();
-  void   get_min_bbox(double& x, double& y);
-  int    get_id();
+  int         number_vertices();
+  int         number_faces();
+  void        get_min_bbox(double& x, double& y);
+  std::string get_id();
 
   bool   does_self_intersect();
   bool   is_empty();
   int    add_point(Point3 p);
   void   add_face(std::vector< std::vector<int> > f, std::string id = "");
 
-  json          get_report_json(std::string preid = "");
+  std::vector<json> get_errors();
+
   void          add_error(int code, std::string faceid = "", std::string info = "");
   bool          has_errors();
   std::set<int> get_unique_error_codes();
@@ -80,7 +81,7 @@ public:
   int           get_number_parsed_vertices();
   
 private:
-  int                                         _id;
+  std::string                                 _id;
   std::vector<Point3>                         _lsPts;
   std::vector<std::vector<std::vector<int>>>  _lsFaces;
   std::vector<std::string>                    _lsFacesID;

@@ -29,24 +29,24 @@ if (WIN32)
 endif (WIN32)
 
 # CGAL
-find_package(CGAL REQUIRED QUIET COMPONENTS)
-if (CGAL_VERSION VERSION_GREATER_EQUAL "5.4")
-    message(STATUS "Found CGAL version ${CGAL_VERSION}")
+find_package(CGAL REQUIRED)
+if (CGAL_VERSION VERSION_GREATER_EQUAL "5.5")
+   message(STATUS "Found CGAL version ${CGAL_VERSION}")
 else()
-    message(FATAL_ERROR "Found CGAL version ${CGAL_VERSION} which is not supported!"
-            "Please use CGAL version 5.4 or higher")
-    return()
+   message(FATAL_ERROR "Found CGAL version ${CGAL_VERSION} which is not supported!"
+           "Please use CGAL version 5.5 or higher")
+   return()
 endif ()
 
 # GDAL
-find_package(GDAL REQUIRED 3.0)
+find_package(GDAL 3.0 REQUIRED)
 if (NOT GDAL_FOUND)
     message(SEND_ERROR "City4CFD requires the GDAL library, check the README for configuration")
 endif()
 include_directories(${GDAL_INCLUDE_DIR})
 
 # Eigen
-find_package(Eigen3 3.2.0) #(requires 3.2.0 or greater)
+find_package(Eigen3 3.3.4)
 include(${CMAKE_SOURCE_DIR}/thirdparty/CGAL/cmake/CGAL_Eigen3_support.cmake)
 
 # OpenMP

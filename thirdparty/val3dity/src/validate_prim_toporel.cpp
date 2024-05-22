@@ -1,7 +1,7 @@
  /*
   val3dity 
 
-  Copyright (c) 2011-2022, 3D geoinformation research group, TU Delft  
+  Copyright (c) 2011-2024, 3D geoinformation research group, TU Delft  
 
   This file is part of val3dity.
 
@@ -32,7 +32,7 @@
 #include "input.h"
 #include "Solid.h"
 #include "CompositeSolid.h"
-#include "val3dity_ostream.h"
+#include <iostream>
 #include <sstream>
 
 #include <CGAL/box_intersection_d.h>
@@ -62,17 +62,17 @@ struct Report_intersections {
     int id1 = (a.handle() - nefs->begin());
     int id2 = (b.handle() - nefs->begin());
     (*thecount)++;
-    if (*thecount % 25 == 0) {
-      int r = rand() % 3;
-      if (r == 0)
-        *val3ditycout << "\b|" << std::flush;
-      else if (r == 1)
-        *val3ditycout << "\b/" << std::flush;
-      else if (r == 2)
-        *val3ditycout << "\b-" << std::flush;
-      else
-        *val3ditycout << "\b\\" << std::flush;
-    }
+    // if (*thecount % 25 == 0) {
+    //   int r = rand() % 3;
+    //   if (r == 0)
+    //     std::cout << "\b|" << std::flush;
+    //   else if (r == 1)
+    //     std::cout << "\b/" << std::flush;
+    //   else if (r == 2)
+    //     std::cout << "\b-" << std::flush;
+    //   else
+    //     std::cout << "\b\\" << std::flush;
+    // }
     //-- we check here if the 2 (usually eroded) Nefs are intersecting, 
     //-- if yes then an error is added to the list lsErrors
     Nef_polyhedron* n1 = nefs->at(id1);
@@ -98,7 +98,7 @@ bool are_cells_interior_disconnected_with_aabb(std::vector<std::tuple<std::strin
                                                std::vector<Error>& lsErrors, 
                                                double tol_overlap)
 {
-  *val3dityclog << "--- Constructing Nef Polyhedra ---" << std::endl;
+  // std::clog << "--- Constructing Nef Polyhedra ---" << std::endl;
   std::vector<Nef_polyhedron*>                lsNefs;
   std::vector<std::tuple<std::string,Solid*>> subsetCells;
   for (auto& c : lsCells)
@@ -117,7 +117,7 @@ bool are_cells_interior_disconnected_with_aabb(std::vector<std::tuple<std::strin
       lsNefs.push_back(tmpnef);
     subsetCells.push_back(c);
   }
-  *val3dityclog << "--- Constructing AABB tree ---" << std::endl;
+  // std::clog << "--- Constructing AABB tree ---" << std::endl;
   std::vector<AABB> aabbs;
   int counter = 0;
   for ( Iterator i = lsNefs.begin(); i != lsNefs.end(); ++i)
@@ -129,14 +129,14 @@ bool are_cells_interior_disconnected_with_aabb(std::vector<std::tuple<std::strin
   std::vector<std::string> lsCellIDs;
   for (auto each : subsetCells)
     lsCellIDs.push_back(std::get<0>(each));
-  *val3dityclog << "--- Testing intersections between Nefs ---" << std::endl;
+  // std::clog << "--- Testing intersections between Nefs ---" << std::endl;
   int n = lsErrors.size();
   int count = 0; 
-  if (lsNefs.size() > 500) {
-    *val3ditycout << "Testing intersections between " << lsNefs.size() << " cells, this could be slow." << std::endl << std::flush;
-  }
+  // if (lsNefs.size() > 500) {
+  //   std::cout << "Testing intersections between " << lsNefs.size() << " cells, this could be slow." << std::endl << std::flush;
+  // }
   CGAL::box_self_intersection_d( aabbs.begin(), aabbs.end(), Report_intersections(lsNefs, lsCellIDs, lsErrors, errorcode_to_assign, count));
-  *val3dityclog << "Total AABB tests: " << count << std::endl;
+  // std::clog << "Total AABB tests: " << count << std::endl;
   if (lsErrors.size() > n)
     return false;
   else

@@ -1,7 +1,7 @@
 /*
   val3dity 
 
-  Copyright (c) 2011-2022, 3D geoinformation research group, TU Delft  
+  Copyright (c) 2011-2024, 3D geoinformation research group, TU Delft  
 
   This file is part of val3dity.
 
@@ -32,7 +32,6 @@
 
 #include "input.h"
 #include "validate_shell.h"
-#include "val3dity_ostream.h"
 
 namespace val3dity
 {
@@ -46,7 +45,12 @@ Solid::Solid(std::string id)
 
 
 Solid::~Solid()
-{}
+{
+  delete _nef;
+  for (auto& sh : _shells) {
+    delete sh;
+  }
+}
 
 Surface* Solid::get_oshell()
 {
@@ -143,13 +147,15 @@ bool Solid::validate(double tol_planarity_d2p, double tol_planarity_normals, dou
       s += std::to_string(e);
       s += "; ";
     }
-    *val3dityclog << "Errors: " << s << std::endl;
+    // std::clog << "Errors: " << s << std::endl;
     return false;
   }
   bool isValid = true;
   if (this->is_empty() == true)
   {
-    this->add_error(902, "", "empty Solid, contains no points and/or surfaces");
+    std::stringstream msg1;
+    msg1 << "Geometry (Solid) #" << this->get_id();
+    this->add_error(902, msg1.str(), "empty Solid, contains no points and/or surfaces");
     return false;
   }
   for (auto& sh : _shells)
@@ -182,45 +188,26 @@ std::string Solid::get_off_representation(int shellno)
   return (_shells[shellno])->get_off_representation();
 }
 
-
-json Solid::get_report_json(std::string preid)
+std::vector<json> Solid::get_errors()
 {
-  json j;
-  j["type"] = "Solid";
-  if (this->get_id() != "")
-    j["id"] = this->_id;
-  else
-    j["id"] = "none";
-  j["numbershells"] = (this->num_ishells() + 1);
-  j["numberfaces"] = this->num_faces();
-  j["numbervertices"] = this->num_vertices();
-  j["errors"] = json::array();
+  std::vector<json> js;
   for (auto& err : _errors)
   {
     for (auto& e : _errors[std::get<0>(err)])
     {
-      json jj;
-      jj["type"] = "Error";
-      jj["code"] = std::get<0>(err);
-      jj["description"] = ALL_ERRORS[std::get<0>(err)];
-      jj["id"] = std::get<0>(e);
-      jj["info"] = std::get<1>(e);
-      j["errors"].push_back(jj);
+      json j;
+      j["code"] = std::get<0>(err);
+      j["description"] = ALL_ERRORS[std::get<0>(err)];
+      j["id"] = std::get<0>(e);
+      j["info"] = std::get<1>(e);
+      js.push_back(j);
     }
   }
-  int shid = 0;
   for (auto& sh : _shells) {
-    std::string t = "shell:" + std::to_string(shid);
-    for (auto& each: sh->get_report_json(t)) {
-      j["errors"].push_back(each); 
-    }
-    shid++;
+    auto e = sh->get_errors();
+    js.insert(js.end(), e.begin(), e.end());
   }
-  if (this->is_valid() == 1)
-    j["validity"] = true;
-  else 
-    j["validity"] = false;  
-  return j;
+  return js;
 }
 
 
@@ -310,13 +297,16 @@ bool Solid::validate_solid_with_nef()
 {
   bool isValid = true;
   //-- check orientation of the normals is outwards or inwards
-  *val3dityclog << "-----Global orientation of normals" << std::endl;
+  // std::clog << "-----Global orientation of normals" << std::endl;
   int i = 0;
   for (auto& sh : this->get_shells())
   {
     if (check_global_orientation_normals(sh->get_cgal_polyhedron(), i == 0) == false) 
     {
-      this->add_error(405, "i", "");
+      std::stringstream msg1, msg2;
+      msg1 << "Geometry (Solid) #" << this->get_id();
+      msg2 << "Shell #" << i;
+      this->add_error(405, msg1.str(), msg2.str());
       isValid = false;
     }
     i++;
@@ -327,7 +317,7 @@ bool Solid::validate_solid_with_nef()
   if (this->num_ishells() == 0)
     return true;
     
-  *val3dityclog << "---Inspection interactions between the " << (this->num_ishells() + 1) << " shells" << std::endl;
+  // std::clog << "---Inspection interactions between the " << (this->num_ishells() + 1) << " shells" << std::endl;
   std::vector<Nef_polyhedron> nefs;
   for (auto& sh : this->get_shells())
   {
@@ -350,17 +340,19 @@ bool Solid::validate_solid_with_nef()
       nef = nefs[0] * nefs[i];
       if (nef.is_empty() == true)
       {
-        std::stringstream msg;
-        msg << "Inner shell (#" << i << ") is completely outside the outer shell (#0))";
-        this->add_error(403, "i", msg.str());
+        std::stringstream msg1, msg2;
+        msg1 << "Geometry (Solid) #" << this->get_id();
+        msg2 << "Inner shell (#" << i << ") is completely outside the outer shell (#0))";
+        this->add_error(403, msg1.str(), msg2.str());
         isValid = false;
       }
       else
       {
-        std::stringstream ss;
-        ss << 0 << "--" << i;
-        this->add_error(401, ss.str(), "");
-        isValid = false; 
+        std::stringstream msg1, msg2;
+        msg1 << "Geometry (Solid) #" << this->get_id();
+        msg2 << "Shells #0 and #" << i;
+        this->add_error(401, msg1.str(), msg2.str());
+        isValid = false;
       }
     }
     else
@@ -368,19 +360,21 @@ bool Solid::validate_solid_with_nef()
       nef = nefs[0] - nefs[i];
       if (nef.number_of_volumes() < 3)
       {
-        std::stringstream ss;
-        ss << 0 << "--" << i;
-        this->add_error(401, ss.str(), "");
-        isValid = false; 
+        std::stringstream msg1, msg2;
+        msg1 << "Geometry (Solid) #" << this->get_id();
+        msg2 << "Shells #0 and #" << i;
+        this->add_error(401, msg1.str(), msg2.str());
+        isValid = false;
       }
       else
       {
         nef = nefs[0].boundary() * nefs[i].boundary();
         if (nef.number_of_facets() > 0)
         {
-          std::stringstream ss;
-          ss << 0 << "--" << i;
-          this->add_error(401, ss.str(), "");
+          std::stringstream msg1, msg2;
+          msg1 << "Geometry (Solid) #" << this->get_id();
+          msg2 << "Shells #0 and #" << i;
+          this->add_error(401, msg1.str(), msg2.str());
           isValid = false;
         }
       }
@@ -396,9 +390,10 @@ bool Solid::validate_solid_with_nef()
       //-- 1. are they the same?
       if (nefs[i] == nefs[j])
       {
-        std::stringstream ss;
-        ss << i << "--" << j;
-        this->add_error(402, ss.str(), "");
+        std::stringstream msg1, msg2;
+        msg1 << "Geometry (Solid) #" << this->get_id();
+        msg2 << "Shells #" << i << " and #" << j;
+        this->add_error(401, msg1.str(), msg2.str());
         isValid = false;
         continue;
       }
@@ -406,9 +401,10 @@ bool Solid::validate_solid_with_nef()
       nef = nefs[i] * nefs[j];
       if (nef.number_of_volumes() > 1)
       {
-        std::stringstream ss;
-        ss << i << "--" << j;
-        this->add_error(401, ss.str(), "");
+        std::stringstream msg1, msg2;
+        msg1 << "Geometry (Solid) #" << this->get_id();
+        msg2 << "Shells #" << i << " and #" << j;
+        this->add_error(401, msg1.str(), msg2.str());
         isValid = false;
         continue;
       }
@@ -416,9 +412,10 @@ bool Solid::validate_solid_with_nef()
       nef = nefs[i] + nefs[j];
       if (nef.number_of_volumes() < 3)
       {
-        std::stringstream ss;
-        ss << 0 << "--" << i;
-        this->add_error(401, ss.str(), "");
+        std::stringstream msg1, msg2;
+        msg1 << "Geometry (Solid) #" << this->get_id();
+        msg2 << "Shells #" << i << " and #" << j;
+        this->add_error(401, msg1.str(), msg2.str());
         isValid = false;
         continue;
       }
@@ -436,7 +433,9 @@ bool Solid::validate_solid_with_nef()
       numvol++;
       if (nef.number_of_volumes() != numvol)
       {
-        this->add_error(404, "", "");
+        std::stringstream msg1;
+        msg1 << "Geometry (Solid) #" << this->get_id();
+        this->add_error(404, msg1.str(), "");
         isValid = false;
         break;
       }
