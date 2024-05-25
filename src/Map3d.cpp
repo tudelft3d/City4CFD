@@ -199,6 +199,15 @@ void Map3d::set_features() {
         m_reconRegions.emplace_back(reconRegion);
     }
     if (Config::get().domainBndConfig.type() == typeid(bool)) m_bndBPG = true;
+
+    //-- Apply area filtering
+    if (Config::get().minArea > 0.) {
+        for (auto& b: m_buildingsPtr) {
+            if (b->get_poly().outer_boundary().area() < Config::get().minArea) b->deactivate();
+            Config::write_to_log("Building ID: " + b->get_id() + "  Skipped reconstruction; footprint smaller than defined value.");
+        }
+        this->clear_inactives();
+    }
 }
 
 void Map3d::add_building_pts() {

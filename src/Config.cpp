@@ -263,15 +263,14 @@ void Config::set_config(nlohmann::json& j) {
     // Buildings
     if (j.contains("building_percentile"))
         buildingPercentile = (double)j["building_percentile"].front() / 100.;
-    if (j.contains("min_height")) {
+    if (j.contains("min_height"))
         minHeight = j["min_height"];
-    }
-    if (j.contains("reconstruct_failed")) {
+    if (j.contains("min_area"))
+        minArea = j["min_area"];
+    if (j.contains("reconstruct_failed"))
         reconstructFailed = j["reconstruct_failed"];
-    }
-    if (j.contains("intersect_buildings_terrain")) {
+    if (j.contains("intersect_buildings_terrain"))
        intersectBuildingsTerrain = j["intersect_buildings_terrain"];
-    }
 
     // Imported buildings
     if (j.contains("import_geometries")) {

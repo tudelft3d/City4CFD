@@ -301,6 +301,11 @@ namespace jsonschema {
           "type": "number",
           "exclusiveMinimum": 0
         },
+        "min_area": {
+          "description": "Optional; minimum allowed footprint area",
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
         "reconstruct_failed": {
           "description": "Optional: Reconstruct failed buildings to minimum height",
           "type": "boolean"

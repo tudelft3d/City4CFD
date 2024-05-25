@@ -85,7 +85,8 @@ public:
     //- Buildings
     std::string buildingUniqueId;
     double      minHeight                       = 2.;
-    double      buildingPercentile              = 70.; // Handled by schema
+    double      minArea                         = -9999.; // Handled by schema
+    double      buildingPercentile              = 70.;    // Handled by schema
     bool        reconstructFailed               = false;
     std::string crsInfo;                                  // CRS information of building footprints
     // Height from attributes
