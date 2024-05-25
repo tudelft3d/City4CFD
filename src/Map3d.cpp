@@ -631,12 +631,14 @@ void Map3d::prep_cityjson_output() { // Temp impl, might change
 }
 
 void Map3d::clear_inactives() {
-    for (unsigned long i = 0; i < m_reconstructedBuildingsPtr.size();) {
-        if (m_reconstructedBuildingsPtr[i]->is_active()) ++i;
-        else {
-            m_reconstructedBuildingsPtr.erase(m_reconstructedBuildingsPtr.begin() + i);
-        }
-    }
+    m_reconstructedBuildingsPtr.erase(
+            std::remove_if(
+                    m_reconstructedBuildingsPtr.begin(),
+                    m_reconstructedBuildingsPtr.end(),
+                    [](const ReconstructedBuildingPtr& b) { return !b->is_active(); }
+            ),
+            m_reconstructedBuildingsPtr.end()
+    );
     if (m_cityjsonInput) {
         std::vector<std::string> inactiveBuildingIdxs;
         for (auto& importedBuilding: m_importedBuildingsPtr) {
@@ -657,32 +659,39 @@ void Map3d::clear_inactives() {
             }
         }
     } else {
-        for (unsigned long i = 0; i < m_importedBuildingsPtr.size();) {
-            if (m_importedBuildingsPtr[i]->is_active()) ++i;
-            else {
-                m_importedBuildingsPtr.erase(m_importedBuildingsPtr.begin() + i);
-            }
-        }
+        m_importedBuildingsPtr.erase(
+                std::remove_if(
+                        m_importedBuildingsPtr.begin(),
+                        m_importedBuildingsPtr.end(),
+                        [](const ImportedBuildingPtr& b) { return !b->is_active(); }
+                ),
+                m_importedBuildingsPtr.end()
+        );
     }
-    for (unsigned long i = 0; i < m_buildingsPtr.size();) {
-        if (m_buildingsPtr[i]->is_active()) ++i;
-        else {
-            if (m_buildingsPtr[i]->has_failed_to_reconstruct()) m_failedBuildingsPtr.push_back(m_buildingsPtr[i]);
-            m_buildingsPtr.erase(m_buildingsPtr.begin() + i);
-        }
-    }
-    for (unsigned long i = 0; i < m_surfaceLayersPtr.size();) {
-        if (m_surfaceLayersPtr[i]->is_active()) ++i;
-        else {
-            m_surfaceLayersPtr.erase(m_surfaceLayersPtr.begin() + i);
-        }
-    }
-    for (unsigned long i = 0; i < m_allFeaturesPtr.size();) {
-        if (m_allFeaturesPtr[i]->is_active()) ++i;
-        else {
-            m_allFeaturesPtr.erase(m_allFeaturesPtr.begin() + i);
-        }
-    }
+    m_buildingsPtr.erase(
+            std::remove_if(
+                    m_buildingsPtr.begin(),
+                    m_buildingsPtr.end(),
+                    [](const BuildingPtr & b) { return !b->is_active(); }
+            ),
+            m_buildingsPtr.end()
+    );
+    m_surfaceLayersPtr.erase(
+            std::remove_if(
+                    m_surfaceLayersPtr.begin(),
+                    m_surfaceLayersPtr.end(),
+                    [](const std::shared_ptr<SurfaceLayer>& s) { return !s->is_active(); }
+            ),
+            m_surfaceLayersPtr.end()
+    );
+    m_allFeaturesPtr.erase(
+            std::remove_if(
+                    m_allFeaturesPtr.begin(),
+                    m_allFeaturesPtr.end(),
+                    [](const std::shared_ptr<PolyFeature>& p) { return !p->is_active(); }
+            ),
+            m_allFeaturesPtr.end()
+    );
 }
 
 BuildingsPtr Map3d::get_failed_buildings() const {

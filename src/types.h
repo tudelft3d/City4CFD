@@ -58,6 +58,7 @@ class Building;    class Boundary; class TopoFeature;
 class PolyFeature; class Terrain;  class SurfaceLayer;
 class ReconstructedBuilding; class ImportedBuilding;
 typedef std::shared_ptr<ReconstructedBuilding>                 ReconstructedBuildingPtr;
+typedef std::shared_ptr<ImportedBuilding>                      ImportedBuildingPtr;
 typedef std::shared_ptr<Building>                              BuildingPtr;
 typedef std::shared_ptr<Terrain>                               TerrainPtr;
 typedef std::vector<std::shared_ptr<Building>>                 BuildingsPtr;
