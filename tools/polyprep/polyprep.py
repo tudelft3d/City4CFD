@@ -131,7 +131,7 @@ def process_polygons(input_filename, output_filename, buffer_size, apply_convex_
 
 def main():
     parser = argparse.ArgumentParser(
-        description="polyprep: City4CFD polygon simplification tool\n\n"
+        description="polyprep: City4CFD polygon generalisation tool\n\n"
                     "This tool generalises GeoJSON polygon file so that subsequent building reconstruction results in "
                     "simplified geometries.\n"
                     "It can buffer, simplify, and optionally remove holes from polygons, among other features.\n\n"
