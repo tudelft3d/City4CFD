@@ -6,6 +6,7 @@
 - Multiple reconstruction regions
 - Geometric validity check
 - Fallbacks for failed reconstructions
+- Polygon simplification tool
 
 ## [0.4.6] - 2024-03-11
 ### Changed

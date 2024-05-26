@@ -1,0 +1,3 @@
+Fiona==1.9.4.post1
+Rtree==1.0.1
+shapely==2.0.1
