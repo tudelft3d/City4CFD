@@ -136,7 +136,7 @@ def main():
                     "simplified geometries.\n"
                     "It can buffer, simplify, and optionally remove holes from polygons, among other features.\n\n"
                     "Example usage:\n"
-                    "  python script.py input.geojson output.geojson 1.0 --remove_holes 1 --simplification_tol 0.1",
+                    "  python polyprep.py input.geojson output.geojson 1.0 --remove_holes 1 --simplification_tol 0.1",
         epilog="This program is released under the GNU Affero General Purpose Licence (AGPL) v3\n"
                "Copyright(c) 2024, 3D Geoinformation Research Group, TU Delft",
         formatter_class=argparse.RawTextHelpFormatter
