@@ -29,22 +29,22 @@
 #include "Config.h"
 #include "misc/cgal_utils.hpp"
 
-LoD22::LoD22(roofer::Mesh roofer_mesh) {
+LoD22::LoD22(roofer::Mesh rooferMesh) {
     // shorten long poly edges
-    double sq_maxdist = Config::get().edgeMaxLen * Config::get().edgeMaxLen;
-    this->shorten_mesh_edges(roofer_mesh, sq_maxdist);
+    const double sq_maxdist = Config::get().edgeMaxLen * Config::get().edgeMaxLen;
+    this->shorten_mesh_edges(rooferMesh, sq_maxdist);
 
     // sort out the footprint back
-    this->get_footprint_from_mesh(roofer_mesh, m_footprint, m_baseElevations);
+    this->get_footprint_from_mesh(rooferMesh, m_footprint, m_baseElevations);
 
     // sort out the mesh
-    m_mesh = roofer::Mesh2CGALSurfaceMesh<Point_3>(roofer_mesh);
+    m_mesh = roofer::Mesh2CGALSurfaceMesh<Point_3>(rooferMesh);
 }
 
 void LoD22::reconstruct(const PointSet3Ptr& buildingPtsPtr,
                         const PointSet3Ptr& groundPtsPtr,
                         const Polygon_with_holes_2& footprint,
-                        const std::vector<std::vector<double>>& base_elevations,
+                        const std::vector<std::vector<double>>& baseElevations,
                         ReconstructionConfig config
                         ) {
 
@@ -65,13 +65,13 @@ void LoD22::reconstruct(const PointSet3Ptr& buildingPtsPtr,
     }
 
     // prep footprints
-    //todo  base_elevations are in for a rewrite
+    //todo  baseElevations are in for a rewrite
     roofer::LinearRing linearRing;
     int i = 0;
     for (auto& p : footprint.outer_boundary()) {
         float x = p.x();
         float y = p.y();
-        float z = base_elevations.front()[i++];
+        float z = baseElevations.front()[i++];
         linearRing.push_back({x, y, z});
     }
     int j = 1;
@@ -81,7 +81,7 @@ void LoD22::reconstruct(const PointSet3Ptr& buildingPtsPtr,
         for (auto& p : *it) {
             float x = p.x();
             float y = p.y();
-            float z = base_elevations[j][i++];
+            float z = baseElevations[j][i++];
             iring.push_back({x, y, z});
         }
         linearRing.interior_rings().push_back(iring);
@@ -90,29 +90,30 @@ void LoD22::reconstruct(const PointSet3Ptr& buildingPtsPtr,
 
     //todo groundPts flag
     // reconstruct
-//    m_roofer_meshes = roofer::reconstruct_single_instance(buildingPts, groundPts, linearRing,
+//    m_rooferMeshes = roofer::reconstruct_single_instance(buildingPts, groundPts, linearRing,
 //                                                         {.lambda = config.m_lambda,
 //                                                          .lod = config.m_lod,
 //                                                          .lod13_step_height = config.m_lod13_step_height});
-    m_roofer_meshes = roofer::reconstruct_single_instance(buildingPts, linearRing,
+    m_rooferMeshes = roofer::reconstruct_single_instance(buildingPts, linearRing,
                                                          {.lambda = config.m_lambda,
-                                                          .lod = config.m_lod,
-                                                          .lod13_step_height = config.m_lod13_step_height});
+                                                         .lod = config.m_lod,
+                                                         .lod13_step_height = config.m_lod13_step_height});
 
-    auto roofer_mesh = m_roofer_meshes.front();
+    // store the first mesh from the vector, rest should be handled separately
+    auto rooferMesh = m_rooferMeshes.front();
 
     // shorten long poly edges
-    double sq_maxdist = Config::get().edgeMaxLen * Config::get().edgeMaxLen;
-    this->shorten_mesh_edges(roofer_mesh, sq_maxdist);
+    const double sq_maxdist = Config::get().edgeMaxLen * Config::get().edgeMaxLen;
+    this->shorten_mesh_edges(rooferMesh, sq_maxdist);
 
     // sort out the footprint back
-    this->get_footprint_from_mesh(roofer_mesh, m_footprint, m_baseElevations);
+    this->get_footprint_from_mesh(rooferMesh, m_footprint, m_baseElevations);
 
     // sort out the mesh
-    m_mesh = roofer::Mesh2CGALSurfaceMesh<Point_3>(roofer_mesh);
+    m_mesh = roofer::Mesh2CGALSurfaceMesh<Point_3>(rooferMesh);
 }
 
-void LoD22::shorten_mesh_edges(roofer::Mesh& roofer_mesh, const double sq_maxdist) const{
+void LoD22::shorten_mesh_edges(roofer::Mesh& roofer_mesh, const double sq_maxdist) const {
     for (auto& poly: roofer_mesh.get_polygons()) {
         int i = 0;
         while (i != poly.size()) {
@@ -143,41 +144,41 @@ void LoD22::shorten_mesh_edges(roofer::Mesh& roofer_mesh, const double sq_maxdis
     }
 }
 
-void LoD22::get_footprint_from_mesh(const roofer::Mesh& roofer_mesh, Polygon_with_holes_2& footprint,
-                                    std::vector<std::vector<double>>& baseElevations) {
+void LoD22::get_footprint_from_mesh(const roofer::Mesh& rooferMesh, Polygon_with_holes_2& footprint,
+                                    std::vector<std::vector<double>>& baseElevations) const {
     footprint.rings().clear();
     baseElevations.clear();
-    auto labels = roofer_mesh.get_labels();
-    roofer::LinearRing roofer_new_footprint;
+    auto labels = rooferMesh.get_labels();
+    roofer::LinearRing rooferNewFootprint;
     for (int i = 0; i != labels.size(); ++i) {
         if (labels[i] == 0) {
-            roofer_new_footprint = roofer_mesh.get_polygons()[i];
+            rooferNewFootprint = rooferMesh.get_polygons()[i];
             break;
         }
         throw city4cfd_error("No footprint found in the reconstructed mesh!");
     }
     Polygon_2 poly2;
-    std::vector<double> outer_base_elevations;
-    for (auto& p: roofer_new_footprint) {
+    std::vector<double> outerBaseElevations;
+    for (auto& p: rooferNewFootprint) {
         poly2.push_back(Point_2(p[0], p[1]));
-        outer_base_elevations.push_back(p[2]);
+        outerBaseElevations.push_back(p[2]);
     }
-    baseElevations.push_back(outer_base_elevations);
+    baseElevations.push_back(outerBaseElevations);
     std::vector<Polygon_2> holes;
-    for (auto& lr_hole: roofer_new_footprint.interior_rings()) {
+    for (auto& lr_hole: rooferNewFootprint.interior_rings()) {
         Polygon_2 hole;
-        std::vector<double> hole_elevations;
+        std::vector<double> holeElevations;
         for (auto& p: lr_hole) {
             hole.push_back(Point_2(p[0], p[1]));
-            hole_elevations.push_back(p[2]);
+            holeElevations.push_back(p[2]);
         }
         holes.push_back(hole);
-        baseElevations.push_back(hole_elevations);
-        hole_elevations.clear();
+        baseElevations.push_back(holeElevations);
+        holeElevations.clear();
     }
-    CGAL::Polygon_with_holes_2<EPICK> new_footprint = CGAL::Polygon_with_holes_2<EPICK>(poly2, holes.begin(),
-                                                                                        holes.end());
-    footprint = Polygon_with_holes_2(new_footprint);
+    CGAL::Polygon_with_holes_2<EPICK> newFootprint = CGAL::Polygon_with_holes_2<EPICK>(poly2, holes.begin(),
+                                                                                       holes.end());
+    footprint = Polygon_with_holes_2(newFootprint);
 }
 
 Polygon_with_holes_2 LoD22::get_footprint() const {

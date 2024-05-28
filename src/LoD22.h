@@ -56,7 +56,7 @@ public:
     void reconstruct(const PointSet3Ptr& buildingPtsPtr,
                      const PointSet3Ptr& groundPtsPtr,
                      const Polygon_with_holes_2& footprint,
-                     const std::vector<std::vector<double>>& base_elevations,
+                     const std::vector<std::vector<double>>& baseElevations,
                      ReconstructionConfig config = ReconstructionConfig()
     );
 
@@ -68,12 +68,12 @@ public:
 
 private:
     Mesh                                     m_mesh;
-    std::vector<roofer::Mesh>                m_roofer_meshes;
+    std::vector<roofer::Mesh>                m_rooferMeshes;
     Polygon_with_holes_2                     m_footprint;
     std::vector<std::vector<double>>         m_baseElevations;
 
     void shorten_mesh_edges(roofer::Mesh& mesh, const double sq_maxdist) const;
-    void get_footprint_from_mesh(const roofer::Mesh& roofer_mesh, Polygon_with_holes_2& footprint, std::vector<std::vector<double>>& baseElevations);
+    void get_footprint_from_mesh(const roofer::Mesh& rooferMesh, Polygon_with_holes_2& footprint, std::vector<std::vector<double>>& baseElevations) const;
 };
 
 
