@@ -198,16 +198,31 @@ namespace jsonschema {
               }
             },
             "required": ["influence_region", "lod"],
-            "if": {
+            "oneOf": [
+              {
                 "properties": {
                   "enforce_validity": {
-                    "const": "surface_wrap"
+                    "not": {
+                      "const": "surface_wrap"
+                    }
                   }
                 }
               },
-            "then": {
-              "required": ["relative_alpha", "relative_offset"]
-            }
+              {
+                "properties": {
+                  "enforce_validity": {
+                    "const": "surface_wrap"
+                  },
+                  "relative_alpha": {
+                    "type": "number"
+                  },
+                  "relative_offset": {
+                    "type": "number"
+                  }
+                },
+                "required": ["relative_alpha", "relative_offset"]
+              }
+            ]
           }
         },
         "import_geometries": {
