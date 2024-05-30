@@ -65,11 +65,11 @@ void Terrain::set_cdt(const Point_set_3& pointCloud) {
 void Terrain::prep_constraints(const PolyFeaturesPtr& features, Point_set_3& pointCloud) {
     std::cout << "    Lifting polygon edges to terrain elevation" << std::endl;
     int countFeatures = 0;
-    auto building_pt = pointCloud.add_property_map<std::shared_ptr<Building>>("building_point", nullptr).first;
+    auto buildingPt = pointCloud.add_property_map<std::shared_ptr<Building>>("building_point", nullptr).first;
     for (auto& f : features) {
         if (!f->is_active()) continue;
-        bool is_building = false;
-        if (f->get_class() == BUILDING) is_building = true;
+        bool isBuilding = false;
+        if (f->get_class() == BUILDING) isBuilding = true;
         int polyCount = 0;
         for (auto& ring : f->get_poly().rings()) {
             auto& elevations = f->get_ground_elevations();
@@ -79,7 +79,7 @@ void Terrain::prep_constraints(const PolyFeaturesPtr& features, Point_set_3& poi
             for (auto& polyVertex : ring) {
                 pts.push_back(ePoint_3(polyVertex.x(), polyVertex.y(), elevations[polyCount][i]));
                 auto it = pointCloud.insert(Point_3(polyVertex.x(), polyVertex.y(), elevations[polyCount][i++]));
-                if (is_building) building_pt[*it] = std::static_pointer_cast<Building>(f);
+                if (isBuilding) buildingPt[*it] = std::static_pointer_cast<Building>(f);
             }
             m_constrainedPolys.push_back(pts);
             ++polyCount;
@@ -222,7 +222,7 @@ void Terrain::tag_layers(const Face_handle& start,
     }
     int surfaceLayer = -1; //-- Default value is unmarked triangle, i.e. general terrain
     if (index != 0) {
-        for (auto& feature : features) {
+        for (const auto& feature : features) {
             if (!feature->is_active()) continue;
             //- Polygons are already ordered according to importance - find first polygon
             if (geomutils::point_in_poly(chkPoint, feature->get_poly())) {
@@ -239,7 +239,7 @@ void Terrain::tag_layers(const Face_handle& start,
     }
     std::list<Face_handle> queue;
     queue.push_back(start);
-    while (! queue.empty()) {
+    while (!queue.empty()) {
         Face_handle fh = queue.front();
         queue.pop_front();
         if (fh->info().nesting_level == -1) {

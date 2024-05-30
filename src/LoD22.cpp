@@ -165,10 +165,10 @@ void LoD22::get_footprint_from_mesh(const roofer::Mesh& rooferMesh, Polygon_with
     }
     baseElevations.push_back(outerBaseElevations);
     std::vector<Polygon_2> holes;
-    for (auto& lr_hole: rooferNewFootprint.interior_rings()) {
+    for (auto& lrHole: rooferNewFootprint.interior_rings()) {
         Polygon_2 hole;
         std::vector<double> holeElevations;
-        for (auto& p: lr_hole) {
+        for (auto& p: lrHole) {
             hole.push_back(Point_2(p[0], p[1]));
             holeElevations.push_back(p[2]);
         }

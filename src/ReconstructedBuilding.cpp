@@ -214,10 +214,10 @@ void ReconstructedBuilding::reconstruct() {
             if (!m_reconSettings->skipGapClosing && !CGAL::is_closed(mesh)) {
                 // collect boundary halfedges
                 typedef boost::graph_traits<Mesh>::halfedge_descriptor halfedge_descriptor;
-                std::vector<halfedge_descriptor> border_cycles;
-                PMP::extract_boundary_cycles(mesh, std::back_inserter(border_cycles));
+                std::vector<halfedge_descriptor> borderCycles;
+                PMP::extract_boundary_cycles(mesh, std::back_inserter(borderCycles));
                 // fill using boundary halfedges
-                for(halfedge_descriptor h : border_cycles)
+                for(halfedge_descriptor h : borderCycles)
                     PMP::triangulate_hole(mesh, h);
             }
             //-- Validity check

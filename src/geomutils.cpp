@@ -64,13 +64,13 @@ bool geomutils::point_in_circle(const Point_3& pt, const Point_2& center, const 
 
 void geomutils::cdt_to_mesh(CDT& cdt, Mesh& mesh, const int surfaceLayerID) {
     std::map<CDT::Vertex_handle, int> indices;
-    std::vector<Mesh::vertex_index> mesh_vertex;
-    std::vector<Mesh::face_index> face_index;
-    mesh_vertex.reserve(cdt.number_of_vertices());
+    std::vector<Mesh::vertex_index> meshVertexIdx;
+    std::vector<Mesh::face_index> meshFaceIdx;
+    meshVertexIdx.reserve(cdt.number_of_vertices());
 
     int counter = 0;
     for (const auto& it : cdt.finite_vertex_handles()) {
-        mesh_vertex.emplace_back(mesh.add_vertex(Converter<EPECK, EPICK>()(it->point())));
+        meshVertexIdx.emplace_back(mesh.add_vertex(Converter<EPECK, EPICK>()(it->point())));
         //        outstream << it->point() << std::endl;
         indices.insert(std::pair<CDT::Vertex_handle, int>(it, counter++));
     }
@@ -81,18 +81,18 @@ void geomutils::cdt_to_mesh(CDT& cdt, Mesh& mesh, const int surfaceLayerID) {
         int v1 = indices[it->vertex(0)];
         int v2 = indices[it->vertex(1)];
         int v3 = indices[it->vertex(2)];
-        mesh.add_face(mesh_vertex[v1], mesh_vertex[v2], mesh_vertex[v3]);
+        mesh.add_face(meshVertexIdx[v1], meshVertexIdx[v2], meshVertexIdx[v3]);
     }
 }
 
 void geomutils::dt_to_mesh(DT& dt, Mesh& mesh) {
     std::map<DT::Vertex_handle, int> indices;
-    std::vector<Mesh::vertex_index> mesh_vertex;
-    std::vector<Mesh::face_index> face_index;
-    mesh_vertex.reserve(dt.number_of_vertices());
+    std::vector<Mesh::vertex_index> meshVertexIdx;
+    std::vector<Mesh::face_index> meshFaceIdx;
+    meshVertexIdx.reserve(dt.number_of_vertices());
     int counter = 0;
     for (const auto& it : dt.finite_vertex_handles()) {
-        mesh_vertex.emplace_back(mesh.add_vertex(it->point()));
+        meshVertexIdx.emplace_back(mesh.add_vertex(it->point()));
         //        outstream << it->point() << std::endl;
         indices.insert(std::pair<DT::Vertex_handle, int>(it, counter++));
     }
@@ -100,7 +100,7 @@ void geomutils::dt_to_mesh(DT& dt, Mesh& mesh) {
         int v1 = indices[it->vertex(0)];
         int v2 = indices[it->vertex(1)];
         int v3 = indices[it->vertex(2)];
-        mesh.add_face(mesh_vertex[v1], mesh_vertex[v2], mesh_vertex[v3]);
+        mesh.add_face(meshVertexIdx[v1], meshVertexIdx[v2], meshVertexIdx[v3]);
     }
 }
 
@@ -205,11 +205,11 @@ void geomutils::interpolate_poly_from_pc(const Polygon_2& poly, std::vector<doub
         Point_2 query(polypt.x(), polypt.y());
         Neighbor_search search(searchTree, query, 5);
 
-        std::vector<double> poly_elevation;
+        std::vector<double> polyElevation;
         for (Neighbor_search::iterator it = search.begin(); it != search.end(); ++it) {
-            poly_elevation.push_back(it->first.z());
+            polyElevation.push_back(it->first.z());
         }
-        elevations.emplace_back(geomutils::avg(poly_elevation));
+        elevations.emplace_back(geomutils::avg(polyElevation));
     }
 }
 

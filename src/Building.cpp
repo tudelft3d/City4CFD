@@ -93,14 +93,14 @@ void Building::alpha_wrap_all(const BuildingsPtr& buildings, Mesh& newMesh) {
     PMP::triangulate_faces(newMesh);
 
     //-- Perform CGAL's alpha wrapping
-    const double relative_alpha = 2000.; //1000.
-    const double relative_offset = 7000.; // 12000.
+    const double relativeAlpha = 2000.; //1000.
+    const double relativeOffset = 7000.; // 12000.
     CGAL::Bbox_3 bbox = CGAL::Polygon_mesh_processing::bbox(newMesh);
-    const double diag_length = std::sqrt(CGAL::square(bbox.xmax() - bbox.xmin()) +
-                                         CGAL::square(bbox.ymax() - bbox.ymin()) +
-                                         CGAL::square(bbox.zmax() - bbox.zmin()));
-    const double alpha = diag_length / relative_alpha;
-    const double offset = diag_length / relative_offset;
+    const double diagLength = std::sqrt(CGAL::square(bbox.xmax() - bbox.xmin()) +
+                                        CGAL::square(bbox.ymax() - bbox.ymin()) +
+                                        CGAL::square(bbox.zmax() - bbox.zmin()));
+    const double alpha = diagLength / relativeAlpha;
+    const double offset = diagLength / relativeOffset;
     CGAL::alpha_wrap_3(newMesh, alpha, offset, newMesh);
 
 //    CGAL::alpha_wrap_3(newMesh, 2, 0.01, newMesh);   // 'coarse'
@@ -140,8 +140,8 @@ void Building::refine() {
     typedef Mesh::Halfedge_index           halfedge_descriptor;
     typedef Mesh::Edge_index               edge_descriptor;
 
-    const double target_edge_length = 5; //5;
-    const unsigned int nb_iter =  30;   //30;
+    const double targetEdgeLength = 5; //5;
+    const unsigned int nbIter =  30;   //30;
 
     PMP::remove_degenerate_faces(m_mesh);
     /*
@@ -152,8 +152,8 @@ void Building::refine() {
     */
 
     //-- Set the property map for constrained edges
-    Mesh::Property_map<edge_descriptor,bool> is_constrained =
-            m_mesh.add_property_map<edge_descriptor,bool>("e:is_constrained", false).first;
+    Mesh::Property_map<edge_descriptor,bool> isConstrained =
+            m_mesh.add_property_map<edge_descriptor,bool>("e:isConstrained", false).first;
 
     //-- Detect sharp features
     for (auto e : edges(m_mesh)) {
@@ -164,27 +164,27 @@ void Building::refine() {
                                                         m_mesh.point(target(next(hd, m_mesh), m_mesh)),
                                                         m_mesh.point(target(next(opposite(hd, m_mesh), m_mesh), m_mesh)));
             if (CGAL::abs(angle)<179.5)
-                is_constrained[e]=true;
+                isConstrained[e]=true;
         }
     }
 
-    PMP::isotropic_remeshing(faces(m_mesh), target_edge_length, m_mesh,
-                             PMP::parameters::number_of_iterations(nb_iter)
-                                     .edge_is_constrained_map(is_constrained));
+    PMP::isotropic_remeshing(faces(m_mesh), targetEdgeLength, m_mesh,
+                             PMP::parameters::number_of_iterations(nbIter)
+                                     .edge_is_constrained_map(isConstrained));
 
 //    PMP::remove_self_intersections(m_mesh);
 }
 
-void Building::alpha_wrap(double relative_alpha, double relative_offset) {
+void Building::alpha_wrap(double relativeAlpha, double relativeOffset) {
     typedef EPICK::FT                 FT;
 
     //-- Perform CGAL's alpha wrapping
     CGAL::Bbox_3 bbox = CGAL::Polygon_mesh_processing::bbox(m_mesh);
-    const double diag_length = std::sqrt(CGAL::square(bbox.xmax() - bbox.xmin()) +
-                                         CGAL::square(bbox.ymax() - bbox.ymin()) +
-                                         CGAL::square(bbox.zmax() - bbox.zmin()));
-    const double alpha = diag_length / relative_alpha;
-    const double offset = diag_length / relative_offset;
+    const double diagLength = std::sqrt(CGAL::square(bbox.xmax() - bbox.xmin()) +
+                                        CGAL::square(bbox.ymax() - bbox.ymin()) +
+                                        CGAL::square(bbox.zmax() - bbox.zmin()));
+    const double alpha = diagLength / relativeAlpha;
+    const double offset = diagLength / relativeOffset;
     CGAL::alpha_wrap_3(m_mesh, alpha, offset, m_mesh);
 }
 

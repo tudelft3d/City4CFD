@@ -30,13 +30,13 @@
 #include "geomutils.h"
 
 LoD12::LoD12(const Polygon_with_holes_2& poly,
-             const std::vector<std::vector<double>>& base_elevations)
-        : m_elevation(), m_poly(poly), m_baseElevations(base_elevations) {}
+             const std::vector<std::vector<double>>& baseElevations)
+        : m_elevation(), m_poly(poly), m_baseElevations(baseElevations) {}
 
 LoD12::LoD12(const Polygon_with_holes_2& poly,
-             const std::vector<std::vector<double>>& base_elevations,
+             const std::vector<std::vector<double>>& baseElevations,
              const double elevation)
-        : m_elevation(elevation), m_poly(poly), m_baseElevations(base_elevations) {}
+        : m_elevation(elevation), m_poly(poly), m_baseElevations(baseElevations) {}
 
 void LoD12::set_elevation(const double& elevation) {
     m_elevation = elevation;
@@ -48,41 +48,41 @@ void LoD12::reconstruct(Mesh& mesh) {
     auto surfaceType = mesh.add_property_map<face_descriptor , std::string>("f:semantics", "").first;
     face_descriptor fIdx;
 
-    CDT cdt_buildings;
+    CDT cdtBuildings;
 
     //-- Map CDT and Mesh vertices
     std::map<CDT::Vertex_handle, Mesh::Vertex_index> cdtToMesh;
 
     int polyCount = 0;
     for (auto& poly : m_poly.rings()) { // Loop over polys
-        std::vector<Vertex_handle> cdt_handle;
-        std::vector<Mesh::Vertex_index> mesh_vertex;
+        std::vector<Vertex_handle> cdtHandle;
+        std::vector<Mesh::Vertex_index> meshVertex;
         int count = 0;
         for (auto vert = poly.vertices_begin(); vert != poly.vertices_end(); ++vert) { // Loop over poly vertices
-            cdt_handle.emplace_back(cdt_buildings.insert(ePoint_3(vert->x(),
-                                                                  vert->y(),
-                                                                  m_baseElevations[polyCount][count])));
-            mesh_vertex.emplace_back(mesh.add_vertex(Point_3(vert->x(),
-                                                             vert->y(),
-                                                             m_baseElevations[polyCount][count++])));
-            cdtToMesh[cdt_handle.back()] = mesh_vertex.back();
-            mesh_vertex.emplace_back(mesh.add_vertex(Point_3(vert->x(),
-                                                             vert->y(),
-                                                             m_elevation)));
+            cdtHandle.emplace_back(cdtBuildings.insert(ePoint_3(vert->x(),
+                                                                vert->y(),
+                                                                m_baseElevations[polyCount][count])));
+            meshVertex.emplace_back(mesh.add_vertex(Point_3(vert->x(),
+                                                            vert->y(),
+                                                            m_baseElevations[polyCount][count++])));
+            cdtToMesh[cdtHandle.back()] = meshVertex.back();
+            meshVertex.emplace_back(mesh.add_vertex(Point_3(vert->x(),
+                                                            vert->y(),
+                                                            m_elevation)));
         }
-        cdt_handle.emplace_back(cdt_handle.front());
-        mesh_vertex.emplace_back(mesh_vertex.front());
-        mesh_vertex.emplace_back(mesh_vertex.front() + 1);
+        cdtHandle.emplace_back(cdtHandle.front());
+        meshVertex.emplace_back(meshVertex.front());
+        meshVertex.emplace_back(meshVertex.front() + 1);
 
         //- Add constraints and create mesh faces for sides
-        for (auto i = 0; i < cdt_handle.size() - 1; ++i) {
-            cdt_buildings.insert_constraint(cdt_handle[i], cdt_handle[i + 1]);
+        for (auto i = 0; i < cdtHandle.size() - 1; ++i) {
+            cdtBuildings.insert_constraint(cdtHandle[i], cdtHandle[i + 1]);
 
             auto it1 = mesh.vertices_begin();
             auto it2 = mesh.vertices_begin();
 
-            auto v1 = cdtToMesh[cdt_handle[i]];
-            auto v2 = cdtToMesh[cdt_handle[i + 1]];
+            auto v1 = cdtToMesh[cdtHandle[i]];
+            auto v2 = cdtToMesh[cdtHandle[i + 1]];
 
             std::advance(it1, v1.idx() + 1);
             std::advance(it2, v2.idx() + 1);
@@ -99,8 +99,8 @@ void LoD12::reconstruct(Mesh& mesh) {
         ++polyCount;
     }
     //- Handle top and bottom
-    geomutils::mark_domains(cdt_buildings);
-    for (auto& it : cdt_buildings.finite_face_handles()) {
+    geomutils::mark_domains(cdtBuildings);
+    for (auto& it : cdtBuildings.finite_face_handles()) {
         if (!it->info().in_domain()) continue;
 
         auto it1 = mesh.vertices_begin();

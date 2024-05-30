@@ -36,25 +36,25 @@ Sides::Sides(const int outputLayerID)
 Sides::~Sides() = default;
 
 void Sides::reconstruct() {
-    std::vector<Mesh::vertex_index> mesh_vertex_side;
+    std::vector<Mesh::vertex_index> meshVertexSide;
 
     //-- Add mesh vertices and store them in a vector
     for (auto it = m_sideOutputPts.begin(); it != m_sideOutputPts.end(); ++it) {
-        mesh_vertex_side.emplace_back(m_mesh.add_vertex(*it));
-        mesh_vertex_side.emplace_back(m_mesh.add_vertex(Point_3(it->x(), it->y(), Config::get().topHeight)));
+        meshVertexSide.emplace_back(m_mesh.add_vertex(*it));
+        meshVertexSide.emplace_back(m_mesh.add_vertex(Point_3(it->x(), it->y(), Config::get().topHeight)));
     }
 
     //-- Add middle top point to mesh
 //    Mesh::vertex_index topMiddlePoint = _meshTop.add_vertex(Point_3(bndInfo.xcent, bndInfo.ycent, bndInfo.height));
 
     //-- Add mesh faces for side
-    for (auto i = 0; i < mesh_vertex_side.size() - 3; i= i + 2) {
+    for (auto i = 0; i < meshVertexSide.size() - 3; i= i + 2) {
         // -- i + 1 is i lifted up
         int v1 = i;
         int v2 = i + 2;
 
-        m_mesh.add_face(mesh_vertex_side[v2], mesh_vertex_side[v1], mesh_vertex_side[v1 + 1]);
-        m_mesh.add_face(mesh_vertex_side[v2 + 1], mesh_vertex_side[v2], mesh_vertex_side[v1 + 1]);
+        m_mesh.add_face(meshVertexSide[v2], meshVertexSide[v1], meshVertexSide[v1 + 1]);
+        m_mesh.add_face(meshVertexSide[v2 + 1], meshVertexSide[v2], meshVertexSide[v1 + 1]);
     }
 }
 

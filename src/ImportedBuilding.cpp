@@ -122,7 +122,7 @@ ImportedBuilding::ImportedBuilding(std::unique_ptr<nlohmann::json>& buildingJson
         bool first = true;
         for (auto& coordBnd : geometry["boundaries"].front()[footprintIdx]) {
             CGAL::Polygon_2<EPECK> facePoly;
-            for (const int& ptIdx: coordBnd) {
+            for (const int ptIdx: coordBnd) {
                 facePoly.push_back(ePoint_2(m_ptMap.at(ptIdx).x(), m_ptMap.at(ptIdx).y()));
                 footprintElevations.push_back(m_ptMap.at(ptIdx).z());
                 pointConnectivity[IO::gen_key_bucket(Point_2(m_ptMap.at(ptIdx).x(), m_ptMap.at(ptIdx).y()))] = ptIdx;

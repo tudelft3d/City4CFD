@@ -33,8 +33,8 @@
 class LoD12 {
 public:
     LoD12() = delete;
-    LoD12(const Polygon_with_holes_2& poly, const std::vector<std::vector<double>>& base_elevations);
-    LoD12(const Polygon_with_holes_2& poly, const std::vector<std::vector<double>>& base_elevations,
+    LoD12(const Polygon_with_holes_2& poly, const std::vector<std::vector<double>>& baseElevations);
+    LoD12(const Polygon_with_holes_2& poly, const std::vector<std::vector<double>>& baseElevations,
           const double elevation);
     ~LoD12() = default;
 

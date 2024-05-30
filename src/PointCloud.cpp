@@ -62,20 +62,20 @@ void PointCloud::smooth_terrain() {
     std::cout << "Smoothing terrain" << std::endl;
 
     //-- WLOP simplification and regularization
-    double retain_percentage = 100;
+    double retainPercentage = 100;
     int& maxTerrainPts = Config::get().maxSmoothPts;
     if (maxTerrainPts > 0 && m_pointCloudTerrain.size() > maxTerrainPts) {
-        retain_percentage = (double)maxTerrainPts / (double)m_pointCloudTerrain.size() * 100.;
+        retainPercentage = (double)maxTerrainPts / (double)m_pointCloudTerrain.size() * 100.;
         std::cout << "    Performing additional (optimized) terrain thinning to " << maxTerrainPts << " points" << std::endl;
     }
 
     std::cout << "    Smoothing terrain 1/3..." << std::flush;
-    const double neighbor_radius = 0.5;   // neighbors size.
+    const double neighborRadius = 0.5;   // neighbors size.
     Point_set_3 simplPts;
     CGAL::wlop_simplify_and_regularize_point_set<Concurrency_tag>
             (m_pointCloudTerrain, simplPts.point_back_inserter(),
-             CGAL::parameters::select_percentage(retain_percentage).
-                     neighbor_radius (neighbor_radius));
+             CGAL::parameters::select_percentage(retainPercentage).
+                     neighbor_radius (neighborRadius));
     m_pointCloudTerrain.clear();
 
     std::cout << "\r    Smoothing terrain 2/3..." << std::flush;
@@ -91,11 +91,11 @@ void PointCloud::smooth_terrain() {
     dt.clear(); // end of scope for the dt
 
     //-- Isotropic remeshing
-    const double target_edge_length = 0;
-    const unsigned int nb_iter =  10;
+    const double targetEdgeLength = 0;
+    const unsigned int nbIter =  10;
     PMP::remove_degenerate_faces(mesh);
-    PMP::isotropic_remeshing(faces(mesh), target_edge_length, mesh,
-                             PMP::parameters::number_of_iterations(nb_iter)
+    PMP::isotropic_remeshing(faces(mesh), targetEdgeLength, mesh,
+                             PMP::parameters::number_of_iterations(nbIter)
                                      );
 
     //-- Smoothing
@@ -133,13 +133,13 @@ void PointCloud::terrain_points_in_polygon(BuildingsPtr& features) {
         std::vector<Point_index*> intersected_nodes;
         pointCloudIndex.find_intersections(intersected_nodes, offsetPoly.bbox().xmin(), offsetPoly.bbox().xmax(),
                                            offsetPoly.bbox().ymin(), offsetPoly.bbox().ymax());
-        for (auto const &node: intersected_nodes) {
-            for (auto const &point_index: node->points) {
-                if (geomutils::point_in_poly_and_boundary(pointCloud.point(point_index), poly)) {
-                    pointCloud.remove(point_index);
+        for (auto const& node: intersected_nodes) {
+            for (auto const& pointIdx: node->points) {
+                if (geomutils::point_in_poly_and_boundary(pointCloud.point(pointIdx), poly)) {
+                    pointCloud.remove(pointIdx);
                 }
                 //todo temp add to building
-//                f->insert_terrain_point(pointCloud.point(point_index)); //use bbox for roofer
+//                f->insert_terrain_point(pointCloud.point(pointIdx)); //use bbox for roofer
             }
         }
     }

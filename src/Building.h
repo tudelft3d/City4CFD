@@ -50,7 +50,7 @@ public:
     void   insert_point(const Point_3& pt);
     void   clip_bottom(const TerrainPtr& terrain);
     void   refine();
-    void   alpha_wrap(double relative_alpha, double relative_offset);
+    void   alpha_wrap(double relativeAlpha, double relativeOffset);
     void   translate_footprint(const double h);
     bool   is_part_of(const Polygon_2& otherPoly) const;
     void   set_reconstruction_rules(const BoundingRegion& reconRegion);

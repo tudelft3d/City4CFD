@@ -128,6 +128,7 @@ int PolyFeature::s_numOfPolyFeatures = 0;
 
 void PolyFeature::calc_footprint_elevation_nni(const DT& dt) {
     typedef std::vector<std::pair<DT::Point, double>> Point_coordinate_vector;
+
     DT::Face_handle fh = nullptr;
     for (auto& ring: m_poly.rings()) {
         std::vector<double> ringElevations;
@@ -233,7 +234,7 @@ bool PolyFeature::flatten_polygon_inner_points(const Point_set_3& pointCloud,
 
     std::vector<int>    indices;
     std::vector<double> originalHeights;
-    auto building_pt = pointCloud.property_map<std::shared_ptr<Building>>("building_point").first;
+    auto buildingPt = pointCloud.property_map<std::shared_ptr<Building>>("building_point").first;
     //-- Take tree subset bounded by the polygon
     std::vector<Point_3> subsetPts;
     Polygon_2 bbox = geomutils::calc_bbox_poly(m_poly.rings().front());
@@ -251,7 +252,7 @@ bool PolyFeature::flatten_polygon_inner_points(const Point_set_3& pointCloud,
             auto pointSetIt = pointCloud.begin();
             std::advance(pointSetIt, itIdx->second);
 
-            auto currBuilding = building_pt[*pointSetIt];
+            auto currBuilding = buildingPt[*pointSetIt];
             if (currBuilding != nullptr) {
                 int buildingId = currBuilding->get_internal_id();
                 auto it = overlappingBuildings.find(buildingId);
@@ -295,24 +296,24 @@ bool PolyFeature::flatten_polygon_inner_points(const Point_set_3& pointCloud,
         bool isFirst = true;
         for (auto& poly : flattenCandidatePolys) {
             const double offsetVal = 0.1; // offset value hardcoded
-            PolygonPtrVectorWH offset_poly =
+            PolygonPtrVectorWH offsetPoly =
                     CGAL::create_interior_skeleton_and_offset_polygons_with_holes_2(offsetVal,
                                                                                     poly.get_cgal_type());
 #ifdef CITY4CFD_POLYFEATURE_VERBOSE
-            std::cout << "Offset polygons created: " << offset_poly.size() << std::endl;
+            std::cout << "Offset polygons created: " << offsetPoly.size() << std::endl;
 #endif
-            if (!offset_poly.empty()) { // make a check whether the offset is successfully created
-                poly = *(offset_poly.front());
+            if (!offsetPoly.empty()) { // make a check whether the offset is successfully created
+                poly = *(offsetPoly.front());
             } else {
                 std::cout << "WARNING: Polygon ID" << m_id << " Skeleton construction failed! Some polygons will not be flattened." << std::endl;
                 return false;
             }
             if (isFirst) {
-                m_poly = Polygon_with_holes_2(*(offset_poly.front()));
+                m_poly = Polygon_with_holes_2(*(offsetPoly.front()));
                 isFirst = false;
             } else {
                 // Some polys are cut -- save the new resulting polys and add them as new features in Map3D
-                newPolys.emplace_back(Polygon_with_holes_2(*(offset_poly.front())), m_outputLayerID);
+                newPolys.emplace_back(Polygon_with_holes_2(*(offsetPoly.front())), m_outputLayerID);
             }
         }
     } else {

@@ -35,7 +35,7 @@ Top::Top(const int outputLayerID)
 Top::~Top() = default;
 
 void Top::reconstruct() {
-    std::vector<Mesh::vertex_index> mesh_vertex_top;
+    std::vector<Mesh::vertex_index> meshVertexTop;
 
     //-- Top is done by making a CDT of outerPts
     CDT cdt_top;
