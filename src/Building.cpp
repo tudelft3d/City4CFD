@@ -58,6 +58,13 @@ void Building::insert_point(const Point_3& pt) {
     m_ptsPtr->insert(pt);
 }
 
+double Building::get_elevation() {
+    if (m_elevation < -global::largnum + global::smallnum) // calculate if not set
+        this->calc_elevation();
+
+    return m_elevation;
+}
+
 double Building::get_height() {
     if (m_height < -global::largnum + global::smallnum) {
         m_height = this->get_elevation() - this->ground_elevation();

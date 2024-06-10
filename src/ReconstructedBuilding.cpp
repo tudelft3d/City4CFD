@@ -132,7 +132,7 @@ ReconstructedBuilding::~ReconstructedBuilding() = default;
 /*
  * Calculate building elevation without mesh reconstruction
  */
-double ReconstructedBuilding::get_elevation() {
+void ReconstructedBuilding::calc_elevation() {
     if (m_elevation < -global::largnum + global::smallnum) { // calculate if not already available
         if (m_attributeHeightAdvantage && m_attributeHeight > 0) { // get height from attribute
             m_elevation = this->ground_elevation() + m_attributeHeight;
@@ -152,7 +152,6 @@ double ReconstructedBuilding::get_elevation() {
             }
         }
     }
-    return m_elevation;
 }
 
 void ReconstructedBuilding::reconstruct() {
@@ -161,13 +160,24 @@ void ReconstructedBuilding::reconstruct() {
     if (m_clipBottom || Config::get().intersectBuildingsTerrain) {
         this->translate_footprint(-5);
     }
+
     //-- Check if reconstructing from height attribute takes precedence
     if (m_attributeHeightAdvantage) {
         this->reconstruct_from_attribute();
         return;
     }
+
+    //-- Narrow down check for points without the buffer
+    bool innerPts = false;
+    for (auto& pt : m_ptsPtr->points()) {
+        if (geomutils::point_in_poly_and_boundary(pt, m_poly)) {
+            innerPts = true;
+            break;
+        }
+    }
+
     //-- Reconstruction fallbacks if there are no points belonging to the polygon
-    if (m_ptsPtr->empty()) {
+    if (!innerPts) {
         // reconstruct using attribute
         if (this->reconstruct_again_from_attribute("Found no points belonging to the building")) {
             return;
@@ -182,16 +192,18 @@ void ReconstructedBuilding::reconstruct() {
             throw city4cfd_error("Found no points belonging to the building");
         }
     }
-    //todo temp
-    /*
+
+#ifdef CITY4CFD_DEBUG
     std::cout << "Checking if polygon is valid and simple" << std::endl;
     for (auto& poly : m_poly.rings()) {
         if (!poly.is_simple() || poly.is_empty() || !poly.is_convex()) {
             std::cout << "Polygon is not simple, empty or convex" << std::endl;
             std::cout << "Poly id: " << m_id << std::endl;
         }
-    }
-     */
+     }
+    std::cout << "End polygon check" << std::endl;
+#endif
+
     if (m_reconSettings->lod == "2.2" || m_reconSettings->lod == "1.3") {
         try {
             LoD22 lod22;
@@ -250,7 +262,7 @@ void ReconstructedBuilding::reconstruct() {
             m_poly = lod22.get_footprint();
             m_mesh = mesh;
         } catch (const std::exception& e) {
-#ifdef CITY4CFD_VERBOSE
+#ifdef CITY4CFD_DEBUG
             std::cout << "LoD2.2/1.3 reconstruction failed!" << std::endl;
             std::cout << "Reason: " << e.what() << std::endl;
 #endif

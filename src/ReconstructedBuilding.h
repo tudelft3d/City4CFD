@@ -43,7 +43,7 @@ public:
 
     const std::vector<roofer::Mesh>& get_roofer_meshes() const;
 
-    virtual double get_elevation() override;
+    virtual void   calc_elevation() override;
     virtual void   reconstruct() override;
     virtual void   insert_terrain_point(const Point_3& pt) override;
     virtual void   reconstruct_flat_terrain() override;

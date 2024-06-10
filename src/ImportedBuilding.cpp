@@ -273,7 +273,7 @@ ImportedBuilding::~ImportedBuilding() = default;
  * Calculate building elevation without reconstruction.
  * Defined as the highest point
  */
-double ImportedBuilding::get_elevation() {
+void ImportedBuilding::calc_elevation() {
     if (m_elevation < -global::largnum + global::smallnum) {
         if (m_height > 0) {
             m_elevation = m_height - this->ground_elevation();
@@ -285,7 +285,6 @@ double ImportedBuilding::get_elevation() {
             }
         }
     }
-    return m_elevation;
 }
 
 void ImportedBuilding::reconstruct() {

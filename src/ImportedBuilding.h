@@ -42,7 +42,7 @@ public:
     ImportedBuilding(Mesh& mesh);
     ~ImportedBuilding();
 
-    virtual double get_elevation() override;
+    virtual void   calc_elevation() override;
     virtual void   reconstruct() override;
     virtual void   reconstruct_flat_terrain() override;
     virtual void   insert_terrain_point(const Point_3& /* pt */) override;
