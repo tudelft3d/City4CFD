@@ -50,10 +50,11 @@ void Terrain::set_cdt(const Point_set_3& pointCloud) {
     std::cout << "\n    Preparing triangulation" << std::endl;
     int count = 0;
     std::vector<ePoint_3> pts;
+    IO::print_progress_bar(0);
     for (auto& pt : pointCloud.points()) {
         pts.push_back(to_exact(pt));
 
-        if ((count % 5000) == 0) IO::print_progress_bar(100 * count / pointCloud.size());
+        if ((count % 10000) == 0) IO::print_progress_bar(100 * count / pointCloud.size());
         ++count;
     }
     IO::print_progress_bar(100); std::clog << std::endl;
