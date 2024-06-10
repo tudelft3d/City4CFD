@@ -188,6 +188,7 @@ void ReconstructedBuilding::reconstruct() {
                                  + std::to_string(Config::get().minHeight) + " m");
             m_elevation = this->ground_elevation() + Config::get().minHeight;
         } else { // exception handling when cannot reconstruct
+            this->mark_as_failed();
             this->deactivate();
             throw city4cfd_error("Found no points belonging to the building");
         }
@@ -359,6 +360,7 @@ void ReconstructedBuilding::get_cityjson_semantics(nlohmann::json& g) const { //
 void ReconstructedBuilding::reconstruct_from_attribute() {
     //-- Check attribute height
     if (m_attributeHeight <= 0) {
+        this->mark_as_failed();
         this->deactivate();
         throw city4cfd_error("Attribute height from geojson file is invalid!");
     }

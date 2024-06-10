@@ -544,7 +544,7 @@ void IO::output_log() {
     of.close();
 }
 
-void IO::output_log(const BuildingsPtr failedBuildings) {
+void IO::output_log(const BuildingsPtr& failedBuildings) {
     if (!Config::get().outputLog) return;
     fs::current_path(Config::get().outputDir);
 

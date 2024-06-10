@@ -56,7 +56,7 @@ namespace IO {
     bool is_degen(const Mesh& mesh, Mesh::Face_index face);
 
     void output_log();
-    void output_log(const BuildingsPtr failedBuildings);
+    void output_log(const BuildingsPtr& failedBuildings);
     bool has_substr(const std::string& strMain, const std::string& subStr);
 
     std::string gen_key_bucket(const Point_2 p);

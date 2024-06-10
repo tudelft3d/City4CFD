@@ -668,6 +668,8 @@ void Map3d::clear_inactives() {
                 m_importedBuildingsPtr.end()
         );
     }
+    for (auto& b : m_buildingsPtr)
+        if (b->has_failed_to_reconstruct()) m_failedBuildingsPtr.push_back(b);
     m_buildingsPtr.erase(
             std::remove_if(
                     m_buildingsPtr.begin(),
@@ -694,7 +696,7 @@ void Map3d::clear_inactives() {
     );
 }
 
-BuildingsPtr Map3d::get_failed_buildings() const {
+const BuildingsPtr& Map3d::get_failed_buildings() const {
     return m_failedBuildingsPtr;
 }
 

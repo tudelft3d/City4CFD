@@ -40,7 +40,7 @@ public:
 
     void reconstruct();
 
-    BuildingsPtr get_failed_buildings() const;
+    const BuildingsPtr& get_failed_buildings() const;
 
     void read_data();
     void output();
