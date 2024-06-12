@@ -45,11 +45,13 @@ double               Boundary::s_outerBndHeight;
 
 void Boundary::set_bnd_poly(Polygon_2& bndPoly, Polygon_2& pcBndPoly, Polygon_2& startBufferPoly) {
     Polygon_2 bufferPoly;
+    Point_2 center = CGAL::centroid(bndPoly.begin(), bndPoly.end(),
+                                    CGAL::Dimension_tag<0>());
+    double bufferLen = 0.;
+
     //-- Set bndPoly and pcBndPoly depending on the buffer setup
     if (Config::get().domainBuffer > -global::largnum) {
-        double bufferLen = Config::get().domainBuffer / 100.;
-        Point_2 center = CGAL::centroid(bndPoly.begin(), bndPoly.end(),
-                                        CGAL::Dimension_tag<0>());
+        bufferLen = Config::get().domainBuffer / 100.;
         for (auto& pt: bndPoly)
             bufferPoly.push_back(pt + (pt - center) * bufferLen);
 
@@ -59,13 +61,12 @@ void Boundary::set_bnd_poly(Polygon_2& bndPoly, Polygon_2& pcBndPoly, Polygon_2&
             startBufferPoly = bndPoly;
             bndPoly = bufferPoly;
         }
-
-        for (auto& pt : startBufferPoly)
-            pcBndPoly.push_back(pt - (pt - center) * 0.001 * std::abs(bufferLen));
     } else {
         startBufferPoly = bndPoly;
-        pcBndPoly = startBufferPoly;
+        bufferLen = 1.; // arbitrary value for pcBndPoly
     }
+    for (auto& pt : startBufferPoly)
+        pcBndPoly.push_back(pt - (pt - center) * 0.001 * std::abs(bufferLen));
 }
 
 //-- Deactivate point cloud points that are out of bounds
