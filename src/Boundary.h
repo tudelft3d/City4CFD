@@ -6,16 +6,16 @@
   This file is part of City4CFD.
 
   City4CFD is free software: you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
+  it under the terms of the GNU Affero General Public License as published by
   the Free Software Foundation, either version 3 of the License, or
   (at your option) any later version.
 
   City4CFD is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
+  GNU Affero General Public License for more details.
 
-  You should have received a copy of the GNU General Public License
+  You should have received a copy of the GNU Affero General Public License
   along with City4CFD.  If not, see <http://www.gnu.org/licenses/>.
 
   For any information or further details about the use of City4CFD, contact
@@ -54,8 +54,8 @@ public:
     virtual std::string get_cityjson_primitive() const;
 
 protected:
-    static std::vector<Point_3> _outerPts;
-    static double               _outerBndHeight;
-    std::vector<Point_3>        _sideOutputPts;
+    static std::vector<Point_3> s_outerPts;
+    static double               s_outerBndHeight;
+    std::vector<Point_3>        m_sideOutputPts;
 };
 #endif //CITY4CFD_BOUNDARY_H

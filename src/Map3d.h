@@ -6,16 +6,16 @@
   This file is part of City4CFD.
 
   City4CFD is free software: you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
+  it under the terms of the GNU Affero General Public License as published by
   the Free Software Foundation, either version 3 of the License, or
   (at your option) any later version.
 
   City4CFD is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
+  GNU Affero General Public License for more details.
 
-  You should have received a copy of the GNU General Public License
+  You should have received a copy of the GNU Affero General Public License
   along with City4CFD.  If not, see <http://www.gnu.org/licenses/>.
 
   For any information or further details about the use of City4CFD, contact
@@ -40,38 +40,37 @@ public:
 
     void reconstruct();
 
-    BuildingsPtr get_failed_buildings() const;
+    const BuildingsPtr& get_failed_buildings() const;
 
     void read_data();
     void output();
 
 private:
-    PointCloud                  _pointCloud;
-//    JsonVectorPtr               _polygonsBuildings;     // for json-only reader
-    PolyVecPtr                  _polygonsBuildings;
-    JsonVectorPtr               _importedBuildingsJSON;
-//    std::vector<JsonVectorPtr>  _polygonsSurfaceLayers; // for json-only reader
-    std::vector<PolyVecPtr>     _polygonsSurfaceLayers;
-    PointSet3Ptr                _importedBuildingsPts;
-    std::vector<Mesh>           _importedBuildingsOther;
+    PointCloud                  m_pointCloud;
+//    JsonVectorPtr               m_polygonsBuildings;     // for json-only reader
+    PolyVecPtr                  m_polygonsBuildings;
+    JsonVectorPtr               m_importedBuildingsJSON;
+//    std::vector<JsonVectorPtr>  m_polygonsSurfaceLayers; // for json-only reader
+    std::vector<PolyVecPtr>     m_polygonsSurfaceLayers;
+    PointSet3Ptr                m_importedBuildingsPts;
+    std::vector<Mesh>           m_importedBuildingsOther;
 
-    TerrainPtr                  _terrainPtr;
-    BuildingsPtr                _buildingsPtr;
-    BuildingsPtr                _failedBuildingsPtr;
-    ReconstructedBuildingsPtr   _reconstructedBuildingsPtr;
-    ImportedBuildingsPtr        _importedBuildingsPtr;
-    SurfaceLayersPtr            _surfaceLayersPtr;
-    BoundariesPtr               _boundariesPtr;
-    PolyFeaturesPtr             _allFeaturesPtr;
-    OutputFeaturesPtr           _outputFeaturesPtr;
+    TerrainPtr                  m_terrainPtr;
+    BuildingsPtr                m_buildingsPtr;
+    BuildingsPtr                m_failedBuildingsPtr;
+    ReconstructedBuildingsPtr   m_reconstructedBuildingsPtr;
+    ImportedBuildingsPtr        m_importedBuildingsPtr;
+    SurfaceLayersPtr            m_surfaceLayersPtr;
+    BoundariesPtr               m_boundariesPtr;
+    PolyFeaturesPtr             m_allFeaturesPtr;
+    OutputFeaturesPtr           m_outputFeaturesPtr;
 
-    BoundingRegion              _influRegion;
-    BoundingRegion              _domainBnd;
-    DT                          _dt;
+    std::vector<BoundingRegion> m_reconRegions; // one influ region -> vector of reconstruction regions
+    BoundingRegion              m_domainBnd;
+    DT                          m_dt;
 
-    bool                        _influRegionBPG = false;
-    bool                        _bndBPG         = false;
-    bool                        _cityjsonInput  = false;
+    bool                        m_bndBPG         = false;
+    bool                        m_cityjsonInput  = false;
 
     void set_features();
     void set_influ_region();
@@ -88,7 +87,6 @@ private:
     void clip_buildings();
     void wrap();
 
-    void prep_feature_output();
     void prep_cityjson_output();
 
     void clear_inactives();

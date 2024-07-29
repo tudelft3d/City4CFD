@@ -6,16 +6,16 @@
   This file is part of City4CFD.
 
   City4CFD is free software: you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
+  it under the terms of the GNU Affero General Public License as published by
   the Free Software Foundation, either version 3 of the License, or
   (at your option) any later version.
 
   City4CFD is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
+  GNU Affero General Public License for more details.
 
-  You should have received a copy of the GNU General Public License
+  You should have received a copy of the GNU Affero General Public License
   along with City4CFD.  If not, see <http://www.gnu.org/licenses/>.
 
   For any information or further details about the use of City4CFD, contact
@@ -30,25 +30,30 @@
 
 #include "types.h"
 #include "CGALTypes.h"
+#include "Config.h"
 
 class BoundingRegion {
 public:
-    CDT _projCDT;
+    CDT m_projCDT;
+    std::shared_ptr<const Config::ReconRegion> m_reconSettings;
 
     BoundingRegion();
+    BoundingRegion(std::shared_ptr<Config::ReconRegion> reconRegion);
     ~BoundingRegion();
 
     void operator()(double radius);
     void operator()(Polygon_2& poly);
 
-    void calc_influ_region_bpg(const DT& dt, BuildingsPtr& buildings);
+    double calc_influ_region_bpg(const DT& dt, BuildingsPtr& buildings);
+    void   calc_influ_region_bpg(const double maxDim);
     void calc_bnd_bpg(const Polygon_2& influRegionPoly, const BuildingsPtr& buildings);
+    bool is_subset_of(const BoundingRegion& otherRegion) const;
 
     Polygon_2& get_bounding_region();
     const Polygon_2& get_bounding_region() const;
 
 protected:
-    Polygon_2  _boundingRegion;
+    Polygon_2  m_boundingRegion;
 
     Polygon_2  calc_bnd_poly(const std::vector<Point_2>& candidatePts, const double hMax,
                              const double angle, const double enlargeRatio = 1);

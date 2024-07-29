@@ -6,16 +6,16 @@
   This file is part of City4CFD.
 
   City4CFD is free software: you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
+  it under the terms of the GNU Affero General Public License as published by
   the Free Software Foundation, either version 3 of the License, or
   (at your option) any later version.
 
   City4CFD is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
+  GNU Affero General Public License for more details.
 
-  You should have received a copy of the GNU General Public License
+  You should have received a copy of the GNU Affero General Public License
   along with City4CFD.  If not, see <http://www.gnu.org/licenses/>.
 
   For any information or further details about the use of City4CFD, contact
@@ -103,8 +103,7 @@ namespace jsonschema {
                       "exclusiveMinimum": 0
                     },
                     "height_attribute_advantage": {"type": "boolean"},
-                    "avoid_bad_polys": {"type": "boolean"},
-                    "refine": {"type": "boolean"}
+                    "avoid_bad_polys": {"type": "boolean"}
                   },
                   "dependencies": {
                     "floor_attribute": ["floor_height"]
@@ -146,15 +145,92 @@ namespace jsonschema {
             "required": ["type", "path"]
           }
         },
+        "reconstruction_regions": {
+          "description": "Reconstruction regions/regions of interest/influence zones",
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "properties": {
+              "influence_region": {
+                "$ref": "#/$defs/influBndStruct"
+              },
+              "lod": {
+                "type": "string",
+                "enum": ["1.2", "1.3", "2.2"]
+              },
+              "complexity_factor": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "exclusiveMaximum": 1
+              },
+              "lod13_step_height": {
+                "type": "number",
+                "minimum": 0
+              },
+              "validate": {
+                "type": "boolean"
+              },
+              "enforce_validity": {
+                "type": "string",
+                "enum": ["lod1.2", "surface_wrap"]
+              },
+              "relative_alpha": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "relative_offset": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "skip_gap_closing": {
+                "type": "boolean"
+              },
+              "bpg_influence_region_extra": {
+                "type": "number",
+                "minimum": 0
+              },
+              "import_advantage": {
+                "type": "boolean"
+              },
+              "refine": {
+                "type": "boolean"
+              }
+            },
+            "required": ["influence_region", "lod"],
+            "oneOf": [
+              {
+                "properties": {
+                  "enforce_validity": {
+                    "not": {
+                      "const": "surface_wrap"
+                    }
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "enforce_validity": {
+                    "const": "surface_wrap"
+                  },
+                  "relative_alpha": {
+                    "type": "number"
+                  },
+                  "relative_offset": {
+                    "type": "number"
+                  }
+                },
+                "required": ["relative_alpha", "relative_offset"]
+              }
+            ]
+          }
+        },
         "import_geometries": {
           "description": "Handling imported geometries",
           "type": "object",
           "properties": {
             "path": {
               "type": "string"
-            },
-            "advantage": {
-              "type": "boolean"
             },
             "true_height": {
               "type": "boolean"
@@ -166,13 +242,10 @@ namespace jsonschema {
               "type": "boolean"
             }
           },
-          "required": ["path", "advantage", "true_height"]
+          "required": ["path", "true_height"]
         },
         "point_of_interest": {
           "$ref": "#/$defs/point"
-        },
-        "influence_region": {
-          "$ref": "#/$defs/influBndStruct"
         },
         "domain_bnd":{
           "$ref": "#/$defs/influBndStruct"
@@ -233,9 +306,6 @@ namespace jsonschema {
           "description": "Optional: Force flat terrain",
           "type": "boolean"
         },
-        "lod": {
-          "type": "string"
-        },
         "building_percentile": {
           "type": "number",
           "exclusiveMinimum": 0,
@@ -243,6 +313,11 @@ namespace jsonschema {
         },
         "min_height": {
           "description": "Default: 2.; minimum allowed height to be reconstructed",
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "min_area": {
+          "description": "Optional; minimum allowed footprint area",
           "type": "number",
           "exclusiveMinimum": 0
         },
@@ -404,9 +479,9 @@ namespace jsonschema {
           }
         }
       ],
-        "required": [ "point_of_interest", "influence_region", "domain_bnd",
-                      "building_percentile", "edge_max_len", "output_file_name", "output_format",
-                      "output_separately", "lod"]
+      "required": [ "point_of_interest", "domain_bnd", "reconstruction_regions",
+        "edge_max_len", "output_file_name", "output_format", "building_percentile",
+        "output_separately"]
     }
         )"_json;
 }

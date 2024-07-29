@@ -49,7 +49,7 @@ RUN bash /tmp/strip-docker-image-export \
     -f /etc/passwd \
     -f /bin/ls \
     -f /data \
-    -f /usr/local/share/proj/proj.db \
+    -f /usr/share/proj/proj.db \
     -f /usr/local/bin/city4cfd_pcprep \
     -f /usr/local/bin/city4cfd_las2las \
     -f /usr/local/bin/city4cfd
@@ -64,7 +64,7 @@ LABEL org.opencontainers.image.source="https://github.com/tudelft3d/city4cfd"
 LABEL org.opencontainers.image.vendor="Tudelft3D"
 LABEL org.opencontainers.image.title="City4CFD"
 LABEL org.opencontainers.image.description="City4CFD image"
-LABEL org.opencontainers.image.licenses="GPL-3.0"
+LABEL org.opencontainers.image.licenses="AGPL-3.0"
 LABEL org.opencontainers.image.url="https://github.com/tudelft3d/city4cfd"
 LABEL org.opencontainers.image.version=$VERSION
 
