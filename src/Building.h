@@ -6,16 +6,16 @@
   This file is part of City4CFD.
 
   City4CFD is free software: you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
+  it under the terms of the GNU Affero General Public License as published by
   the Free Software Foundation, either version 3 of the License, or
   (at your option) any later version.
 
   City4CFD is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
+  GNU Affero General Public License for more details.
 
-  You should have received a copy of the GNU General Public License
+  You should have received a copy of the GNU Affero General Public License
   along with City4CFD.  If not, see <http://www.gnu.org/licenses/>.
 
   For any information or further details about the use of City4CFD, contact
@@ -29,6 +29,7 @@
 #define CITY4CFD_BUILDING_H
 
 #include "PolyFeature.h"
+#include "BoundingRegion.h"
 #include "Config.h"
 
 class Building : public PolyFeature {
@@ -38,18 +39,25 @@ public:
     Building(const Polygon_with_attr& poly);
     ~Building();
 
-    static void alpha_wrap(const BuildingsPtr& buildings, Mesh& newMesh);
+    static void alpha_wrap_all(const BuildingsPtr& buildings, Mesh& newMesh);
 
-    virtual double get_elevation() = 0;
+    virtual void   calc_elevation() = 0;
     virtual void   reconstruct() = 0;
     virtual void   reconstruct_flat_terrain() = 0;
+    virtual void   insert_terrain_point(const Point_3& pt) = 0;
 
+    double get_elevation();
     double get_height();
     void   insert_point(const Point_3& pt);
     void   clip_bottom(const TerrainPtr& terrain);
     void   refine();
+    void   alpha_wrap(double relativeAlpha, double relativeOffset);
     void   translate_footprint(const double h);
-    void   check_feature_scope(const Polygon_2& influRegion);
+    bool   is_part_of(const Polygon_2& otherPoly) const;
+    void   set_reconstruction_rules(const BoundingRegion& reconRegion);
+    void   remove_reconstruction_rules();
+    bool   has_reconstruction_region() const;
+    std::shared_ptr<const Config::ReconRegion> get_reconstruction_settings() const;
     void   set_clip_flag (const bool flag);
     void   mark_as_failed();
     bool   has_failed_to_reconstruct() const;
@@ -65,11 +73,12 @@ public:
     virtual std::string get_class_name() const override;
 
 protected:
-    PointSet3Ptr         _ptsPtr;
-    double               _elevation;
-    double               _height;
-    bool                 _hasFailed;
-    bool                 _clip_bottom = Config::get().clip;
+    PointSet3Ptr         m_ptsPtr;
+    double               m_elevation;
+    double               m_height;
+    bool                 m_hasFailed;
+    bool                 m_clipBottom = Config::get().clip;
+    std::shared_ptr<const Config::ReconRegion> m_reconSettings;
 };
 
 //-- Struct for clipping

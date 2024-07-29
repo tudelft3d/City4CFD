@@ -6,16 +6,16 @@
   This file is part of City4CFD.
 
   City4CFD is free software: you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
+  it under the terms of the GNU Affero General Public License as published by
   the Free Software Foundation, either version 3 of the License, or
   (at your option) any later version.
 
   City4CFD is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
+  GNU Affero General Public License for more details.
 
-  You should have received a copy of the GNU General Public License
+  You should have received a copy of the GNU Affero General Public License
   along with City4CFD.  If not, see <http://www.gnu.org/licenses/>.
 
   For any information or further details about the use of City4CFD, contact
@@ -47,31 +47,31 @@
 #endif
 
 PolyFeature::PolyFeature()
-        : TopoFeature(), _poly(), _groundElevations(), _polyInternalID(new_internal_id()),
-      _groundElevation(-global::largnum), _minBbox() {}
+        : TopoFeature(), m_poly(), m_groundElevations(), m_polyInternalID(new_internal_id()),
+          m_groundElevation(-global::largnum), m_minBbox() {}
 
 PolyFeature::PolyFeature(const int outputLayerID)
-        : TopoFeature(outputLayerID), _poly(), _groundElevations(), _polyInternalID(new_internal_id()),
-      _groundElevation(-global::largnum), _minBbox() {}
+        : TopoFeature(outputLayerID), m_poly(), m_groundElevations(), m_polyInternalID(new_internal_id()),
+          m_groundElevation(-global::largnum), m_minBbox() {}
 
 PolyFeature::PolyFeature(const nlohmann::json& poly, const bool checkSimplicity)
-        : TopoFeature(), _groundElevations(), _polyInternalID(new_internal_id()),
-      _groundElevation(-global::largnum), _minBbox() {
+        : TopoFeature(), m_groundElevations(), m_polyInternalID(new_internal_id()),
+          m_groundElevation(-global::largnum), m_minBbox() {
     this->parse_json_poly(poly, checkSimplicity);
 }
 
 PolyFeature::PolyFeature(const nlohmann::json& poly, const bool checkSimplicity, const int outputLayerID)
         : PolyFeature(poly, checkSimplicity) {
-    _outputLayerID = outputLayerID;
-    if (_outputLayerID  >= _numOfOutputLayers) _numOfOutputLayers = _outputLayerID + 1;
+    m_outputLayerID = outputLayerID;
+    if (m_outputLayerID >= s_numOfOutputLayers) s_numOfOutputLayers = m_outputLayerID + 1;
 }
 
 PolyFeature::PolyFeature(const nlohmann::json& poly, const int outputLayerID)
         : PolyFeature(poly, false, outputLayerID) {}
 
 PolyFeature::PolyFeature(const Polygon_with_attr& poly, const bool checkSimplicity)
-        : TopoFeature(), _groundElevations(), _polyInternalID(new_internal_id()),
-          _groundElevation(-global::largnum), _minBbox() {
+        : TopoFeature(), m_groundElevations(), m_polyInternalID(new_internal_id()),
+          m_groundElevation(-global::largnum), m_minBbox() {
     bool isOuterRing = true;
     for (auto& ring : poly.polygon.rings()) {
         Polygon_2 tempPoly;
@@ -109,14 +109,14 @@ PolyFeature::PolyFeature(const Polygon_with_attr& poly, const bool checkSimplici
         } else {
             if (tempPoly.is_counterclockwise_oriented()) tempPoly.reverse_orientation();
         }
-        _poly._rings.push_back(tempPoly);
+        m_poly.m_rings.push_back(tempPoly);
     }
 }
 
 PolyFeature::PolyFeature(const Polygon_with_attr& poly, const bool checkSimplicity, const int outputLayerID)
         : PolyFeature(poly, checkSimplicity) {
-    _outputLayerID = outputLayerID;
-    if (_outputLayerID  >= _numOfOutputLayers) _numOfOutputLayers = _outputLayerID + 1;
+    m_outputLayerID = outputLayerID;
+    if (m_outputLayerID >= s_numOfOutputLayers) s_numOfOutputLayers = m_outputLayerID + 1;
 }
 
 PolyFeature::PolyFeature(const Polygon_with_attr& poly, const int outputLayerID)
@@ -124,12 +124,13 @@ PolyFeature::PolyFeature(const Polygon_with_attr& poly, const int outputLayerID)
 
 PolyFeature::~PolyFeature() = default;
 
-int PolyFeature::_numOfPolyFeatures = 0;
+int PolyFeature::s_numOfPolyFeatures = 0;
 
 void PolyFeature::calc_footprint_elevation_nni(const DT& dt) {
     typedef std::vector<std::pair<DT::Point, double>> Point_coordinate_vector;
+
     DT::Face_handle fh = nullptr;
-    for (auto& ring: _poly.rings()) {
+    for (auto& ring: m_poly.rings()) {
         std::vector<double> ringElevations;
         for (auto& polypt: ring) {
             Point_coordinate_vector coords;
@@ -139,7 +140,7 @@ void PolyFeature::calc_footprint_elevation_nni(const DT& dt) {
                     CGAL::natural_neighbor_coordinates_2(dt, pt, std::back_inserter(coords), fh);
 
             if (!result.third) {
-//                throw std::runtime_error("Trying to interpolate the point that lies outside the convex hull!");
+//                throw city4cfd_error("Trying to interpolate the point that lies outside the convex hull!");
                 this->deactivate();
                 return;
             }
@@ -150,14 +151,14 @@ void PolyFeature::calc_footprint_elevation_nni(const DT& dt) {
             }
             ringElevations.push_back(elevation);
         }
-        _groundElevations.push_back(ringElevations);
+        m_groundElevations.push_back(ringElevations);
     }
 }
 
 #ifndef NDEBUG
 void PolyFeature::calc_footprint_elevation_linear(const DT& dt) {
     DT::Face_handle fh = nullptr;
-    for (auto& ring : _poly.rings()) {
+    for (auto& ring : m_poly.rings()) {
         std::vector<double> ringHeights;
         for (auto& polypt : ring) {
             DT::Point pt(polypt.x(), polypt.y(), 0);
@@ -185,19 +186,19 @@ void PolyFeature::calc_footprint_elevation_linear(const DT& dt) {
             }
             ringHeights.push_back(h);
         }
-        _groundElevations.push_back(ringHeights);
+        m_groundElevations.push_back(ringHeights);
     }
 }
 #endif
 
 double PolyFeature::ground_elevation() {
-    if (_groundElevation < -global::largnum + global::smallnum) {
-        if (_groundElevations.empty()) throw std::runtime_error("Polygon elevations missing!"
+    if (m_groundElevation < -global::largnum + global::smallnum) {
+        if (m_groundElevations.empty()) throw city4cfd_error("Polygon elevations missing!"
                                                                 " Cannot calculate average");
         // calculating base elevation as 95 percentile of outer ring
-        _groundElevation = geomutils::percentile(_groundElevations.front(), 0.95);
+        m_groundElevation = geomutils::percentile(m_groundElevations.front(), 0.95);
     }
-    return _groundElevation;
+    return m_groundElevation;
 }
 
 ///*
@@ -205,9 +206,9 @@ double PolyFeature::ground_elevation() {
 // * Calculated on the fly as rarely used
 // */
 //double PolyFeature::slope_height() {
-//    if (_groundElevations.empty())throw std::runtime_error("Polygon elevations missing!"
+//    if (m_groundElevations.empty())throw city4cfd_error("Polygon elevations missing!"
 //                                                           " Cannot perform calculations");
-//    return this->ground_elevation() - geomutils::percentile(_groundElevations.front(), 0.2);
+//    return this->ground_elevation() - geomutils::percentile(m_groundElevations.front(), 0.2);
 //}
 
 bool PolyFeature::flatten_polygon_inner_points(const Point_set_3& pointCloud,
@@ -225,7 +226,7 @@ bool PolyFeature::flatten_polygon_inner_points(const Point_set_3& pointCloud,
 #ifdef CITY4CFD_POLYFEATURE_VERBOSE
     std::cout << "\nINFO: Flattening a polygon..." << std::endl;
     int nonSimpleRings = 0;
-    for (auto& ring : _poly.rings()) {
+    for (auto& ring : m_poly.rings()) {
         if (!ring.is_simple()) ++nonSimpleRings;
     }
     std::cout << "Non-simple rings: " << nonSimpleRings << std::endl;
@@ -233,10 +234,10 @@ bool PolyFeature::flatten_polygon_inner_points(const Point_set_3& pointCloud,
 
     std::vector<int>    indices;
     std::vector<double> originalHeights;
-    auto building_pt = pointCloud.property_map<std::shared_ptr<Building>>("building_point").first;
+    auto buildingPt = pointCloud.property_map<std::shared_ptr<Building>>("building_point").first;
     //-- Take tree subset bounded by the polygon
     std::vector<Point_3> subsetPts;
-    Polygon_2 bbox = geomutils::calc_bbox_poly(_poly.rings().front());
+    Polygon_2 bbox = geomutils::calc_bbox_poly(m_poly.rings().front());
     Point_2 bbox1(bbox[0].x(), bbox[0].y());
     Point_2 bbox2(bbox[2].x(), bbox[2].y());
     Fuzzy_iso_box pts_range(bbox1, bbox2);
@@ -246,12 +247,12 @@ bool PolyFeature::flatten_polygon_inner_points(const Point_set_3& pointCloud,
     std::map<int, std::shared_ptr<Building>> overlappingBuildings; //id-building map
     for (auto& pt3 : subsetPts) {
         Point_2 pt(pt3.x(), pt3.y());
-        if (geomutils::point_in_poly_and_boundary(pt, _poly)) {
+        if (geomutils::point_in_poly_and_boundary(pt, m_poly)) {
             auto itIdx = pointCloudConnectivity.find(pt3);
             auto pointSetIt = pointCloud.begin();
             std::advance(pointSetIt, itIdx->second);
 
-            auto currBuilding = building_pt[*pointSetIt];
+            auto currBuilding = buildingPt[*pointSetIt];
             if (currBuilding != nullptr) {
                 int buildingId = currBuilding->get_internal_id();
                 auto it = overlappingBuildings.find(buildingId);
@@ -280,7 +281,7 @@ bool PolyFeature::flatten_polygon_inner_points(const Point_set_3& pointCloud,
         CGAL_assertion(polySet.is_valid());
         // Clip with this polygon
         polySet.complement();
-        polySet.intersection(_poly.get_exact());
+        polySet.intersection(m_poly.get_exact());
         // Store this as the new polygon
         std::vector<CGAL::Polygon_with_holes_2<EPECK>> resPolys;
         polySet.polygons_with_holes(std::back_inserter(resPolys));
@@ -295,33 +296,33 @@ bool PolyFeature::flatten_polygon_inner_points(const Point_set_3& pointCloud,
         bool isFirst = true;
         for (auto& poly : flattenCandidatePolys) {
             const double offsetVal = 0.1; // offset value hardcoded
-            PolygonPtrVectorWH offset_poly =
+            PolygonPtrVectorWH offsetPoly =
                     CGAL::create_interior_skeleton_and_offset_polygons_with_holes_2(offsetVal,
                                                                                     poly.get_cgal_type());
 #ifdef CITY4CFD_POLYFEATURE_VERBOSE
-            std::cout << "Offset polygons created: " << offset_poly.size() << std::endl;
+            std::cout << "Offset polygons created: " << offsetPoly.size() << std::endl;
 #endif
-            if (!offset_poly.empty()) { // make a check whether the offset is successfully created
-                poly = *(offset_poly.front());
+            if (!offsetPoly.empty()) { // make a check whether the offset is successfully created
+                poly = *(offsetPoly.front());
             } else {
-                std::cout << "WARNING: Skeleton construction failed! Some surfaces might not be flattened." << std::endl;
+                std::cout << "WARNING: Polygon ID" << m_id << " Skeleton construction failed! Some polygons will not be flattened." << std::endl;
                 return false;
             }
             if (isFirst) {
-                _poly = Polygon_with_holes_2(*(offset_poly.front()));
+                m_poly = Polygon_with_holes_2(*(offsetPoly.front()));
                 isFirst = false;
             } else {
                 // Some polys are cut -- save the new resulting polys and add them as new features in Map3D
-                newPolys.emplace_back(Polygon_with_holes_2(*(offset_poly.front())), _outputLayerID);
+                newPolys.emplace_back(Polygon_with_holes_2(*(offsetPoly.front())), m_outputLayerID);
             }
         }
     } else {
         if (!overlappingBuildings.empty()) {
-            std::cout << "WARNING: Polygon ID" << _id << " flattening failed due to unresolved"
+            std::cout << "WARNING: Polygon ID" << m_id << " flattening failed due to unresolved"
                                                          " intersections with buildings!" << std::endl;
             return false;
         }
-        flattenCandidatePolys.push_back(_poly);
+        flattenCandidatePolys.push_back(m_poly);
     }
     //-- Collect points that have not been already flattened
     for (auto& pt3 : subsetPts) {
@@ -365,7 +366,7 @@ bool PolyFeature::flatten_polygon_inner_points(const Point_set_3& pointCloud,
 }
 
 void PolyFeature::set_zero_borders() {
-    for (auto& ring : _groundElevations) {
+    for (auto& ring : m_groundElevations) {
         for (auto& pt : ring) {
             pt = 0.;
         }
@@ -373,11 +374,11 @@ void PolyFeature::set_zero_borders() {
 }
 
 void PolyFeature::calc_min_bbox() {
-    if (_poly.rings().front().is_empty()) throw std::runtime_error("Missing polygon!");
+    if (m_poly.rings().front().is_empty()) throw city4cfd_error("Missing polygon!");
     //-- Point set needs to be convex for the rotating caliper algorithm
     std::vector<Point_2> chull;
-    CGAL::convex_hull_2(_poly.rings().front().vertices_begin(),
-                        _poly.rings().front().vertices_end(),
+    CGAL::convex_hull_2(m_poly.rings().front().vertices_begin(),
+                        m_poly.rings().front().vertices_end(),
                         std::back_inserter(chull));
 
     std::vector<Point_2> obbPts; obbPts.reserve(4);
@@ -386,48 +387,48 @@ void PolyFeature::calc_min_bbox() {
                           std::back_inserter(obbPts));
     assert(obbPts.size() == 4);
 
-    _minBbox.vec1 = obbPts[1] - obbPts[0];
-    _minBbox.vec2 = obbPts[3] - obbPts[0];
+    m_minBbox.vec1 = obbPts[1] - obbPts[0];
+    m_minBbox.vec2 = obbPts[3] - obbPts[0];
 
-    _minBbox.calc();
+    m_minBbox.calc();
 }
 
 void PolyFeature::clear_feature() {
-    _groundElevations.clear();
-    _mesh.clear();
+    m_groundElevations.clear();
+    m_mesh.clear();
 }
 
 int PolyFeature::new_internal_id() {
-    return ++_numOfPolyFeatures;
+    return ++s_numOfPolyFeatures;
 }
 
 Polygon_with_holes_2& PolyFeature::get_poly() {
-    return _poly;
+    return m_poly;
 }
 
 const Polygon_with_holes_2& PolyFeature::get_poly() const {
-    return _poly;
+    return m_poly;
 }
 
 Polygon_with_attr PolyFeature::get_poly_w_attr() const {
     Polygon_with_attr poly;
-    poly.polygon = _poly;
+    poly.polygon = m_poly;
     return poly;
 }
 
 const std::vector<std::vector<double>>& PolyFeature::get_ground_elevations() const {
-    return _groundElevations;
+    return m_groundElevations;
 }
 
 const int PolyFeature::get_internal_id() const {
-    return _polyInternalID;
+    return m_polyInternalID;
 }
 
 MinBbox& PolyFeature::get_min_bbox() {
-    if (_minBbox.empty()) {
+    if (m_minBbox.empty()) {
         this->calc_min_bbox();
     }
-    return _minBbox;
+    return m_minBbox;
 }
 
 void PolyFeature::parse_json_poly(const nlohmann::json& poly, const bool checkSimplicity) {
@@ -464,11 +465,11 @@ void PolyFeature::parse_json_poly(const nlohmann::json& poly, const bool checkSi
                 }
             }
         }
-        if (_poly._rings.empty()) {
+        if (m_poly.m_rings.empty()) {
             if (tempPoly.is_clockwise_oriented()) tempPoly.reverse_orientation();
         } else {
             if (tempPoly.is_counterclockwise_oriented()) tempPoly.reverse_orientation();
         }
-        _poly._rings.push_back(tempPoly);
+        m_poly.m_rings.push_back(tempPoly);
     }
 }

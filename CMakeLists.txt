@@ -7,9 +7,9 @@ project(city4cfd)
 set(CMAKE_CXX_FLAGS "-O3")
 set(CMAKE_BUILD_TYPE "Release")
 
-if (COMMAND cmake_policy)
-    cmake_policy(SET CMP0003 NEW)
-endif()
+#if (COMMAND cmake_policy)
+#    cmake_policy(SET CMP0003 NEW)
+#endif()
 
 if (MSVC)
     add_definitions(-DNOMINMAX)
@@ -17,7 +17,7 @@ if (MSVC)
 endif (MSVC)
 
 # BOOST
-find_package(Boost 1.66 REQUIRED COMPONENTS filesystem locale)
+find_package(Boost 1.66 REQUIRED COMPONENTS filesystem locale QUIET)
 if (WIN32)
     FIND_PACKAGE(Boost)
     if (Boost_FOUND)
@@ -29,26 +29,24 @@ if (WIN32)
 endif (WIN32)
 
 # CGAL
-find_package(CGAL REQUIRED QUIET COMPONENTS)
-if (CGAL_VERSION VERSION_GREATER_EQUAL "5.0")
-    message(STATUS "Found CGAL version greater than 5.0")
-    include_directories(${CMAKE_SOURCE_DIR}/thirdparty/CGAL/include)
-    set(CGAL_USE_INCLUDED_HEADERS ON)
+find_package(CGAL REQUIRED)
+if (CGAL_VERSION VERSION_GREATER_EQUAL "5.5")
+   message(STATUS "Found CGAL version ${CGAL_VERSION}")
 else()
-    message(FATAL_ERROR "Found CGAL version ${CGAL_VERSION} which is not supported!"
-            "Please use CGAL version 5")
-    return()
+   message(FATAL_ERROR "Found CGAL version ${CGAL_VERSION} which is not supported!"
+           "Please use CGAL version 5.5 or higher")
+   return()
 endif ()
 
 # GDAL
-find_package(GDAL REQUIRED 3.0)
+find_package(GDAL 3.0 REQUIRED)
 if (NOT GDAL_FOUND)
     message(SEND_ERROR "City4CFD requires the GDAL library, check the README for configuration")
 endif()
 include_directories(${GDAL_INCLUDE_DIR})
 
 # Eigen
-find_package(Eigen3 3.2.0) #(requires 3.2.0 or greater)
+find_package(Eigen3 3.3.4)
 include(${CMAKE_SOURCE_DIR}/thirdparty/CGAL/cmake/CGAL_Eigen3_support.cmake)
 
 # OpenMP
@@ -62,9 +60,12 @@ endif()
 # Third-party
 add_subdirectory(${CMAKE_SOURCE_DIR}/thirdparty/LAStools)
 add_subdirectory(${CMAKE_SOURCE_DIR}/thirdparty/CSF/src)
+add_subdirectory(${CMAKE_SOURCE_DIR}/thirdparty/roofer/src)
+add_subdirectory(${CMAKE_SOURCE_DIR}/thirdparty/val3dity)
 include_directories(${CMAKE_SOURCE_DIR}/thirdparty)
 include_directories(${CMAKE_SOURCE_DIR}/thirdparty/valijson)
 include_directories(${Boost_INCLUDE_DIR})
+include_directories(${CMAKE_SOURCE_DIR}/thirdparty/roofer/src)
 
 # Tools
 add_subdirectory(${CMAKE_SOURCE_DIR}/tools/prepare_point_cloud)
@@ -74,7 +75,7 @@ FILE(GLOB SRC_FILES "src/*.cpp")
 add_executable(city4cfd ${SRC_FILES})
 set_target_properties(
         city4cfd
-        PROPERTIES CXX_STANDARD 14
+        PROPERTIES CXX_STANDARD 17
 )
 
 target_link_libraries(city4cfd
@@ -86,6 +87,8 @@ target_link_libraries(city4cfd
         ${Boost_LOCALE_LIBRARY}
         LASlib
         CGAL::Eigen3_support
+        roofer_api
+        val3dity
         ${OpenMP_support}
         )
 

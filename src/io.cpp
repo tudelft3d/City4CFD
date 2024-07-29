@@ -6,16 +6,16 @@
   This file is part of City4CFD.
 
   City4CFD is free software: you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
+  it under the terms of the GNU Affero General Public License as published by
   the Free Software Foundation, either version 3 of the License, or
   (at your option) any later version.
 
   City4CFD is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
+  GNU Affero General Public License for more details.
 
-  You should have received a copy of the GNU General Public License
+  You should have received a copy of the GNU Affero General Public License
   along with City4CFD.  If not, see <http://www.gnu.org/licenses/>.
 
   For any information or further details about the use of City4CFD, contact
@@ -51,7 +51,7 @@ void IO::read_config(std::string& config_path) {
     //-- Filepaths in the json file are relative to the location of the json file
     Config::get().workDir = fs::path(config_path).parent_path();
     fs::current_path(Config::get().workDir);
-    std::cout << "Work directory: " << fs::canonical(Config::get().workDir) << std::endl;
+    std::cout << "Working directory: " << fs::canonical(Config::get().workDir) << std::endl;
 
     nlohmann::json j;
     try {
@@ -73,7 +73,7 @@ bool IO::read_point_cloud(std::string& file, Point_set_3& pc) {
     std::ifstream ifile(file, std::ios_base::binary);
     if (IO::has_substr(file, ".las") || IO::has_substr(file, ".laz")) {
         if (!CGAL::IO::read_LAS(ifile, pc.point_back_inserter())) {
-            throw std::runtime_error("Error reading LAS point cloud!");
+            throw city4cfd_error("Error reading LAS point cloud!");
         }
     } else {
         ifile >> pc;
@@ -114,7 +114,7 @@ void IO::read_geojson_polygons(std::string& file, JsonVectorPtr& jsonPolygons) {
 //            ++count;
         }
     } catch (std::exception& e) {
-        throw std::runtime_error(std::string("Error parsing JSON file '" + file + "'. Details: " + e.what()));
+        throw city4cfd_error(std::string("Error parsing JSON file '" + file + "'. Details: " + e.what()));
     }
 }
 
@@ -123,7 +123,7 @@ void IO::read_polygons(std::string& file, PolyVecPtr& polygons, std::string* crs
     GDALAllRegister();
     GDALDataset *inputMapDataset = (GDALDataset*) GDALOpenEx(file.c_str(), GDAL_OF_READONLY, NULL, NULL, NULL);
     if (inputMapDataset == NULL) {
-        throw std::runtime_error("Error: Could not open input polygon");
+        throw city4cfd_error("Error: Could not open input polygon");
     }
     std::cout << "    Reading polygon file: " << file << " type: " << inputMapDataset->GetDriverName() << std::endl;
 
@@ -267,7 +267,7 @@ void IO::read_other_geometries(std::string& file, std::vector<Mesh>& meshes) {
 
     Mesh mesh;
     if(!PMP::IO::read_polygon_mesh(file, mesh)) {
-        throw std::runtime_error("Error parsing file '" + file);
+        throw city4cfd_error("Error parsing file '" + file);
     }
     PMP::transform(Affine_transformation_3(CGAL::Translation(),
                                            Vector_3(-Config::get().pointOfInterest.x(),
@@ -301,7 +301,7 @@ void IO::read_cityjson_geometries(std::string& file, JsonVectorPtr& importedBuil
             }
         }
     } catch (std::exception& e) {
-        throw std::runtime_error(std::string("Error parsing JSON file '" + file + "'. Details: " + e.what()));
+        throw city4cfd_error(std::string("Error parsing JSON file '" + file + "'. Details: " + e.what()));
     }
 }
 
@@ -325,14 +325,15 @@ void IO::print_progress_bar(int percent) {
 }
 
 void IO::output_obj(const OutputFeaturesPtr& allFeatures) {
-    int numOutputSurfaces = TopoFeature::get_num_output_layers();
+    int numOutputLayers = TopoFeature::get_num_output_layers();
     std::vector<std::ofstream> of;
-    std::vector<std::string>   fs(numOutputSurfaces), bs(numOutputSurfaces);
+    std::vector<std::string>   fs(numOutputLayers), bs(numOutputLayers);
 
-    std::vector<std::unordered_map<std::string, int>> dPts(numOutputSurfaces);
+    std::vector<std::unordered_map<std::string, int>> dPts(numOutputLayers);
     //-- Output points
 //    int count = 0; // to output each building as a separate group
     for (auto& f : allFeatures) {
+        assert(f->get_output_layer_id() > -1 && f->get_output_layer_id() < numOutputLayers);
         if (Config::get().outputSeparately) {
 //            if (f->get_class() == BUILDING)
 //                bs[f->get_output_layer_id()] += "\no " + std::to_string(count++);
@@ -370,6 +371,7 @@ void IO::output_stl(const OutputFeaturesPtr& allFeatures) {
 
     //-- Get all triangles
     for (auto& f : allFeatures) {
+        assert(f->get_output_layer_id() > -1 && f->get_output_layer_id() < numOutputLayers);
         if (!f->is_active()) continue;
         IO::get_stl_pts(f->get_mesh(), fs[f->get_output_layer_id()]);
     }
@@ -442,7 +444,7 @@ void IO::get_obj_pts(const Mesh& mesh,
                      std::string& fs,
                      std::string& bs,
                      std::unordered_map<std::string, int>& dPts) {
-    for (auto& face : mesh.faces()) {
+    for (auto face : mesh.faces()) {
         if (IO::is_degen(mesh, face)) continue;
         std::string bsTemp;
         for (auto index : CGAL::vertices_around_face(mesh.halfedge(face), mesh)) {
@@ -465,7 +467,7 @@ void IO::get_stl_pts(Mesh& mesh, std::string& fs) {
     auto vnormals = mesh.add_property_map<vertex_descriptor, Vector_3>("v:normals", CGAL::NULL_VECTOR).first;
     auto fnormals = mesh.add_property_map<face_descriptor, Vector_3>("f:normals", CGAL::NULL_VECTOR).first;
     PMP::compute_normals(mesh, vnormals, fnormals);
-    for (auto& face : mesh.faces()) {
+    for (auto face : mesh.faces()) {
         if (IO::is_degen(mesh, face)) continue;
         std::vector<std::string> outputPts;
         for (auto index: CGAL::vertices_around_face(mesh.halfedge(face), mesh)) {
@@ -484,9 +486,9 @@ void IO::get_stl_pts(Mesh& mesh, std::string& fs) {
 void IO::get_cityjson_geom(const Mesh& mesh, nlohmann::json& g, std::unordered_map<std::string, int>& dPts,
                            std::string primitive) {
     g["type"] = primitive;
-    g["lod"] = Config::get().lod;
+    g["lod"] = "1.2"; //hardcoded for now
     g["boundaries"];
-    for (auto& face: mesh.faces()) {
+    for (auto face: mesh.faces()) {
         if (IO::is_degen(mesh, face)) continue;
         std::vector<int> tempPoly;
         tempPoly.reserve(3);
@@ -542,7 +544,7 @@ void IO::output_log() {
     of.close();
 }
 
-void IO::output_log(const BuildingsPtr failedBuildings) {
+void IO::output_log(const BuildingsPtr& failedBuildings) {
     if (!Config::get().outputLog) return;
     fs::current_path(Config::get().outputDir);
 

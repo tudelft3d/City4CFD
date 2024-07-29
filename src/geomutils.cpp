@@ -6,16 +6,16 @@
   This file is part of City4CFD.
 
   City4CFD is free software: you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
+  it under the terms of the GNU Affero General Public License as published by
   the Free Software Foundation, either version 3 of the License, or
   (at your option) any later version.
 
   City4CFD is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
+  GNU Affero General Public License for more details.
 
-  You should have received a copy of the GNU General Public License
+  You should have received a copy of the GNU Affero General Public License
   along with City4CFD.  If not, see <http://www.gnu.org/licenses/>.
 
   For any information or further details about the use of City4CFD, contact
@@ -30,9 +30,12 @@
 //#include <CGAL/compute_average_spacing.h>
 #include <CGAL/Boolean_set_operations_2/do_intersect.h>
 #include <CGAL/Polygon_mesh_processing/repair.h>
+#include <CGAL/approximated_offset_2.h>
+#include <CGAL/IO/WKT.h>
+#include <geos_c.h>
 
 double geomutils::avg(const std::vector<double>& values) {
-    if (values.empty()) throw std::length_error("Can't calculate average of a zero-sized vector!");
+    if (values.empty()) throw city4cfd_error("Can't calculate average of a zero-sized vector!");
     double average = 0;
     for (auto& value : values) {
         average += value;
@@ -42,7 +45,7 @@ double geomutils::avg(const std::vector<double>& values) {
 
 double geomutils::percentile(std::vector<double> values, const double percentile) {
     assert(percentile >= 0 && percentile <= 1);
-    if (values.empty()) throw std::length_error("Can't calculate percentile of a zero-sized vector!");
+    if (values.empty()) throw city4cfd_error("Can't calculate percentile of a zero-sized vector!");
     std::sort(values.begin(), values.end());
     int i = values.size() * percentile;
     return values[i];
@@ -61,13 +64,13 @@ bool geomutils::point_in_circle(const Point_3& pt, const Point_2& center, const 
 
 void geomutils::cdt_to_mesh(CDT& cdt, Mesh& mesh, const int surfaceLayerID) {
     std::map<CDT::Vertex_handle, int> indices;
-    std::vector<Mesh::vertex_index> mesh_vertex;
-    std::vector<Mesh::face_index> face_index;
-    mesh_vertex.reserve(cdt.number_of_vertices());
+    std::vector<Mesh::vertex_index> meshVertexIdx;
+    std::vector<Mesh::face_index> meshFaceIdx;
+    meshVertexIdx.reserve(cdt.number_of_vertices());
 
     int counter = 0;
     for (const auto& it : cdt.finite_vertex_handles()) {
-        mesh_vertex.emplace_back(mesh.add_vertex(Converter<EPECK, EPICK>()(it->point())));
+        meshVertexIdx.emplace_back(mesh.add_vertex(Converter<EPECK, EPICK>()(it->point())));
         //        outstream << it->point() << std::endl;
         indices.insert(std::pair<CDT::Vertex_handle, int>(it, counter++));
     }
@@ -78,18 +81,18 @@ void geomutils::cdt_to_mesh(CDT& cdt, Mesh& mesh, const int surfaceLayerID) {
         int v1 = indices[it->vertex(0)];
         int v2 = indices[it->vertex(1)];
         int v3 = indices[it->vertex(2)];
-        mesh.add_face(mesh_vertex[v1], mesh_vertex[v2], mesh_vertex[v3]);
+        mesh.add_face(meshVertexIdx[v1], meshVertexIdx[v2], meshVertexIdx[v3]);
     }
 }
 
 void geomutils::dt_to_mesh(DT& dt, Mesh& mesh) {
     std::map<DT::Vertex_handle, int> indices;
-    std::vector<Mesh::vertex_index> mesh_vertex;
-    std::vector<Mesh::face_index> face_index;
-    mesh_vertex.reserve(dt.number_of_vertices());
+    std::vector<Mesh::vertex_index> meshVertexIdx;
+    std::vector<Mesh::face_index> meshFaceIdx;
+    meshVertexIdx.reserve(dt.number_of_vertices());
     int counter = 0;
     for (const auto& it : dt.finite_vertex_handles()) {
-        mesh_vertex.emplace_back(mesh.add_vertex(it->point()));
+        meshVertexIdx.emplace_back(mesh.add_vertex(it->point()));
         //        outstream << it->point() << std::endl;
         indices.insert(std::pair<DT::Vertex_handle, int>(it, counter++));
     }
@@ -97,7 +100,7 @@ void geomutils::dt_to_mesh(DT& dt, Mesh& mesh) {
         int v1 = indices[it->vertex(0)];
         int v2 = indices[it->vertex(1)];
         int v3 = indices[it->vertex(2)];
-        mesh.add_face(mesh_vertex[v1], mesh_vertex[v2], mesh_vertex[v3]);
+        mesh.add_face(meshVertexIdx[v1], meshVertexIdx[v2], meshVertexIdx[v3]);
     }
 }
 
@@ -202,11 +205,11 @@ void geomutils::interpolate_poly_from_pc(const Polygon_2& poly, std::vector<doub
         Point_2 query(polypt.x(), polypt.y());
         Neighbor_search search(searchTree, query, 5);
 
-        std::vector<double> poly_elevation;
+        std::vector<double> polyElevation;
         for (Neighbor_search::iterator it = search.begin(); it != search.end(); ++it) {
-            poly_elevation.push_back(it->first.z());
+            polyElevation.push_back(it->first.z());
         }
-        elevations.emplace_back(geomutils::avg(poly_elevation));
+        elevations.emplace_back(geomutils::avg(polyElevation));
     }
 }
 
@@ -215,7 +218,7 @@ void geomutils::remove_self_intersections(Mesh& mesh) {
 #ifndef __clang__
     PMP::experimental::remove_self_intersections(mesh);
 #else
-    throw std::runtime_error(std::string("Function remove_self_intersections() does not work with clang compiler!"
+    throw city4cfd_error(std::string("Function remove_self_intersections() does not work with clang compiler!"
                                          " Set 'handle_self_intersections' to false"
                                          " or recompile the program again using gcc"));
 #endif
@@ -232,6 +235,61 @@ bool geomutils::polygons_in_contact(const Polygon_with_holes_2& firstPoly, const
         }
     }
     return false;
+}
+
+Polygon_2 geomutils::offset_polygon(const Polygon_2& poly, double offset) {
+    typedef CGAL::Gps_circle_segment_traits_2<EPICK> Gps_traits_2;
+    typedef Gps_traits_2::General_polygon_2 General_polygon_2;
+
+    // offset polygon with Minkowski
+    auto offsetPoly = CGAL::approximated_offset_2(poly, offset, 0.0001); //todo get minkowski sum
+    const General_polygon_2& outerBoundary = offsetPoly.outer_boundary();
+    Polygon_2 offsetOutputPoly;
+    // convert to linear polygon
+    for (auto cit = outerBoundary.curves_begin();
+         cit !=outerBoundary.curves_end();++cit) {
+        auto offsetPt = Point_2((cit->source().x().alpha()) +
+                                (cit->source().x().beta() * CGAL::approximate_sqrt(cit->source().x().gamma())),
+                                (cit->source().y().alpha()) +
+                                (cit->source().y().beta() * CGAL::approximate_sqrt(cit->source().y().gamma())));
+        offsetOutputPoly.push_back(offsetPt);
+    }
+    return offsetOutputPoly;
+}
+
+Polygon_with_holes_2 geomutils::offset_polygon_with_holes(const Polygon_with_holes_2& poly, double offset) {
+    typedef CGAL::Gps_circle_segment_traits_2<EPICK> Gps_traits_2;
+    typedef Gps_traits_2::General_polygon_2 General_polygon_2;
+
+    Polygon_with_holes_2 offsetPolywHoles;
+
+    // offset polygon with Minkowski
+    auto cgalPoly = poly.get_cgal_type();
+    auto offsetPoly = CGAL::approximated_offset_2(cgalPoly, offset, 0.0001);
+    const General_polygon_2& outerBoundary = offsetPoly.outer_boundary();
+    Polygon_2 outerRing;
+    // convert to linear polygon
+    for (auto cit = outerBoundary.curves_begin();
+         cit !=outerBoundary.curves_end();++cit) {
+        auto offsetPt = Point_2((cit->source().x().alpha()) +
+                                (cit->source().x().beta() * CGAL::approximate_sqrt(cit->source().x().gamma())),
+                                (cit->source().y().alpha()) +
+                                (cit->source().y().beta() * CGAL::approximate_sqrt(cit->source().y().gamma())));
+        outerRing.push_back(offsetPt);
+    }
+    offsetPolywHoles.rings().push_back(outerRing);
+    for (auto hit = offsetPoly.holes_begin(); hit != offsetPoly.holes_end(); ++hit) {
+        Polygon_2 hole;
+        for (auto cit = hit->curves_begin(); cit != hit->curves_end(); ++cit) {
+            auto offsetPt = Point_2((cit->source().x().alpha()) +
+                                    (cit->source().x().beta() * CGAL::approximate_sqrt(cit->source().x().gamma())),
+                                    (cit->source().y().alpha()) +
+                                    (cit->source().y().beta() * CGAL::approximate_sqrt(cit->source().y().gamma())));
+            hole.push_back(offsetPt);
+        }
+        offsetPolywHoles.rings().push_back(hole);
+    }
+    return offsetPolywHoles;
 }
 
 Polygon_with_holes_2 geomutils::exact_poly_to_poly(const CGAL::Polygon_with_holes_2<EPECK>& exactPoly) {
@@ -409,6 +467,63 @@ Polygon_2 geomutils::calc_bbox_poly(const T& inputPts) {
 //- Explicit template instantiation
 template Polygon_2 geomutils::calc_bbox_poly<std::vector<Point_2>>(const std::vector<Point_2>& inputPts);
 template Polygon_2 geomutils::calc_bbox_poly<Polygon_2>(const Polygon_2& inputPts);
+
+template <typename T>
+T geomutils::offset_polygon_geos(T poly, double offset) {
+    // add the first point to end to fulfil ogc simple feature requirements
+    if constexpr (std::is_same_v<T, Polygon_2>) {
+        poly.push_back(*poly.begin());
+    } else if constexpr (std::is_same_v<T, CGAL::Polygon_with_holes_2<EPICK>>) {
+        poly.outer_boundary().push_back(*poly.outer_boundary().begin());
+        for (auto& hole : poly.holes()) {
+            hole.push_back(*hole.begin());
+        }
+    }
+
+    // start geos
+    initGEOS(NULL, NULL);
+    // use wkt as an adapter from cgal to geos
+    std::stringstream wkt;
+    wkt << std::setprecision(10);
+    CGAL::IO::write_polygon_WKT(wkt, poly);
+    auto mygeom = GEOSGeomFromWKT(wkt.str().c_str());
+
+    if (!mygeom) {
+        // free memory before throwing exception
+        GEOSGeom_destroy(mygeom);
+        finishGEOS();
+        throw city4cfd_error("Error in converting CGAL polygon to GEOS through WKT");
+    }
+
+    // use geos to buffer the polygon
+    auto bufferParams = GEOSBufferParams_create();
+    GEOSBufferParams_setEndCapStyle(bufferParams, GEOSBUF_CAP_SQUARE);
+    auto buffer = GEOSBufferWithParams(mygeom, bufferParams, offset);
+
+    // transfer back to CGAL
+    auto bufferedWKT = GEOSGeomToWKT(buffer);
+
+    // convert char* to stringstream
+    std::stringstream bufferedWKTss;
+    bufferedWKTss << bufferedWKT;
+    // convert back to CGAL form
+    T offsetPoly;
+    CGAL::read_polygon_WKT(bufferedWKTss, offsetPoly); // the function does pop_back_if_equal_to_front internally
+
+    // geos cleanup
+    GEOSGeom_destroy(mygeom);
+    GEOSGeom_destroy(buffer);
+    GEOSBufferParams_destroy(bufferParams);
+    GEOSFree(bufferedWKT);
+    finishGEOS();
+
+    return offsetPoly;
+}
+//- Explicit template instantiation
+template Polygon_2 geomutils::offset_polygon_geos<Polygon_2>(Polygon_2 poly, double offset);
+template CGAL::Polygon_with_holes_2<EPICK>
+        geomutils::offset_polygon_geos<CGAL::Polygon_with_holes_2<EPICK>>
+        (CGAL::Polygon_with_holes_2<EPICK> poly, double offset);
 
 template <typename T>
 void geomutils::pop_back_if_equal_to_front(CGAL::Polygon_2<T>& poly)

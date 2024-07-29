@@ -6,16 +6,16 @@
   This file is part of City4CFD.
 
   City4CFD is free software: you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
+  it under the terms of the GNU Affero General Public License as published by
   the Free Software Foundation, either version 3 of the License, or
   (at your option) any later version.
 
   City4CFD is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
+  GNU Affero General Public License for more details.
 
-  You should have received a copy of the GNU General Public License
+  You should have received a copy of the GNU Affero General Public License
   along with City4CFD.  If not, see <http://www.gnu.org/licenses/>.
 
   For any information or further details about the use of City4CFD, contact
@@ -44,6 +44,8 @@ namespace geomutils {
     Point_3 rotate_pt_xy(const Point_3& pt, const double angle, Point_2 centerPt = Point_2(0, 0));
     void    interpolate_poly_from_pc(const Polygon_2& poly, std::vector<double>& elevations, const Point_set_3& pointCloud);
     bool    polygons_in_contact(const Polygon_with_holes_2& firstPoly, const Polygon_with_holes_2& secondPoly);
+    Polygon_2 offset_polygon(const Polygon_2& poly, double offset);
+    Polygon_with_holes_2 offset_polygon_with_holes(const Polygon_with_holes_2& poly, double offset);
     Polygon_with_holes_2 exact_poly_to_poly(const CGAL::Polygon_with_holes_2<EPECK>& exactPoly);
     void    remove_self_intersections(Mesh& mesh);
 
@@ -57,6 +59,7 @@ namespace geomutils {
                                                int nPts, double angInt, double ang, T& poly);
 //    template <typename T, typename U> void smooth_dt (const Point_set_3& pointCloud, T& dt);
     template <typename T> Polygon_2 calc_bbox_poly(const T& inputPts);
+    template <typename T> T offset_polygon_geos(T poly, double offset);
     template <typename T> void pop_back_if_equal_to_front(CGAL::Polygon_2<T>& poly);
 
     struct Array_traits {

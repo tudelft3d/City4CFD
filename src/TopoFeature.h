@@ -6,16 +6,16 @@
   This file is part of City4CFD.
 
   City4CFD is free software: you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
+  it under the terms of the GNU Affero General Public License as published by
   the Free Software Foundation, either version 3 of the License, or
   (at your option) any later version.
 
   City4CFD is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
+  GNU Affero General Public License for more details.
 
-  You should have received a copy of the GNU General Public License
+  You should have received a copy of the GNU Affero General Public License
   along with City4CFD.  If not, see <http://www.gnu.org/licenses/>.
 
   For any information or further details about the use of City4CFD, contact
@@ -38,6 +38,7 @@ public:
     TopoFeature(int outputLayerID);
     virtual ~TopoFeature();
 
+    static void          add_recon_region_output_layers(const int numLayers);
     static int           get_num_output_layers();
 
     virtual void         get_cityjson_info(nlohmann::json& b) const;
@@ -50,23 +51,23 @@ public:
     const Mesh& get_mesh() const;
     void        set_id(unsigned long id);
     std::string get_id() const;
-    const int   get_output_layer_id() const;
+    int         get_output_layer_id() const;
     bool        is_active() const;
     bool        is_imported() const;
     void        deactivate();
 
 protected:
-    static int _numOfOutputLayers;
+    static int s_numOfOutputLayers;
 
-    Mesh           _mesh;
-    std::string    _id;
-    bool           _f_active;
-    bool           _f_imported;
-    int            _outputLayerID; // 0- Terrain
-                                   // 1- Buildings
-                                   //    Surface Layers
-                                   //    Sides
-                                   //    Top
+    Mesh           m_mesh;
+    std::string    m_id;
+    bool           m_f_active;
+    bool           m_f_imported;
+    int            m_outputLayerID; // 0  Terrain
+                                    //    Building regions
+                                    //    Sides
+                                    //    Top
+                                    //    Surface Layers
 };
 
 #endif //CITY4CFD_TOPOFEATURE_H

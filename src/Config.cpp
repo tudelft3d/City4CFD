@@ -6,16 +6,16 @@
   This file is part of City4CFD.
 
   City4CFD is free software: you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
+  it under the terms of the GNU Affero General Public License as published by
   the Free Software Foundation, either version 3 of the License, or
   (at your option) any later version.
 
   City4CFD is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
+  GNU Affero General Public License for more details.
 
-  You should have received a copy of the GNU General Public License
+  You should have received a copy of the GNU Affero General Public License
   along with City4CFD.  If not, see <http://www.gnu.org/licenses/>.
 
   For any information or further details about the use of City4CFD, contact
@@ -77,7 +77,7 @@ void Config::validate(nlohmann::json& j) {
                     << "  desc:    " << error.description << std::endl;
             ++error_num;
         }
-        throw std::runtime_error(err_oss.str());
+        throw city4cfd_error(err_oss.str());
     }
 }
 
@@ -87,17 +87,59 @@ void Config::set_config(nlohmann::json& j) {
         if (j["point_clouds"].contains("ground")) ground_xyz = j["point_clouds"]["ground"];
         if (j["point_clouds"].contains("buildings")) buildings_xyz = j["point_clouds"]["buildings"];
     }
-
     //-- Domain setup
     pointOfInterest = Point_2(j["point_of_interest"][0], j["point_of_interest"][1]);
 
-    //- Influence region
-    std::string influRegionCursor = "influence_region";
-    Config::get().set_region(influRegionConfig, influRegionCursor, j);
+    //- Reconstruction regions setup
+    // need to define and add all reconstruction-specific parameters
+    int buildingOutputLayerID = 1;
+    for (auto regionJson : j["reconstruction_regions"]) {
+        std::shared_ptr<ReconRegion> reconRegion = std::make_shared<ReconRegion>();
+
+        //- Influence region
+        Config::get().set_region(reconRegion->influRegionConfig, "influence_region", regionJson);
+
+        reconRegion->lod = regionJson["lod"].front();
+        if (regionJson.contains("import_advantage"))
+            reconRegion->importAdvantage = regionJson["import_advantage"];
+        if (regionJson.contains("bpg_influence_region_extra"))
+            reconRegion->bpgInfluExtra = regionJson["bpg_influence_region_extra"];
+        if (regionJson.contains("complexity_factor"))
+            reconRegion->complexityFactor = regionJson["complexity_factor"];
+        if (regionJson.contains("lod13_step_height"))
+            reconRegion->lod13StepHeight = regionJson["lod13_step_height"];
+        if (regionJson.contains("validate"))
+            reconRegion->validate = regionJson["validate"];
+        if (regionJson.contains("enforce_validity"))
+            reconRegion->enforceValidity = regionJson["enforce_validity"];
+        if (regionJson.contains("relative_alpha"))
+            reconRegion->relativeAlpha = regionJson["relative_alpha"];
+        if (regionJson.contains("relative_offset"))
+            reconRegion->relativeOffset = regionJson["relative_offset"];
+        if (regionJson.contains("skip_gap_closing"))
+            reconRegion->skipGapClosing = regionJson["skip_gap_closing"];
+
+        // validate regardless if enforce_validity is present
+        if (!reconRegion->enforceValidity.empty()) reconRegion->validate = true;
+
+        // set the building (belonging to recon region) output layer id
+        reconRegion->outputLayerID = buildingOutputLayerID;
+        ++buildingOutputLayerID;
+
+        reconRegions.push_back(reconRegion);
+    }
+
+    // Handle output surface names for buildings
+    if (j["reconstruction_regions"].size() < 2) {
+        outputSurfaces.emplace_back("Buildings");
+    } else {
+        for (int i = 0; i < j["reconstruction_regions"].size(); ++i) {
+            outputSurfaces.emplace_back("Buildings_" + std::to_string(i));
+        }
+    }
 
     //- Domain boundaries
-    std::string domainBndCursor = "domain_bnd";
-    Config::get().set_region(domainBndConfig, domainBndCursor, j);
+    Config::get().set_region(domainBndConfig, "domain_bnd", j);
     // Define domain type if using BPG
     if (domainBndConfig.type() == typeid(bool)) {
         if (j.contains("flow_direction"))
@@ -142,7 +184,7 @@ void Config::set_config(nlohmann::json& j) {
 
     //-- Polygon configuration
     int i = 0;
-    int surfLayerIdx = outputSurfaces.size(); // 0 - terrain, 1 - buildings, surface layers start from 2
+    int surfLayerIdx = outputSurfaces.size(); // 0 terrain, 1-x buildings, x-y boundaries, y-z surface layers
     for (auto& poly : j["polygons"]) {
         if (poly["type"] == "Building") {
             gisdata = poly["path"];
@@ -159,7 +201,7 @@ void Config::set_config(nlohmann::json& j) {
             if (poly.contains("avoid_bad_polys"))
                 avoidBadPolys = poly["avoid_bad_polys"];
             if (poly.contains("refine"))
-                refineReconstructedBuildings = poly["refine"];
+                refineReconstructed= poly["refine"];
         }
         if (poly["type"] == "SurfaceLayer") {
             topoLayers.push_back(poly["path"]);
@@ -219,27 +261,25 @@ void Config::set_config(nlohmann::json& j) {
         flatTerrain = j["flat_terrain"];
 
     // Buildings
-    lod = j["lod"].front();
-    buildingPercentile = (double)j["building_percentile"].front() / 100.;
-    if (j.contains("min_height")) {
+    if (j.contains("building_percentile"))
+        buildingPercentile = (double)j["building_percentile"].front() / 100.;
+    if (j.contains("min_height"))
         minHeight = j["min_height"];
-    }
-    if (j.contains("reconstruct_failed")) {
+    if (j.contains("min_area"))
+        minArea = j["min_area"];
+    if (j.contains("reconstruct_failed"))
         reconstructFailed = j["reconstruct_failed"];
-    }
-    if (j.contains("intersect_buildings_terrain")) {
+    if (j.contains("intersect_buildings_terrain"))
        intersectBuildingsTerrain = j["intersect_buildings_terrain"];
-    }
 
     // Imported buildings
     if (j.contains("import_geometries")) {
         importedBuildingsPath = j["import_geometries"]["path"];
-        importAdvantage       = j["import_geometries"]["advantage"];
         importTrueHeight      = j["import_geometries"]["true_height"];
         if (j["import_geometries"].contains("lod"))
             importLoD = j["import_geometries"]["lod"];
         if (j["import_geometries"].contains("refine"))
-            refineImportedBuildings = j["import_geometries"]["refine"];
+            refineImported = j["import_geometries"]["refine"];
     }
 
     // Boundary
@@ -281,14 +321,14 @@ void Config::set_config(nlohmann::json& j) {
             clip = j["experimental"]["clip"];
         if (j["experimental"].contains("handle_self_intersections"))
             handleSelfIntersect = j["experimental"]["handle_self_intersections"];
-        if (j["experimental"].contains("alpha_wrap"))
-            alphaWrap = j["experimental"]["alpha_wrap"];
+        if (j["experimental"].contains("alpha_wrap_all"))
+            alphaWrapAll = j["experimental"]["alpha_wrap_all"];
     }
 }
 
 //-- influRegion and domainBndConfig flow control
 void Config::set_region(boost::variant<bool, double, Polygon_2>& regionType,
-                        std::string& regionName,
+                        const std::string regionName,
                         nlohmann::json& j) {
     if (j[regionName].is_string()) { // Search for GeoJSON polygon
         std::string polyFilePath = (std::string)j[regionName];

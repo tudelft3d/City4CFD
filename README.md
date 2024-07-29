@@ -5,16 +5,18 @@
 [![GitHub license](https://img.shields.io/github/license/tudelft3d/City4CFD?style=flat-square)](https://github.com/tudelft3d/City4CFD/blob/master/LICENSE)
 [![DOI:10.3389/fbuil.2022.899332](http://img.shields.io/badge/DOI-10.3389/fbuil.2022.899332-B62030.svg?style=flat-square)](https://doi.org/10.3389/fbuil.2022.899332)
 
-![welcome_figure](https://github.com/tudelft3d/City4CFD/blob/main/docs/images/workflow.png)
+![welcome_figure](/docs/images/workflow.png)
 
-City4CFD--*City for CFD*--is a tool that aims to automatically reconstruct 3D city geometries tailored for microscale urban flow simulations.
+City4CFD--*City for CFD*--is a tool that aims to automatically reconstruct high-detailed 3D city geometries tailored for microscale urban flow simulations.
 
-It can create automatically a terrain from a point cloud and imprint different surfaces (e.g. green areas, water, roads).
+It can automatically create a terrain from a point cloud and imprint different surfaces (e.g. green areas, water, roads).
 
 It enables us to reconstruct buildings from different sources and their combination, such as:
   - Reconstruction with the combination of 2D polygons and a point cloud,
   - Extrusion of footprints containing height or floor number attributes,
   - The import of existing building models.
+
+The reconstruction using the combination of point clouds and 2D polygons can be done in [LoD2.2, LoD1.3, and LoD1.2](https://3d.bk.tudelft.nl/lod/). You can use the [complexity factor](need link) to tune the overall complexity of the reconstructed geometry.
 
 The resulting geometry is watertight -- buildings and surfaces are seamlessly integrated into a terrain.
 
@@ -38,19 +40,25 @@ You can directly compile City4CFD on your system using cmake, run it through a D
 
 ### Build from source
 The following libraries are required to build the project:
-- [CGAL](https://www.cgal.org/) version 5
+- [CGAL](https://www.cgal.org/) >= 5.5
 - Boost >= 1.66
-- Eigen >= 3.2
+- Eigen >= 3.3.4
+- GMP >= 4.2
+- MPFR >= 2.2.1
 - GDAL >= 3.0
 
 *OpenMP* is an optional dependency.
 
-All dependencies are generally available in Linux distributions, e.g. in Debian/Ubuntu/Mint:
+GMP, MFPR, and Eigen are necessary dependencies for CGAL.
+
+Dependencies are generally available in Linux distributions, e.g. in Debian/Ubuntu/Mint:
 ```
-sudo apt-get install libcgal-dev libboost-all-dev libeigen3-dev libomp-dev libgdal-dev
+sudo apt-get install libcmpfr-dev libgmp-dev libboost-all-dev libeigen3-dev libomp-dev libgdal-dev
 ```
 
-In macOS you can install dependencies with Homebrew:
+CGAL can be directly downloaded from the [release page](https://github.com/CGAL/cgal/releases/tag/v5.6.1) (-library). No install is necessary, only the path to the unzipped folder is required (see below).
+
+In macOS you can install all dependencies with Homebrew:
 
 ```
 brew install cmake boost cgal eigen libomp gdal
@@ -61,11 +69,11 @@ The project uses CMake to generate makefiles, so make sure it is also installed.
 To build City4CFD, do the following:
 ```
 mkdir build && cd build
-cmake ..
+cmake .. -DCGAL_DIR=/path/to/cgal/dir
 make
 ./city4cfd
 ```
-You can speed up compilation by typing *make -j $numcores* where *$numcores* is the number of threads you can spare for compilation.
+In case of Homebrew, you do not have to use the ```-DCGAL_DIR``` parameter. You can speed up compilation by typing *make -j $numcores* where *$numcores* is the number of threads you can spare for compilation.
 
 ### Docker
 We offer built [Docker](https://www.docker.com/) images for every release, available at the [Docker Hub](https://hub.docker.com/r/tudelft3d/city4cfd). Running [the docker script](https://github.com/tudelft3d/City4CFD/tree/main/docker/run) for the first time will pull the docker image from the Docker Hub repository.

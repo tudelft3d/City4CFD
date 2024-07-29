@@ -1,8 +1,8 @@
 {
   "point_clouds" :
   {
-    "ground": "point_cloud/sampled_ground_1m.ply",
-    "buildings" : "point_cloud/sampled_buildings_1m.ply"
+    "ground": "point_cloud/sampled_ground_1m.laz",
+    "buildings" : "point_cloud/sampled_buildings.laz"
   },
   "polygons" : [
     {
@@ -21,9 +21,15 @@
       "layer_name": "Water"
     }
   ],
+  "reconstruction_regions": [
+    {
+      "influence_region":   300,
+      "lod": "2.2",
+      "complexity_factor": 0.7
+    }
+  ],
 
   "point_of_interest": [85376, 446125],
-  "influence_region":   300,
   "domain_bnd":         null,
   "top_height":         300,
 
@@ -39,7 +45,6 @@
     "max_pts": 100000
   },
 
-  "lod": "1.2",
   "building_percentile": 90,
 
   "edge_max_len": 5,

@@ -6,16 +6,16 @@
   This file is part of City4CFD.
 
   City4CFD is free software: you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
+  it under the terms of the GNU Affero General Public License as published by
   the Free Software Foundation, either version 3 of the License, or
   (at your option) any later version.
 
   City4CFD is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
+  GNU Affero General Public License for more details.
 
-  You should have received a copy of the GNU General Public License
+  You should have received a copy of the GNU Affero General Public License
   along with City4CFD.  If not, see <http://www.gnu.org/licenses/>.
 
   For any information or further details about the use of City4CFD, contact
@@ -37,38 +37,40 @@
 #include <CGAL/Polygon_mesh_processing/orient_polygon_soup.h>
 #include <CGAL/Polygon_mesh_processing/polygon_soup_to_polygon_mesh.h>
 #include <CGAL/Polygon_mesh_processing/triangulate_faces.h>
+#include <CGAL/Polygon_mesh_processing/compute_normal.h>
+
 
 int ImportedBuilding::noBottom = 0;
 
 ImportedBuilding::ImportedBuilding(std::unique_ptr<nlohmann::json>& buildingJson, PointSet3Ptr& importedBuildingPts)
-        : Building(), _buildingJson(std::move(buildingJson)),
-          _footprintIdxList(), _ptMap(), _appendToBuilding(false),
-          _lodIdx(-1), _footprintPtsIdxList(), _trueHeight(Config::get().importTrueHeight) {
+        : Building(), m_buildingJson(std::move(buildingJson)),
+          m_footprintIdxList(), m_ptMap(), m_appendToBuilding(false),
+          m_lodIdx(-1), m_footprintPtsIdxList(), m_trueHeight(Config::get().importTrueHeight) {
 
-    _f_imported = true; // the flag is here to avoid shorten polygons later. todo to fix
+    m_f_imported = true; // the flag is here to avoid shorten polygons later. todo to fix
     //-- ID is the partent building ID
-    _id = (*_buildingJson)["parents"].front();
+    m_id = (*m_buildingJson)["parents"].front();
 
     //-- Define LoD
     std::map<std::string, int> lodGeomLst;
     int idx = 0;
-    for (auto& lodGeom : (*_buildingJson)["geometry"]) {
+    for (auto& lodGeom : (*m_buildingJson)["geometry"]) {
         lodGeomLst[lodGeom["lod"]] = idx++;
     }
     auto it = lodGeomLst.find(Config::get().importLoD);
     if (it == lodGeomLst.end()) {
         --it;
     }
-    _lodIdx = it->second;
+    m_lodIdx = it->second;
 
-    nlohmann::json& geometry = (*_buildingJson)["geometry"][_lodIdx];
+    nlohmann::json& geometry = (*m_buildingJson)["geometry"][m_lodIdx];
 
     //-- Collect points belonging to a building and create a point map
     double highestPt = -global::largnum;
     for (auto& faces : geometry["boundaries"].front()) {
         for (auto& faceLst : faces) {
             for (const int& facePt : faceLst) {
-                _ptMap[facePt]=(importedBuildingPts->point(facePt));
+                m_ptMap[facePt]=(importedBuildingPts->point(facePt));
                 //-- Store max height to calculate building height later
                 if (importedBuildingPts->point(facePt).z() > highestPt)
                     highestPt = importedBuildingPts->point(facePt).z();
@@ -77,9 +79,9 @@ ImportedBuilding::ImportedBuilding(std::unique_ptr<nlohmann::json>& buildingJson
     }
     // sort out the highest point depending on whether buildings with height or elevation were imported
     if (Config::get().importTrueHeight) {
-        _elevation = highestPt;
+        m_elevation = highestPt;
     } else {
-        _height = highestPt;
+        m_height = highestPt;
     }
 
     //-- Get the footprint polygon
@@ -95,18 +97,18 @@ ImportedBuilding::ImportedBuilding(std::unique_ptr<nlohmann::json>& buildingJson
     //todo exception handling
     // if CityJSON is turned to mesh here, I can use the footprint extraction algorithm from CAD as a
     // workaround
-    if (groundSemanticIdx == -9999) throw std::runtime_error("Cannot find 'GroundSurface' in imported buildings CityJSON file!");
+    if (groundSemanticIdx == -9999) throw city4cfd_error("Cannot find 'GroundSurface' in imported buildings CityJSON file!");
 
     //- Find boundary ID of the footprint
     nlohmann::json& semanticValues = geometry["semantics"]["values"].front();
     for (int i = 0; i < semanticValues.size(); ++i) {
         if (semanticValues[i] == groundSemanticIdx) {
-            _footprintIdxList.push_back(i);
+            m_footprintIdxList.push_back(i);
         }
     }
     //- Handle building part in case it is not a ground part
-    if (_footprintIdxList.empty()) {
-        _appendToBuilding = true;
+    if (m_footprintIdxList.empty()) {
+        m_appendToBuilding = true;
         return;
     }
 
@@ -114,16 +116,16 @@ ImportedBuilding::ImportedBuilding(std::unique_ptr<nlohmann::json>& buildingJson
     CGAL::Polygon_set_2<EPECK> polySet;
     std::vector<double> footprintElevations;
     //    int polyNo = 0;
-    for (int& footprintIdx : _footprintIdxList) {
+    for (int& footprintIdx : m_footprintIdxList) {
         //-- Construct footprint polygon from ground surface
         CGAL::Polygon_with_holes_2<EPECK> facePolyWH;
         bool first = true;
         for (auto& coordBnd : geometry["boundaries"].front()[footprintIdx]) {
             CGAL::Polygon_2<EPECK> facePoly;
-            for (const int& ptIdx: coordBnd) {
-                facePoly.push_back(ePoint_2(_ptMap.at(ptIdx).x(), _ptMap.at(ptIdx).y()));
-                footprintElevations.push_back(_ptMap.at(ptIdx).z());
-                pointConnectivity[IO::gen_key_bucket(Point_2(_ptMap.at(ptIdx).x(), _ptMap.at(ptIdx).y()))] = ptIdx;
+            for (const int ptIdx: coordBnd) {
+                facePoly.push_back(ePoint_2(m_ptMap.at(ptIdx).x(), m_ptMap.at(ptIdx).y()));
+                footprintElevations.push_back(m_ptMap.at(ptIdx).z());
+                pointConnectivity[IO::gen_key_bucket(Point_2(m_ptMap.at(ptIdx).x(), m_ptMap.at(ptIdx).y()))] = ptIdx;
             }
             if (!facePoly.is_simple()) {
                 Config::write_to_log("Failed to import building: " + this->get_id()
@@ -152,12 +154,12 @@ ImportedBuilding::ImportedBuilding(std::unique_ptr<nlohmann::json>& buildingJson
 }
 
 ImportedBuilding::ImportedBuilding(Mesh& mesh)
-    : Building(), _buildingJson(std::make_unique<nlohmann::json>()),
-      _footprintIdxList(), _appendToBuilding(false), _ptMap(),
-      _lodIdx(-1), _footprintPtsIdxList(), _trueHeight(Config::get().importTrueHeight) {
+    : Building(), m_buildingJson(std::make_unique<nlohmann::json>()),
+      m_footprintIdxList(), m_appendToBuilding(false), m_ptMap(),
+      m_lodIdx(-1), m_footprintPtsIdxList(), m_trueHeight(Config::get().importTrueHeight) {
 
-    _f_imported = true; // the flag is here to avoid shorten polygons later. todo to fix
-    _id = std::to_string(_polyInternalID);
+    m_f_imported = true; // the flag is here to avoid shorten polygons later. todo to fix
+    m_id = std::to_string(m_polyInternalID);
     //-- Get the polygon from the building bottom
     // group faces pointing down
     CGAL::Vector_3<EPICK> downVector(0, 0, -1);
@@ -218,7 +220,7 @@ ImportedBuilding::ImportedBuilding(Mesh& mesh)
     }
     //-- Get all pts for reconstruction from JSON
     for (auto vert : mesh.vertices()) {
-        _ptMap[vert.idx()] = mesh.point(vert);
+        m_ptMap[vert.idx()] = mesh.point(vert);
     }
 
     //-- Stitch faces of the lowest group into a polygon
@@ -228,9 +230,9 @@ ImportedBuilding::ImportedBuilding(Mesh& mesh)
     for (auto& face : downwardFaceGroups[lowestGroup]) {
         CGAL::Polygon_2<EPECK> facePoly;
         for (auto pt : mesh.vertices_around_face(mesh.halfedge(face))) {
-            facePoly.push_back(ePoint_2(_ptMap.at(pt.idx()).x(), _ptMap.at(pt.idx()).y()));
-            footprintElevations.push_back(_ptMap.at(pt.idx()).z());
-            pointConectivity[IO::gen_key_bucket(Point_2(_ptMap.at(pt.idx()).x(), _ptMap.at(pt.idx()).y()))] = pt.idx();
+            facePoly.push_back(ePoint_2(m_ptMap.at(pt.idx()).x(), m_ptMap.at(pt.idx()).y()));
+            footprintElevations.push_back(m_ptMap.at(pt.idx()).z());
+            pointConectivity[IO::gen_key_bucket(Point_2(m_ptMap.at(pt.idx()).x(), m_ptMap.at(pt.idx()).y()))] = pt.idx();
         }
         if (!facePoly.is_simple()) {
             Config::write_to_log("Failed to import building: " + std::to_string(this->get_internal_id())
@@ -250,9 +252,9 @@ ImportedBuilding::ImportedBuilding(Mesh& mesh)
     this->set_footprint_mesh_connectivity(pointConectivity);
 
     //-- Shove it back to JSON for now
-    _lodIdx = 0;
+    m_lodIdx = 0;
     nlohmann::json geom;
-    for (auto& face : mesh.faces()) {
+    for (auto face : mesh.faces()) {
         nlohmann::json faceJson;
         for (auto vert : mesh.vertices_around_face(mesh.halfedge(face))) {
             faceJson.push_back(vert.idx());
@@ -260,8 +262,8 @@ ImportedBuilding::ImportedBuilding(Mesh& mesh)
         nlohmann::json faceLstJson; faceLstJson.push_back(faceJson);
         geom.push_back(faceLstJson);
     }
-    (*_buildingJson)["geometry"].push_back({});
-    (*_buildingJson)["geometry"].front()["boundaries"].push_back(geom);
+    (*m_buildingJson)["geometry"].push_back({});
+    (*m_buildingJson)["geometry"].front()["boundaries"].push_back(geom);
     mesh.clear();
 }
 
@@ -271,40 +273,39 @@ ImportedBuilding::~ImportedBuilding() = default;
  * Calculate building elevation without reconstruction.
  * Defined as the highest point
  */
-double ImportedBuilding::get_elevation() {
-    if (_elevation < -global::largnum + global::smallnum) {
-        if (_height > 0) {
-            _elevation = _height - this->ground_elevation();
+void ImportedBuilding::calc_elevation() {
+    if (m_elevation < -global::largnum + global::smallnum) {
+        if (m_height > 0) {
+            m_elevation = m_height - this->ground_elevation();
         } else {
-            if (_ptMap.empty()) throw std::runtime_error("Building missing points!");
+            if (m_ptMap.empty()) throw city4cfd_error("Building missing points!");
             // loop over all points and find the highest one
-            for (auto& pt: _ptMap) {
-                if (pt.second.z() > _elevation) _elevation = pt.second.z();
+            for (auto& pt: m_ptMap) {
+                if (pt.second.z() > m_elevation) m_elevation = pt.second.z();
             }
         }
     }
-    return _elevation;
 }
 
 void ImportedBuilding::reconstruct() {
     typedef EPICK::FT                 FT;
     typedef std::vector<std::size_t>  CGAL_Polygon;
 
-    nlohmann::json& geometry = (*_buildingJson)["geometry"][_lodIdx];
+    nlohmann::json& geometry = (*m_buildingJson)["geometry"][m_lodIdx];
 
-    _mesh.clear();
-    if (_clip_bottom || Config::get().intersectBuildingsTerrain) {
+    m_mesh.clear();
+    if (m_clipBottom || Config::get().intersectBuildingsTerrain) {
         this->translate_footprint(-5);
     }
     //-- Adjust building height points
-    if (!_trueHeight || Config::get().ground_xyz.empty()) {
+    if (!m_trueHeight || Config::get().ground_xyz.empty()) {
         Vector_3 movePt(0, 0, this->ground_elevation());
         std::vector<int> checkedPt;
         for (auto& faces : geometry["boundaries"].front()) {
             for (auto& faceLst : faces) {
                 for (const int facePt: faceLst) {
                     if (std::find(checkedPt.begin(), checkedPt.end(), facePt) == checkedPt.end()) {
-                        _ptMap.at(facePt) += movePt;
+                        m_ptMap.at(facePt) += movePt;
                         checkedPt.push_back(facePt);
                     } else continue;
                 }
@@ -312,11 +313,11 @@ void ImportedBuilding::reconstruct() {
         }
     }
     //-- Adjust footprints to terrain
-    for (int i = 0; i < _footprintPtsIdxList.size(); ++i) {
-        for (int j = 0; j < _footprintPtsIdxList[i].size(); ++j) {
-            _ptMap.at(_footprintPtsIdxList[i][j]) = Point_3(_ptMap.at(_footprintPtsIdxList[i][j]).x(),
-                                                            _ptMap.at(_footprintPtsIdxList[i][j]).y(),
-                                                            _groundElevations[i][j]);
+    for (int i = 0; i < m_footprintPtsIdxList.size(); ++i) {
+        for (int j = 0; j < m_footprintPtsIdxList[i].size(); ++j) {
+            m_ptMap.at(m_footprintPtsIdxList[i][j]) = Point_3(m_ptMap.at(m_footprintPtsIdxList[i][j]).x(),
+                                                              m_ptMap.at(m_footprintPtsIdxList[i][j]).y(),
+                                                              m_groundElevations[i][j]);
         }
     }
     //-- Add points to mesh
@@ -327,19 +328,19 @@ void ImportedBuilding::reconstruct() {
         /*
         //-- Remove bottom surface
         ++surfIdx;
-        if (std::find(_footprintIdxList.begin(), _footprintIdxList.end(), surfIdx) != _footprintIdxList.end())
+        if (std::find(m_footprintIdxList.begin(), m_footprintIdxList.end(), surfIdx) != m_footprintIdxList.end())
             continue;
         */
 
         for (auto& faceLst : faces) {
             CGAL_Polygon p;
             for (const int facePt : faceLst) {
-                points.push_back(CGAL::make_array<FT>(_ptMap.at(facePt).x(),
-                                                      _ptMap.at(facePt).y(),
-                                                      _ptMap.at(facePt).z()));
+                points.push_back(CGAL::make_array<FT>(m_ptMap.at(facePt).x(),
+                                                      m_ptMap.at(facePt).y(),
+                                                      m_ptMap.at(facePt).z()));
                 p.push_back(points.size() - 1);
                 //-- Store max elevation
-                if (_ptMap.at(facePt).z() > _elevation) _elevation = _ptMap.at(facePt).z();
+                if (m_ptMap.at(facePt).z() > m_elevation) m_elevation = m_ptMap.at(facePt).z();
             }
             polygons.push_back(p);
         }
@@ -347,13 +348,13 @@ void ImportedBuilding::reconstruct() {
     //-- Polygon soup to polygon mesh
     PMP::repair_polygon_soup(points, polygons, CGAL::parameters::geom_traits(geomutils::Array_traits()));
     PMP::orient_polygon_soup(points, polygons);
-    PMP::polygon_soup_to_polygon_mesh(points, polygons, _mesh);
-    PMP::triangulate_faces(_mesh);
+    PMP::polygon_soup_to_polygon_mesh(points, polygons, m_mesh);
+    PMP::triangulate_faces(m_mesh);
 
     if (this->get_height() < Config::get().minHeight) {
         // Store points to ptsPtr so that it might be used for LoD1 reconstruction
-        for (auto& pt : _ptMap) _ptsPtr->insert(pt.second);
-        throw std::runtime_error("Importing failed. It could be that the height is"
+        for (auto& pt : m_ptMap) m_ptsPtr->insert(pt.second);
+        throw city4cfd_error("Importing failed. It could be that the height is"
                                  "\n             lower than minimum, or the mesh connectivity is broken."
                                  "\n             Trying to reconstruct LoD1.2 from building points");
     }
@@ -362,19 +363,19 @@ void ImportedBuilding::reconstruct() {
     Mesh wrap;
     const double relative_alpha = 300.;
     const double relative_offset = 5000.;
-    CGAL::Bbox_3 bbox = CGAL::Polygon_mesh_processing::bbox(_mesh);
+    CGAL::Bbox_3 bbox = CGAL::Polygon_mesh_processing::bbox(m_mesh);
     const double diag_length = std::sqrt(CGAL::square(bbox.xmax() - bbox.xmin()) +
                                          CGAL::square(bbox.ymax() - bbox.ymin()) +
                                          CGAL::square(bbox.zmax() - bbox.zmin()));
     const double alpha = diag_length / relative_alpha;
     const double offset = diag_length / relative_offset;
 //    CGAL::alpha_wrap_3(mesh, alpha, offset, wrap);
-    CGAL::alpha_wrap_3(_mesh, alpha, offset, wrap);
-//    CGAL::alpha_wrap_3(_mesh, 10, 10, wrap);
-    _mesh = wrap;
+    CGAL::alpha_wrap_3(m_mesh, alpha, offset, wrap);
+//    CGAL::alpha_wrap_3(m_mesh, 10, 10, wrap);
+    m_mesh = wrap;
      */
 
-    if (_clip_bottom || Config::get().intersectBuildingsTerrain) {
+    if (m_clipBottom || Config::get().intersectBuildingsTerrain) {
         this->translate_footprint(5);
     }
         /*
@@ -385,55 +386,55 @@ void ImportedBuilding::reconstruct() {
             if (++facid > 0) std::cout << "YO THERE's A FACE NO: " << facid << std::endl;
 //            if (!(facid > 0)) continue;
             for (auto& face: faceLst) {
-                faceVertices.emplace_back(_mesh.add_vertex(_ptsPtr[face]));
+                faceVertices.emplace_back(m_mesh.add_vertex(m_ptsPtr[face]));
             }
-            bool isReconstruct = _mesh.add_face(faceVertices);
+            bool isReconstruct = m_mesh.add_face(faceVertices);
             // temp
             if (!isReconstruct) {
                 std::cout << "I have a failed surface!!!" << std::endl;
                 CGAL::Polygon_with_holes_2<EPICK> tempPoly;
                 for (auto& face : faceLst) {
-                    tempPoly.outer_boundary().push_back(Point_2(_ptsPtr[face].x(), _ptsPtr[face].y()));
+                    tempPoly.outer_boundary().push_back(Point_2(m_ptsPtr[face].x(), m_ptsPtr[face].y()));
                 }
                 std::cout << "IS THAT FAILED SURFACE VALID POLY?? : " << tempPoly.outer_boundary().is_simple() << std::endl;
 //                CGAL::draw(tempPoly);
             }
-            PMP::duplicate_non_manifold_vertices(_mesh);
+            PMP::duplicate_non_manifold_vertices(m_mesh);
         }
     }
-    PMP::stitch_borders(_mesh);
-    PMP::triangulate_faces(_mesh);
+    PMP::stitch_borders(m_mesh);
+    PMP::triangulate_faces(m_mesh);
     */
-    if (Config::get().refineImportedBuildings) this->refine();
+    if (Config::get().refineImported) this->refine();
 }
 
 void ImportedBuilding::reconstruct_flat_terrain() {
-    _trueHeight = false;
-    _groundElevation = 0;
+    m_trueHeight = false;
+    m_groundElevation = 0;
     this->reconstruct();
 }
 
 void ImportedBuilding::append_nonground_part(const std::shared_ptr<ImportedBuilding>& other) {
     // append json
-    (*_buildingJson)["geometry"][this->_lodIdx]["boundaries"].front()
+    (*m_buildingJson)["geometry"][this->m_lodIdx]["boundaries"].front()
           .push_back(other->get_building_json()["geometry"][other->get_lod_idx()]["boundaries"].front());
     // append point map
-    _ptMap.insert(other->_ptMap.begin(), other->_ptMap.end());
+    m_ptMap.insert(other->m_ptMap.begin(), other->m_ptMap.end());
     // reset elevation and height
-    _elevation = -global::largnum;
-    _height    = -global::largnum;
+    m_elevation = -global::largnum;
+    m_height    = -global::largnum;
 }
 
 const nlohmann::json& ImportedBuilding::get_building_json() const {
-    return *_buildingJson;
+    return *m_buildingJson;
 }
 
 const int ImportedBuilding::get_lod_idx() const {
-    return _lodIdx;
+    return m_lodIdx;
 }
 
 const bool ImportedBuilding::is_appending() const {
-    return _appendToBuilding;
+    return m_appendToBuilding;
 }
 
 void ImportedBuilding::check_simplicity(Polygon_2& ring) {
@@ -457,7 +458,7 @@ void ImportedBuilding::polyset_to_polygon(const CGAL::Polygon_set_2<CGAL::Epeck>
         transferKernelPoly.push_back(polyPt);
     }
     this->check_simplicity(transferKernelPoly);
-    _poly._rings.push_back(transferKernelPoly);
+    m_poly.m_rings.push_back(transferKernelPoly);
 
     for (auto& hole : res.front().holes()) {
         transferKernelPoly.clear();
@@ -466,18 +467,20 @@ void ImportedBuilding::polyset_to_polygon(const CGAL::Polygon_set_2<CGAL::Epeck>
             transferKernelPoly.push_back(polyPt);
         }
         this->check_simplicity(transferKernelPoly);
-        _poly._rings.push_back(transferKernelPoly);
+        m_poly.m_rings.push_back(transferKernelPoly);
     }
 }
 
 void ImportedBuilding::set_footprint_mesh_connectivity(const std::unordered_map<std::string, int>& pointConnectivity) {
-    for (auto& ring: _poly._rings) {
+    for (auto& ring: m_poly.m_rings) {
         std::vector<int> ringFootprintIdxs;
         for (auto& pt : ring) {
             auto itPt = pointConnectivity.find(IO::gen_key_bucket(pt));
             assert(itPt != pointConnectivity.end());
             ringFootprintIdxs.push_back(itPt->second);
         }
-        _footprintPtsIdxList.push_back(ringFootprintIdxs);
+        m_footprintPtsIdxList.push_back(ringFootprintIdxs);
     }
 }
+
+void ImportedBuilding::insert_terrain_point(const Point_3& /* pt */) {}
