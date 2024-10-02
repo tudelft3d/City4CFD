@@ -39,7 +39,7 @@ You can directly compile City4CFD on your system using cmake, run it through a D
 
 ### Build from source
 The following libraries are required to build the project:
-- [CGAL](https://www.cgal.org/) >= 5.5
+- [CGAL](https://www.cgal.org/) 5.5.x or 5.6.x
 - Boost >= 1.66
 - Eigen >= 3.3.4
 - GMP >= 4.2
