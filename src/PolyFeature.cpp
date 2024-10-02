@@ -220,7 +220,7 @@ bool PolyFeature::flatten_polygon_inner_points(const Point_set_3& pointCloud,
                                                bool& isNextToBuilding) {
 
     typedef CGAL::Straight_skeleton_2<EPICK>           Ss;
-    typedef boost::shared_ptr<CGAL::Polygon_with_holes_2<EPICK>> PolygonPtrWH;
+    typedef std::shared_ptr<CGAL::Polygon_with_holes_2<EPICK>> PolygonPtrWH;
     typedef std::vector<PolygonPtrWH> PolygonPtrVectorWH;
 
 #ifdef CITY4CFD_POLYFEATURE_VERBOSE
@@ -234,7 +234,7 @@ bool PolyFeature::flatten_polygon_inner_points(const Point_set_3& pointCloud,
 
     std::vector<int>    indices;
     std::vector<double> originalHeights;
-    auto buildingPt = pointCloud.property_map<std::shared_ptr<Building>>("building_point").first;
+    auto buildingPt = pointCloud.property_map<std::shared_ptr<Building>>("building_point").value();
     //-- Take tree subset bounded by the polygon
     std::vector<Point_3> subsetPts;
     Polygon_2 bbox = geomutils::calc_bbox_poly(m_poly.rings().front());

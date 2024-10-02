@@ -8,7 +8,7 @@ project( val3dity )
 
 
 
-add_definitions(-std=c++14)
+add_definitions(-std=c++17)
 
 set( CMAKE_BUILD_TYPE "Release")
 set( CMAKE_CXX_FLAGS "-O2" )
@@ -25,9 +25,7 @@ endif(MSVC)
 
 # CGAL
 find_package( CGAL QUIET COMPONENTS )
-if ( CGAL_FOUND )
-  include( ${CGAL_USE_FILE} )
-else()
+if (NOT CGAL_FOUND )
   message(SEND_ERROR "val3dity requires the CGAL library")
   return()  
 endif()

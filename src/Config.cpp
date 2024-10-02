@@ -141,7 +141,7 @@ void Config::set_config(nlohmann::json& j) {
     //- Domain boundaries
     Config::get().set_region(domainBndConfig, "domain_bnd", j);
     // Define domain type if using BPG
-    if (domainBndConfig.type() == typeid(bool)) {
+    if (std::holds_alternative<bool>(domainBndConfig)) {
         if (j.contains("flow_direction"))
             flowDirection = Vector_2(j["flow_direction"][0], j["flow_direction"][1]);
 
@@ -165,13 +165,13 @@ void Config::set_config(nlohmann::json& j) {
     }
 
     // Set domain side and top
-    if (domainBndConfig.type() == typeid(Polygon_2)) {
-        Polygon_2 poly = boost::get<Polygon_2>(domainBndConfig);
+    if (std::holds_alternative<Polygon_2>(domainBndConfig)) {
+        Polygon_2 poly = std::get<Polygon_2>(domainBndConfig);
         numSides = poly.size();
         for (int i = 0; i < poly.size(); ++i) {
             outputSurfaces.emplace_back("Side_" + std::to_string(i % poly.size()));
         }
-    } else if (domainBndConfig.type() == typeid(double) || bpgDomainType != RECTANGLE) {
+    } else if (std::holds_alternative<double>(domainBndConfig) || bpgDomainType != RECTANGLE) {
         outputSurfaces.emplace_back("Sides");
     } else if (bpgDomainType == RECTANGLE) { // Expand output surfaces with front and back
         numSides = 4;
@@ -327,7 +327,7 @@ void Config::set_config(nlohmann::json& j) {
 }
 
 //-- influRegion and domainBndConfig flow control
-void Config::set_region(boost::variant<bool, double, Polygon_2>& regionType,
+void Config::set_region(std::variant<bool, double, Polygon_2>& regionType,
                         const std::string regionName,
                         nlohmann::json& j) {
     if (j[regionName].is_string()) { // Search for GeoJSON polygon
