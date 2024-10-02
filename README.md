@@ -3,7 +3,6 @@
 [![build](https://img.shields.io/github/actions/workflow/status/tudelft3d/City4CFD/build.yml?branch=main&style=flat-square)](https://github.com/tudelft3d/City4CFD/actions/workflows/build.yml)
 [![docs](https://img.shields.io/badge/docs-Wiki-yellow?style=flat-square)](https://github.com/tudelft3d/City4CFD/wiki)
 [![GitHub license](https://img.shields.io/github/license/tudelft3d/City4CFD?style=flat-square)](https://github.com/tudelft3d/City4CFD/blob/master/LICENSE)
-[![DOI:10.3389/fbuil.2022.899332](http://img.shields.io/badge/DOI-10.3389/fbuil.2022.899332-B62030.svg?style=flat-square)](https://doi.org/10.3389/fbuil.2022.899332)
 
 ![welcome_figure](/docs/images/workflow.png)
 
@@ -16,7 +15,7 @@ It enables us to reconstruct buildings from different sources and their combinat
   - Extrusion of footprints containing height or floor number attributes,
   - The import of existing building models.
 
-The reconstruction using the combination of point clouds and 2D polygons can be done in [LoD2.2, LoD1.3, and LoD1.2](https://3d.bk.tudelft.nl/lod/). You can use the [complexity factor](need link) to tune the overall complexity of the reconstructed geometry.
+The reconstruction using the combination of point clouds and 2D polygons can be done in [LoD2.2, LoD1.3, and LoD1.2](https://3d.bk.tudelft.nl/lod/). You can use the [complexity factor](https://github.com/tudelft3d/City4CFD/wiki/Features#buildings) to tune the overall complexity of the reconstructed geometry.
 
 The resulting geometry is watertight -- buildings and surfaces are seamlessly integrated into a terrain.
 
@@ -108,9 +107,11 @@ More information on the project can be found in the documentation.
 The [wiki section](https://github.com/tudelft3d/City4CFD/wiki) of this project has details on reconstruction setup and also contains information and suggestions on data preparation.
 
 ## Citation
-If you use City4CFD in a scientific context, please cite the following paper:
+If you use City4CFD in a scientific context, please cite the following papers:
 
-Pađen, Ivan, García-Sánchez, Clara and Ledoux, Hugo (2022). Towards Automatic Reconstruction of 3D City Models Tailored for Urban Flow Simulations. *Frontiers in Built Environment*, 8, 2022 [[DOI](https://www.frontiersin.org/articles/10.3389/fbuil.2022.899332)][[BibTeX](https://github.com/tudelft3d/City4CFD/blob/master/CITATION.bib)]
+Ivan Pađen, Clara García-Sánchez, and Hugo Ledoux (2022). Towards Automatic Reconstruction of 3D City Models Tailored for Urban Flow Simulations. *Frontiers in Built Environment*, 8, 2022 [[DOI](https://doi.org/10.3389/fbuil.2022.899332)][[BibTeX](https://github.com/tudelft3d/City4CFD/blob/master/CITATION.bib)]
+
+Ivan Pađen, Ravi Peters, Clara García-Sánchez, and Hugo Ledoux (2024). Automatic high-detailed building reconstruction workflow for urban microscale simulations. *Building and Environment*, 265, 2024 [[DOI](https://doi.org/10.1016/j.buildenv.2024.111978)][[BibTeX](https://github.com/tudelft3d/City4CFD/blob/master/CITATION.bib)]
 
 ## Acknowledgements
 We would like to acknowledge the authors of the supporting libraries we use in this project:
