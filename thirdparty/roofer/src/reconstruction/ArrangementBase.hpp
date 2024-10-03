@@ -82,7 +82,7 @@ typedef CGAL::Arr_face_overlay_traits<Arrangement_2,
 
 // An arrangement observer, used to receive notifications of face splits and
 // to update the indices of the newly created faces.
-class Face_index_observer : public CGAL::Arr_observer<Arrangement_2>
+class Face_index_observer : public CGAL::Arr_observer<roofer::Arrangement_2>
 {
 private:
   int     n_faces;          // The current number of faces.
@@ -91,8 +91,8 @@ private:
   float   elevation=0;
   Plane   plane;
 public:
-  Face_index_observer (Arrangement_2& arr, bool is_footprint, size_t pid, float elevation, Plane plane) :
-    CGAL::Arr_observer<Arrangement_2> (arr),
+  Face_index_observer (roofer::Arrangement_2& arr, bool is_footprint, size_t pid, float elevation, Plane plane) :
+    CGAL::Arr_observer<roofer::Arrangement_2> (arr),
     n_faces (0), in_footprint(is_footprint), plane_id(pid), elevation(elevation), plane(plane)
   {
     CGAL_precondition (arr.is_empty());
@@ -111,14 +111,14 @@ public:
     n_faces++;
   }
 };
-class Face_split_observer : public CGAL::Arr_observer<Arrangement_2>
+class Face_split_observer : public CGAL::Arr_observer<roofer::Arrangement_2>
 {
 private:
   int   n_faces;          // The current number of faces.
   bool  hole_mode=false;
 public:
-  Face_split_observer (Arrangement_2& arr) :
-    CGAL::Arr_observer<Arrangement_2> (arr),
+  Face_split_observer (roofer::Arrangement_2& arr) :
+    CGAL::Arr_observer<roofer::Arrangement_2> (arr),
     n_faces (0)
   {
     CGAL_precondition (arr.is_empty());

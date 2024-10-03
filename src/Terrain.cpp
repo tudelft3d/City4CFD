@@ -35,12 +35,12 @@
 Terrain::Terrain()
         : TopoFeature(0), m_cdt(), m_surfaceLayersTerrain(),
           m_constrainedPolys(), m_vertexFaceMap(), m_extraConstrainedEdges(),
-          m_searchTree(Config::get().searchtree_bucket_size) {}
+          m_searchTree() {}
 
 Terrain::Terrain(int pid)
         : TopoFeature(pid), m_cdt(), m_surfaceLayersTerrain(),
           m_constrainedPolys(), m_vertexFaceMap(), m_extraConstrainedEdges(),
-          m_searchTree(Config::get().searchtree_bucket_size) {}
+          m_searchTree() {}
 
 Terrain::~Terrain() = default;
 

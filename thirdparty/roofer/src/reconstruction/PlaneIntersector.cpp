@@ -1,6 +1,7 @@
 #include "PlaneIntersector.hpp"
 
 #include <map>
+#include <optional>
 
 namespace roofer::detection {
   
@@ -72,7 +73,7 @@ namespace roofer::detection {
           auto result = CGAL::intersection(plane_hi, plane_lo);
           if (result) {
             // bound the line to extend of one plane's inliers
-            if (auto l = boost::get<typename EPICK::Line_3>(&*result)) {
+            if (auto l = std::get_if<typename EPICK::Line_3>(&*result)) {
               Point pmin_lo, pmax_lo;
               Point pmin_hi, pmax_hi;
               double dmin_lo, dmax_lo;

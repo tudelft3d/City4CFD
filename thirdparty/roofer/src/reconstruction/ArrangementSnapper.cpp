@@ -210,7 +210,7 @@ namespace arragementsnapper {
         auto obj = walk_pl.locate( Walk_pl::Arrangement_2::Point_2(p.x(), p.y()) );
 
         // std::cout << "The point (" << p << ") is located ";
-        if (auto f = boost::get<Face_const_handle>(&obj)) { // located inside a face
+        if (auto f = std::get_if<Face_const_handle>(&obj)) { // located inside a face
           // std::cout << "inside "
           //           << (((*f)->is_unbounded()) ? "the unbounded" : "a bounded")
           //           << " face." << std::endl;
@@ -476,7 +476,7 @@ namespace arragementsnapper {
 
             auto obj = walk_pl.locate( Walk_pl::Arrangement_2::Point_2(p.x(), p.y()) );
 
-            if (auto f = boost::get<Face_const_handle>(&obj)) { // located inside a face
+            if (auto f = std::get_if<Face_const_handle>(&obj)) { // located inside a face
               // arrFace->data() = (*f)->data();
               canidate_faces[arr.non_const_handle(*f)] += cdt.triangle(fit).area();
             }
