@@ -6,6 +6,9 @@ endif(COMMAND cmake_policy)
 cmake_minimum_required (VERSION 3.16)
 project( val3dity )
 
+if(POLICY CMP0167)
+    cmake_policy(SET CMP0167 NEW)
+endif()
 
 
 add_definitions(-std=c++17)
