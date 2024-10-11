@@ -1,5 +1,9 @@
 # Changelog
 
+## [Unreleased]
+### Changed
+- Updated to CGAL 6
+
 ## [0.5.0] - 2024-07-29 - breaking changes
 ### Added
 - LoD2.2 and LoD1.3 reconstruction
