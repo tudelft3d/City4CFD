@@ -33,7 +33,6 @@
 #include "Building.h"
 #include "Quadtree/Quadtree.h"
 
-#include <boost/locale.hpp>
 #include <CGAL/Polygon_mesh_processing/remesh.h>
 #include <CGAL/Polygon_mesh_processing/smooth_shape.h>
 #include <CGAL/wlop_simplify_and_regularize_point_set.h>
@@ -241,7 +240,7 @@ void PointCloud::buffer_flat_edges(const PolyFeaturesPtr& avgFeatures,
     typedef CGAL::Polygon_offset_builder_traits_2<EPICK> OffsetBuilderTraits;
     typedef CGAL::Polygon_offset_builder_2<Ss, OffsetBuilderTraits, Polygon_2> OffsetBuilder;
 
-    typedef boost::shared_ptr<Polygon_2> ContourPtr;
+    typedef std::shared_ptr<Polygon_2> ContourPtr;
     typedef std::vector<ContourPtr> ContourSequence;
     // get info using the original point cloud
 //    std::vector<double> offsets{0.001, 0.2};
@@ -252,7 +251,7 @@ void PointCloud::buffer_flat_edges(const PolyFeaturesPtr& avgFeatures,
     //for (auto& f: avgFeatures) { // MSVC doesn't like range loop with OMP
         auto& poly = avgFeatures[i]->get_poly().outer_boundary();
         // set the frame
-        boost::optional<double> margin = CGAL::compute_outer_frame_margin(poly.begin(), poly.end(), offsets.back());
+        auto margin = CGAL::compute_outer_frame_margin(poly.begin(), poly.end(), offsets.back());
         CGAL::Bbox_2 bbox = CGAL::bbox_2(poly.begin(), poly.end());
         // Compute the boundaries of the frame
         double fxmin = bbox.xmin() - *margin;
@@ -271,7 +270,7 @@ void PointCloud::buffer_flat_edges(const PolyFeaturesPtr& avgFeatures,
         poly.reverse_orientation();
         ssb.enter_contour(poly.begin(), poly.end());
         // Construct the skeleton
-        boost::shared_ptr<Ss> ss = ssb.construct_skeleton();
+        auto ss = ssb.construct_skeleton();
         // Proceed only if the skeleton was correctly constructed.
         if (ss) {
             for (auto& offset: offsets) {

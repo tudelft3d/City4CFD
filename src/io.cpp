@@ -86,6 +86,7 @@ bool IO::read_point_cloud(std::string& file, Point_set_3& pc) {
     for (auto it = pc.points().begin(); it != pc.points().end(); ++it) {
         transformPC.insert(it->transform(translate));
     }
+    transformPC.add_normal_map(); //todo temp workaround due to CGAL bug
     pc = transformPC;
     return true;
 }

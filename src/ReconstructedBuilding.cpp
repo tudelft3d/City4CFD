@@ -339,10 +339,10 @@ void ReconstructedBuilding::get_cityjson_info(nlohmann::json& b) const {
 
 void ReconstructedBuilding::get_cityjson_semantics(nlohmann::json& g) const { // Temp for checking CGAL mesh properties
     Face_property semantics;
-    bool foundProperty;
-    boost::tie(semantics, foundProperty) = m_mesh.property_map<face_descriptor, std::string>("f:semantics");
-    //   auto semantics = m_mesh.property_map<face_descriptor, std::string>("f:semantics");
-    if (!foundProperty) throw city4cfd_error("Semantic property map not found!");
+    auto semanticsMap = m_mesh.property_map<face_descriptor, std::string>("f:semantics");
+    if (semanticsMap.has_value()) {
+        semantics = semanticsMap.value();
+    } else throw city4cfd_error("Semantic property map not found!");
 
     std::unordered_map<std::string, int> surfaceId;
     surfaceId["RoofSurface"]   = 0; g["semantics"]["surfaces"][0]["type"] = "RoofSurface";

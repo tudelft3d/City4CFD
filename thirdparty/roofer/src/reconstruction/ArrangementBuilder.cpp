@@ -21,7 +21,7 @@ namespace roofer::detection {
       // arr_common_face(edge->source(), edge->target(), common_face);
       auto result = CGAL::intersection(Segment_2(e_source, e_target), segment);
       if (result) {
-        if (auto p = boost::get<Point_2>(&*result)) {
+        if (auto p = std::get_if<Point_2>(&*result)) {
           // std::cout << "\tp " << *p << std::endl;
           // std::cout << "\tp (geo) " << CGAL::to_double(p->x())+CGAL::to_double(geo_p.x()) << ", " << CGAL::to_double(p->y())+CGAL::to_double(geo_p.y()) << std::endl;
           // check if point of intersection is practically at the same coordinates of one of the edge's end points
