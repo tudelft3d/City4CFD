@@ -331,12 +331,11 @@ void IO::output_obj(const OutputFeaturesPtr& allFeatures) {
 
     std::vector<std::unordered_map<std::string, int>> dPts(numOutputLayers);
     //-- Output points
-//    int count = 0; // to output each building as a separate group
     for (auto& f : allFeatures) {
         assert(f->get_output_layer_id() > -1 && f->get_output_layer_id() < numOutputLayers);
         if (Config::get().outputSeparately) {
-//            if (f->get_class() == BUILDING)
-//                bs[f->get_output_layer_id()] += "\no " + std::to_string(count++);
+            if (f->get_class() == BUILDING) // output each building as a separate object
+                bs[f->get_output_layer_id()] += "\no " + f->get_id();
             IO::get_obj_pts(f->get_mesh(),
                             fs[f->get_output_layer_id()],
                             bs[f->get_output_layer_id()],
