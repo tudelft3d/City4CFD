@@ -1,7 +1,7 @@
 /*
   City4CFD
  
-  Copyright (c) 2021-2024, 3D Geoinformation Research Group, TU Delft
+  Copyright (c) 2021-2025, 3D Geoinformation Research Group, TU Delft
 
   This file is part of City4CFD.
 
@@ -198,7 +198,7 @@ void Map3d::set_features() {
     for (auto& reconRegion : Config::get().reconRegions) {
         m_reconRegions.emplace_back(reconRegion);
     }
-    if (Config::get().domainBndConfig.type() == typeid(bool)) m_bndBPG = true;
+    if (std::holds_alternative<bool>(Config::get().domainBndConfig)) m_bndBPG = true;
 
     //-- Apply area filtering
     if (Config::get().minArea > 0.) {
@@ -256,7 +256,7 @@ void Map3d::set_influ_region() {
     //-- Set the reconstruction (influence) regions --//
     double maxDim = -1.; // this works if there's one point of interest
     for (int i = 0; i < m_reconRegions.size(); ++i) {
-        if (m_reconRegions[i].m_reconSettings->influRegionConfig.type() == typeid(bool)) {// bool defines BPG request
+        if (std::holds_alternative<bool>(m_reconRegions[i].m_reconSettings->influRegionConfig)) {// bool defines BPG request
             std::cout << "INFO: Reconstruction region "<< i << " not defined in config. "
                       << "Calculating with BPG." << std::endl;
             if (maxDim < 0.)
@@ -264,7 +264,7 @@ void Map3d::set_influ_region() {
             else
                 m_reconRegions[i].calc_influ_region_bpg(maxDim);
         } else
-            boost::apply_visitor(m_reconRegions[i], Config::get().reconRegions[i]->influRegionConfig);
+            std::visit(m_reconRegions[i], Config::get().reconRegions[i]->influRegionConfig);
     }
     // Check if regions get larger with increasing index
     for (int i = 0; i < m_reconRegions.size(); ++i) {
@@ -303,7 +303,7 @@ void Map3d::set_bnd() {
         m_domainBnd.calc_bnd_bpg(m_reconRegions.back().get_bounding_region(), m_buildingsPtr);
     } else {
         //-- Define boundary region with values set in config
-        boost::apply_visitor(m_domainBnd, Config::get().domainBndConfig);
+        std::visit(m_domainBnd, Config::get().domainBndConfig);
     }
     this->bnd_sanity_check(); // Check if outer bnd is larger than the influ region
 

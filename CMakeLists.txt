@@ -11,6 +11,10 @@ set(CMAKE_BUILD_TYPE "Release")
 #    cmake_policy(SET CMP0003 NEW)
 #endif()
 
+if(POLICY CMP0167)
+    cmake_policy(SET CMP0167 NEW)
+endif()
+
 if (MSVC)
     add_definitions(-DNOMINMAX)
     add_definitions("/EHsc")

@@ -6,9 +6,12 @@ endif(COMMAND cmake_policy)
 cmake_minimum_required (VERSION 3.16)
 project( val3dity )
 
+if(POLICY CMP0167)
+    cmake_policy(SET CMP0167 NEW)
+endif()
 
 
-add_definitions(-std=c++14)
+add_definitions(-std=c++17)
 
 set( CMAKE_BUILD_TYPE "Release")
 set( CMAKE_CXX_FLAGS "-O2" )
@@ -25,9 +28,7 @@ endif(MSVC)
 
 # CGAL
 find_package( CGAL QUIET COMPONENTS )
-if ( CGAL_FOUND )
-  include( ${CGAL_USE_FILE} )
-else()
+if (NOT CGAL_FOUND )
   message(SEND_ERROR "val3dity requires the CGAL library")
   return()  
 endif()

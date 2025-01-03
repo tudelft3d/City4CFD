@@ -1,7 +1,7 @@
 /*
   City4CFD
  
-  Copyright (c) 2021-2024, 3D Geoinformation Research Group, TU Delft
+  Copyright (c) 2021-2025, 3D Geoinformation Research Group, TU Delft
 
   This file is part of City4CFD.
 
@@ -35,12 +35,12 @@
 Terrain::Terrain()
         : TopoFeature(0), m_cdt(), m_surfaceLayersTerrain(),
           m_constrainedPolys(), m_vertexFaceMap(), m_extraConstrainedEdges(),
-          m_searchTree(Config::get().searchtree_bucket_size) {}
+          m_searchTree() {}
 
 Terrain::Terrain(int pid)
         : TopoFeature(pid), m_cdt(), m_surfaceLayersTerrain(),
           m_constrainedPolys(), m_vertexFaceMap(), m_extraConstrainedEdges(),
-          m_searchTree(Config::get().searchtree_bucket_size) {}
+          m_searchTree() {}
 
 Terrain::~Terrain() = default;
 

@@ -96,7 +96,10 @@ public:
     n_faces (0), in_footprint(is_footprint), plane_id(pid), elevation(elevation), plane(plane)
   {
     CGAL_precondition (arr.is_empty());
-    arr.unbounded_face()->data().is_finite=false;
+    for (auto uf = arr.unbounded_faces_begin();
+         uf != arr.unbounded_faces_end(); ++uf) {
+        uf->data().is_finite = false;
+    }
     n_faces++;
   };
   virtual void after_split_face (Face_handle old_face,
@@ -122,7 +125,10 @@ public:
     n_faces (0)
   {
     CGAL_precondition (arr.is_empty());
-    arr.unbounded_face()->data().in_footprint=false;
+    for (auto uf = arr.unbounded_faces_begin();
+         uf != arr.unbounded_faces_end(); ++uf) {
+        uf->data().is_finite = false;
+    }
     n_faces++;
   }
   virtual void after_split_face (Face_handle old_face,

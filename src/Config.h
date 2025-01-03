@@ -1,7 +1,7 @@
 /*
   City4CFD
  
-  Copyright (c) 2021-2024, 3D Geoinformation Research Group, TU Delft
+  Copyright (c) 2021-2025, 3D Geoinformation Research Group, TU Delft
 
   This file is part of City4CFD.
 
@@ -50,7 +50,7 @@ protected:
 public:
     void validate(nlohmann::json& j);
     void set_config(nlohmann::json& j);
-    void set_region(boost::variant<bool, double, Polygon_2>& regionType,
+    void set_region(std::variant<bool, double, Polygon_2>& regionType,
                     const std::string regionName,
                     nlohmann::json& j);
     static void write_to_log(const std::string& msg);
@@ -65,7 +65,7 @@ public:
     //-- Domain setup
     Point_2     pointOfInterest;
     double      topHeight                       = 0.;
-    boost::variant<bool, double, Polygon_2> domainBndConfig;
+    std::variant<bool, double, Polygon_2> domainBndConfig;
     DomainType            bpgDomainType;
     bool                  bpgBlockageRatioFlag  = false;
     double                bpgBlockageRatio      = 0.03;
@@ -134,7 +134,7 @@ public:
 
     //-- Struct for reconstruction regions (part of Buildings)
     struct ReconRegion{
-        boost::variant<bool, double, Polygon_2> influRegionConfig;
+        std::variant<bool, double, Polygon_2> influRegionConfig;
         std::string lod;
         double      bpgInfluExtra                   = 0.;
         bool        importAdvantage                 = true;
