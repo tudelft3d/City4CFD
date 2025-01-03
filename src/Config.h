@@ -114,6 +114,7 @@ public:
     std::string               outputFileName;
     GeomFormat                outputFormat;
     bool                      outputSeparately  = false;
+    bool                      outputBuildingsSeparately  = false;
     std::vector<std::string>  outputSurfaces    = {"Terrain"};
     int                       numSides          = 1;
     std::vector<int>          surfaceLayerIDs;

@@ -326,24 +326,40 @@ void IO::print_progress_bar(int percent) {
 
 void IO::output_obj(const OutputFeaturesPtr& allFeatures) {
     int numOutputLayers = TopoFeature::get_num_output_layers();
+    // first - group name, second - surface name
+    std::vector<std::pair<std::string, std::string>> outputSurfaces;
+    for (auto& surface : Config::get().outputSurfaces) {
+        outputSurfaces.emplace_back(surface, surface);
+    }
+
     std::vector<std::ofstream> of;
     std::vector<std::string>   fs(numOutputLayers), bs(numOutputLayers);
 
     std::vector<std::unordered_map<std::string, int>> dPts(numOutputLayers);
     //-- Output points
     for (auto& f : allFeatures) {
-        assert(f->get_output_layer_id() > -1 && f->get_output_layer_id() < numOutputLayers);
+        int outputLayerID = f->get_output_layer_id();
+        assert(outputLayerID > -1 && outputLayerID < numOutputLayers);
         if (Config::get().outputSeparately) {
-            if (f->get_class() == BUILDING) // output each building as a separate object
-                bs[f->get_output_layer_id()] += "\no " + f->get_id();
+            if (f->get_class() == BUILDING) {
+                // output each building as a separate object
+                if (Config::get().outputBuildingsSeparately) {
+                    fs.emplace_back();
+                    bs.emplace_back();
+                    dPts.emplace_back();
+                    outputSurfaces.emplace_back(Config::get().outputSurfaces[outputLayerID], "Building_" + f->get_id());
+                    outputLayerID = fs.size() - 1; // set the new outputLayerID
+                }
+                bs[outputLayerID] += "\no " + f->get_id();
+            }
             IO::get_obj_pts(f->get_mesh(),
-                            fs[f->get_output_layer_id()],
-                            bs[f->get_output_layer_id()],
-                            dPts[f->get_output_layer_id()]);
+                            fs[outputLayerID],
+                            bs[outputLayerID],
+                            dPts[outputLayerID]);
         } else {
             IO::get_obj_pts(f->get_mesh(),
-                            fs[f->get_output_layer_id()],
-                            bs[f->get_output_layer_id()],
+                            fs[outputLayerID],
+                            bs[outputLayerID],
                             dPts.front());
         }
     }
@@ -356,23 +372,30 @@ void IO::output_obj(const OutputFeaturesPtr& allFeatures) {
         if (bs[i].empty()) continue;
         if (Config::get().outputSeparately) {
             of.emplace_back();
-            of.back().open(Config::get().outputFileName + "_" + Config::get().outputSurfaces[i] + ".obj");
+            of.back().open(Config::get().outputFileName + "_" + outputSurfaces[i].second + ".obj");
         }
-        of.back() << fs[i] << "\ng " << Config::get().outputSurfaces[i] << bs[i];
+        of.back() << fs[i] << "\ng " << outputSurfaces[i].first << bs[i];
     }
     for (auto& f : of) f.close();
 }
 
 void IO::output_stl(const OutputFeaturesPtr& allFeatures) {
     int numOutputLayers = TopoFeature::get_num_output_layers();
+    auto outputSurfaces = Config::get().outputSurfaces;
     std::vector<std::ofstream> of;
     std::vector<std::string>   fs(numOutputLayers);
 
     //-- Get all triangles
     for (auto& f : allFeatures) {
-        assert(f->get_output_layer_id() > -1 && f->get_output_layer_id() < numOutputLayers);
+        int outputLayerID = f->get_output_layer_id();
+        assert(outputLayerID > -1 && outputLayerID < numOutputLayers);
         if (!f->is_active()) continue;
-        IO::get_stl_pts(f->get_mesh(), fs[f->get_output_layer_id()]);
+        if (Config::get().outputBuildingsSeparately && f->get_class() == BUILDING) {
+            outputSurfaces.push_back("Building_" + f->get_id());
+            fs.emplace_back();
+            outputLayerID = fs.size() - 1;
+        }
+        IO::get_stl_pts(f->get_mesh(), fs[outputLayerID]);
     }
     //-- Add class name and output to file
     if (!Config::get().outputSeparately) {
@@ -383,11 +406,11 @@ void IO::output_stl(const OutputFeaturesPtr& allFeatures) {
         if (fs[i].empty()) continue;
         if (Config::get().outputSeparately) {
             of.emplace_back();
-            of.back().open(Config::get().outputFileName + "_" + Config::get().outputSurfaces[i] + ".stl");
+            of.back().open(Config::get().outputFileName + "_" + outputSurfaces[i] + ".stl");
         }
-        of.back() << "solid " << Config::get().outputSurfaces[i];
+        of.back() << "solid " << outputSurfaces[i];
         of.back() << fs[i];
-        of.back() << "\nendsolid " << Config::get().outputSurfaces[i];
+        of.back() << "\nendsolid " << outputSurfaces[i];
         if (!Config::get().outputSeparately && i != fs.size() - 1) of.back() << "\n";
     }
     for (auto& f : of) f.close();
