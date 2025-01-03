@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2021-2024, 3D Geoinformation Research Group, TU Delft
+  Copyright (c) 2021-2025, 3D Geoinformation Research Group, TU Delft
 
   This file is part of City4CFD.
 
@@ -29,7 +29,7 @@
 
 #include  <boost/algorithm/string/predicate.hpp>
 
-std::string CITY4CFD_VERSION = "0.5.0+dev";
+std::string CITY4CFD_VERSION = "0.6.0+dev";
 
 void printWelcome() {
     auto logo{
@@ -55,7 +55,7 @@ void printWelcome() {
     };
 
     std::cout << logo;
-    std::cout << "City4CFD Copyright (C) 2021-2024 3D Geoinformation Research Group, TU Delft\n" << std::endl;
+    std::cout << "City4CFD Copyright (C) 2021-2025 3D Geoinformation Research Group, TU Delft\n" << std::endl;
 }
 
 void printHelp() {

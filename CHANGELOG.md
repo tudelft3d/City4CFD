@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [0.6.0] - 2025-01-03
 ### Changed
 - Updated to CGAL 6
 
