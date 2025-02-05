@@ -34,7 +34,7 @@ endif (WIN32)
 
 # CGAL
 find_package(CGAL REQUIRED)
-if (CGAL_VERSION VERSION_GREATER_EQUAL "6.0.1")
+if (CGAL_VERSION VERSION_GREATER_EQUAL "6.0")
    message(STATUS "Found CGAL version ${CGAL_VERSION}")
 else()
    message(FATAL_ERROR "Found CGAL version ${CGAL_VERSION} which is not supported!"
