@@ -38,7 +38,7 @@ if (CGAL_VERSION VERSION_GREATER_EQUAL "6.0.1")
    message(STATUS "Found CGAL version ${CGAL_VERSION}")
 else()
    message(FATAL_ERROR "Found CGAL version ${CGAL_VERSION} which is not supported!"
-           "Please use CGAL version 6.0.1 or higher")
+           " Please use CGAL version 6.0.1 or higher")
    return()
 endif ()
 
