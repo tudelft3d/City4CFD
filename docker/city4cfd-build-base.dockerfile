@@ -24,9 +24,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /tmp/*
 
 # Download and extract CGAL
-RUN wget https://github.com/CGAL/cgal/releases/download/v6.0/CGAL-6.0-library.tar.xz \
-    && tar -xf CGAL-6.0-library.tar.xz -C /opt \
-    && rm CGAL-6.0-library.tar.xz
+RUN wget https://github.com/CGAL/cgal/releases/download/v6.0.1/CGAL-6.0.1-library.tar.xz \
+    && tar -xf CGAL-6.0.1-library.tar.xz -C /opt \
+    && rm CGAL-6.0.1-library.tar.xz
 
 # Set environment variable for CGAL
-ENV CGAL_DIR=/opt/CGAL-6.0
+ENV CGAL_DIR=/opt/CGAL-6.0.1
