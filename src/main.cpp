@@ -79,7 +79,7 @@ void printVersion() {
 }
 
 int main(int argc, char** argv) {
-//    try {
+    try {
         printWelcome();
 
         auto startTime = std::chrono::steady_clock::now();
@@ -139,12 +139,12 @@ int main(int argc, char** argv) {
         std:: cout << "End" << std::endl;
 
         return EXIT_SUCCESS;
-//    } catch (std::exception& e) {
-//        //-- Output log
-//        IO::output_log();
-//
-//        std::cerr << "\nProgram failed! Reason: " << e.what() << std::endl;
-//        std::cout << "End" << std::endl;
-//        return EXIT_FAILURE;
-//    }
+    } catch (std::exception& e) {
+        //-- Output log
+        IO::output_log();
+
+        std::cerr << "\nProgram failed! Reason: " << e.what() << std::endl;
+        std::cout << "End" << std::endl;
+        return EXIT_FAILURE;
+    }
 }
