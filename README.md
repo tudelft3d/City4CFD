@@ -52,7 +52,7 @@ GMP, MFPR, and Eigen are necessary dependencies for CGAL.
 
 Dependencies are generally available in Linux distributions, e.g. in Debian/Ubuntu/Mint:
 ```
-sudo apt-get install libcmpfr-dev libgmp-dev libboost-all-dev libeigen3-dev libomp-dev libgdal-dev
+sudo apt-get install libmpfr-dev libgmp-dev libboost-all-dev libeigen3-dev libomp-dev libgdal-dev
 ```
 
 CGAL can be directly downloaded from the [release page](https://github.com/CGAL/cgal/releases/tag/v5.6.1) (-library). No install is necessary, only the path to the unzipped folder is required (see below).
