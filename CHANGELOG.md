@@ -1,7 +1,8 @@
 # Changelog
-## [0.6.1] - 2025-02-05
+## [0.6.1] - 2025-02-06
 ### Fixed
 - Docker image hotfix
+- CGAL version update in CMakeLists
 
 ## [0.6.0] - 2025-01-03
 ### Changed
