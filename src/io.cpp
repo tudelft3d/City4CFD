@@ -399,7 +399,7 @@ void IO::output_cityjson(const OutputFeaturesPtr& allFeatures) {
     nlohmann::json j;
 
     j["type"] = "CityJSON";
-    j["version"] = "1.0";
+    j["version"] = "2.0";
     j["metadata"] = {};
     std::vector<double> bbox = Boundary::get_domain_bbox();
     j["metadata"]["geographicalExtent"] = Boundary::get_domain_bbox();
@@ -414,7 +414,12 @@ void IO::output_cityjson(const OutputFeaturesPtr& allFeatures) {
 
         //-- Get feature geometry
         nlohmann::json g;
-        IO::get_cityjson_geom(f->get_mesh(), g, dPts, f->get_cityjson_primitive());
+        g["type"] = f->get_cityjson_primitive();
+        // grab lod information for buildings
+        auto derivedClass = std::dynamic_pointer_cast<Building>(f);
+        if (derivedClass) g["lod"] = derivedClass->get_lod();
+
+        IO::get_cityjson_geom(f->get_mesh(), g, dPts);
 
         //-- Get feature semantics
         f->get_cityjson_semantics(g);
@@ -483,10 +488,7 @@ void IO::get_stl_pts(Mesh& mesh, std::string& fs) {
     }
 }
 
-void IO::get_cityjson_geom(const Mesh& mesh, nlohmann::json& g, std::unordered_map<std::string, int>& dPts,
-                           std::string primitive) {
-    g["type"] = primitive;
-    g["lod"] = "1.2"; //hardcoded for now
+void IO::get_cityjson_geom(const Mesh& mesh, nlohmann::json& g, std::unordered_map<std::string, int>& dPts) {
     g["boundaries"];
     for (auto face: mesh.faces()) {
         if (IO::is_degen(mesh, face)) continue;

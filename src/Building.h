@@ -65,6 +65,7 @@ public:
     void   set_to_zero_terrain();
     double sq_max_dim();
     PointSet3Ptr get_points() const;
+    std::string get_lod() const;
 
     virtual void        get_cityjson_info(nlohmann::json& b) const override;
     virtual void        get_cityjson_semantics(nlohmann::json& g) const override;
