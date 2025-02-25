@@ -284,6 +284,10 @@ PointSet3Ptr Building::get_points() const {
     return m_ptsPtr;
 }
 
+std::string Building::get_lod() const {
+    return m_reconSettings->lod;
+}
+
 void Building::get_cityjson_info(nlohmann::json& b) const {
     b["type"] = "Building";
 //  b["attributes"];
@@ -294,7 +298,7 @@ void Building::get_cityjson_info(nlohmann::json& b) const {
     b["attributes"]["measuredHeight"] = m_elevation - geomutils::avg(m_groundElevations[0]);
 }
 
-void Building::get_cityjson_semantics(nlohmann::json& g) const { // Temp for checking CGAL mesh properties
+void Building::get_cityjson_semantics(nlohmann::json& g) const {
     Face_property semantics;
     auto semanticsMap = m_mesh.property_map<face_descriptor, std::string>("f:semantics");
     if (semanticsMap.has_value()) {
