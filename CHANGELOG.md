@@ -1,5 +1,7 @@
 # Changelog
-## Unreleased
+## [Unreleased]
+### Changed
+- Improved inserting surface layer polygons when terrain pc is missing
 ### Fixed
 - Minor bugfixes
 
