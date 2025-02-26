@@ -33,8 +33,6 @@ Sides::Sides(const int outputLayerID)
         : Boundary(outputLayerID) {
 }
 
-Sides::~Sides() = default;
-
 void Sides::reconstruct() {
     std::vector<Mesh::vertex_index> meshVertexSide;
 

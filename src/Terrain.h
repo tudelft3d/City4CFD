@@ -37,7 +37,7 @@ public:
     using TopoFeature::TopoFeature;
     Terrain();
     Terrain(int pid);
-    ~Terrain();
+    ~Terrain() = default;
 
     void set_cdt(const Point_set_3 &pointCloud);
     void prep_constraints(const PolyFeaturesPtr& features, Point_set_3& pointCloud);

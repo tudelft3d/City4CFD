@@ -36,7 +36,7 @@ public:
     TopoFeature();
     TopoFeature(std::string pid);
     TopoFeature(int outputLayerID);
-    virtual ~TopoFeature();
+    virtual ~TopoFeature() = default;
 
     static void          add_recon_region_output_layers(const int numLayers);
     static int           get_num_output_layers();

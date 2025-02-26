@@ -127,8 +127,6 @@ ReconstructedBuilding::ReconstructedBuilding(const std::shared_ptr<ImportedBuild
     m_outputLayerID = importedBuilding->get_output_layer_id();
 }
 
-ReconstructedBuilding::~ReconstructedBuilding() = default;
-
 /*
  * Calculate building elevation without mesh reconstruction
  */

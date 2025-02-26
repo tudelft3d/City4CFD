@@ -37,7 +37,7 @@ public:
     Building();
     Building(const nlohmann::json& poly);
     Building(const Polygon_with_attr& poly);
-    ~Building();
+    virtual ~Building() = default;
 
     static void alpha_wrap_all(const BuildingsPtr& buildings, Mesh& newMesh);
 

@@ -38,7 +38,7 @@ public:
     SurfaceLayer(const nlohmann::json& poly, const int outputLayerID);
     SurfaceLayer(const Polygon_with_attr& poly);
     SurfaceLayer(const Polygon_with_attr& poly, const int outputLayerID);
-    ~SurfaceLayer();
+    ~SurfaceLayer() = default;
 
     void check_feature_scope(const Polygon_2& bndPoly);
 

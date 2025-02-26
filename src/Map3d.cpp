@@ -36,9 +36,6 @@
 #include "Sides.h"
 #include "Top.h"
 
-Map3d::Map3d() = default;
-Map3d::~Map3d() = default;
-
 void Map3d::reconstruct() {
     //-- Prepare features
     this->set_features();

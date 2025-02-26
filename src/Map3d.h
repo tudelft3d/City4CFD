@@ -35,8 +35,8 @@
 
 class Map3d {
 public:
-    Map3d();
-    ~Map3d();
+    Map3d() = default;
+    ~Map3d() = default;
 
     void reconstruct();
 

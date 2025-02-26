@@ -52,8 +52,6 @@ Building::Building(const Polygon_with_attr& poly)
           m_ptsPtr(std::make_shared<Point_set_3>()), m_hasFailed(false), m_reconSettings(nullptr) {}
         // 'true' here to check for polygon simplicity
 
-Building::~Building() = default;
-
 void Building::insert_point(const Point_3& pt) {
     m_ptsPtr->insert(pt);
 }

@@ -42,8 +42,6 @@ Terrain::Terrain(int pid)
           m_constrainedPolys(), m_vertexFaceMap(), m_extraConstrainedEdges(),
           m_searchTree() {}
 
-Terrain::~Terrain() = default;
-
 void Terrain::set_cdt(const Point_set_3& pointCloud) {
     Converter<EPICK, EPECK> to_exact;
 

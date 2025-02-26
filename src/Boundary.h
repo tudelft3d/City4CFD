@@ -34,7 +34,7 @@ class Boundary : public TopoFeature {
 public:
     Boundary();
     Boundary(const int outputLayerID);
-    virtual ~Boundary();
+    virtual ~Boundary() = default;
 
     static void set_bnd_poly(Polygon_2& bndPoly, Polygon_2& pcBndPoly, Polygon_2& startBufferPoly);
     static void set_bounds_to_buildings_pc(Point_set_3& pointCloud, const Polygon_2& pcBndPoly);

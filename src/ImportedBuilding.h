@@ -40,7 +40,7 @@ public:
     ImportedBuilding(std::unique_ptr<nlohmann::json>& buildingJson,
                      PointSet3Ptr& importedBuildingPts);
     ImportedBuilding(Mesh& mesh);
-    ~ImportedBuilding();
+    ~ImportedBuilding() = default;
 
     virtual void   calc_elevation() override;
     virtual void   reconstruct() override;

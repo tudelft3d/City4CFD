@@ -39,7 +39,7 @@ public:
     ReconstructedBuilding(const nlohmann::json& poly);
     ReconstructedBuilding(const Polygon_with_attr& poly);
     ReconstructedBuilding(const std::shared_ptr<ImportedBuilding>& importedBuilding);
-    ~ReconstructedBuilding();
+    ~ReconstructedBuilding() = default;
 
     const std::vector<roofer::Mesh>& get_roofer_meshes() const;
 
