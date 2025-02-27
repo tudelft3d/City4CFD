@@ -37,8 +37,6 @@ Boundary::Boundary()
 Boundary::Boundary(const int outputLayerID)
         : TopoFeature(outputLayerID), m_sideOutputPts() {}
 
-Boundary::~Boundary() = default;
-
 //-- Static member definition
 std::vector<Point_3> Boundary::s_outerPts;
 double               Boundary::s_outerBndHeight;

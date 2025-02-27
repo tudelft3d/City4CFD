@@ -36,9 +36,6 @@
 #include "Sides.h"
 #include "Top.h"
 
-Map3d::Map3d() = default;
-Map3d::~Map3d() = default;
-
 void Map3d::reconstruct() {
     //-- Prepare features
     this->set_features();
@@ -320,6 +317,11 @@ void Map3d::set_bnd() {
     //-- Deactivate point cloud points that are out of bounds
     Boundary::set_bounds_to_terrain_pc(m_pointCloud.get_terrain(),
                                        bndPoly, pcBndPoly, startBufferPoly);
+
+    // update the terrain DT for interpolation
+    m_dt.clear();
+    m_dt.insert(m_pointCloud.get_terrain().points().begin(),
+                m_pointCloud.get_terrain().points().end());
 
     //-- Check feature scope for surface layers now that the full domain is known
     for (auto& f: m_surfaceLayersPtr) {

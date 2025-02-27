@@ -1,4 +1,10 @@
 # Changelog
+## [0.6.2] - 2025-02-27
+### Changed
+- Improved inserting surface layer polygons when terrain pc is missing
+### Fixed
+- Minor bugfixes
+
 ## [0.6.1] - 2025-02-06
 ### Fixed
 - Docker image hotfix

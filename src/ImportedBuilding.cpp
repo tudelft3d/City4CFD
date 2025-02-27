@@ -267,8 +267,6 @@ ImportedBuilding::ImportedBuilding(Mesh& mesh)
     mesh.clear();
 }
 
-ImportedBuilding::~ImportedBuilding() = default;
-
 /*
  * Calculate building elevation without reconstruction.
  * Defined as the highest point

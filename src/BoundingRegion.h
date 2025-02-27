@@ -37,9 +37,9 @@ public:
     CDT m_projCDT;
     std::shared_ptr<const Config::ReconRegion> m_reconSettings;
 
-    BoundingRegion();
+    BoundingRegion() = default;
     BoundingRegion(std::shared_ptr<Config::ReconRegion> reconRegion);
-    ~BoundingRegion();
+    ~BoundingRegion() = default;
 
     void operator()(double radius);
     void operator()(Polygon_2& poly);

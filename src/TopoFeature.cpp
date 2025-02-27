@@ -39,8 +39,6 @@ TopoFeature::TopoFeature(int outputLayerID)
     if (m_outputLayerID >= s_numOfOutputLayers) s_numOfOutputLayers = m_outputLayerID + 1;
 }
 
-TopoFeature::~TopoFeature() = default;
-
 int TopoFeature::s_numOfOutputLayers = 0;
 
 void TopoFeature::add_recon_region_output_layers(const int numLayers) {

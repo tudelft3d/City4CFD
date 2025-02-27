@@ -33,7 +33,7 @@
 class Sides : public Boundary {
 public:
     Sides(const int outputLayerID);
-    ~Sides();
+    ~Sides() = default;
 
     virtual void reconstruct() override;
 

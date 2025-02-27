@@ -33,7 +33,7 @@
 class Top : public Boundary {
 public:
     Top(const int outputLayerID);
-    ~Top();
+    ~Top() = default;
 
     virtual void reconstruct() override;
 

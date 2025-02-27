@@ -122,8 +122,6 @@ PolyFeature::PolyFeature(const Polygon_with_attr& poly, const bool checkSimplici
 PolyFeature::PolyFeature(const Polygon_with_attr& poly, const int outputLayerID)
         : PolyFeature(poly, false, outputLayerID) {}
 
-PolyFeature::~PolyFeature() = default;
-
 int PolyFeature::s_numOfPolyFeatures = 0;
 
 void PolyFeature::calc_footprint_elevation_nni(const DT& dt) {
