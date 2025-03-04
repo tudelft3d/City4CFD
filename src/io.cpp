@@ -31,6 +31,7 @@
 #include "TopoFeature.h"
 #include "Boundary.h"
 #include "Building.h"
+#include "SurfaceLayer.h"
 
 #include <CGAL/Polygon_mesh_processing/compute_normal.h>
 #include <CGAL/Polygon_mesh_processing/connected_components.h>
@@ -406,8 +407,9 @@ void IO::output_cityjson(const OutputFeaturesPtr& allFeatures) {
     j["metadata"]["referenceSystem"] = "urn:ogc:def:crs:EPSG::7415";
     std::unordered_map<std::string, int> dPts;
     for (auto& f : allFeatures) {
-        // Only Buildings and Terrain for now
-        if (f->get_class() != BUILDING && f->get_class() != TERRAIN) continue;
+        if (f->get_class() != BUILDING &&
+            f->get_class() != TERRAIN &&
+            f->get_class() != SURFACELAYER) continue;
         //-- Get feature info
         nlohmann::json b;
         f->get_cityjson_info(b);
@@ -416,8 +418,8 @@ void IO::output_cityjson(const OutputFeaturesPtr& allFeatures) {
         nlohmann::json g;
         g["type"] = f->get_cityjson_primitive();
         // grab lod information for buildings
-        auto derivedClass = std::dynamic_pointer_cast<Building>(f);
-        if (derivedClass) g["lod"] = derivedClass->get_lod();
+        auto buildingDerived = std::dynamic_pointer_cast<Building>(f);
+        if (buildingDerived) g["lod"] = buildingDerived->get_lod();
 
         IO::get_cityjson_geom(f->get_mesh(), g, dPts);
 
@@ -426,7 +428,14 @@ void IO::output_cityjson(const OutputFeaturesPtr& allFeatures) {
 
         //-- Append to main json struct
         b["geometry"].push_back(g);
-        j["CityObjects"][f->get_id()] = b;
+
+        // store terran and surface layers with the name, rest with the id
+        if (f->get_class() == TERRAIN ||
+            f->get_class() == SURFACELAYER) {
+            j["CityObjects"][Config::get().outputSurfaces[f->get_output_layer_id()]] = b;
+        } else {
+            j["CityObjects"][f->get_id()] = b;
+        }
     }
 
     //-- Vertices - store them in a vector to quickly sort
@@ -441,7 +450,7 @@ void IO::output_cityjson(const OutputFeaturesPtr& allFeatures) {
         j["vertices"].push_back({std::stod(c[0], NULL), std::stod(c[1], NULL), std::stod(c[2], NULL) });
     }
 
-    of.open(Config::get().outputFileName + ".json");
+    of.open(Config::get().outputFileName + ".city.json");
     of << j.dump() << std::endl;
 }
 
