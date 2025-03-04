@@ -1,4 +1,8 @@
 # Changelog
+## [Unreleased]
+### Fixed
+- CityJSON terrain output
+
 ## [0.6.2] - 2025-02-27
 ### Changed
 - Improved inserting surface layer polygons when terrain pc is missing
