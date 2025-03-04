@@ -88,16 +88,12 @@ void LoD22::reconstruct(const PointSet3Ptr& buildingPtsPtr,
         ++j;
     }
 
-    //todo groundPts flag
     // reconstruct
-//    m_rooferMeshes = roofer::reconstruct_single_instance(buildingPts, groundPts, linearRing,
-//                                                         {.lambda = config.m_lambda,
-//                                                          .lod = config.m_lod,
-//                                                          .lod13_step_height = config.m_lod13_step_height});
     m_rooferMeshes = roofer::reconstruct_single_instance(buildingPts, linearRing,
+//                                                       groundPts, //todo groundPts flag
                                                          {.lambda = config.m_lambda,
-                                                         .lod = config.m_lod,
-                                                         .lod13_step_height = config.m_lod13_step_height});
+                                                          .lod = config.m_lod,
+                                                          .lod13_step_height = config.m_lod13_step_height});
 
     // store the first mesh from the vector, rest should be handled separately
     auto rooferMesh = m_rooferMeshes.front();
