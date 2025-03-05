@@ -458,7 +458,7 @@ void IO::output_cityjson(const OutputFeaturesPtr& allFeatures) {
     for (auto& p : thepts) {
         std::vector<std::string> c;
         boost::split(c, p, boost::is_any_of(" "));
-        j["vertices"].push_back({std::stod(c[0], NULL), std::stod(c[1], NULL), std::stod(c[2], NULL) });
+        j["vertices"].push_back({std::stoi(c[0]), std::stoi(c[1]), std::stoi(c[2])});
     }
 
     of.open(Config::get().outputFileName + ".city.json");
