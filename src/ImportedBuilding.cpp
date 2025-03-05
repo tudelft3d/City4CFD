@@ -39,7 +39,6 @@
 #include <CGAL/Polygon_mesh_processing/triangulate_faces.h>
 #include <CGAL/Polygon_mesh_processing/compute_normal.h>
 
-
 int ImportedBuilding::noBottom = 0;
 
 ImportedBuilding::ImportedBuilding(std::unique_ptr<nlohmann::json>& buildingJson, PointSet3Ptr& importedBuildingPts)

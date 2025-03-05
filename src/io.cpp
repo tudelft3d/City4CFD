@@ -402,10 +402,17 @@ void IO::output_cityjson(const OutputFeaturesPtr& allFeatures) {
     j["type"] = "CityJSON";
     j["version"] = "2.0";
     j["metadata"] = {};
-    std::vector<double> bbox = Boundary::get_domain_bbox();
-    j["metadata"]["geographicalExtent"] = Boundary::get_domain_bbox();
-    j["metadata"]["referenceSystem"] = "urn:ogc:def:crs:EPSG::7415";
+    j["CityObjects"] = {};
+    j["vertices"] = {};
+
+    // CityJSON transform and scale are hardcoded to 0 and 0.001
+    j["transform"] = {};
+    j["transform"]["scale"] = {0.001, 0.001, 0.001};
+    j["transform"]["translate"] = {0, 0, 0};
+
+//    j["metadata"]["referenceSystem"] = "urn:ogc:def:crs:EPSG::7415"; // CRS is not defined due to transform by point of interest
     std::unordered_map<std::string, int> dPts;
+    std::vector<double> minMaxZ = {global::largnum, -global::largnum};
     for (auto& f : allFeatures) {
         if (f->get_class() != BUILDING &&
             f->get_class() != TERRAIN &&
@@ -421,7 +428,7 @@ void IO::output_cityjson(const OutputFeaturesPtr& allFeatures) {
         auto buildingDerived = std::dynamic_pointer_cast<Building>(f);
         if (buildingDerived) g["lod"] = buildingDerived->get_lod();
 
-        IO::get_cityjson_geom(f->get_mesh(), g, dPts);
+        IO::get_cityjson_geom(f->get_mesh(), g, dPts, minMaxZ);
 
         //-- Get feature semantics
         f->get_cityjson_semantics(g);
@@ -437,6 +444,10 @@ void IO::output_cityjson(const OutputFeaturesPtr& allFeatures) {
             j["CityObjects"][f->get_id()] = b;
         }
     }
+    auto bbox = Boundary::get_outer_bnd_bbox();
+    bbox[2] = minMaxZ[0];
+    bbox[5] = minMaxZ[1];
+    j["metadata"]["geographicalExtent"] = bbox;
 
     //-- Vertices - store them in a vector to quickly sort
     std::vector<std::string> thepts;
@@ -497,14 +508,22 @@ void IO::get_stl_pts(Mesh& mesh, std::string& fs) {
     }
 }
 
-void IO::get_cityjson_geom(const Mesh& mesh, nlohmann::json& g, std::unordered_map<std::string, int>& dPts) {
+void IO::get_cityjson_geom(const Mesh& mesh,
+                           nlohmann::json& g,
+                           std::unordered_map<std::string, int>& dPts,
+                           std::vector<double>& minMaxZ) {
+    // CityJSON transform and scale are hardcoded to 0 and 0.001
+    const double inverseScale = 1000.; // hardcoded scale for CityJSON is 0.001, so we are multiplying by 1000 to store it
+    const double inverseTranslate = 0.; // hardcoded translation
+
     g["boundaries"];
     for (auto face: mesh.faces()) {
         if (IO::is_degen(mesh, face)) continue;
         std::vector<int> tempPoly;
         tempPoly.reserve(3);
         for (auto index: CGAL::vertices_around_face(mesh.halfedge(face), mesh)) {
-            std::string pt = gen_key_bucket(mesh.point(index));
+            // store point as a string with CityJSON transformations
+            std::string pt = gen_key_bucket_int(mesh.point(index), inverseScale, inverseTranslate);
             auto it = dPts.find(pt);
             if (it == dPts.end()) {
 
@@ -514,6 +533,10 @@ void IO::get_cityjson_geom(const Mesh& mesh, nlohmann::json& g, std::unordered_m
             } else {
                 tempPoly.push_back(it->second);
             }
+
+            // get the z value for the bounding box
+            minMaxZ[0] = std::min(minMaxZ[0], mesh.point(index).z());
+            minMaxZ[1] = std::max(minMaxZ[1], mesh.point(index).z());
         }
         g["boundaries"].push_back({tempPoly});
     }
@@ -628,3 +651,16 @@ std::string IO::gen_key_bucket(const T& p) {
 //- Explicit template instantiation
 template std::string IO::gen_key_bucket<Point_3>(const Point_3& p);
 template std::string IO::gen_key_bucket<Vector_3>(const Vector_3& p);
+
+template<typename T>
+std::string IO::gen_key_bucket_int(const T& p, const double inverseScale, const double inverseTranslate) {
+    std::stringstream ss;
+    ss << std::fixed << std::setprecision(0)
+            << (p.x() + inverseTranslate) * inverseScale << " "
+            << (p.y() + inverseTranslate) * inverseScale << " "
+            << (p.z() + inverseTranslate) * inverseScale;
+    return ss.str();
+}
+//- Explicit template instantiation
+template std::string IO::gen_key_bucket_int<Point_3>(const Point_3& p, const double inverseScale, const double inverseTransform);
+template std::string IO::gen_key_bucket_int<Vector_3>(const Vector_3& p, const double inverseScale, const double inverseTransform);
