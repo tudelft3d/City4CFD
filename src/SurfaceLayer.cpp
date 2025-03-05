@@ -53,8 +53,6 @@ void SurfaceLayer::get_cityjson_info(nlohmann::json& b) const {
     b["type"] = "TINRelief";
 }
 
-void SurfaceLayer::get_cityjson_semantics(nlohmann::json& /*g*/) const { }
-
 std::string SurfaceLayer::get_cityjson_primitive() const {
     return "CompositeSurface";
 }

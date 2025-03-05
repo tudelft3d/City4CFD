@@ -40,7 +40,6 @@ public:
     void check_feature_scope(const Polygon_2& bndPoly);
 
     virtual void        get_cityjson_info(nlohmann::json& b) const override;
-    virtual void        get_cityjson_semantics(nlohmann::json& g) const override;
     virtual std::string get_cityjson_primitive() const override;
     virtual TopoClass   get_class() const override;
     virtual std::string get_class_name() const override;
