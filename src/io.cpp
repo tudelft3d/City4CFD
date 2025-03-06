@@ -651,10 +651,10 @@ template std::string IO::gen_key_bucket<Vector_3>(const Vector_3& p);
 template<typename T>
 std::string IO::gen_key_bucket_int(const T& p, const double inverseScale, const double inverseTranslate) {
     std::stringstream ss;
-    ss << std::fixed << std::setprecision(0)
-            << (p.x() + inverseTranslate) * inverseScale << " "
-            << (p.y() + inverseTranslate) * inverseScale << " "
-            << (p.z() + inverseTranslate) * inverseScale;
+    // round to integer before converting to string
+    ss << static_cast<int>(std::round((p.x() + inverseTranslate) * inverseScale)) << " "
+       << static_cast<int>(std::round((p.y() + inverseTranslate) * inverseScale)) << " "
+       << static_cast<int>(std::round((p.z() + inverseTranslate) * inverseScale));
     return ss.str();
 }
 //- Explicit template instantiation
