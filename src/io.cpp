@@ -419,12 +419,11 @@ void IO::output_cityjson(const OutputFeaturesPtr& allFeatures) {
             f->get_class() != SURFACELAYER) continue;
         //-- Get feature info
         nlohmann::json b;
-        f->get_cityjson_info(b);
+        f->get_cityjson_cityobj_info(b);
 
         //-- Get feature geometry
         nlohmann::json g;
-        g["type"] = f->get_cityjson_primitive();
-        g["lod"] = f->get_lod();
+        f->get_cityjson_geomobj_info(g);
 
         IO::get_cityjson_geom(f->get_mesh(), g, dPts, minMaxZ);
 
@@ -524,7 +523,6 @@ void IO::get_cityjson_geom(const Mesh& mesh,
             std::string pt = gen_key_bucket_int(mesh.point(index), inverseScale, inverseTranslate);
             auto it = dPts.find(pt);
             if (it == dPts.end()) {
-
                 tempPoly.push_back(dPts.size());
 
                 dPts[pt] = dPts.size();

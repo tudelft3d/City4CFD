@@ -325,16 +325,6 @@ void ReconstructedBuilding::reconstruct_flat_terrain() {
     }
 }
 
-void ReconstructedBuilding::get_cityjson_info(nlohmann::json& b) const {
-    b["type"] = "Building";
-//  b["attributes"];
-//    get_cityjson_attributes(b, _attributes);
-//    float hbase = z_to_float(this->get_height_base());
-//    float h = z_to_float(this->get_height());
-//    b["attributes"]["TerrainHeight"] = m_baseElevations.back(); // temp - will calculate avg for every footprint
-    b["attributes"]["measuredHeight"] = m_elevation - geomutils::avg(m_groundElevations[0]);
-}
-
 void ReconstructedBuilding::get_cityjson_semantics(nlohmann::json& g) const { // Temp for checking CGAL mesh properties
     // for now handle only LoD1.2 with semantics, LoD1.3 and LoD2.2 loses information
     // when making final repairs

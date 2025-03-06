@@ -49,12 +49,13 @@ void SurfaceLayer::check_feature_scope(const Polygon_2& bndPoly) {
     }
 }
 
-void SurfaceLayer::get_cityjson_info(nlohmann::json& b) const {
-    b["type"] = "TINRelief";
+void SurfaceLayer::get_cityjson_cityobj_info(nlohmann::json& f) const {
+    f["type"] = "TINRelief";
 }
 
-std::string SurfaceLayer::get_cityjson_primitive() const {
-    return "CompositeSurface";
+void SurfaceLayer::get_cityjson_geomobj_info(nlohmann::json& g) const {
+    g["type"] = "CompositeSurface";
+    g["lod"] = "1.2";
 }
 
 TopoClass SurfaceLayer::get_class() const {

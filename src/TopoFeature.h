@@ -44,10 +44,9 @@ public:
     virtual TopoClass    get_class() const = 0;
     virtual std::string  get_class_name() const = 0;
 
-    virtual std::string  get_lod() const;
-    virtual void         get_cityjson_info(nlohmann::json& b) const;
+    virtual void         get_cityjson_cityobj_info(nlohmann::json& f) const;
+    virtual void         get_cityjson_geomobj_info(nlohmann::json& g) const;
     virtual void         get_cityjson_semantics(nlohmann::json& g) const;
-    virtual std::string  get_cityjson_primitive() const;
 
     Mesh&       get_mesh();
     const Mesh& get_mesh() const;

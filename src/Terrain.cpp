@@ -316,13 +316,14 @@ void Terrain::check_layer(const Face_handle& fh, int surfaceLayer) {
 }
 */
 
-void Terrain::get_cityjson_info(nlohmann::json& b) const {
-    b["type"] = "TINRelief";
+void Terrain::get_cityjson_cityobj_info(nlohmann::json& f) const {
+    f["type"] = "TINRelief";
 //    b["attributes"]; // commented out until I have attributes to add
 }
 
-std::string Terrain::get_cityjson_primitive() const {
-    return "CompositeSurface";
+void Terrain::get_cityjson_geomobj_info(nlohmann::json& g) const {
+    g["type"] = "CompositeSurface";
+    g["lod"] = "1.2";
 }
 
 CDT& Terrain::get_cdt() {

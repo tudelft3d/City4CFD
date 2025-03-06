@@ -286,14 +286,19 @@ std::string Building::get_lod() const {
     return m_reconSettings->lod;
 }
 
-void Building::get_cityjson_info(nlohmann::json& b) const {
-    b["type"] = "Building";
+void Building::get_cityjson_cityobj_info(nlohmann::json& f) const {
+    f["type"] = "Building";
 //  b["attributes"];
 //    get_cityjson_attributes(b, _attributes);
 //    float hbase = z_to_float(this->get_height_base());
 //    float h = z_to_float(this->get_height());
 //    b["attributes"]["TerrainHeight"] = m_baseElevations.back(); // temp - will calculate avg for every footprint
-    b["attributes"]["measuredHeight"] = m_elevation - geomutils::avg(m_groundElevations[0]);
+    f["attributes"]["measuredHeight"] = m_elevation - geomutils::avg(m_groundElevations[0]);
+}
+
+void Building::get_cityjson_geomobj_info(nlohmann::json& g) const {
+    g["type"] = "MultiSurface";
+    g["lod"] = this->get_lod();
 }
 
 void Building::get_cityjson_semantics(nlohmann::json& g) const {
@@ -314,10 +319,6 @@ void Building::get_cityjson_semantics(nlohmann::json& g) const {
 
         g["semantics"]["values"][faceIdx.idx()] = it->second;
     }
-}
-
-std::string Building::get_cityjson_primitive() const {
-    return "MultiSurface";
 }
 
 TopoClass Building::get_class() const {
