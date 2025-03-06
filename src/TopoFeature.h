@@ -41,11 +41,13 @@ public:
     static void          add_recon_region_output_layers(const int numLayers);
     static int           get_num_output_layers();
 
+    virtual TopoClass    get_class() const = 0;
+    virtual std::string  get_class_name() const = 0;
+
+    virtual std::string  get_lod() const;
     virtual void         get_cityjson_info(nlohmann::json& b) const;
     virtual void         get_cityjson_semantics(nlohmann::json& g) const;
     virtual std::string  get_cityjson_primitive() const;
-    virtual TopoClass    get_class() const = 0;
-    virtual std::string  get_class_name() const = 0;
 
     Mesh&       get_mesh();
     const Mesh& get_mesh() const;

@@ -424,9 +424,7 @@ void IO::output_cityjson(const OutputFeaturesPtr& allFeatures) {
         //-- Get feature geometry
         nlohmann::json g;
         g["type"] = f->get_cityjson_primitive();
-        // grab lod information for buildings
-        auto buildingDerived = std::dynamic_pointer_cast<Building>(f);
-        if (buildingDerived) g["lod"] = buildingDerived->get_lod();
+        g["lod"] = f->get_lod();
 
         IO::get_cityjson_geom(f->get_mesh(), g, dPts, minMaxZ);
 

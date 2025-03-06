@@ -81,6 +81,13 @@ void TopoFeature::deactivate() {
     m_f_active = false;
 }
 
+/*
+ * Default LoD specifier is 1.2 unless specified otherwise in the derived class
+ */
+std::string TopoFeature::get_lod() const {
+    return "1.2";
+}
+
 void TopoFeature::get_cityjson_info(nlohmann::json& /*j*/) const {}
 
 void TopoFeature::get_cityjson_semantics(nlohmann::json& /*g*/) const {}
