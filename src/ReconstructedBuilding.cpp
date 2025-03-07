@@ -336,18 +336,15 @@ void ReconstructedBuilding::get_cityjson_semantics(nlohmann::json& g) const { //
         } else throw city4cfd_error("Semantic property map not found!");
 
         std::unordered_map<std::string, int> surfaceId;
-        surfaceId["RoofSurface"] = 0;
-        g["semantics"]["surfaces"][0]["type"] = "RoofSurface";
-        surfaceId["GroundSurface"] = 1;
-        g["semantics"]["surfaces"][1]["type"] = "GroundSurface";
-        surfaceId["WallSurface"] = 2;
-        g["semantics"]["surfaces"][2]["type"] = "WallSurface";
+        surfaceId["RoofSurface"] = 0;   g["surfaces"][0]["type"] = "RoofSurface";
+        surfaceId["GroundSurface"] = 1; g["surfaces"][1]["type"] = "GroundSurface";
+        surfaceId["WallSurface"] = 2;   g["surfaces"][2]["type"] = "WallSurface";
 
         for (auto faceIdx: m_mesh.faces()) {
             auto it = surfaceId.find(semantics[faceIdx]);
             if (it == surfaceId.end()) throw city4cfd_error("Could not find semantic attribute!");
 
-            g["semantics"]["values"][faceIdx.idx()] = it->second;
+            g["values"][faceIdx.idx()] = it->second;
         }
     }
 }

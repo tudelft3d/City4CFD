@@ -428,17 +428,28 @@ void IO::output_cityjson(const OutputFeaturesPtr& allFeatures) {
         IO::get_cityjson_geom(f->get_mesh(), g, dPts, minMaxZ);
 
         //-- Get feature semantics
-        f->get_cityjson_semantics(g);
+        nlohmann::json s;
+        f->get_cityjson_semantics(s);
+        if (!s.empty()) g["semantics"] = s;
 
         //-- Append to main json struct
         b["geometry"].push_back(g);
 
-        // store terran and surface layers with the name, rest with the id
+        //-- Store terran and surface layers with the name, rest with the id
         if (f->get_class() == TERRAIN ||
             f->get_class() == SURFACELAYER) {
             j["CityObjects"][Config::get().outputSurfaces[f->get_output_layer_id()]] = b;
         } else {
-            j["CityObjects"][f->get_id()] = b;
+            std::string uniqueID = f->get_id();
+            int suffix = 0;
+            // check if the ID already exists and ensure unique ID
+            while (!j["CityObjects"][uniqueID].empty()) {
+                ++suffix;
+                uniqueID = f->get_id() + "_" + std::to_string(suffix);
+            }
+            j["CityObjects"][uniqueID] = b;
+            if (suffix > 0)
+                Config::write_to_log("Building ID: " + f->get_id() + " already exists. Stored as a new ID: " + uniqueID);
         }
     }
     auto bbox = Boundary::get_outer_bnd_bbox();
