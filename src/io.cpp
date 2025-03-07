@@ -458,8 +458,7 @@ void IO::output_cityjson(const OutputFeaturesPtr& allFeatures) {
     j["metadata"]["geographicalExtent"] = bbox;
 
     //-- Vertices - store them in a vector to quickly sort
-    std::vector<std::string> thepts;
-    thepts.resize(dPts.size());
+    std::vector<std::string> thepts(dPts.size());
     for (auto& p : dPts)
         thepts[p.second] = p.first;
     dPts.clear();
