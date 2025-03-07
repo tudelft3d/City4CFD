@@ -1,5 +1,5 @@
 # Changelog
-## [Unreleased]
+## [0.6.3] 2025-03-07
 ### Fixed
 - CityJSON terrain output
 
