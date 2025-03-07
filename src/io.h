@@ -50,7 +50,10 @@ namespace IO {
 
     void get_obj_pts(const Mesh& mesh, std::string& fs, std::string& bs, std::unordered_map<std::string, int>& dPts);
     void get_stl_pts(Mesh& mesh, std::string& fs);
-    void get_cityjson_geom(const Mesh& mesh, nlohmann::json& g, std::unordered_map<std::string, int>& dPts);
+    void get_cityjson_geom(const Mesh& mesh,
+                           nlohmann::json& g,
+                           std::unordered_map<std::string,int>& dPts,
+                           std::vector<double>& minMaxZ);
 
     bool not_same(std::vector<int> idxLst);
     bool is_degen(const Mesh& mesh, Mesh::Face_index face);
@@ -63,6 +66,7 @@ namespace IO {
 
     //-- Templated function
     template <typename T> std::string gen_key_bucket(const T& p);
+    template <typename T> std::string gen_key_bucket_int(const T& p, const double inverseScale, const double inverseTranslate);
 }
 
 #endif //CITY4CFD_IO_H

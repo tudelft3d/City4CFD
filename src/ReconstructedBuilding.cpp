@@ -325,16 +325,6 @@ void ReconstructedBuilding::reconstruct_flat_terrain() {
     }
 }
 
-void ReconstructedBuilding::get_cityjson_info(nlohmann::json& b) const {
-    b["type"] = "Building";
-//  b["attributes"];
-//    get_cityjson_attributes(b, _attributes);
-//    float hbase = z_to_float(this->get_height_base());
-//    float h = z_to_float(this->get_height());
-//    b["attributes"]["TerrainHeight"] = m_baseElevations.back(); // temp - will calculate avg for every footprint
-    b["attributes"]["measuredHeight"] = m_elevation - geomutils::avg(m_groundElevations[0]);
-}
-
 void ReconstructedBuilding::get_cityjson_semantics(nlohmann::json& g) const { // Temp for checking CGAL mesh properties
     // for now handle only LoD1.2 with semantics, LoD1.3 and LoD2.2 loses information
     // when making final repairs
@@ -346,18 +336,15 @@ void ReconstructedBuilding::get_cityjson_semantics(nlohmann::json& g) const { //
         } else throw city4cfd_error("Semantic property map not found!");
 
         std::unordered_map<std::string, int> surfaceId;
-        surfaceId["RoofSurface"] = 0;
-        g["semantics"]["surfaces"][0]["type"] = "RoofSurface";
-        surfaceId["GroundSurface"] = 1;
-        g["semantics"]["surfaces"][1]["type"] = "GroundSurface";
-        surfaceId["WallSurface"] = 2;
-        g["semantics"]["surfaces"][2]["type"] = "WallSurface";
+        surfaceId["RoofSurface"] = 0;   g["surfaces"][0]["type"] = "RoofSurface";
+        surfaceId["GroundSurface"] = 1; g["surfaces"][1]["type"] = "GroundSurface";
+        surfaceId["WallSurface"] = 2;   g["surfaces"][2]["type"] = "WallSurface";
 
         for (auto faceIdx: m_mesh.faces()) {
             auto it = surfaceId.find(semantics[faceIdx]);
             if (it == surfaceId.end()) throw city4cfd_error("Could not find semantic attribute!");
 
-            g["semantics"]["values"][faceIdx.idx()] = it->second;
+            g["values"][faceIdx.idx()] = it->second;
         }
     }
 }

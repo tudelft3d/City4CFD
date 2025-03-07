@@ -40,7 +40,7 @@ public:
     static void set_bounds_to_buildings_pc(Point_set_3& pointCloud, const Polygon_2& pcBndPoly);
     static void set_bounds_to_terrain_pc(Point_set_3& pointCloud, const Polygon_2& bndPoly,
                                          const Polygon_2& pcBndPoly, const Polygon_2& startBufferPoly);
-    static std::vector<double> get_domain_bbox();
+    static std::vector<double> get_outer_bnd_bbox();
 
     virtual void reconstruct() = 0;
 
@@ -49,9 +49,6 @@ public:
 
     virtual TopoClass   get_class() const = 0;
     virtual std::string get_class_name() const = 0;
-    virtual void        get_cityjson_info(nlohmann::json& b) const;
-    virtual void        get_cityjson_semantics(nlohmann::json& g) const;
-    virtual std::string get_cityjson_primitive() const;
 
 protected:
     static std::vector<Point_3> s_outerPts;

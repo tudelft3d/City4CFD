@@ -29,20 +29,11 @@
 
 #include "geomutils.h"
 
-SurfaceLayer::SurfaceLayer()
-        : PolyFeature() {}
-
 SurfaceLayer::SurfaceLayer(const int outputLayerID)
         : PolyFeature(outputLayerID) {}
 
-SurfaceLayer::SurfaceLayer(const nlohmann::json& poly)
-        : PolyFeature(poly) {}
-
 SurfaceLayer::SurfaceLayer(const nlohmann::json& poly, const int outputLayerID)
         : PolyFeature(poly, outputLayerID) {}
-
-SurfaceLayer::SurfaceLayer(const Polygon_with_attr& poly)
-        : PolyFeature(poly) {}
 
 SurfaceLayer::SurfaceLayer(const Polygon_with_attr& poly, const int outputLayerID)
         : PolyFeature(poly, outputLayerID) {}
@@ -58,16 +49,13 @@ void SurfaceLayer::check_feature_scope(const Polygon_2& bndPoly) {
     }
 }
 
-void SurfaceLayer::get_cityjson_info(nlohmann::json& b) const {
-
+void SurfaceLayer::get_cityjson_cityobj_info(nlohmann::json& f) const {
+    f["type"] = "TINRelief";
 }
 
-void SurfaceLayer::get_cityjson_semantics(nlohmann::json& g) const {
-
-}
-
-std::string SurfaceLayer::get_cityjson_primitive() const {
-    return "Dunno yet";
+void SurfaceLayer::get_cityjson_geomobj_info(nlohmann::json& g) const {
+    g["type"] = "CompositeSurface";
+    g["lod"] = "1.2";
 }
 
 TopoClass SurfaceLayer::get_class() const {

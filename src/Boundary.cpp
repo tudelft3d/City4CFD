@@ -153,8 +153,7 @@ void Boundary::prep_output(Vector_2 edge) {
     throw city4cfd_error("Cannot find side for output!");
 }
 
-std::vector<double> Boundary::get_domain_bbox() {
-    //todo: proper bbox calculation
+std::vector<double> Boundary::get_outer_bnd_bbox() {
     double maxx(-global::largnum), maxy(-global::largnum), maxz(-global::largnum);
     double minx(global::largnum),  miny(global::largnum),  minz(global::largnum);
 
@@ -165,24 +164,9 @@ std::vector<double> Boundary::get_domain_bbox() {
         if (pt.y() > maxy) maxy = pt.y();
         else if (pt.y() < miny) miny = pt.y();
 
-//        if (pt.z() > maxz) maxz = pt.z();
-//        else if (pt.z() < minz) minz = pt.z();
+        if (pt.z() > maxz) maxz = pt.z();
+        else if (pt.z() < minz) minz = pt.z();
     }
-    minz = -5;
-    maxz = 100;
 
     return std::vector<double> {minx, miny, minz, maxx, maxy, maxz};
 }
-
-//-- TEMP
-void Boundary::get_cityjson_info(nlohmann::json& b) const {
-    //temp
-}
-
-void Boundary::get_cityjson_semantics(nlohmann::json& g) const {
-    //temp
-}
-
-std::string Boundary::get_cityjson_primitive() const {
-    return "";
-};
