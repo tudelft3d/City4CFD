@@ -81,16 +81,8 @@ void TopoFeature::deactivate() {
     m_f_active = false;
 }
 
-void TopoFeature::get_cityjson_info(nlohmann::json& j) const {
-    //TEMP UNTIL ALL FUNCTIONS ARE IMPLEMENTED
-}
+void TopoFeature::get_cityjson_cityobj_info(nlohmann::json& /* f */) const { }
 
-void TopoFeature::get_cityjson_semantics(nlohmann::json& g) const {
-    // TEMP until I figure what to do with this
-}
+void TopoFeature::get_cityjson_geomobj_info(nlohmann::json& /* g */) const { }
 
-
-std::string TopoFeature::get_cityjson_primitive() const {
-    //TEMP UNTIL ALL FUNCTIONS ARE IMPLEMENTED
-    return "Nope";
-}
+void TopoFeature::get_cityjson_semantics(nlohmann::json& /* g */) const { }
