@@ -40,7 +40,7 @@ public:
     PolyFeature(const Polygon_with_attr& poly, const bool checkSimplicity = false);
     PolyFeature(const Polygon_with_attr& poly, const bool checkSimplicity, const int outputLayerID);
     PolyFeature(const Polygon_with_attr& poly, const int outputLayerID);
-    virtual ~PolyFeature();
+    virtual ~PolyFeature() = default;
 
     void  calc_footprint_elevation_nni(const DT& dt);
 #ifndef NDEBUG
@@ -57,9 +57,6 @@ public:
     void  calc_min_bbox();
     void  clear_feature();
 
-    virtual void        get_cityjson_info(nlohmann::json& b) const = 0;
-    virtual void        get_cityjson_semantics(nlohmann::json& g) const = 0;
-    virtual std::string get_cityjson_primitive() const = 0;
     virtual TopoClass   get_class() const = 0;
     virtual std::string get_class_name() const = 0;
 

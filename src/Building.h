@@ -37,7 +37,7 @@ public:
     Building();
     Building(const nlohmann::json& poly);
     Building(const Polygon_with_attr& poly);
-    ~Building();
+    virtual ~Building() = default;
 
     static void alpha_wrap_all(const BuildingsPtr& buildings, Mesh& newMesh);
 
@@ -65,10 +65,11 @@ public:
     void   set_to_zero_terrain();
     double sq_max_dim();
     PointSet3Ptr get_points() const;
+    std::string get_lod() const;
 
-    virtual void        get_cityjson_info(nlohmann::json& b) const override;
+    virtual void        get_cityjson_cityobj_info(nlohmann::json& f) const override;
+    virtual void        get_cityjson_geomobj_info(nlohmann::json& g) const override;
     virtual void        get_cityjson_semantics(nlohmann::json& g) const override;
-    virtual std::string get_cityjson_primitive() const override;
     virtual TopoClass   get_class() const override;
     virtual std::string get_class_name() const override;
 

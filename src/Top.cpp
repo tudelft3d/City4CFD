@@ -32,8 +32,6 @@
 Top::Top(const int outputLayerID)
         : Boundary(outputLayerID) {}
 
-Top::~Top() = default;
-
 void Top::reconstruct() {
     std::vector<Mesh::vertex_index> meshVertexTop;
 

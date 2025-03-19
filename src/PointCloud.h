@@ -36,8 +36,8 @@
 
 class PointCloud {
 public:
-    PointCloud();
-    ~PointCloud();
+    PointCloud() = default;
+    ~PointCloud() = default;
 
     void random_thin_pts();
     void create_flat_terrain(const PolyFeaturesPtr& lsFeatures);

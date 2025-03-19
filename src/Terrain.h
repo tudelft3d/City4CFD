@@ -37,7 +37,7 @@ public:
     using TopoFeature::TopoFeature;
     Terrain();
     Terrain(int pid);
-    ~Terrain();
+    ~Terrain() = default;
 
     void set_cdt(const Point_set_3 &pointCloud);
     void prep_constraints(const PolyFeaturesPtr& features, Point_set_3& pointCloud);
@@ -58,8 +58,8 @@ public:
     const SearchTree&        get_mesh_search_tree() const;
     std::vector<EPECK::Segment_3>& get_extra_constrained_edges();
 
-    void         get_cityjson_info(nlohmann::json& b) const override;
-    std::string  get_cityjson_primitive() const override;
+    void         get_cityjson_geomobj_info(nlohmann::json& g) const override;
+    void         get_cityjson_cityobj_info(nlohmann::json& f) const override;
     TopoClass    get_class() const override;
     std::string  get_class_name() const override;
 

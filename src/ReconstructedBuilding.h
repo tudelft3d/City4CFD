@@ -39,7 +39,7 @@ public:
     ReconstructedBuilding(const nlohmann::json& poly);
     ReconstructedBuilding(const Polygon_with_attr& poly);
     ReconstructedBuilding(const std::shared_ptr<ImportedBuilding>& importedBuilding);
-    ~ReconstructedBuilding();
+    ~ReconstructedBuilding() = default;
 
     const std::vector<roofer::Mesh>& get_roofer_meshes() const;
 
@@ -47,7 +47,6 @@ public:
     virtual void   reconstruct() override;
     virtual void   insert_terrain_point(const Point_3& pt) override;
     virtual void   reconstruct_flat_terrain() override;
-    virtual void   get_cityjson_info(nlohmann::json& b) const override;
     virtual void   get_cityjson_semantics(nlohmann::json& g) const override;
 
 protected:

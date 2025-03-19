@@ -37,11 +37,9 @@
 #include <CGAL/convex_hull_2.h>
 #include <CGAL/Delaunay_triangulation_2.h>
 
-BoundingRegion::BoundingRegion() = default;
 BoundingRegion::BoundingRegion(std::shared_ptr<Config::ReconRegion> reconRegion)
 : m_reconSettings(reconRegion)
 {}
-BoundingRegion::~BoundingRegion() = default;
 
 //-- Operators to read bounded region if explicitly defined in config
 //   called through boost:apply_visitor

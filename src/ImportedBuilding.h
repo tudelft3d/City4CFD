@@ -40,7 +40,7 @@ public:
     ImportedBuilding(std::unique_ptr<nlohmann::json>& buildingJson,
                      PointSet3Ptr& importedBuildingPts);
     ImportedBuilding(Mesh& mesh);
-    ~ImportedBuilding();
+    ~ImportedBuilding() = default;
 
     virtual void   calc_elevation() override;
     virtual void   reconstruct() override;
@@ -52,9 +52,6 @@ public:
     const nlohmann::json& get_building_json() const;
     const int             get_lod_idx() const;
     const bool            is_appending() const;
-
-//    virtual void  get_cityjson_info(nlohmann::json& b) const override;
-//    virtual void  get_cityjson_semantics(nlohmann::json& g) const override;
 
 protected:
     std::unordered_map<int, Point_3>  m_ptMap;

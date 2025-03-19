@@ -41,9 +41,6 @@
 #include <CGAL/Straight_skeleton_builder_2.h>
 #include <CGAL/compute_outer_frame_margin.h>
 
-PointCloud::PointCloud()  = default;
-PointCloud::~PointCloud() = default;
-
 void PointCloud::random_thin_pts() {
     if (Config::get().terrainThinning > 0 + global::smallnum) {
         std::cout <<"\nRandomly thinning terrain points" << std::endl;
