@@ -126,7 +126,7 @@ void PointCloud::terrain_points_in_polygon(BuildingsPtr& features) {
         auto poly = f->get_poly().get_cgal_type();
 //        const double offset = 1.; // offset hardcoded
 //        auto offsetPoly = geomutils::offset_polygon_geos(poly, offset);
-        auto& offsetPoly = poly; // temp
+        auto& offsetPoly = poly; // temp until terrain is included in buildings
 
         std::vector<Point_index*> intersected_nodes;
         pointCloudIndex.find_intersections(intersected_nodes, offsetPoly.bbox().xmin(), offsetPoly.bbox().xmax(),

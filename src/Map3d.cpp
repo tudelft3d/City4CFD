@@ -318,6 +318,12 @@ void Map3d::set_bnd() {
     Boundary::set_bounds_to_terrain_pc(m_pointCloud.get_terrain(),
                                        bndPoly, pcBndPoly, startBufferPoly);
 
+    // check if there are any points left in the terrain
+    if (m_pointCloud.get_terrain().empty()) {
+        throw city4cfd_error("All terrain points are out of domain bounds! "
+                                 "Check if your terrain points are aligned with polygons.");
+    }
+
     // update the terrain DT for interpolation
     m_dt.clear();
     m_dt.insert(m_pointCloud.get_terrain().points().begin(),
