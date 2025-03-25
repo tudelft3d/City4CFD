@@ -330,7 +330,7 @@ void Config::set_config(nlohmann::json& j) {
 void Config::set_region(std::variant<bool, double, Polygon_2>& regionType,
                         const std::string regionName,
                         nlohmann::json& j) {
-    if (j[regionName].is_string()) { // Search for GeoJSON polygon
+    if (j[regionName].is_string()) { // Search for a polygon
         std::string polyFilePath = (std::string)j[regionName];
         if(!fs::exists(polyFilePath)) {
             throw city4cfd_error(std::string("Cannot find polygon file '" +

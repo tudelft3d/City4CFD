@@ -124,9 +124,9 @@ void IO::read_polygons(std::string& file, PolyVecPtr& polygons, std::string* crs
     GDALAllRegister();
     GDALDataset *inputMapDataset = (GDALDataset*) GDALOpenEx(file.c_str(), GDAL_OF_READONLY, NULL, NULL, NULL);
     if (inputMapDataset == NULL) {
-        throw city4cfd_error("Error: Could not open input polygon");
+        throw city4cfd_error("Error: Could not open input polygon " + file);
     }
-    std::cout << "    Reading polygon file: " << file << " type: " << inputMapDataset->GetDriverName() << std::endl;
+    std::cout << "Reading polygon file: " << file << " type: " << inputMapDataset->GetDriverName() << std::endl;
 
     CPLStringList metadataDomains(inputMapDataset->GetMetadataDomainList());
     for (int currentDomain = 0; currentDomain < metadataDomains.Count(); ++currentDomain) {

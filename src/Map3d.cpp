@@ -549,12 +549,8 @@ void Map3d::wrap() {
 }
 
 void Map3d::read_data() {
-    //-- Read point clouds
-    m_pointCloud.read_point_clouds();
-
     //-- Read building polygons
     if (!Config::get().gisdata.empty()) {
-        std::cout << "Reading polygons" << std::endl;
         IO::read_polygons(Config::get().gisdata, m_polygonsBuildings, &Config::get().crsInfo);
         if (m_polygonsBuildings.empty()) throw city4cfd_error("Didn't find any building polygons!");
     }
@@ -582,6 +578,9 @@ void Map3d::read_data() {
                                                                   ".ply. .off, or .json (CityJSON)"));
         }
     }
+
+    //-- Read point clouds
+    m_pointCloud.read_point_clouds();
 }
 
 void Map3d::output() {
