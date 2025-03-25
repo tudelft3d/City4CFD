@@ -88,6 +88,12 @@ void Boundary::set_bounds_to_terrain_pc(Point_set_3& pointCloud, const Polygon_2
     //-- Remove points out of the boundary region
     Boundary::set_bounds_to_buildings_pc(pointCloud, pcBndPoly);
 
+    // check if there are any points left in the terrain
+    if (pointCloud.empty()) {
+        throw city4cfd_error("All terrain points are out of domain bounds! "
+                             "Check if your terrain points are aligned with polygons.");
+    }
+
     std::vector<double> bndHeights;
     geomutils::interpolate_poly_from_pc(bndPoly, bndHeights, pointCloud);
     s_outerBndHeight = geomutils::avg(bndHeights); // Height for buffer (for now) - average of outer pts
