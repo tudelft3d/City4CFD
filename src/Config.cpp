@@ -301,7 +301,7 @@ void Config::set_config(nlohmann::json& j) {
         outputFormat = STL;
     } else if (boost::iequals(outputFormatConfig, "cityjson")) {
         outputFormat = CityJSON;
-    } else throw std::invalid_argument(std::string("'" + outputFormatConfig + "'" + " is unsupported file format!"));
+    } else throw city4cfd_error(std::string("'" + outputFormatConfig + "'" + " is unsupported file format!"));
 
     outputSeparately = j["output_separately"];
 
@@ -333,14 +333,14 @@ void Config::set_region(std::variant<bool, double, Polygon_2>& regionType,
     if (j[regionName].is_string()) { // Search for GeoJSON polygon
         std::string polyFilePath = (std::string)j[regionName];
         if(!fs::exists(polyFilePath)) {
-            throw std::invalid_argument(std::string("Cannot find polygon file '" +
+            throw city4cfd_error(std::string("Cannot find polygon file '" +
                                                     polyFilePath + "' for " + regionName));
         }
         //-- Read poly
         PolyVecPtr tempPolyVec;
         IO::read_polygons(polyFilePath, tempPolyVec, nullptr);
         if (tempPolyVec.empty()) {
-            throw std::invalid_argument(std::string("Polygon file '" + polyFilePath + "' is empty!"));
+            throw city4cfd_error(std::string("Polygon file '" + polyFilePath + "' is empty!"));
         }
         // access only first ring of the first poly, otherwise the input is invalid
         Polygon_2 tempPoly = tempPolyVec.front()->polygon.outer_boundary();

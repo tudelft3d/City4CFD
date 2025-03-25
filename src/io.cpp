@@ -47,7 +47,7 @@
 void IO::read_config(std::string& config_path) {
     std::ifstream json_file(config_path);
     if (!json_file)
-        throw std::invalid_argument(std::string("Configuration file " + config_path + " not found."));
+        throw city4cfd_error(std::string("Configuration file " + config_path + " not found."));
 
     //-- Filepaths in the json file are relative to the location of the json file
     Config::get().workDir = fs::path(config_path).parent_path();
