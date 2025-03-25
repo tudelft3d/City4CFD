@@ -6,14 +6,17 @@ import geopandas as gpd
 from shapely.geometry import Point
 from geopy.geocoders import Nominatim
 from pyproj import CRS
+# 
+# USER INPUT PARAMETERS
+#
+Hmax = 230                            # Maximum height of the building the region of interest
+rbuildings = 1200                     # Radius for building polygons
+rpolygons = 4000                      # Radius for non-building polygons (only active when Hmax < 0)
+outdir = "data"                       # Define the output directory where polygons are downloaded 
 #
 # Initialize geocoder
 #
 geolocator = Nominatim(user_agent="osm_downloader")
-#
-# Define output dir
-#
-outdir = "data"
 #
 # Define the file read function
 #
@@ -56,11 +59,15 @@ with open("cities.txt", "r") as file:
         cities.append((f"{city}, {country}", lat, lon, crs))
 #
 # Radius in meters for downloading the OSM data
-# First element is for buildings and second element is for non-building features
+# First element is for buildings and second element is for other features
 #
-radii = [1200, 4000]
+# Setup the radius based on COST72 guidelines
+if (Hmax > 0):
+    radii = [rbuildings, 15*Hmax + 2*rbuildings]
+else:
+    radii = [rbuildings, rpolygons]
 #
-# Define OSM tags - Please edit these tags to include additional features
+# Define OSM tags
 #
 tags = {
     "buildings": {
@@ -101,13 +108,12 @@ for city, lat, lon, crs in cities:
     if(crs.to_string() != "EPSG:4326"):
         city_center = gpd.GeoDataFrame(geometry=[Point(lon, lat)], crs="EPSG:4326").to_crs(crs)
     else:
-        print("CRS not defined, using default EPSG:4326 for clipping area!")
         city_center = gpd.GeoDataFrame(geometry=[Point(lon, lat)], crs=crs)
     buffer_distance = radii[1]
 
     clipping_area = city_center.buffer(buffer_distance)
 
-    print(f"City4CFD input Coordinates: {city} | {city_center})")
+    print(f"City4CFD: {city} | {city_center})")
 
     # Download and process OSM features
     for category, osm_tags in tags.items():
