@@ -337,14 +337,15 @@ void Config::set_region(std::variant<bool, double, Polygon_2>& regionType,
                                                     polyFilePath + "' for " + regionName));
         }
         //-- Read poly
-        Polygon_2 tempPoly;
-        JsonVectorPtr influJsonPoly;
-        IO::read_geojson_polygons(polyFilePath, influJsonPoly);
-        for (auto& coords : influJsonPoly.front()->at("geometry").at("coordinates").front()) { // I know it should be only 1 polygon with 1 ring
-            tempPoly.push_back(Point_2((double)coords[0] - Config::get().pointOfInterest.x(),
-                                       (double)coords[1] - Config::get().pointOfInterest.y()));
+        PolyVecPtr tempPolyVec;
+        IO::read_polygons(polyFilePath, tempPolyVec, nullptr);
+        if (tempPolyVec.empty()) {
+            throw std::invalid_argument(std::string("Polygon file '" + polyFilePath + "' is empty!"));
         }
-        //-- Prepare poly
+        // access only first ring of the first poly, otherwise the input is invalid
+        Polygon_2 tempPoly = tempPolyVec.front()->polygon.outer_boundary();
+
+        // prepare poly
         geomutils::pop_back_if_equal_to_front(tempPoly);
         if (tempPoly.is_clockwise_oriented()) tempPoly.reverse_orientation();
 
