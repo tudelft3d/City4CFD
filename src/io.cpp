@@ -47,7 +47,7 @@
 void IO::read_config(std::string& config_path) {
     std::ifstream json_file(config_path);
     if (!json_file)
-        throw city4cfd_error(std::string("Configuration file " + config_path + " not found."));
+        throw city4cfd_error(std::string("Configuration file '" + config_path + "' not found."));
 
     //-- Filepaths in the json file are relative to the location of the json file
     Config::get().workDir = fs::path(config_path).parent_path();
@@ -74,7 +74,7 @@ bool IO::read_point_cloud(std::string& file, Point_set_3& pc) {
     std::ifstream ifile(file, std::ios_base::binary);
     if (IO::has_substr(file, ".las") || IO::has_substr(file, ".laz")) {
         if (!CGAL::IO::read_LAS(ifile, pc.point_back_inserter())) {
-            throw city4cfd_error("Error reading LAS point cloud!");
+            throw city4cfd_error("Could not read point cloud file '" + file + "'.");
         }
     } else {
         ifile >> pc;
