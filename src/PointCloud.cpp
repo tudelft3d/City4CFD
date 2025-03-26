@@ -346,7 +346,7 @@ void PointCloud::read_point_clouds() {
     if (!Config::get().buildings_xyz.empty()) {
         std::cout << "Reading building points" << std::endl;
         IO::read_point_cloud(Config::get().buildings_xyz, m_pointCloudBuildings);
-        if (m_pointCloudBuildings.empty()) throw std::invalid_argument("Didn't find any building points!");
+        if (m_pointCloudBuildings.empty()) throw city4cfd_error("Didn't find any building points!");
 
         std::cout << "    Points read: " << m_pointCloudBuildings.size() << std::endl;
     }
