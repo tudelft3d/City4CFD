@@ -375,6 +375,7 @@ void Map3d::reconstruct_buildings() {
     }
     int count = 0;
     int tenPercent = m_buildingsPtr.size() / 10;
+    if (tenPercent == 0) tenPercent = 1;
     #pragma omp parallel for
     for (int i = 0; i < m_buildingsPtr.size(); ++i) {
     //for (auto& f : m_buildingsPtr) { // MSVC doesn't like range loops with OMP
