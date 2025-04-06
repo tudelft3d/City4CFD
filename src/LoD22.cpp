@@ -177,7 +177,7 @@ void LoD22::get_footprint_from_mesh(roofer::Mesh& rooferMesh, Polygon_with_holes
     footprint = Polygon_with_holes_2(newFootprint);
 
     // remove bottom surface from rooferMesh
-    if (true) { //todo flag
+    if (Config::get().removeBottom) {
         *rooferNewFootprint = roofer::LinearRing();
     }
 

@@ -329,6 +329,10 @@ namespace jsonschema {
           "description": "Optional: Force buildings to protrude through terrain",
           "type": "boolean"
         },
+        "remove_bottom": {
+          "description": "Optional: Remove bottom surfaces of buildings and the terrain below them",
+          "type": "boolean"
+        },
         "reconstruct_boundaries": {
           "type": "boolean"
         },

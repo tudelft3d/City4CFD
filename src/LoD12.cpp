@@ -111,12 +111,12 @@ void LoD12::reconstruct(Mesh& mesh) {
         std::advance(it2, cdtToMesh[it->vertex(1)]);
         std::advance(it3, cdtToMesh[it->vertex(2)]);
 
-        /*
-        fIdx = mesh.add_face(*it1, *it3, *it2); // Bottom face
-        if (fIdx != Mesh::null_face()) {
-            surfaceType[fIdx] = "GroundSurface";
+        if (Config::get().removeBottom) {
+            fIdx = mesh.add_face(*it1, *it3, *it2); // Bottom face
+            if (fIdx != Mesh::null_face()) {
+                surfaceType[fIdx] = "GroundSurface";
+            }
         }
-        */
         fIdx = mesh.add_face(*std::next(it1), *std::next(it2), *std::next(it3));
         if (fIdx != Mesh::null_face()) {
             surfaceType[fIdx] = "RoofSurface";

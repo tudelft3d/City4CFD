@@ -81,6 +81,7 @@ public:
     int       maxSmoothPts                      = -9999;
     bool      flatTerrain                       = false;
     bool      intersectBuildingsTerrain         = false;
+    bool      removeBottom                      = false;
 
     //- Buildings
     std::string buildingUniqueId;

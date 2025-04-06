@@ -271,6 +271,8 @@ void Config::set_config(nlohmann::json& j) {
         reconstructFailed = j["reconstruct_failed"];
     if (j.contains("intersect_buildings_terrain"))
        intersectBuildingsTerrain = j["intersect_buildings_terrain"];
+    if (j.contains("remove_bottom"))
+        removeBottom = j["remove_bottom"];
 
     // Imported buildings
     if (j.contains("import_geometries")) {
