@@ -320,14 +320,12 @@ void ImportedBuilding::reconstruct() {
     //-- Add points to mesh
     std::vector<std::array<FT, 3>> points;
     std::vector<CGAL_Polygon> polygons;
-//    int surfIdx = -1;
+    int surfIdx = -1;
     for (auto& faces : geometry["boundaries"].front()) {
-        /*
-        //-- Remove bottom surface
         ++surfIdx;
-        if (std::find(m_footprintIdxList.begin(), m_footprintIdxList.end(), surfIdx) != m_footprintIdxList.end())
+        if (Config::get().removeBottom &&
+                std::find(m_footprintIdxList.begin(), m_footprintIdxList.end(), surfIdx) != m_footprintIdxList.end())
             continue;
-        */
 
         for (auto& faceLst : faces) {
             CGAL_Polygon p;

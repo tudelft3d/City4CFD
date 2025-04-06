@@ -222,8 +222,7 @@ void ReconstructedBuilding::reconstruct() {
             if (mesh.is_empty()) throw city4cfd_error("Unsuccessful mesh reconstruction.");
 
             // try easy hole plugging fix just in case
-            //todo temp
-            /*
+            //todo handle no bottom situation
             if (!m_reconSettings->skipGapClosing && !CGAL::is_closed(mesh)) {
                 // collect boundary halfedges
                 typedef boost::graph_traits<Mesh>::halfedge_descriptor halfedge_descriptor;
@@ -233,7 +232,6 @@ void ReconstructedBuilding::reconstruct() {
                 for(halfedge_descriptor h : borderCycles)
                     PMP::triangulate_hole(mesh, h);
             }
-             */
             //-- Validity check
             if (m_reconSettings->validate) {
                 std::vector<std::array<double, 3>> points;
