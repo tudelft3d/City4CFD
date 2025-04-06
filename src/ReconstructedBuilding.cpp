@@ -222,15 +222,20 @@ void ReconstructedBuilding::reconstruct() {
             if (mesh.is_empty()) throw city4cfd_error("Unsuccessful mesh reconstruction.");
 
             // try easy hole plugging fix just in case
-            //todo handle no bottom situation
             if (!m_reconSettings->skipGapClosing && !CGAL::is_closed(mesh)) {
                 // collect boundary halfedges
                 typedef boost::graph_traits<Mesh>::halfedge_descriptor halfedge_descriptor;
                 std::vector<halfedge_descriptor> borderCycles;
                 PMP::extract_boundary_cycles(mesh, std::back_inserter(borderCycles));
                 // fill using boundary halfedges
-                for(halfedge_descriptor h : borderCycles)
+                for(halfedge_descriptor h : borderCycles) {
+                    // don't triangulate the removed bottom in case of remove_bottom
+                    // assumption here that there are no larger holes in the mesh than the footprint
+                    if (Config::get().removeBottom
+                        && geomutils::is_large_ground_hole(h, mesh, m_poly.bbox())) continue;
+                    // triangulate other holes
                     PMP::triangulate_hole(mesh, h);
+                }
             }
             //-- Validity check
             if (m_reconSettings->validate) {
