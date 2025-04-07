@@ -226,8 +226,9 @@ void Terrain::tag_layers(const Face_handle& start,
             //- Polygons are already ordered according to importance - find first polygon
             if (geomutils::point_in_poly(chkPoint, feature->get_poly())) {
                 if (feature->get_class() == BUILDING) {
-//                    surfaceLayer = 9999; //- Remove building footprints from terrain
-                    surfaceLayer = -1; //- Leave building footprints as part of terrain
+                    // flag to remove building footprints from the terrain
+                    if (Config::get().removeBottom) surfaceLayer = 9999;
+                    else surfaceLayer = -1; // leave building footprints in terrain
                     break;
                 } else {
                     surfaceLayer = feature->get_output_layer_id();

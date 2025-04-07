@@ -73,7 +73,7 @@ private:
     std::vector<std::vector<double>>         m_baseElevations;
 
     void shorten_mesh_edges(roofer::Mesh& mesh, const double sq_maxdist) const;
-    void get_footprint_from_mesh(const roofer::Mesh& rooferMesh, Polygon_with_holes_2& footprint, std::vector<std::vector<double>>& baseElevations) const;
+    void get_footprint_from_mesh(roofer::Mesh& rooferMesh, Polygon_with_holes_2& footprint, std::vector<std::vector<double>>& baseElevations) const;
 };
 
 

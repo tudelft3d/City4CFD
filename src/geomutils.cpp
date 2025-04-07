@@ -313,6 +313,17 @@ Polygon_with_holes_2 geomutils::exact_poly_to_poly(const CGAL::Polygon_with_hole
     return convertedPoly;
 }
 
+bool geomutils::is_large_ground_hole(Mesh::halfedge_index h,Mesh& mesh, CGAL::Bbox_2 polyBbox) {
+    CGAL::Bbox_3 hole_bbox;
+    for (Mesh::halfedge_index hc : CGAL::halfedges_around_face(h, mesh)) {
+        const Mesh::Point& p = mesh.point(target(hc, mesh));
+        hole_bbox += p.bbox();
+    }
+    if (hole_bbox.x_span() < (polyBbox.x_span() - 0.1)) return false;
+    if (hole_bbox.y_span() < (polyBbox.y_span() - 0.1)) return false;
+    return true;
+}
+
 //-- Templated functions
 //-- Check if the point is inside a polygon on a 2D projection
 template <typename T>

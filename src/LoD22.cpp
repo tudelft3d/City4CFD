@@ -140,28 +140,28 @@ void LoD22::shorten_mesh_edges(roofer::Mesh& roofer_mesh, const double sq_maxdis
     }
 }
 
-void LoD22::get_footprint_from_mesh(const roofer::Mesh& rooferMesh, Polygon_with_holes_2& footprint,
+void LoD22::get_footprint_from_mesh(roofer::Mesh& rooferMesh, Polygon_with_holes_2& footprint,
                                     std::vector<std::vector<double>>& baseElevations) const {
     footprint.rings().clear();
     baseElevations.clear();
     auto labels = rooferMesh.get_labels();
-    roofer::LinearRing rooferNewFootprint;
+    roofer::LinearRing* rooferNewFootprint;
     for (int i = 0; i != labels.size(); ++i) {
         if (labels[i] == 0) {
-            rooferNewFootprint = rooferMesh.get_polygons()[i];
+            rooferNewFootprint = &rooferMesh.get_polygons()[i];
             break;
         }
         throw city4cfd_error("No footprint found in the reconstructed mesh!");
     }
     Polygon_2 poly2;
     std::vector<double> outerBaseElevations;
-    for (auto& p: rooferNewFootprint) {
+    for (auto& p: *rooferNewFootprint) {
         poly2.push_back(Point_2(p[0], p[1]));
         outerBaseElevations.push_back(p[2]);
     }
     baseElevations.push_back(outerBaseElevations);
     std::vector<Polygon_2> holes;
-    for (auto& lrHole: rooferNewFootprint.interior_rings()) {
+    for (auto& lrHole: rooferNewFootprint->interior_rings()) {
         Polygon_2 hole;
         std::vector<double> holeElevations;
         for (auto& p: lrHole) {
@@ -175,6 +175,12 @@ void LoD22::get_footprint_from_mesh(const roofer::Mesh& rooferMesh, Polygon_with
     CGAL::Polygon_with_holes_2<EPICK> newFootprint = CGAL::Polygon_with_holes_2<EPICK>(poly2, holes.begin(),
                                                                                        holes.end());
     footprint = Polygon_with_holes_2(newFootprint);
+
+    // remove bottom surface from rooferMesh
+    if (Config::get().removeBottom) {
+        *rooferNewFootprint = roofer::LinearRing();
+    }
+
 }
 
 Polygon_with_holes_2 LoD22::get_footprint() const {

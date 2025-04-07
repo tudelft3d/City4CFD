@@ -228,8 +228,14 @@ void ReconstructedBuilding::reconstruct() {
                 std::vector<halfedge_descriptor> borderCycles;
                 PMP::extract_boundary_cycles(mesh, std::back_inserter(borderCycles));
                 // fill using boundary halfedges
-                for(halfedge_descriptor h : borderCycles)
+                for(halfedge_descriptor h : borderCycles) {
+                    // don't triangulate the removed bottom in case of remove_bottom
+                    // assumption here that there are no larger holes in the mesh than the footprint
+                    if (Config::get().removeBottom
+                        && geomutils::is_large_ground_hole(h, mesh, m_poly.bbox())) continue;
+                    // triangulate other holes
                     PMP::triangulate_hole(mesh, h);
+                }
             }
             //-- Validity check
             if (m_reconSettings->validate) {

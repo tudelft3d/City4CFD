@@ -48,6 +48,7 @@ namespace geomutils {
     Polygon_with_holes_2 offset_polygon_with_holes(const Polygon_with_holes_2& poly, double offset);
     Polygon_with_holes_2 exact_poly_to_poly(const CGAL::Polygon_with_holes_2<EPECK>& exactPoly);
     void    remove_self_intersections(Mesh& mesh);
+    bool is_large_ground_hole(Mesh::halfedge_index h, Mesh& mesh, CGAL::Bbox_2 polyBbox);
 
     //-- Templated functions
     template <typename T> bool point_in_poly(const T& pt2, const Polygon_with_holes_2& polygon);
