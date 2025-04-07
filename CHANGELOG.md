@@ -2,6 +2,7 @@
 ## [Unreleased]
 ### Added
 - A script to fetch polygons (building, water, vegetation) from OSM
+- An option to remove bottom surfaces at the terrain-building intersection
 ### Changed
 - Influence region and domain boundaries support all formats for polygon input
 
