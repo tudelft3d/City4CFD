@@ -47,7 +47,7 @@
 void IO::read_config(std::string& config_path) {
     std::ifstream json_file(config_path);
     if (!json_file)
-        throw std::invalid_argument(std::string("Configuration file " + config_path + " not found."));
+        throw city4cfd_error(std::string("Configuration file '" + config_path + "' not found."));
 
     //-- Filepaths in the json file are relative to the location of the json file
     Config::get().workDir = fs::path(config_path).parent_path();
@@ -74,7 +74,7 @@ bool IO::read_point_cloud(std::string& file, Point_set_3& pc) {
     std::ifstream ifile(file, std::ios_base::binary);
     if (IO::has_substr(file, ".las") || IO::has_substr(file, ".laz")) {
         if (!CGAL::IO::read_LAS(ifile, pc.point_back_inserter())) {
-            throw city4cfd_error("Error reading LAS point cloud!");
+            throw city4cfd_error("Could not read point cloud file '" + file + "'.");
         }
     } else {
         ifile >> pc;
@@ -124,9 +124,9 @@ void IO::read_polygons(std::string& file, PolyVecPtr& polygons, std::string* crs
     GDALAllRegister();
     GDALDataset *inputMapDataset = (GDALDataset*) GDALOpenEx(file.c_str(), GDAL_OF_READONLY, NULL, NULL, NULL);
     if (inputMapDataset == NULL) {
-        throw city4cfd_error("Error: Could not open input polygon");
+        throw city4cfd_error("Error: Could not open input polygon " + file);
     }
-    std::cout << "    Reading polygon file: " << file << " type: " << inputMapDataset->GetDriverName() << std::endl;
+    std::cout << "Reading polygon file: " << file << " type: " << inputMapDataset->GetDriverName() << std::endl;
 
     CPLStringList metadataDomains(inputMapDataset->GetMetadataDomainList());
     for (int currentDomain = 0; currentDomain < metadataDomains.Count(); ++currentDomain) {

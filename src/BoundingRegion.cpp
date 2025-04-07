@@ -76,7 +76,7 @@ BoundingRegion::calc_influ_region_bpg(const DT& dt, BuildingsPtr& buildings) {
             return maxDim;
         }
     }
-    throw std::invalid_argument("Point of interest does not belong to any building! "
+    throw city4cfd_error("Point of interest does not belong to any building! "
                                 "Impossible to determine influence region");
 }
 
