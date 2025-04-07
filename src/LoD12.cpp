@@ -111,7 +111,7 @@ void LoD12::reconstruct(Mesh& mesh) {
         std::advance(it2, cdtToMesh[it->vertex(1)]);
         std::advance(it3, cdtToMesh[it->vertex(2)]);
 
-        if (Config::get().removeBottom) {
+        if (!Config::get().removeBottom) {
             fIdx = mesh.add_face(*it1, *it3, *it2); // Bottom face
             if (fIdx != Mesh::null_face()) {
                 surfaceType[fIdx] = "GroundSurface";

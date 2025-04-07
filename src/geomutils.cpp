@@ -315,15 +315,12 @@ Polygon_with_holes_2 geomutils::exact_poly_to_poly(const CGAL::Polygon_with_hole
 
 bool geomutils::is_large_ground_hole(Mesh::halfedge_index h,Mesh& mesh, CGAL::Bbox_2 polyBbox) {
     CGAL::Bbox_3 hole_bbox;
-    for (Mesh::halfedge_index hc : CGAL::halfedges_around_face(h, mesh))
-    {
+    for (Mesh::halfedge_index hc : CGAL::halfedges_around_face(h, mesh)) {
         const Mesh::Point& p = mesh.point(target(hc, mesh));
         hole_bbox += p.bbox();
-
-        // Exit early, to avoid unnecessary traversal of large holes
-        if (hole_bbox.xmax() - hole_bbox.xmin() < polyBbox.x_span() - 0.2) return false;
-        if (hole_bbox.ymax() - hole_bbox.ymin() < polyBbox.y_span() - 0.2) return false;
     }
+    if (hole_bbox.x_span() < (polyBbox.x_span() - 0.1)) return false;
+    if (hole_bbox.y_span() < (polyBbox.y_span() - 0.1)) return false;
     return true;
 }
 
