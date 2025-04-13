@@ -15,13 +15,15 @@ It enables us to reconstruct buildings from different sources and their combinat
   - Extrusion of footprints containing height or floor number attributes,
   - The import of existing building models.
 
-The reconstruction using the combination of point clouds and 2D polygons can be done in [LoD2.2, LoD1.3, and LoD1.2](https://3d.bk.tudelft.nl/lod/). You can use the [complexity factor](https://github.com/tudelft3d/City4CFD/wiki/Features#buildings) to tune the overall complexity of the reconstructed geometry. The LoD2.2 and LoD1.3 reconstructions are based on [roofer](https://github.com/3DBAG/roofer).
+The reconstruction using the combination of point clouds and 2D polygons can be done in [LoD2.2, LoD1.3, and LoD1.2](https://3d.bk.tudelft.nl/lod/). You can use the [complexity factor](https://github.com/tudelft3d/City4CFD/wiki/Features#buildings) to tune the overall complexity of the reconstructed geometry.
 
 The resulting geometry is watertight -- buildings and surfaces are seamlessly integrated into a terrain.
 
 It can automatically or manually define the zone of influence and domain boundaries.
 
 If you happen to use it, feedback is very much appreciated.
+
+The LoD2.2 and LoD1.3 reconstructions are based on [roofer](https://github.com/3DBAG/roofer). If you are interested in applications other than urban flow simulations, or you want to create your own 3D city modelling pipeline, we suggest checking out that project.
 
 City4CFD is developed by the [3D Geoinformation Research Group](https://3d.bk.tudelft.nl/) at the Delft University of Technology.
 
