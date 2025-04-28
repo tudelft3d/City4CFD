@@ -193,7 +193,7 @@ namespace jsonschema {
               "import_advantage": {
                 "type": "boolean"
               },
-              "refine": {
+              "remesh": {
                 "type": "boolean"
               }
             },
@@ -238,7 +238,7 @@ namespace jsonschema {
             "lod": {
               "type": "string"
             },
-            "refine": {
+            "remesh": {
               "type": "boolean"
             }
           },

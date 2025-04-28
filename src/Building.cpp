@@ -140,7 +140,7 @@ void Building::clip_bottom(const TerrainPtr& terrain) {
     PMP::clip(m_mesh, terrainSubsetMesh, params::vertex_point_map(mesh2_vpm), params::vertex_point_map(mesh1_vpm));
 }
 
-void Building::refine() {
+void Building::remesh() {
     typedef Mesh::Halfedge_index           halfedge_descriptor;
     typedef Mesh::Edge_index               edge_descriptor;
 

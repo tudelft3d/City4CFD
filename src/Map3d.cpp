@@ -551,7 +551,7 @@ void Map3d::wrap() {
     // add reconstruction settings from the first region
     m_buildingsPtr.back()->set_reconstruction_rules(m_reconRegions.front());
     // remesh buildings if asked
-    if (Config::get().refineReconstructed) m_buildingsPtr.back()->refine();
+    if (Config::get().remeshReconstructed) m_buildingsPtr.back()->remesh();
 }
 
 void Map3d::read_data() {

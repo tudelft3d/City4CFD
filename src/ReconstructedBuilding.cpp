@@ -288,7 +288,7 @@ void ReconstructedBuilding::reconstruct() {
     if (m_clipBottom || Config::get().intersectBuildingsTerrain) {
         this->translate_footprint(5);
     }
-    if (Config::get().refineReconstructed) this->refine();
+    if (Config::get().remeshReconstructed) this->remesh();
 }
 
 void ReconstructedBuilding::reconstruct_lod12() {

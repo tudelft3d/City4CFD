@@ -402,7 +402,7 @@ void ImportedBuilding::reconstruct() {
     PMP::stitch_borders(m_mesh);
     PMP::triangulate_faces(m_mesh);
     */
-    if (Config::get().refineImported) this->refine();
+    if (Config::get().remeshImported) this->remesh();
 }
 
 void ImportedBuilding::reconstruct_flat_terrain() {

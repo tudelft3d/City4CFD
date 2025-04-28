@@ -51,7 +51,7 @@ public:
     double get_height();
     void   insert_point(const Point_3& pt);
     void   clip_bottom(const TerrainPtr& terrain);
-    void   refine();
+    void   remesh();
     void   alpha_wrap(double relativeAlpha, double relativeOffset);
     void   translate_footprint(const double h);
     bool   is_part_of(const Polygon_2& otherPoly) const;

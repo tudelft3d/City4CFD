@@ -95,11 +95,11 @@ public:
     double      floorHeight                     = 9999.; // Handled by schema
     bool        buildingHeightAttrAdv           = false;
     bool        avoidBadPolys                   = false;
-    bool        refineReconstructed             = false;
+    bool        remeshReconstructed             = false;
     //- Imported buildings
     bool        importTrueHeight                = true;
     std::string importLoD                       = "9999";
-    bool        refineImported                  = false;
+    bool        remeshImported                  = false;
     //- Boundary
     bool  reconstructBoundaries                 = false;
 

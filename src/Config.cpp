@@ -200,8 +200,8 @@ void Config::set_config(nlohmann::json& j) {
                 floorHeight = (double)poly["floor_height"];
             if (poly.contains("avoid_bad_polys"))
                 avoidBadPolys = poly["avoid_bad_polys"];
-            if (poly.contains("refine"))
-                refineReconstructed= poly["refine"];
+            if (poly.contains("remesh"))
+                remeshReconstructed= poly["remesh"];
         }
         if (poly["type"] == "SurfaceLayer") {
             topoLayers.push_back(poly["path"]);
@@ -278,8 +278,8 @@ void Config::set_config(nlohmann::json& j) {
         importTrueHeight      = j["import_geometries"]["true_height"];
         if (j["import_geometries"].contains("lod"))
             importLoD = j["import_geometries"]["lod"];
-        if (j["import_geometries"].contains("refine"))
-            refineImported = j["import_geometries"]["refine"];
+        if (j["import_geometries"].contains("remesh"))
+            remeshImported = j["import_geometries"]["remesh"];
     }
 
     // Boundary
