@@ -36,6 +36,8 @@
 #include "Sides.h"
 #include "Top.h"
 
+#include <CGAL/Polygon_mesh_processing/connected_components.h>
+
 void Map3d::reconstruct() {
     //-- Prepare features
     this->set_features();
@@ -546,12 +548,24 @@ void Map3d::wrap() {
     //-- Deactivate all individual buildings and add the new mesh
     for (auto& b : m_buildingsPtr) b->deactivate();
     this->clear_inactives();
-    //todo split individual components?
-    m_buildingsPtr.push_back(std::make_shared<ReconstructedBuilding>(newMesh));
-    // add reconstruction settings from the first region
-    m_buildingsPtr.back()->set_reconstruction_rules(m_reconRegions.front());
-    // remesh buildings if asked
-    if (Config::get().remeshReconstructed) m_buildingsPtr.back()->remesh();
+
+    //-- Split meshes
+    std::vector<Mesh> newMeshes;
+    CGAL::Polygon_mesh_processing::split_connected_components(newMesh, newMeshes);
+    for (auto& mesh : newMeshes) {
+        m_buildingsPtr.push_back(std::make_shared<ReconstructedBuilding>(mesh));
+        // add reconstruction settings from the first region
+        m_buildingsPtr.back()->set_reconstruction_rules(m_reconRegions.front());
+    }
+    //-- Remesh buildings if asked
+    if (Config::get().remeshReconstructed || Config::get().remeshImported) {
+        std::cout << "\n    Remeshing buildings..." << std::flush;
+        #pragma omp parallel for
+        for (int i = 0; i < m_buildingsPtr.size(); ++i) {
+            m_buildingsPtr[i]->remesh();
+        }
+    }
+    std::cout << std::endl;
 }
 
 void Map3d::read_data() {
