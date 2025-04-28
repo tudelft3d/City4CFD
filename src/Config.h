@@ -128,6 +128,8 @@ public:
     bool       clip                             = false;
     bool       handleSelfIntersect              = false;
     bool       alphaWrapAll                     = false;
+    double     alphaWrapAllRelAlpha             = 2000.;
+    double     alphaWrapAllRelOffset            = 7000.;
 
     //-- Other settings
     const int searchtree_bucket_size = 100; // hardcoded

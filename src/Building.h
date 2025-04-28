@@ -39,7 +39,8 @@ public:
     Building(const Polygon_with_attr& poly);
     virtual ~Building() = default;
 
-    static void alpha_wrap_all(const BuildingsPtr& buildings, Mesh& newMesh);
+    static void alpha_wrap_all(const BuildingsPtr& buildings, Mesh& newMesh,
+                               double relativeAlpha=2000., double relativeOffset=7000.);
 
     virtual void   calc_elevation() = 0;
     virtual void   reconstruct() = 0;

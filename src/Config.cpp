@@ -323,6 +323,10 @@ void Config::set_config(nlohmann::json& j) {
             handleSelfIntersect = j["experimental"]["handle_self_intersections"];
         if (j["experimental"].contains("alpha_wrap_all"))
             alphaWrapAll = j["experimental"]["alpha_wrap_all"];
+        if (j["experimental"].contains("alpha_wrap_rel_alpha"))
+            alphaWrapAllRelAlpha = j["experimental"]["alpha_wrap_rel_alpha"];
+        if (j["experimental"].contains("alpha_wrap_rel_offset"))
+            alphaWrapAllRelOffset = j["experimental"]["alpha_wrap_rel_offset"];
     }
 }
 

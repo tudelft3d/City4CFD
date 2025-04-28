@@ -539,14 +539,19 @@ void Map3d::wrap() {
     Mesh newMesh;
 
     //-- Perform alpha wrapping
-    Building::alpha_wrap_all(m_buildingsPtr, newMesh);
+    Building::alpha_wrap_all(m_buildingsPtr, newMesh,
+                             Config::get().alphaWrapAllRelAlpha,
+                             Config::get().alphaWrapAllRelOffset);
 
     //-- Deactivate all individual buildings and add the new mesh
     for (auto& b : m_buildingsPtr) b->deactivate();
     this->clear_inactives();
+    //todo split individual components?
     m_buildingsPtr.push_back(std::make_shared<ReconstructedBuilding>(newMesh));
     // add reconstruction settings from the first region
     m_buildingsPtr.back()->set_reconstruction_rules(m_reconRegions.front());
+    // remesh buildings if asked
+    if (Config::get().refineReconstructed) m_buildingsPtr.back()->refine();
 }
 
 void Map3d::read_data() {

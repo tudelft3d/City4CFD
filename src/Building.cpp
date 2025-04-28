@@ -70,7 +70,8 @@ double Building::get_height() {
     return m_height;
 }
 
-void Building::alpha_wrap_all(const BuildingsPtr& buildings, Mesh& newMesh) {
+void Building::alpha_wrap_all(const BuildingsPtr& buildings, Mesh& newMesh,
+                              double relativeAlpha, double relativeOffset) {
     typedef EPICK::FT                 FT;
     typedef std::vector<std::size_t>  CGAL_Polygon;
 
@@ -98,8 +99,6 @@ void Building::alpha_wrap_all(const BuildingsPtr& buildings, Mesh& newMesh) {
     PMP::triangulate_faces(newMesh);
 
     //-- Perform CGAL's alpha wrapping
-    const double relativeAlpha = 2000.; //1000.
-    const double relativeOffset = 7000.; // 12000.
     CGAL::Bbox_3 bbox = CGAL::Polygon_mesh_processing::bbox(newMesh);
     const double diagLength = std::sqrt(CGAL::square(bbox.xmax() - bbox.xmin()) +
                                         CGAL::square(bbox.ymax() - bbox.ymin()) +
@@ -145,7 +144,7 @@ void Building::refine() {
     typedef Mesh::Halfedge_index           halfedge_descriptor;
     typedef Mesh::Edge_index               edge_descriptor;
 
-    const double targetEdgeLength = 5; //5;
+    const double targetEdgeLength = Config::get().edgeMaxLen;
     const unsigned int nbIter =  30;   //30;
 
     PMP::remove_degenerate_faces(m_mesh);
