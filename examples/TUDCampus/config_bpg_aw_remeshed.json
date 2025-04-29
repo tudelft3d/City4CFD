@@ -1,0 +1,65 @@
+{
+  "point_clouds" :
+  {
+    "ground": "point_cloud/sampled_ground_1m.laz",
+    "buildings" : "point_cloud/sampled_buildings.laz"
+  },
+  "polygons" : [
+    {
+      "type": "Building",
+      "path": "polygons/tudcampus.geojson",
+      "unique_id": "gid",
+      "remesh": true
+    },
+    {
+      "type": "SurfaceLayer",
+      "path": "polygons/Vegetation.geojson",
+      "layer_name" : "Vegetation"
+    },
+    {
+      "type":       "SurfaceLayer",
+      "path":       "polygons/Water.geojson",
+      "layer_name": "Water"
+    }
+  ],
+  "reconstruction_regions": [
+    {
+      "influence_region":   300,
+      "lod": "2.2",
+      "complexity_factor": 0.7
+    }
+  ],
+
+  "point_of_interest": [85376, 446125],
+  "domain_bnd":         null,
+  "top_height":         300,
+
+  "bnd_type_bpg":      "Rectangle",
+  "bpg_blockage_ratio": false,        
+  "flow_direction":     [1, 1],
+  "buffer_region":      20,
+  "reconstruct_boundaries": true,
+
+  "experimental": {
+      "alpha_wrap_all": true,
+      "alpha_wrap_rel_alpha": 1000,
+      "alpha_wrap_rel_offset": 3000
+  },
+
+  "terrain_thinning": 10,
+  "smooth_terrain":   {
+    "iterations": 1,
+    "max_pts": 100000
+  },
+
+  "building_percentile": 90,
+
+  "edge_max_len": 5,
+
+  "output_file_name":  "Mesh",
+  "output_format":     "obj",
+  "output_separately":  true,
+
+  "output_log": true,
+  "log_file": "logFile.log"
+}
