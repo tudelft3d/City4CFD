@@ -29,7 +29,7 @@
 
 #include  <boost/algorithm/string/predicate.hpp>
 
-std::string CITY4CFD_VERSION = "0.6.3";
+std::string CITY4CFD_VERSION = "0.6.3+dev";
 
 void printWelcome() {
     auto logo{
@@ -102,16 +102,16 @@ int main(int argc, char** argv) {
                 printVersion();
                 return EXIT_SUCCESS;
             } else if (boost::iequals(argv[i], "--output_dir")) {
-                if (i + 1 == argc) throw std::invalid_argument("Missing argument for --output_dir");
+                if (i + 1 == argc) throw city4cfd_error("Missing argument for --output_dir");
 
                 Config::get().outputDir = fs::absolute(argv[++i]);
-                if (!fs::exists(Config::get().outputDir)) throw std::invalid_argument(std::string("Output directory '" + Config::get().outputDir.string() + "' does not exist!"));
+                if (!fs::exists(Config::get().outputDir)) throw city4cfd_error(std::string("Output directory '" + Config::get().outputDir.string() + "' does not exist!"));
             } else if (boost::iequals(argv[i], "--output_file")) {
-                if (i + 1 == argc) throw std::invalid_argument("Missing argument for --output_file");
+                if (i + 1 == argc) throw city4cfd_error("Missing argument for --output_file");
 
                 Config::get().outputFileName = argv[++i];
             } else {
-                if (i > 1) throw std::invalid_argument(std::string("Unknown option " + std::string(argv[i])));
+                if (i > 1) throw city4cfd_error(std::string("Unknown option " + std::string(argv[i])));
             }
         }
 

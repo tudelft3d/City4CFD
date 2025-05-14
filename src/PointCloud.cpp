@@ -126,7 +126,7 @@ void PointCloud::terrain_points_in_polygon(BuildingsPtr& features) {
         auto poly = f->get_poly().get_cgal_type();
 //        const double offset = 1.; // offset hardcoded
 //        auto offsetPoly = geomutils::offset_polygon_geos(poly, offset);
-        auto& offsetPoly = poly; // temp
+        auto& offsetPoly = poly; // temp until terrain is included in buildings
 
         std::vector<Point_index*> intersected_nodes;
         pointCloudIndex.find_intersections(intersected_nodes, offsetPoly.bbox().xmin(), offsetPoly.bbox().xmax(),
@@ -346,7 +346,7 @@ void PointCloud::read_point_clouds() {
     if (!Config::get().buildings_xyz.empty()) {
         std::cout << "Reading building points" << std::endl;
         IO::read_point_cloud(Config::get().buildings_xyz, m_pointCloudBuildings);
-        if (m_pointCloudBuildings.empty()) throw std::invalid_argument("Didn't find any building points!");
+        if (m_pointCloudBuildings.empty()) throw city4cfd_error("Didn't find any building points!");
 
         std::cout << "    Points read: " << m_pointCloudBuildings.size() << std::endl;
     }

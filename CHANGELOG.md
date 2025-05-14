@@ -1,4 +1,10 @@
 # Changelog
+## [Unreleased]
+### Added
+- A script to fetch polygons (building, water, vegetation) from OSM
+### Changed
+- Influence region and domain boundaries support all formats for polygon input
+
 ## [0.6.3] 2025-03-07
 ### Fixed
 - CityJSON terrain output

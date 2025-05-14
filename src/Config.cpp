@@ -301,7 +301,7 @@ void Config::set_config(nlohmann::json& j) {
         outputFormat = STL;
     } else if (boost::iequals(outputFormatConfig, "cityjson")) {
         outputFormat = CityJSON;
-    } else throw std::invalid_argument(std::string("'" + outputFormatConfig + "'" + " is unsupported file format!"));
+    } else throw city4cfd_error(std::string("'" + outputFormatConfig + "'" + " is unsupported file format!"));
 
     outputSeparately = j["output_separately"];
 
@@ -330,21 +330,22 @@ void Config::set_config(nlohmann::json& j) {
 void Config::set_region(std::variant<bool, double, Polygon_2>& regionType,
                         const std::string regionName,
                         nlohmann::json& j) {
-    if (j[regionName].is_string()) { // Search for GeoJSON polygon
+    if (j[regionName].is_string()) { // Search for a polygon
         std::string polyFilePath = (std::string)j[regionName];
         if(!fs::exists(polyFilePath)) {
-            throw std::invalid_argument(std::string("Cannot find polygon file '" +
+            throw city4cfd_error(std::string("Cannot find polygon file '" +
                                                     polyFilePath + "' for " + regionName));
         }
         //-- Read poly
-        Polygon_2 tempPoly;
-        JsonVectorPtr influJsonPoly;
-        IO::read_geojson_polygons(polyFilePath, influJsonPoly);
-        for (auto& coords : influJsonPoly.front()->at("geometry").at("coordinates").front()) { // I know it should be only 1 polygon with 1 ring
-            tempPoly.push_back(Point_2((double)coords[0] - Config::get().pointOfInterest.x(),
-                                       (double)coords[1] - Config::get().pointOfInterest.y()));
+        PolyVecPtr tempPolyVec;
+        IO::read_polygons(polyFilePath, tempPolyVec, nullptr);
+        if (tempPolyVec.empty()) {
+            throw city4cfd_error(std::string("Polygon file '" + polyFilePath + "' is empty!"));
         }
-        //-- Prepare poly
+        // access only first ring of the first poly, otherwise the input is invalid
+        Polygon_2 tempPoly = tempPolyVec.front()->polygon.outer_boundary();
+
+        // prepare poly
         geomutils::pop_back_if_equal_to_front(tempPoly);
         if (tempPoly.is_clockwise_oriented()) tempPoly.reverse_orientation();
 
