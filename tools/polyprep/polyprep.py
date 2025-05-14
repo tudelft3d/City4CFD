@@ -24,7 +24,6 @@
   3D Geoinformation Research Group
   Delft University of Technology
 """
-
 import argparse
 from shapely.geometry import shape, mapping, MultiPolygon, Polygon
 from shapely.ops import unary_union
@@ -93,9 +92,13 @@ def process_polygons(input_filename, output_filename, buffer_size, apply_convex_
         }
 
         polygon_data = []
-        for feature in input_src:
+        first_properties = None
+        for i, feature in enumerate(input_src):
             geom = shape(feature['geometry'])
             properties = feature['properties']
+
+            if first_properties is None:
+                first_properties = properties
 
             if isinstance(geom, Polygon):
                 polygon_data.append((geom, properties))
@@ -145,8 +148,9 @@ def process_polygons(input_filename, output_filename, buffer_size, apply_convex_
         print("Writing new polygons to file...")
         with fiona.open(output_filename, 'w', 'GeoJSON', output_schema, crs=input_crs) as output_src:
             for polygon, properties in polygons_to_write:
-                final_properties = dict(input_src[0]['properties'])
-                final_properties.update(properties)
+                final_properties = dict(first_properties if first_properties is not None else {})
+                if properties:
+                    final_properties.update(properties)
 
                 if simplification_tol > 0.:
                     polygon = polygon.simplify(simplification_tol)
