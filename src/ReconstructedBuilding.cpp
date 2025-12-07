@@ -191,6 +191,7 @@ void ReconstructedBuilding::reconstruct() {
                              + " Ignoring the above ground height attribute.");
         baseElevations = m_groundElevations;
     } else {
+        // Set all base elevations to the lifted height
         const double liftedBaseElevation = this->ground_elevation() + m_aboveGroundHeight;
         baseElevations.reserve(m_groundElevations.size());
         for (const auto& groundRing : m_groundElevations) {
