@@ -54,9 +54,9 @@ protected:
     PointSet3Ptr m_groundPtsPtr;
     std::vector<roofer::Mesh> m_roofer_meshes;
 
-    void reconstruct_from_attribute();
-    bool reconstruct_again_from_attribute(const std::string& reason);
-    void reconstruct_lod12();
+    void reconstruct_from_attribute(doubleVec_t& baseElevations);
+    bool reconstruct_again_from_attribute(const std::string& reason, doubleVec_t& baseElevations);
+    void reconstruct_lod12(doubleVec_t& baseElevations);
     bool is_bottom_surface(const Mesh& mesh, const Mesh::halfedge_index h);
 };
 

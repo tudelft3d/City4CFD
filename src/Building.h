@@ -62,6 +62,7 @@ public:
     bool   has_self_intersections() const;
     void   set_to_flat_terrain(const double elevation = 0.);
     double sq_max_dim();
+    bool   is_above_ground() const;
     PointSet3Ptr get_points() const;
     std::string get_lod() const;
 
@@ -76,6 +77,7 @@ protected:
     double               m_elevation;
     double               m_height;
     bool                 m_hasFailed;
+    bool                 m_isBaseAboveGround;
     bool                 m_clipBottom = Config::get().clip;
     std::shared_ptr<const Config::ReconRegion> m_reconSettings;
 

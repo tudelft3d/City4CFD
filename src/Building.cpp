@@ -40,16 +40,19 @@
 
 Building::Building()
         : PolyFeature(-1), m_elevation(-global::largnum), m_height(-global::largnum),
-          m_ptsPtr(std::make_shared<Point_set_3>()), m_hasFailed(false), m_reconSettings(nullptr) {}
+          m_ptsPtr(std::make_shared<Point_set_3>()), m_hasFailed(false), m_reconSettings(nullptr),
+          m_isBaseAboveGround(false){}
 
 Building::Building(const nlohmann::json& poly)
         : PolyFeature(poly, true, -1), m_elevation(-global::largnum), m_height(-global::largnum),
-          m_ptsPtr(std::make_shared<Point_set_3>()), m_hasFailed(false), m_reconSettings(nullptr) {}
+          m_ptsPtr(std::make_shared<Point_set_3>()), m_hasFailed(false), m_reconSettings(nullptr),
+          m_isBaseAboveGround(false){}
         // 'true' here to check for polygon simplicity
 
 Building::Building(const Polygon_with_attr& poly)
         : PolyFeature(poly, true, -1), m_elevation(-global::largnum), m_height(-global::largnum),
-          m_ptsPtr(std::make_shared<Point_set_3>()), m_hasFailed(false), m_reconSettings(nullptr) {}
+          m_ptsPtr(std::make_shared<Point_set_3>()), m_hasFailed(false), m_reconSettings(nullptr),
+          m_isBaseAboveGround(false){}
         // 'true' here to check for polygon simplicity
 
 void Building::insert_point(const Point_3& pt) {
@@ -305,6 +308,10 @@ double Building::sq_max_dim() {
     dims.emplace_back(m_elevation * m_elevation);
 
     return *(std::max_element(dims.begin(), dims.end()));
+}
+
+bool Building::is_above_ground() const {
+    return m_isBaseAboveGround;
 }
 
 PointSet3Ptr Building::get_points() const {

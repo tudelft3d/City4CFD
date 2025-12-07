@@ -414,7 +414,7 @@ Polygon_with_attr PolyFeature::get_poly_w_attr() const {
     return poly;
 }
 
-const std::vector<std::vector<double>>& PolyFeature::get_ground_elevations() const {
+const doubleVec_t& PolyFeature::get_ground_elevations() const {
     return m_groundElevations;
 }
 

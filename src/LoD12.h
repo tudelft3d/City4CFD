@@ -28,13 +28,14 @@
 #ifndef CITY4CFD_LOD12_H
 #define CITY4CFD_LOD12_H
 
+#include "types.h"
 #include "CGALTypes.h"
 
 class LoD12 {
 public:
     LoD12() = delete;
-    LoD12(const Polygon_with_holes_2& poly, const std::vector<std::vector<double>>& baseElevations);
-    LoD12(const Polygon_with_holes_2& poly, const std::vector<std::vector<double>>& baseElevations,
+    LoD12(const Polygon_with_holes_2& poly, const doubleVec_t& baseElevations);
+    LoD12(const Polygon_with_holes_2& poly, const doubleVec_t& baseElevations,
           const double elevation);
     ~LoD12() = default;
 
@@ -44,7 +45,7 @@ public:
 private:
     double                                   m_elevation;
     const Polygon_with_holes_2&              m_poly;
-    const std::vector<std::vector<double>>&  m_baseElevations;
+    const doubleVec_t&                       m_baseElevations;
 };
 
 #endif //CITY4CFD_LOD12_H

@@ -56,12 +56,12 @@ public:
     void reconstruct(const PointSet3Ptr& buildingPtsPtr,
                      const PointSet3Ptr& groundPtsPtr,
                      const Polygon_with_holes_2& footprint,
-                     const std::vector<std::vector<double>>& baseElevations,
+                     const doubleVec_t& baseElevations,
                      ReconstructionConfig config = ReconstructionConfig()
     );
 
     Polygon_with_holes_2              get_footprint() const;
-    std::vector<std::vector<double>>  get_base_elevations() const;
+    doubleVec_t                       get_base_elevations() const;
     Mesh                              get_mesh() const;
     std::vector<roofer::Mesh>         get_roofer_meshes() const;
 
@@ -70,12 +70,12 @@ private:
     Mesh                                     m_mesh;
     std::vector<roofer::Mesh>                m_rooferMeshes;
     Polygon_with_holes_2                     m_footprint;
-    std::vector<std::vector<double>>         m_baseElevations;
+    doubleVec_t                              m_baseElevations;
 
     void shorten_mesh_edges(roofer::Mesh& mesh, const double sq_maxdist) const;
     roofer::LinearRing& get_footprint_from_mesh(roofer::Mesh& rooferMesh);
     const roofer::LinearRing& get_footprint_from_mesh(const roofer::Mesh& rooferMesh) const;
-    void make_footprint_from_mesh(roofer::Mesh& rooferMesh, Polygon_with_holes_2& footprint, std::vector<std::vector<double>>& baseElevations) const;
+    void make_footprint_from_mesh(roofer::Mesh& rooferMesh, Polygon_with_holes_2& footprint, doubleVec_t& baseElevations) const;
     void remove_footprint_from_mesh(roofer::Mesh& rooferMesh);
 };
 

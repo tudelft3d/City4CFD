@@ -30,11 +30,11 @@
 #include "geomutils.h"
 
 LoD12::LoD12(const Polygon_with_holes_2& poly,
-             const std::vector<std::vector<double>>& baseElevations)
+             const doubleVec_t& baseElevations)
         : m_elevation(), m_poly(poly), m_baseElevations(baseElevations) {}
 
 LoD12::LoD12(const Polygon_with_holes_2& poly,
-             const std::vector<std::vector<double>>& baseElevations,
+             const doubleVec_t& baseElevations,
              const double elevation)
         : m_elevation(elevation), m_poly(poly), m_baseElevations(baseElevations) {}
 
