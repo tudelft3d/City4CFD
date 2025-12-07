@@ -92,9 +92,9 @@ ReconstructedBuilding::ReconstructedBuilding(const nlohmann::json& poly)
     }
 
     // Check for the building base attribute
-    if (poly["properties"].contains(Config::get().buildingBaseAttribute)) {
-        if (poly["properties"][Config::get().buildingBaseAttribute].is_number()) {
-            m_aboveGroundHeight = poly["properties"][Config::get().buildingBaseAttribute];
+    if (poly["properties"].contains(Config::get().buildingBaseHeightAttribute)) {
+        if (poly["properties"][Config::get().buildingBaseHeightAttribute].is_number()) {
+            m_aboveGroundHeight = poly["properties"][Config::get().buildingBaseHeightAttribute];
         }
     }
 
@@ -128,7 +128,7 @@ ReconstructedBuilding::ReconstructedBuilding(const Polygon_with_attr& poly)
     }
 
     // Check for the building base attribute
-    auto buildingBaseAttrIt = poly.attributes.find(Config::get().buildingBaseAttribute);
+    auto buildingBaseAttrIt = poly.attributes.find(Config::get().buildingBaseHeightAttribute);
     if (buildingBaseAttrIt != poly.attributes.end()) {
         m_aboveGroundHeight = std::stod(buildingBaseAttrIt->second);
     }

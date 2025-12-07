@@ -103,6 +103,7 @@ namespace jsonschema {
                       "exclusiveMinimum": 0
                     },
                     "height_attribute_advantage": {"type": "boolean"},
+                    "building_base_height_attribute": {"type": "string"},
                     "avoid_bad_polys": {"type": "boolean"}
                   },
                   "dependencies": {
