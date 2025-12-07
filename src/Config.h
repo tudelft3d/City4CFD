@@ -94,6 +94,7 @@ public:
     // Height from attributes
     std::string buildingHeightAttribute;
     std::string floorAttribute;
+    std::string buildingBaseAttribute;
     double      floorHeight                     = 9999.; // Handled by schema
     bool        buildingHeightAttrAdv           = false;
     bool        avoidBadPolys                   = false;

@@ -39,7 +39,8 @@
 
 ReconstructedBuilding::ReconstructedBuilding()
         : Building(), m_attributeHeight(-global::largnum),
-          m_attributeHeightAdvantage(Config::get().buildingHeightAttrAdv) {}
+          m_attributeHeightAdvantage(Config::get().buildingHeightAttrAdv),
+          m_aboveGroundHeight(-global::largnum) {}
 
 ReconstructedBuilding::ReconstructedBuilding(const Mesh& mesh)
         : ReconstructedBuilding() {
@@ -61,6 +62,7 @@ ReconstructedBuilding::ReconstructedBuilding(const roofer::Mesh& rooferMesh, con
     m_outputLayerID = other->m_outputLayerID;
     m_attributeHeight = other->m_attributeHeight;
     m_attributeHeightAdvantage = other->m_attributeHeightAdvantage;
+    m_aboveGroundHeight = other->m_aboveGroundHeight;
     m_groundPtsPtr = other->m_groundPtsPtr;
     m_ptsPtr = other->m_ptsPtr;
     m_clipBottom = other->m_clipBottom;
@@ -69,12 +71,16 @@ ReconstructedBuilding::ReconstructedBuilding(const roofer::Mesh& rooferMesh, con
 ReconstructedBuilding::ReconstructedBuilding(const nlohmann::json& poly)
         : Building(poly), m_attributeHeight(-global::largnum),
           m_attributeHeightAdvantage(Config::get().buildingHeightAttrAdv),
+          m_aboveGroundHeight(-global::largnum),
           m_groundPtsPtr(std::make_shared<Point_set_3 >()) {
+    // Check for the polygon ID attribute
     if (!Config::get().buildingUniqueId.empty() && poly["properties"].contains(Config::get().buildingUniqueId)) {
         m_id = poly["properties"][Config::get().buildingUniqueId].dump();
     } else {
         m_id = std::to_string(m_polyInternalID);
     }
+
+    // Check for the building height attribute
     if (poly["properties"].contains(Config::get().buildingHeightAttribute)) {
         if (poly["properties"][Config::get().buildingHeightAttribute].is_number()) {
             m_attributeHeight = poly["properties"][Config::get().buildingHeightAttribute];
@@ -84,6 +90,14 @@ ReconstructedBuilding::ReconstructedBuilding(const nlohmann::json& poly)
             m_attributeHeight = (double) poly["properties"][Config::get().floorAttribute] * Config::get().floorHeight;
         }
     }
+
+    // Check for the building base attribute
+    if (poly["properties"].contains(Config::get().buildingBaseAttribute)) {
+        if (poly["properties"][Config::get().buildingBaseAttribute].is_number()) {
+            m_aboveGroundHeight = poly["properties"][Config::get().buildingBaseAttribute];
+        }
+    }
+
     if (!this->is_active()) { // It can only fail if the polygon is not simple
         this->mark_as_failed();
         Config::write_to_log("Failed to import building polygon ID:" + m_id
@@ -94,6 +108,7 @@ ReconstructedBuilding::ReconstructedBuilding(const nlohmann::json& poly)
 ReconstructedBuilding::ReconstructedBuilding(const Polygon_with_attr& poly)
         : Building(poly), m_attributeHeight(-global::largnum),
           m_attributeHeightAdvantage(Config::get().buildingHeightAttrAdv),
+          m_aboveGroundHeight(-global::largnum),
           m_groundPtsPtr(std::make_shared<Point_set_3 >()) {
     // Check for the polygon ID attribute
     auto idIt = poly.attributes.find(Config::get().buildingUniqueId);
@@ -102,6 +117,7 @@ ReconstructedBuilding::ReconstructedBuilding(const Polygon_with_attr& poly)
      } else {
         m_id = std::to_string(m_polyInternalID);
     }
+
     // Check for the building height attribute
     auto buildingHeightAttrIt = poly.attributes.find(Config::get().buildingHeightAttribute);
     auto numFloorsAttrIt = poly.attributes.find(Config::get().floorAttribute);
@@ -110,6 +126,13 @@ ReconstructedBuilding::ReconstructedBuilding(const Polygon_with_attr& poly)
     } else if (numFloorsAttrIt != poly.attributes.end()) { // Check for the number of floors attribute
         m_attributeHeight = std::stod(numFloorsAttrIt->second) * Config::get().floorHeight;
     }
+
+    // Check for the building base attribute
+    auto buildingBaseAttrIt = poly.attributes.find(Config::get().buildingBaseAttribute);
+    if (buildingBaseAttrIt != poly.attributes.end()) {
+        m_aboveGroundHeight = std::stod(buildingBaseAttrIt->second);
+    }
+
     if (!this->is_active()) { // It can only fail if the polygon is not simple
         this->mark_as_failed();
         Config::write_to_log("Failed to import building polygon ID:" + m_id
@@ -157,20 +180,24 @@ void ReconstructedBuilding::reconstruct() {
     m_mesh.clear();
     assert(m_reconSettings);
 
-    doubleVec_t baseElevations; // local copy, simplest
     //-- Check if reconstructing a part above the ground
-    double aboveGroundHeight = 2.; // make it a variable
-    m_isBaseAboveGround = true; // todo temp
-    if (aboveGroundHeight <= 0.) {
+    doubleVec_t baseElevations; // local copy, simplest
+    m_isBaseAboveGround = false;
+    if (m_aboveGroundHeight <= 0.) {
+        baseElevations = m_groundElevations;
+    } else if (m_aboveGroundHeight > this->get_height()) {
+        Config::write_to_log("Building ID: " + this->get_id()
+                             + " Building base above ground attribute is higher than building elevation."
+                             + " Ignoring the above ground height attribute.");
         baseElevations = m_groundElevations;
     } else {
-        const double liftedBaseElevation = this->ground_elevation() + aboveGroundHeight;
-        // todo: add check here if base is higher than building height and offer fallbacks
+        const double liftedBaseElevation = this->ground_elevation() + m_aboveGroundHeight;
         baseElevations.reserve(m_groundElevations.size());
         for (auto& groundRing : m_groundElevations) {
             std::vector<double> baseRing(groundRing.size(), liftedBaseElevation);
             baseElevations.push_back(baseRing);
         }
+        m_isBaseAboveGround = true;
     }
 
     //-- Check if reconstructing from height attribute takes precedence

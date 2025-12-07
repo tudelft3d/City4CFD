@@ -51,6 +51,7 @@ public:
 protected:
     double m_attributeHeight;
     bool   m_attributeHeightAdvantage;
+    double m_aboveGroundHeight;
     PointSet3Ptr m_groundPtsPtr;
     std::vector<roofer::Mesh> m_roofer_meshes;
 
