@@ -193,9 +193,8 @@ void ReconstructedBuilding::reconstruct() {
     } else {
         const double liftedBaseElevation = this->ground_elevation() + m_aboveGroundHeight;
         baseElevations.reserve(m_groundElevations.size());
-        for (auto& groundRing : m_groundElevations) {
-            std::vector<double> baseRing(groundRing.size(), liftedBaseElevation);
-            baseElevations.push_back(baseRing);
+        for (const auto& groundRing : m_groundElevations) {
+            baseElevations.emplace_back(groundRing.size(), liftedBaseElevation);
         }
         m_isBaseAboveGround = true;
     }
@@ -331,7 +330,7 @@ void ReconstructedBuilding::reconstruct() {
     }
 
     if (Config::get().refineReconstructed) this->refine();
-    if (m_clipBottom || Config::get().intersectBuildingsTerrain) {
+    if ((m_clipBottom || Config::get() .intersectBuildingsTerrain) && !m_isBaseAboveGround) {
         this->force_building_terrain_intersection(5);
     }
 }
@@ -399,7 +398,7 @@ void ReconstructedBuilding::reconstruct_from_attribute(doubleVec_t& baseElevatio
     LoD12 lod12HeightAttribute(m_poly, baseElevations, m_elevation);
     lod12HeightAttribute.reconstruct(m_mesh);
 
-    if (m_clipBottom || Config::get().intersectBuildingsTerrain) {
+    if ((m_clipBottom || Config::get() .intersectBuildingsTerrain) && !m_isBaseAboveGround) {
         this->force_building_terrain_intersection(5);
     }
 }
