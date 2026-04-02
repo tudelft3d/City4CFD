@@ -354,6 +354,9 @@ namespace jsonschema {
         "output_separately": {
           "type": "boolean"
         },
+        "output_buildings_separately": {
+          "type": "boolean"
+        },
         "output_log": {
           "description": "Flag to output log file and GeoJSON of failed reconstructions, optional",
           "type": "boolean"
