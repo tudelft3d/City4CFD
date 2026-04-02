@@ -312,8 +312,6 @@ void Config::set_config(nlohmann::json& j) {
     outputSeparately = j["output_separately"];
     if (j.contains("output_buildings_separately"))
         outputBuildingsSeparately = j["output_buildings_separately"];
-    //todo temp
-//    outputBuildingsSeparately = true;
     if (outputBuildingsSeparately) outputSeparately = true;
 
     //-- Data log
