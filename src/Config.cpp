@@ -194,6 +194,8 @@ void Config::set_config(nlohmann::json& j) {
                 buildingHeightAttribute = poly["height_attribute"];
             if (poly.contains("height_attribute_advantage"))
                 buildingHeightAttrAdv = poly["height_attribute_advantage"];
+            if (poly.contains("building_base_height_attribute"))
+                buildingBaseHeightAttribute = poly["building_base_height_attribute"];
             if (poly.contains("floor_attribute"))
                 floorAttribute = poly["floor_attribute"];
             if (poly.contains("floor_height"))

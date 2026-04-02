@@ -63,7 +63,7 @@ public:
     Polygon_with_holes_2&                    get_poly();
     const Polygon_with_holes_2&              get_poly() const;
     Polygon_with_attr                        get_poly_w_attr() const;
-    const std::vector<std::vector<double>>&  get_ground_elevations() const;
+    const doubleVec_t&                       get_ground_elevations() const;
     const int                                get_internal_id() const;
     MinBbox&                                 get_min_bbox();
 
@@ -72,7 +72,7 @@ protected:
 
     int                               m_polyInternalID;
     Polygon_with_holes_2              m_poly;
-    std::vector<std::vector<double>>  m_groundElevations;
+    doubleVec_t                       m_groundElevations;
     double                            m_groundElevation;
     MinBbox                           m_minBbox;
 

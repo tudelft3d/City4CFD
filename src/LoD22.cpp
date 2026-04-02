@@ -50,7 +50,7 @@ LoD22::LoD22(roofer::Mesh rooferMesh) {
 void LoD22::reconstruct(const PointSet3Ptr& buildingPtsPtr,
                         const PointSet3Ptr& groundPtsPtr,
                         const Polygon_with_holes_2& footprint,
-                        const std::vector<std::vector<double>>& baseElevations,
+                        const doubleVec_t& baseElevations,
                         ReconstructionConfig config
                         ) {
 
@@ -180,7 +180,7 @@ const roofer::LinearRing& LoD22::get_footprint_from_mesh(const roofer::Mesh& roo
 }
 
 void LoD22::make_footprint_from_mesh(roofer::Mesh& rooferMesh, Polygon_with_holes_2& footprint,
-                                    std::vector<std::vector<double>>& baseElevations) const {
+                                    doubleVec_t& baseElevations) const {
     auto rooferNewFootprint = this->get_footprint_from_mesh(rooferMesh);
 
     footprint.rings().clear();
@@ -215,7 +215,7 @@ Polygon_with_holes_2 LoD22::get_footprint() const {
     return m_footprint;
 }
 
-std::vector<std::vector<double>> LoD22::get_base_elevations() const {
+doubleVec_t LoD22::get_base_elevations() const {
     if (m_baseElevations.empty()) throw city4cfd_error("No base elevations found!");
     return m_baseElevations;
 }

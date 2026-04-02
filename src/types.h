@@ -70,6 +70,9 @@ typedef std::vector<std::shared_ptr<PolyFeature>>              PolyFeaturesPtr;
 typedef std::vector<std::shared_ptr<SurfaceLayer>>             SurfaceLayersPtr;
 typedef std::vector<std::unique_ptr<nlohmann::json>>           JsonVectorPtr;
 
+//-- Convenience typedefs
+typedef std::vector<std::vector<double>> doubleVec_t;
+
 //-- TopoClasses
 typedef enum {
     TERRAIN          = 0,

@@ -67,8 +67,14 @@ void Terrain::prep_constraints(const PolyFeaturesPtr& features, Point_set_3& poi
     auto buildingPt = pointCloud.add_property_map<std::shared_ptr<Building>>("building_point", nullptr).first;
     for (auto& f : features) {
         if (!f->is_active()) continue;
+
         bool isBuilding = false;
-        if (f->get_class() == BUILDING) isBuilding = true;
+        if (f->get_class() == BUILDING){
+            isBuilding = true;
+            auto buildingPtr = std::static_pointer_cast<Building>(f);
+            if (buildingPtr->is_above_ground()) continue; // do not add footprints of buildings above ground
+        }
+
         int polyCount = 0;
         for (auto& ring : f->get_poly().rings()) {
             auto& elevations = f->get_ground_elevations();
