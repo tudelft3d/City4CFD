@@ -337,8 +337,10 @@ void IO::output_obj(const OutputFeaturesPtr& allFeatures) {
     std::vector<std::string>   fs(numOutputLayers), bs(numOutputLayers);
 
     std::vector<std::unordered_map<std::string, int>> dPts(numOutputLayers);
+    std::unordered_set<std::string> usedBuildingIDs;
     //-- Output points
     for (auto& f : allFeatures) {
+        if (!f->is_active()) continue;
         int outputLayerID = f->get_output_layer_id();
         assert(outputLayerID > -1 && outputLayerID < numOutputLayers);
         if (Config::get().outputSeparately) {
@@ -348,7 +350,17 @@ void IO::output_obj(const OutputFeaturesPtr& allFeatures) {
                     fs.emplace_back();
                     bs.emplace_back();
                     dPts.emplace_back();
-                    outputSurfaces.emplace_back(Config::get().outputSurfaces[outputLayerID], "Building_" + f->get_id());
+                    std::string buildingName = "Building_" + f->get_id();
+                    // handle duplicated ids
+                    if (usedBuildingIDs.count(buildingName)) {
+                        int suffix = 1;
+                        std::string base = buildingName;
+                        while (usedBuildingIDs.count(buildingName))
+                            buildingName = base + "_" + std::to_string(suffix++);
+                        Config::write_to_log("Building ID: " + f->get_id() + " already exists in OBJ output. Stored as: " + buildingName);
+                    }
+                    usedBuildingIDs.insert(buildingName);
+                    outputSurfaces.emplace_back(Config::get().outputSurfaces[outputLayerID], buildingName);
                     outputLayerID = fs.size() - 1; // set the new outputLayerID
                 }
                 bs[outputLayerID] += "\no " + f->get_id();
@@ -385,14 +397,25 @@ void IO::output_stl(const OutputFeaturesPtr& allFeatures) {
     auto outputSurfaces = Config::get().outputSurfaces;
     std::vector<std::ofstream> of;
     std::vector<std::string>   fs(numOutputLayers);
+    std::unordered_set<std::string> usedBuildingIDs;
 
     //-- Get all triangles
     for (auto& f : allFeatures) {
+        if (!f->is_active()) continue;
         int outputLayerID = f->get_output_layer_id();
         assert(outputLayerID > -1 && outputLayerID < numOutputLayers);
-        if (!f->is_active()) continue;
         if (Config::get().outputBuildingsSeparately && f->get_class() == BUILDING) {
-            outputSurfaces.push_back("Building_" + f->get_id());
+            std::string buildingName = "Building_" + f->get_id();
+            // handle duplicated ids
+            if (usedBuildingIDs.count(buildingName)) {
+                int suffix = 1;
+                std::string base = buildingName;
+                while (usedBuildingIDs.count(buildingName))
+                    buildingName = base + "_" + std::to_string(suffix++);
+                Config::write_to_log("Building ID: " + f->get_id() + " already exists in STL output. Stored as: " + buildingName);
+            }
+            usedBuildingIDs.insert(buildingName);
+            outputSurfaces.emplace_back(buildingName);
             fs.emplace_back();
             outputLayerID = fs.size() - 1;
         }
