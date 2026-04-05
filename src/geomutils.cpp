@@ -1,7 +1,7 @@
 /*
   City4CFD
  
-  Copyright (c) 2021-2025, 3D Geoinformation Research Group, TU Delft
+  Copyright (c) 2021-2026, 3D Geoinformation Research Group, TU Delft
 
   This file is part of City4CFD.
 
@@ -17,13 +17,8 @@
 
   You should have received a copy of the GNU Affero General Public License
   along with City4CFD.  If not, see <http://www.gnu.org/licenses/>.
-
-  For any information or further details about the use of City4CFD, contact
-  Ivan Pađen
-  <i.paden@tudelft.nl>
-  3D Geoinformation Research Group
-  Delft University of Technology
 */
+
 
 #include "geomutils.h"
 
