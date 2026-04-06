@@ -1,4 +1,9 @@
 # Changelog
+## [0.8.0] 2026-04-06
+### Added
+- `output_buildings_separately` parameter that outputs every building as an individual file
+- `building_base_height_attribute` parameter that can lift polygons above ground to create underpasses 
+
 ## [0.7.1] 2025-12-14
 ### Fixed
 - Minor bugfixes

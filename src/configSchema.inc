@@ -1,7 +1,7 @@
 /*
   City4CFD
  
-  Copyright (c) 2021-2025, 3D Geoinformation Research Group, TU Delft
+  Copyright (c) 2021-2026, 3D Geoinformation Research Group, TU Delft
 
   This file is part of City4CFD.
 
@@ -17,12 +17,6 @@
 
   You should have received a copy of the GNU Affero General Public License
   along with City4CFD.  If not, see <http://www.gnu.org/licenses/>.
-
-  For any information or further details about the use of City4CFD, contact
-  Ivan Pađen
-  <i.paden@tudelft.nl>
-  3D Geoinformation Research Group
-  Delft University of Technology
 */
 
 #ifndef CITY4CFD_CONFIGSCHEMA_INC
@@ -103,6 +97,7 @@ namespace jsonschema {
                       "exclusiveMinimum": 0
                     },
                     "height_attribute_advantage": {"type": "boolean"},
+                    "building_base_height_attribute": {"type": "string"},
                     "avoid_bad_polys": {"type": "boolean"}
                   },
                   "dependencies": {
@@ -351,6 +346,9 @@ namespace jsonschema {
           "type": "string"
         },
         "output_separately": {
+          "type": "boolean"
+        },
+        "output_buildings_separately": {
           "type": "boolean"
         },
         "output_log": {

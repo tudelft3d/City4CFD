@@ -1,7 +1,7 @@
 /*
   City4CFD
-
-  Copyright (c) 2021-2025, 3D Geoinformation Research Group, TU Delft
+ 
+  Copyright (c) 2021-2026, 3D Geoinformation Research Group, TU Delft
 
   This file is part of City4CFD.
 
@@ -17,13 +17,8 @@
 
   You should have received a copy of the GNU Affero General Public License
   along with City4CFD.  If not, see <http://www.gnu.org/licenses/>.
-
-  For any information or further details about the use of City4CFD, contact
-  Ivan Pađen
-  <i.paden@tudelft.nl>
-  3D Geoinformation Research Group
-  Delft University of Technology
 */
+
 
 #ifndef CITY4CFD_RECONSTRUCTEDBUILDING_H
 #define CITY4CFD_RECONSTRUCTEDBUILDING_H
@@ -51,12 +46,13 @@ public:
 protected:
     double m_attributeHeight;
     bool   m_attributeHeightAdvantage;
+    double m_aboveGroundHeight;
     PointSet3Ptr m_groundPtsPtr;
     std::vector<roofer::Mesh> m_roofer_meshes;
 
-    void reconstruct_from_attribute();
-    bool reconstruct_again_from_attribute(const std::string& reason);
-    void reconstruct_lod12();
+    void reconstruct_from_attribute(doubleVec_t& baseElevations);
+    bool reconstruct_again_from_attribute(const std::string& reason, doubleVec_t& baseElevations);
+    void reconstruct_lod12(doubleVec_t& baseElevations);
     bool is_bottom_surface(const Mesh& mesh, const Mesh::halfedge_index h);
 };
 

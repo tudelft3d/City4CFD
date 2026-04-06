@@ -1,7 +1,7 @@
 /*
   City4CFD
  
-  Copyright (c) 2021-2025, 3D Geoinformation Research Group, TU Delft
+  Copyright (c) 2021-2026, 3D Geoinformation Research Group, TU Delft
 
   This file is part of City4CFD.
 
@@ -17,24 +17,19 @@
 
   You should have received a copy of the GNU Affero General Public License
   along with City4CFD.  If not, see <http://www.gnu.org/licenses/>.
-
-  For any information or further details about the use of City4CFD, contact
-  Ivan Pađen
-  <i.paden@tudelft.nl>
-  3D Geoinformation Research Group
-  Delft University of Technology
 */
+
 
 #include "LoD12.h"
 
 #include "geomutils.h"
 
 LoD12::LoD12(const Polygon_with_holes_2& poly,
-             const std::vector<std::vector<double>>& baseElevations)
+             const doubleVec_t& baseElevations)
         : m_elevation(), m_poly(poly), m_baseElevations(baseElevations) {}
 
 LoD12::LoD12(const Polygon_with_holes_2& poly,
-             const std::vector<std::vector<double>>& baseElevations,
+             const doubleVec_t& baseElevations,
              const double elevation)
         : m_elevation(elevation), m_poly(poly), m_baseElevations(baseElevations) {}
 

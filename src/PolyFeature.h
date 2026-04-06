@@ -1,7 +1,7 @@
 /*
   City4CFD
  
-  Copyright (c) 2021-2025, 3D Geoinformation Research Group, TU Delft
+  Copyright (c) 2021-2026, 3D Geoinformation Research Group, TU Delft
 
   This file is part of City4CFD.
 
@@ -17,13 +17,8 @@
 
   You should have received a copy of the GNU Affero General Public License
   along with City4CFD.  If not, see <http://www.gnu.org/licenses/>.
-
-  For any information or further details about the use of City4CFD, contact
-  Ivan Pađen
-  <i.paden@tudelft.nl>
-  3D Geoinformation Research Group
-  Delft University of Technology
 */
+
 
 #ifndef CITY4CFD_POLYFEATURE_H
 #define CITY4CFD_POLYFEATURE_H
@@ -63,7 +58,7 @@ public:
     Polygon_with_holes_2&                    get_poly();
     const Polygon_with_holes_2&              get_poly() const;
     Polygon_with_attr                        get_poly_w_attr() const;
-    const std::vector<std::vector<double>>&  get_ground_elevations() const;
+    const doubleVec_t&                       get_ground_elevations() const;
     const int                                get_internal_id() const;
     MinBbox&                                 get_min_bbox();
 
@@ -72,7 +67,7 @@ protected:
 
     int                               m_polyInternalID;
     Polygon_with_holes_2              m_poly;
-    std::vector<std::vector<double>>  m_groundElevations;
+    doubleVec_t                       m_groundElevations;
     double                            m_groundElevation;
     MinBbox                           m_minBbox;
 

@@ -1,7 +1,7 @@
 /*
   City4CFD
  
-  Copyright (c) 2021-2025, 3D Geoinformation Research Group, TU Delft
+  Copyright (c) 2021-2026, 3D Geoinformation Research Group, TU Delft
 
   This file is part of City4CFD.
 
@@ -17,13 +17,8 @@
 
   You should have received a copy of the GNU Affero General Public License
   along with City4CFD.  If not, see <http://www.gnu.org/licenses/>.
-
-  For any information or further details about the use of City4CFD, contact
-  Ivan Pađen
-  <i.paden@tudelft.nl>
-  3D Geoinformation Research Group
-  Delft University of Technology
 */
+
 
 #include "Config.h"
 
@@ -194,6 +189,8 @@ void Config::set_config(nlohmann::json& j) {
                 buildingHeightAttribute = poly["height_attribute"];
             if (poly.contains("height_attribute_advantage"))
                 buildingHeightAttrAdv = poly["height_attribute_advantage"];
+            if (poly.contains("building_base_height_attribute"))
+                buildingBaseHeightAttribute = poly["building_base_height_attribute"];
             if (poly.contains("floor_attribute"))
                 floorAttribute = poly["floor_attribute"];
             if (poly.contains("floor_height"))
@@ -308,6 +305,9 @@ void Config::set_config(nlohmann::json& j) {
     } else throw city4cfd_error(std::string("'" + outputFormatConfig + "'" + " is unsupported file format!"));
 
     outputSeparately = j["output_separately"];
+    if (j.contains("output_buildings_separately"))
+        outputBuildingsSeparately = j["output_buildings_separately"];
+    if (outputBuildingsSeparately) outputSeparately = true;
 
     //-- Data log
     if (j.contains("output_log")) {

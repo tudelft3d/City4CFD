@@ -1,7 +1,7 @@
 /*
   City4CFD
-
-  Copyright (c) 2021-2025, 3D Geoinformation Research Group, TU Delft
+ 
+  Copyright (c) 2021-2026, 3D Geoinformation Research Group, TU Delft
 
   This file is part of City4CFD.
 
@@ -17,13 +17,8 @@
 
   You should have received a copy of the GNU Affero General Public License
   along with City4CFD.  If not, see <http://www.gnu.org/licenses/>.
-
-  For any information or further details about the use of City4CFD, contact
-  Ivan Pađen
-  <i.paden@tudelft.nl>
-  3D Geoinformation Research Group
-  Delft University of Technology
 */
+
 
 #include "ReconstructedBuilding.h"
 
@@ -39,7 +34,8 @@
 
 ReconstructedBuilding::ReconstructedBuilding()
         : Building(), m_attributeHeight(-global::largnum),
-          m_attributeHeightAdvantage(Config::get().buildingHeightAttrAdv) {}
+          m_attributeHeightAdvantage(Config::get().buildingHeightAttrAdv),
+          m_aboveGroundHeight(-global::largnum) {}
 
 ReconstructedBuilding::ReconstructedBuilding(const Mesh& mesh)
         : ReconstructedBuilding() {
@@ -61,6 +57,7 @@ ReconstructedBuilding::ReconstructedBuilding(const roofer::Mesh& rooferMesh, con
     m_outputLayerID = other->m_outputLayerID;
     m_attributeHeight = other->m_attributeHeight;
     m_attributeHeightAdvantage = other->m_attributeHeightAdvantage;
+    m_aboveGroundHeight = other->m_aboveGroundHeight;
     m_groundPtsPtr = other->m_groundPtsPtr;
     m_ptsPtr = other->m_ptsPtr;
     m_clipBottom = other->m_clipBottom;
@@ -69,12 +66,16 @@ ReconstructedBuilding::ReconstructedBuilding(const roofer::Mesh& rooferMesh, con
 ReconstructedBuilding::ReconstructedBuilding(const nlohmann::json& poly)
         : Building(poly), m_attributeHeight(-global::largnum),
           m_attributeHeightAdvantage(Config::get().buildingHeightAttrAdv),
+          m_aboveGroundHeight(-global::largnum),
           m_groundPtsPtr(std::make_shared<Point_set_3 >()) {
+    // Check for the polygon ID attribute
     if (!Config::get().buildingUniqueId.empty() && poly["properties"].contains(Config::get().buildingUniqueId)) {
         m_id = poly["properties"][Config::get().buildingUniqueId].dump();
     } else {
         m_id = std::to_string(m_polyInternalID);
     }
+
+    // Check for the building height attribute
     if (poly["properties"].contains(Config::get().buildingHeightAttribute)) {
         if (poly["properties"][Config::get().buildingHeightAttribute].is_number()) {
             m_attributeHeight = poly["properties"][Config::get().buildingHeightAttribute];
@@ -84,6 +85,14 @@ ReconstructedBuilding::ReconstructedBuilding(const nlohmann::json& poly)
             m_attributeHeight = (double) poly["properties"][Config::get().floorAttribute] * Config::get().floorHeight;
         }
     }
+
+    // Check for the building base attribute
+    if (poly["properties"].contains(Config::get().buildingBaseHeightAttribute)) {
+        if (poly["properties"][Config::get().buildingBaseHeightAttribute].is_number()) {
+            m_aboveGroundHeight = poly["properties"][Config::get().buildingBaseHeightAttribute];
+        }
+    }
+
     if (!this->is_active()) { // It can only fail if the polygon is not simple
         this->mark_as_failed();
         Config::write_to_log("Failed to import building polygon ID:" + m_id
@@ -94,6 +103,7 @@ ReconstructedBuilding::ReconstructedBuilding(const nlohmann::json& poly)
 ReconstructedBuilding::ReconstructedBuilding(const Polygon_with_attr& poly)
         : Building(poly), m_attributeHeight(-global::largnum),
           m_attributeHeightAdvantage(Config::get().buildingHeightAttrAdv),
+          m_aboveGroundHeight(-global::largnum),
           m_groundPtsPtr(std::make_shared<Point_set_3 >()) {
     // Check for the polygon ID attribute
     auto idIt = poly.attributes.find(Config::get().buildingUniqueId);
@@ -102,6 +112,7 @@ ReconstructedBuilding::ReconstructedBuilding(const Polygon_with_attr& poly)
      } else {
         m_id = std::to_string(m_polyInternalID);
     }
+
     // Check for the building height attribute
     auto buildingHeightAttrIt = poly.attributes.find(Config::get().buildingHeightAttribute);
     auto numFloorsAttrIt = poly.attributes.find(Config::get().floorAttribute);
@@ -110,6 +121,13 @@ ReconstructedBuilding::ReconstructedBuilding(const Polygon_with_attr& poly)
     } else if (numFloorsAttrIt != poly.attributes.end()) { // Check for the number of floors attribute
         m_attributeHeight = std::stod(numFloorsAttrIt->second) * Config::get().floorHeight;
     }
+
+    // Check for the building base attribute
+    auto buildingBaseAttrIt = poly.attributes.find(Config::get().buildingBaseHeightAttribute);
+    if (buildingBaseAttrIt != poly.attributes.end()) {
+        m_aboveGroundHeight = std::stod(buildingBaseAttrIt->second);
+    }
+
     if (!this->is_active()) { // It can only fail if the polygon is not simple
         this->mark_as_failed();
         Config::write_to_log("Failed to import building polygon ID:" + m_id
@@ -156,9 +174,30 @@ void ReconstructedBuilding::calc_elevation() {
 void ReconstructedBuilding::reconstruct() {
     m_mesh.clear();
     assert(m_reconSettings);
+
+    //-- Check if reconstructing a part above the ground
+    doubleVec_t baseElevations; // local copy, simplest
+    m_isBaseAboveGround = false;
+    if (m_aboveGroundHeight <= 0.) {
+        baseElevations = m_groundElevations;
+    } else if (m_aboveGroundHeight > this->get_height()) {
+        Config::write_to_log("Building ID: " + this->get_id()
+                             + " Building base above ground attribute is higher than building elevation."
+                             + " Ignoring the above ground height attribute.");
+        baseElevations = m_groundElevations;
+    } else {
+        // Set all base elevations to the lifted height
+        const double liftedBaseElevation = this->ground_elevation() + m_aboveGroundHeight;
+        baseElevations.reserve(m_groundElevations.size());
+        for (const auto& groundRing : m_groundElevations) {
+            baseElevations.emplace_back(groundRing.size(), liftedBaseElevation);
+        }
+        m_isBaseAboveGround = true;
+    }
+
     //-- Check if reconstructing from height attribute takes precedence
     if (m_attributeHeightAdvantage) {
-        this->reconstruct_from_attribute();
+        this->reconstruct_from_attribute(baseElevations);
         return;
     }
 
@@ -174,7 +213,7 @@ void ReconstructedBuilding::reconstruct() {
     //-- Reconstruction fallbacks if there are no points belonging to the polygon
     if (!innerPts) {
         // reconstruct using attribute
-        if (this->reconstruct_again_from_attribute("Found no points belonging to the building")) {
+        if (this->reconstruct_again_from_attribute("Found no points belonging to the building", baseElevations)) {
             return;
         } else if (Config::get().reconstructFailed) { // fall back to minimum height if defined as an argument
             Config::write_to_log("Building ID:" + this->get_id()
@@ -204,12 +243,12 @@ void ReconstructedBuilding::reconstruct() {
         try {
             LoD22 lod22;
             if (m_reconSettings->lod == "2.2")
-                lod22.reconstruct(m_ptsPtr, m_groundPtsPtr, m_poly, m_groundElevations,
+                lod22.reconstruct(m_ptsPtr, m_groundPtsPtr, m_poly, baseElevations,
                                   LoD22::ReconstructionConfig()
                                           .lod(22)
                                           .lambda(m_reconSettings->complexityFactor));
             else
-                lod22.reconstruct(m_ptsPtr, m_groundPtsPtr, m_poly, m_groundElevations,
+                lod22.reconstruct(m_ptsPtr, m_groundPtsPtr, m_poly, baseElevations,
                                   LoD22::ReconstructionConfig()
                                   .lod(13)
                                   .lambda(m_reconSettings->complexityFactor)
@@ -275,7 +314,7 @@ void ReconstructedBuilding::reconstruct() {
             if (m_mesh.is_empty() ||
                 m_reconSettings->enforceValidity.empty() ||
                 m_reconSettings->enforceValidity == "lod1.2")
-                this->reconstruct_lod12();
+                this->reconstruct_lod12(baseElevations);
             else if (m_reconSettings->enforceValidity == "surface_wrap") // only alpha wrap if 1. mesh was reconstructed and 2. validity is enforced
                 this->alpha_wrap(m_reconSettings->relativeAlpha, m_reconSettings->relativeOffset);
             else
@@ -283,16 +322,16 @@ void ReconstructedBuilding::reconstruct() {
         }
     } else {
         // just reconstruct LoD12
-        this->reconstruct_lod12();
+        this->reconstruct_lod12(baseElevations);
     }
 
     if (Config::get().refineReconstructed) this->refine();
-    if (m_clipBottom || Config::get().intersectBuildingsTerrain) {
+    if ((m_clipBottom || Config::get() .intersectBuildingsTerrain) && !m_isBaseAboveGround) {
         this->force_building_terrain_intersection(5);
     }
 }
 
-void ReconstructedBuilding::reconstruct_lod12() {
+void ReconstructedBuilding::reconstruct_lod12(doubleVec_t& baseElevations) {
         m_mesh.clear();
         if (this->get_height() < Config::get().minHeight) { // elevation calculated here
             Config::write_to_log("Building ID: " + this->get_id()
@@ -300,7 +339,7 @@ void ReconstructedBuilding::reconstruct_lod12() {
                                  + std::to_string(Config::get().minHeight) + " m");
             m_elevation = this->ground_elevation() + Config::get().minHeight;
         }
-        LoD12 lod12(m_poly, m_groundElevations, m_elevation);
+        LoD12 lod12(m_poly, baseElevations, m_elevation);
         lod12.reconstruct(m_mesh);
 }
 
@@ -336,7 +375,7 @@ void ReconstructedBuilding::get_cityjson_semantics(nlohmann::json& g) const { //
     }
 }
 
-void ReconstructedBuilding::reconstruct_from_attribute() {
+void ReconstructedBuilding::reconstruct_from_attribute(doubleVec_t& baseElevations) {
     //-- Check attribute height
     if (m_attributeHeight <= 0) {
         this->mark_as_failed();
@@ -352,19 +391,19 @@ void ReconstructedBuilding::reconstruct_from_attribute() {
     } else {
         m_elevation = this->ground_elevation() + m_attributeHeight;
     }
-    LoD12 lod12HeightAttribute(m_poly, m_groundElevations, m_elevation);
+    LoD12 lod12HeightAttribute(m_poly, baseElevations, m_elevation);
     lod12HeightAttribute.reconstruct(m_mesh);
 
-    if (m_clipBottom || Config::get().intersectBuildingsTerrain) {
+    if ((m_clipBottom || Config::get() .intersectBuildingsTerrain) && !m_isBaseAboveGround) {
         this->force_building_terrain_intersection(5);
     }
 }
 
-bool ReconstructedBuilding::reconstruct_again_from_attribute(const std::string& reason) {
+bool ReconstructedBuilding::reconstruct_again_from_attribute(const std::string& reason, doubleVec_t& baseElevations) {
     if (m_attributeHeight > 0) {
         Config::write_to_log("Building ID: " + m_id + " Failed to reconstruct using point cloud. Reason: "
                              + reason + ". Reconstructing using height attribute from GeoJSON polygon.");
-        this->reconstruct_from_attribute();
+        this->reconstruct_from_attribute(baseElevations);
         return true;
     } else {
         return false;

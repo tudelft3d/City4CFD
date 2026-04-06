@@ -1,7 +1,7 @@
 /*
   City4CFD
  
-  Copyright (c) 2021-2025, 3D Geoinformation Research Group, TU Delft
+  Copyright (c) 2021-2026, 3D Geoinformation Research Group, TU Delft
 
   This file is part of City4CFD.
 
@@ -17,13 +17,8 @@
 
   You should have received a copy of the GNU Affero General Public License
   along with City4CFD.  If not, see <http://www.gnu.org/licenses/>.
-
-  For any information or further details about the use of City4CFD, contact
-  Ivan Pađen
-  <i.paden@tudelft.nl>
-  3D Geoinformation Research Group
-  Delft University of Technology
 */
+
 
 #include "Building.h"
 
@@ -40,16 +35,19 @@
 
 Building::Building()
         : PolyFeature(-1), m_elevation(-global::largnum), m_height(-global::largnum),
-          m_ptsPtr(std::make_shared<Point_set_3>()), m_hasFailed(false), m_reconSettings(nullptr) {}
+          m_ptsPtr(std::make_shared<Point_set_3>()), m_hasFailed(false), m_reconSettings(nullptr),
+          m_isBaseAboveGround(false){}
 
 Building::Building(const nlohmann::json& poly)
         : PolyFeature(poly, true, -1), m_elevation(-global::largnum), m_height(-global::largnum),
-          m_ptsPtr(std::make_shared<Point_set_3>()), m_hasFailed(false), m_reconSettings(nullptr) {}
+          m_ptsPtr(std::make_shared<Point_set_3>()), m_hasFailed(false), m_reconSettings(nullptr),
+          m_isBaseAboveGround(false){}
         // 'true' here to check for polygon simplicity
 
 Building::Building(const Polygon_with_attr& poly)
         : PolyFeature(poly, true, -1), m_elevation(-global::largnum), m_height(-global::largnum),
-          m_ptsPtr(std::make_shared<Point_set_3>()), m_hasFailed(false), m_reconSettings(nullptr) {}
+          m_ptsPtr(std::make_shared<Point_set_3>()), m_hasFailed(false), m_reconSettings(nullptr),
+          m_isBaseAboveGround(false){}
         // 'true' here to check for polygon simplicity
 
 void Building::insert_point(const Point_3& pt) {
@@ -305,6 +303,10 @@ double Building::sq_max_dim() {
     dims.emplace_back(m_elevation * m_elevation);
 
     return *(std::max_element(dims.begin(), dims.end()));
+}
+
+bool Building::is_above_ground() const {
+    return m_isBaseAboveGround;
 }
 
 PointSet3Ptr Building::get_points() const {

@@ -1,7 +1,7 @@
 /*
   City4CFD
  
-  Copyright (c) 2021-2025, 3D Geoinformation Research Group, TU Delft
+  Copyright (c) 2021-2026, 3D Geoinformation Research Group, TU Delft
 
   This file is part of City4CFD.
 
@@ -17,13 +17,8 @@
 
   You should have received a copy of the GNU Affero General Public License
   along with City4CFD.  If not, see <http://www.gnu.org/licenses/>.
-
-  For any information or further details about the use of City4CFD, contact
-  Ivan Pađen
-  <i.paden@tudelft.nl>
-  3D Geoinformation Research Group
-  Delft University of Technology
 */
+
 
 #include "Terrain.h"
 
@@ -67,8 +62,14 @@ void Terrain::prep_constraints(const PolyFeaturesPtr& features, Point_set_3& poi
     auto buildingPt = pointCloud.add_property_map<std::shared_ptr<Building>>("building_point", nullptr).first;
     for (auto& f : features) {
         if (!f->is_active()) continue;
+
         bool isBuilding = false;
-        if (f->get_class() == BUILDING) isBuilding = true;
+        if (f->get_class() == BUILDING){
+            isBuilding = true;
+            auto buildingPtr = std::static_pointer_cast<Building>(f);
+            if (buildingPtr->is_above_ground()) continue; // do not add footprints of buildings above ground
+        }
+
         int polyCount = 0;
         for (auto& ring : f->get_poly().rings()) {
             auto& elevations = f->get_ground_elevations();

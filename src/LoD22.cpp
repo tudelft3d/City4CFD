@@ -1,7 +1,7 @@
 /*
   City4CFD
-
-  Copyright (c) 2021-2025, 3D Geoinformation Research Group, TU Delft
+ 
+  Copyright (c) 2021-2026, 3D Geoinformation Research Group, TU Delft
 
   This file is part of City4CFD.
 
@@ -17,13 +17,8 @@
 
   You should have received a copy of the GNU Affero General Public License
   along with City4CFD.  If not, see <http://www.gnu.org/licenses/>.
-
-  For any information or further details about the use of City4CFD, contact
-  Ivan Pađen
-  <i.paden@tudelft.nl>
-  3D Geoinformation Research Group
-  Delft University of Technology
 */
+
 
 #include "LoD22.h"
 #include "Config.h"
@@ -50,7 +45,7 @@ LoD22::LoD22(roofer::Mesh rooferMesh) {
 void LoD22::reconstruct(const PointSet3Ptr& buildingPtsPtr,
                         const PointSet3Ptr& groundPtsPtr,
                         const Polygon_with_holes_2& footprint,
-                        const std::vector<std::vector<double>>& baseElevations,
+                        const doubleVec_t& baseElevations,
                         ReconstructionConfig config
                         ) {
 
@@ -180,7 +175,7 @@ const roofer::LinearRing& LoD22::get_footprint_from_mesh(const roofer::Mesh& roo
 }
 
 void LoD22::make_footprint_from_mesh(roofer::Mesh& rooferMesh, Polygon_with_holes_2& footprint,
-                                    std::vector<std::vector<double>>& baseElevations) const {
+                                    doubleVec_t& baseElevations) const {
     auto rooferNewFootprint = this->get_footprint_from_mesh(rooferMesh);
 
     footprint.rings().clear();
@@ -215,7 +210,7 @@ Polygon_with_holes_2 LoD22::get_footprint() const {
     return m_footprint;
 }
 
-std::vector<std::vector<double>> LoD22::get_base_elevations() const {
+doubleVec_t LoD22::get_base_elevations() const {
     if (m_baseElevations.empty()) throw city4cfd_error("No base elevations found!");
     return m_baseElevations;
 }
