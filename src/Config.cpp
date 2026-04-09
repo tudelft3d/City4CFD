@@ -88,12 +88,14 @@ void Config::set_config(nlohmann::json& j) {
                 for (auto& f : pc["point_cloud"])
                     point_cloud_files.push_back(f.get<std::string>());
             }
-            // Validate: all entries must be .las or .laz
+            // Validate: all entries must be .las or .laz and must exist
             for (const auto& f : point_cloud_files) {
                 std::string fl = f;
                 std::transform(fl.begin(), fl.end(), fl.begin(), ::tolower);
                 if (fl.size() < 4 || (fl.substr(fl.size()-4) != ".las" && fl.substr(fl.size()-4) != ".laz"))
                     throw city4cfd_error("point_cloud file '" + f + "' must be a .las or .laz file.");
+                if (!fs::exists(f))
+                    throw city4cfd_error("point_cloud file '" + f + "' not found.");
             }
             if (!point_cloud_files.empty() && (pc.contains("ground") || pc.contains("buildings")))
                 std::cout << "WARNING: 'point_cloud' key is set alongside legacy 'ground'/'buildings' keys. "

@@ -79,7 +79,7 @@ namespace jsonschema {
               ]
             },
             "terrain_las_classes": {
-              "description": "ASPRS classification codes routed to the terrain bucket (default [2])",
+              "description": "ASPRS classification codes routed to the terrain bucket, default [2]",
               "oneOf": [
                 {"type": "integer", "minimum": 0, "maximum": 255},
                 {
@@ -90,7 +90,7 @@ namespace jsonschema {
               ]
             },
             "building_las_classes": {
-              "description": "ASPRS classification codes routed to the buildings bucket (default [6])",
+              "description": "ASPRS classification codes routed to the buildings bucket default [6]",
               "oneOf": [
                 {"type": "integer", "minimum": 0, "maximum": 255},
                 {

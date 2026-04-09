@@ -128,9 +128,14 @@ void IO::read_and_split_point_clouds(const std::vector<std::string>& files,
     const double ty = -Config::get().pointOfInterest.y();
 
     std::size_t droppedCount = 0;
+    const std::size_t nFiles = files.size();
 
-    for (const auto& file : files) {
-        std::cout << "  Reading: " << file << std::flush;
+    for (std::size_t fi = 0; fi < nFiles; ++fi) {
+        const auto& file = files[fi];
+        if (nFiles > 1)
+            std::cout << "  [" << (fi + 1) << "/" << nFiles << "] " << file << std::flush;
+        else
+            std::cout << "  Reading: " << file << std::flush;
 
         LASreadOpener opener;
         opener.set_file_name(file.c_str());
