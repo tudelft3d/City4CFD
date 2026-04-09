@@ -32,7 +32,7 @@
 #include <CGAL/Polygon_mesh_processing/connected_components.h>
 #include <CGAL/Polygon_mesh_processing/transform.h>
 #include <CGAL/Polygon_mesh_processing/IO/polygon_mesh_io.h>
-#include <CGAL/IO/read_las_points.h>
+#include "lasreader.hpp"
 
 #include <ogrsf_frmts.h>
 
@@ -66,23 +66,37 @@ void IO::read_config(std::string& config_path) {
 }
 
 bool IO::read_point_cloud(std::string& file, Point_set_3& pc) {
-    std::ifstream ifile(file, std::ios_base::binary);
     if (IO::has_substr(file, ".las") || IO::has_substr(file, ".laz")) {
-        if (!CGAL::IO::read_LAS(ifile, pc.point_back_inserter())) {
-            throw city4cfd_error("Could not read point cloud file '" + file + "'.");
+        LASreadOpener lasreadopener;
+        lasreadopener.set_file_name(file.c_str());
+        lasreadopener.set_populate_header(true);
+        LASreader* lasreader = lasreadopener.open();
+        if (lasreader == nullptr)
+            throw city4cfd_error("Could not open point cloud file '" + file + "'.");
+
+        const double tx = -Config::get().pointOfInterest.x();
+        const double ty = -Config::get().pointOfInterest.y();
+
+        const I64 npts = lasreader->header.number_of_point_records;
+        if (npts > 0) pc.reserve(pc.size() + static_cast<std::size_t>(npts));
+
+        while (lasreader->read_point()) {
+            pc.insert(Point_3(lasreader->point.get_x() + tx,
+                              lasreader->point.get_y() + ty,
+                              lasreader->point.get_z()));
         }
+        lasreader->close();
+        delete lasreader;
     } else {
+        std::ifstream ifile(file, std::ios_base::binary);
         ifile >> pc;
+        const CGAL::Vector_3<EPICK> translate(-Config::get().pointOfInterest.x(),
+                                             -Config::get().pointOfInterest.y(),
+                                             0);
+        for (auto idx : pc) {
+            pc.point(idx) = pc.point(idx) + translate;
+        }
     }
-    CGAL::Aff_transformation_3<EPICK> translate(CGAL::TRANSLATION,
-                                                CGAL::Vector_3<EPICK>(-Config::get().pointOfInterest.x(),
-                                                                      -Config::get().pointOfInterest.y(),
-                                                                      0));
-    Point_set_3 transformPC;
-    for (auto it = pc.points().begin(); it != pc.points().end(); ++it) {
-        transformPC.insert(it->transform(translate));
-    }
-    pc = transformPC;
     return true;
 }
 
