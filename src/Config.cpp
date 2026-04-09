@@ -79,8 +79,51 @@ void Config::validate(nlohmann::json& j) {
 void Config::set_config(nlohmann::json& j) {
     //-- Point cloud configuration
     if (j.contains("point_clouds")) {
-        if (j["point_clouds"].contains("ground")) ground_xyz = j["point_clouds"]["ground"];
-        if (j["point_clouds"].contains("buildings")) buildings_xyz = j["point_clouds"]["buildings"];
+        auto& pc = j["point_clouds"];
+        // New unified path: "point_cloud" key (string or array of strings)
+        if (pc.contains("point_cloud")) {
+            if (pc["point_cloud"].is_string()) {
+                point_cloud_files.push_back(pc["point_cloud"].get<std::string>());
+            } else {
+                for (auto& f : pc["point_cloud"])
+                    point_cloud_files.push_back(f.get<std::string>());
+            }
+            // Validate: all entries must be .las or .laz
+            for (const auto& f : point_cloud_files) {
+                std::string fl = f;
+                std::transform(fl.begin(), fl.end(), fl.begin(), ::tolower);
+                if (fl.size() < 4 || (fl.substr(fl.size()-4) != ".las" && fl.substr(fl.size()-4) != ".laz"))
+                    throw city4cfd_error("point_cloud file '" + f + "' must be a .las or .laz file.");
+            }
+            if (!point_cloud_files.empty() && (pc.contains("ground") || pc.contains("buildings")))
+                std::cout << "WARNING: 'point_cloud' key is set alongside legacy 'ground'/'buildings' keys. "
+                             "Using 'point_cloud' path only." << std::endl;
+        } else {
+            // Legacy path
+            if (pc.contains("ground"))     ground_xyz     = pc["ground"];
+            if (pc.contains("buildings"))  buildings_xyz  = pc["buildings"];
+        }
+
+        // Classification codes (apply to both new and legacy paths when present)
+        auto parse_int_or_array = [](const nlohmann::json& val, std::set<int>& out) {
+            out.clear();
+            if (val.is_number_integer()) {
+                out.insert(val.get<int>());
+            } else {
+                for (auto& v : val) out.insert(v.get<int>());
+            }
+        };
+        if (pc.contains("terrain_las_classes"))
+            parse_int_or_array(pc["terrain_las_classes"], terrain_las_classes);
+        if (pc.contains("building_las_classes"))
+            parse_int_or_array(pc["building_las_classes"], building_las_classes);
+
+        // Validate: class sets must be disjoint
+        for (int c : terrain_las_classes) {
+            if (building_las_classes.count(c))
+                throw city4cfd_error("Class " + std::to_string(c) +
+                                     " appears in both terrain_las_classes and building_las_classes.");
+        }
     }
     //-- Domain setup
     pointOfInterest = Point_2(j["point_of_interest"][0], j["point_of_interest"][1]);

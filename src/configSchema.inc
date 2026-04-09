@@ -66,6 +66,39 @@ namespace jsonschema {
             },
             "buildings": {
               "type": "string"
+            },
+            "point_cloud": {
+              "description": "One LAS/LAZ file or an array of LAS/LAZ files; split by classification at read time",
+              "oneOf": [
+                {"type": "string"},
+                {
+                  "type": "array",
+                  "items": {"type": "string"},
+                  "minItems": 1
+                }
+              ]
+            },
+            "terrain_las_classes": {
+              "description": "ASPRS classification codes routed to the terrain bucket (default [2])",
+              "oneOf": [
+                {"type": "integer", "minimum": 0, "maximum": 255},
+                {
+                  "type": "array",
+                  "items": {"type": "integer", "minimum": 0, "maximum": 255},
+                  "minItems": 1
+                }
+              ]
+            },
+            "building_las_classes": {
+              "description": "ASPRS classification codes routed to the buildings bucket (default [6])",
+              "oneOf": [
+                {"type": "integer", "minimum": 0, "maximum": 255},
+                {
+                  "type": "array",
+                  "items": {"type": "integer", "minimum": 0, "maximum": 255},
+                  "minItems": 1
+                }
+              ]
             }
           },
           "additionalProperties": false
@@ -399,7 +432,20 @@ namespace jsonschema {
         {
           "anyOf": [
             {
-              "description": "Input for buildings can be point cloud, reconstructed buildings, attribute and their combination",
+              "description": "New unified path: point_cloud key with classification split",
+              "required": ["point_clouds"],
+              "properties": {
+                "point_clouds": {"required": ["point_cloud"]},
+                "polygons": {
+                  "contains": {
+                    "type": "object",
+                    "properties": {"type": {"const": "Building"}}
+                  }
+                }
+              }
+            },
+            {
+              "description": "Legacy path: separate ground and buildings files",
               "required": ["point_clouds"],
               "properties": {
                 "point_clouds": {"required": ["buildings"]},

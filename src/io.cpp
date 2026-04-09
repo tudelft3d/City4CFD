@@ -100,6 +100,77 @@ bool IO::read_point_cloud(std::string& file, Point_set_3& pc) {
     return true;
 }
 
+void IO::read_and_split_point_clouds(const std::vector<std::string>& files,
+                                     Point_set_3& terrain,
+                                     Point_set_3& buildings,
+                                     const PointCloudReadOptions& opts) {
+    if (files.empty()) return;
+
+    // Pre-pass: sum point counts across all files for a single reserve call.
+    std::size_t totalPts = 0;
+    for (const auto& file : files) {
+        LASreadOpener opener;
+        opener.set_file_name(file.c_str());
+        opener.set_populate_header(true);
+        LASreader* r = opener.open();
+        if (r == nullptr)
+            throw city4cfd_error("Could not open point cloud file '" + file + "'.");
+        totalPts += static_cast<std::size_t>(r->header.number_of_point_records);
+        r->close();
+        delete r;
+    }
+    if (totalPts > 0) {
+        terrain.reserve(terrain.size() + totalPts);
+        buildings.reserve(buildings.size() + totalPts);
+    }
+
+    const double tx = -Config::get().pointOfInterest.x();
+    const double ty = -Config::get().pointOfInterest.y();
+
+    std::size_t droppedCount = 0;
+
+    for (const auto& file : files) {
+        std::cout << "  Reading: " << file << std::flush;
+
+        LASreadOpener opener;
+        opener.set_file_name(file.c_str());
+        LASreader* lasreader = opener.open();
+        if (lasreader == nullptr)
+            throw city4cfd_error("Could not open point cloud file '" + file + "'.");
+
+        std::size_t fileTerrain = 0, fileBuildings = 0, fileDropped = 0;
+
+        while (lasreader->read_point()) {
+            const int cls = static_cast<int>(lasreader->point.get_classification());
+            const Point_3 p(lasreader->point.get_x() + tx,
+                            lasreader->point.get_y() + ty,
+                            lasreader->point.get_z());
+
+            if (opts.terrain_classes.count(cls)) {
+                terrain.insert(p);
+                ++fileTerrain;
+            } else if (opts.building_classes.count(cls)) {
+                buildings.insert(p);
+                ++fileBuildings;
+            } else {
+                ++fileDropped;
+            }
+        }
+        lasreader->close();
+        delete lasreader;
+
+        droppedCount += fileDropped;
+        std::cout << "  ->  terrain: " << fileTerrain
+                  << "  buildings: " << fileBuildings
+                  << "  dropped (other class): " << fileDropped << std::endl;
+    }
+
+    if (droppedCount > 0) {
+        std::cout << "  Total points dropped (class not in terrain or building sets): "
+                  << droppedCount << std::endl;
+    }
+}
+
 void IO::read_geojson_polygons(std::string& file, JsonVectorPtr& jsonPolygons) {
     try {
         std::ifstream ifs(file);

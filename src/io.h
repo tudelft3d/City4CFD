@@ -26,7 +26,22 @@
 #include "types.h"
 #include "CGALTypes.h"
 
+#include <set>
+
 namespace IO {
+
+    struct PointCloudReadOptions {
+        std::set<int> terrain_classes  = {2};   // ASPRS codes routed to terrain bucket
+        std::set<int> building_classes = {6};   // ASPRS codes routed to buildings bucket
+    };
+
+    // Streaming LAS/LAZ reader with classification split.
+    // Each file is streamed in sequence into the shared terrain/buildings containers.
+    void read_and_split_point_clouds(const std::vector<std::string>& files,
+                                     Point_set_3& terrain,
+                                     Point_set_3& buildings,
+                                     const PointCloudReadOptions& opts);
+
     //-- Input functions
     void read_config(std::string& config_path);
     bool read_point_cloud(std::string& file, Point_set_3& pc);
