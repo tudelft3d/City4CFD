@@ -119,6 +119,8 @@ void Config::set_config(nlohmann::json& j) {
             parse_int_or_array(pc["terrain_las_classes"], terrain_las_classes);
         if (pc.contains("building_las_classes"))
             parse_int_or_array(pc["building_las_classes"], building_las_classes);
+        if (pc.contains("building_pc_footprint_buffer"))
+            buildingPCFootprintBuffer = pc["building_pc_footprint_buffer"];
 
         // Validate: class sets must be disjoint
         for (int c : terrain_las_classes) {

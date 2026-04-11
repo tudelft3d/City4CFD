@@ -323,7 +323,7 @@ void PointCloud::buffer_flat_edges(const PolyFeaturesPtr& avgFeatures,
     }
 }
 
-void PointCloud::read_point_clouds() {
+void PointCloud::read_point_clouds(const IO::BuildingFootprintFilter& filter) {
     if (!Config::get().point_cloud_files.empty()) {
         //-- New unified path: single or multiple LAS/LAZ files split by classification
         std::cout << "Reading point cloud(s) with classification split" << std::endl;
@@ -331,6 +331,7 @@ void PointCloud::read_point_clouds() {
         IO::PointCloudReadOptions opts;
         opts.terrain_classes  = Config::get().terrain_las_classes;
         opts.building_classes = Config::get().building_las_classes;
+        opts.filter           = filter.empty() ? nullptr : &filter;
 
         IO::read_and_split_point_clouds(Config::get().point_cloud_files,
                                         m_pointCloudTerrain,

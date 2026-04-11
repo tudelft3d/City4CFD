@@ -575,8 +575,16 @@ void Map3d::read_data() {
         }
     }
 
+    //-- Build footprint filter for the new unified point cloud path.
+    //   Built here (after polygons are loaded, before reads) so it's ready for the hot loop.
+    IO::BuildingFootprintFilter footprintFilter;
+    if (!Config::get().point_cloud_files.empty() && !m_polygonsBuildings.empty()) {
+        std::cout << "\nBuilding footprint filter" << std::endl;
+        footprintFilter.build(m_polygonsBuildings, Config::get().buildingPCFootprintBuffer);
+    }
+
     //-- Read point clouds
-    m_pointCloud.read_point_clouds();
+    m_pointCloud.read_point_clouds(footprintFilter);
 }
 
 void Map3d::output() {

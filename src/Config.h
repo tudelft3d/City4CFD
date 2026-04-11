@@ -54,9 +54,10 @@ public:
 
     //-- Input info
     // New unified path: one or more LAS/LAZ files, split by classification at read time.
-    std::vector<std::string> point_cloud_files;      // from "point_cloud" key (string or array)
+    std::vector<std::string> point_cloud_files;              // from "point_cloud" key (string or array)
     std::set<int>            terrain_las_classes     = {2};  // ASPRS codes for terrain
     std::set<int>            building_las_classes    = {6};  // ASPRS codes for buildings
+    double                   buildingPCFootprintBuffer = 1.0; // metres; footprint dilation for filter
     // Legacy two-file path
     std::string              ground_xyz;             // Ground points
     std::string              buildings_xyz;          // Building points

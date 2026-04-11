@@ -23,10 +23,16 @@
 #include "io.h"
 
 #include "Config.h"
+#include "geomutils.h"
 #include "TopoFeature.h"
 #include "Boundary.h"
 #include "Building.h"
 #include "SurfaceLayer.h"
+
+#include <boost/geometry/geometries/point.hpp>
+#include <boost/geometry/geometries/box.hpp>
+#include <boost/geometry/index/rtree.hpp>
+#include <boost/geometry/strategies/index/cartesian.hpp>
 
 #include <CGAL/Polygon_mesh_processing/compute_normal.h>
 #include <CGAL/Polygon_mesh_processing/connected_components.h>
@@ -38,7 +44,65 @@
 
 #include <boost/algorithm/string.hpp>
 
-//-- Input functions
+// ---- BuildingFootprintFilter ------------------------------------------------
+
+namespace {
+    namespace bg  = boost::geometry;
+    namespace bgi = boost::geometry::index;
+    typedef bg::model::point<double, 2, bg::cs::cartesian> BgPt;
+    typedef bg::model::box<BgPt>             BgBox;
+    typedef std::pair<BgBox, std::size_t>    BgVal;
+    typedef bgi::rtree<BgVal, bgi::quadratic<16>> BgRtree;
+}
+
+struct IO::BuildingFootprintFilter::Impl {
+    std::vector<Polygon_2> polygons;
+    BgRtree                rtree;
+};
+
+IO::BuildingFootprintFilter::BuildingFootprintFilter()
+    : m_impl(std::make_unique<Impl>()) {}
+
+IO::BuildingFootprintFilter::~BuildingFootprintFilter() = default;
+
+void IO::BuildingFootprintFilter::build(const PolyVecPtr& polygons, double buffer) {
+    m_impl->polygons.reserve(polygons.size());
+    for (const auto& polyAttr : polygons) {
+        const Polygon_2& outer = polyAttr->polygon.outer_boundary();
+        if (outer.size() < 3) continue;
+        try {
+            Polygon_2 buffered = geomutils::offset_polygon_geos(outer, buffer);
+            if (buffered.is_empty()) continue;
+            auto bb = buffered.bbox();
+            BgBox box(BgPt(bb.xmin(), bb.ymin()), BgPt(bb.xmax(), bb.ymax()));
+            m_impl->rtree.insert({box, m_impl->polygons.size()});
+            m_impl->polygons.push_back(std::move(buffered));
+        } catch (...) {
+            // Skip degenerate polygons — the point simply won't be filtered against them.
+        }
+    }
+    std::cout << "    Footprint filter: " << m_impl->polygons.size()
+              << " footprints indexed (buffer: " << buffer << " m)" << std::endl;
+}
+
+bool IO::BuildingFootprintFilter::contains(double x, double y) const {
+    BgPt pt(x, y);
+    std::vector<BgVal> candidates;
+    m_impl->rtree.query(bgi::intersects(BgBox(pt, pt)), std::back_inserter(candidates));
+    const Point_2 cgalPt(x, y);
+    for (const auto& [box, idx] : candidates) {
+        if (geomutils::point_in_poly_and_boundary(cgalPt, m_impl->polygons[idx]))
+            return true;
+    }
+    return false;
+}
+
+bool IO::BuildingFootprintFilter::empty() const {
+    return m_impl->polygons.empty();
+}
+
+// ---- Input functions --------------------------------------------------------
+
 void IO::read_config(std::string& config_path) {
     std::ifstream json_file(config_path);
     if (!json_file)
@@ -144,19 +208,28 @@ void IO::read_and_split_point_clouds(const std::vector<std::string>& files,
             throw city4cfd_error("Could not open point cloud file '" + file + "'.");
 
         std::size_t fileTerrain = 0, fileBuildings = 0, fileDropped = 0;
+        std::size_t fileTerrainFiltered = 0, fileBuildingsFiltered = 0;
 
         while (lasreader->read_point()) {
-            const int cls = static_cast<int>(lasreader->point.get_classification());
-            const Point_3 p(lasreader->point.get_x() + tx,
-                            lasreader->point.get_y() + ty,
-                            lasreader->point.get_z());
+            const int    cls = static_cast<int>(lasreader->point.get_classification());
+            const double px  = lasreader->point.get_x() + tx;
+            const double py  = lasreader->point.get_y() + ty;
+            const Point_3 p(px, py, lasreader->point.get_z());
 
             if (opts.terrain_classes.count(cls)) {
-                terrain.insert(p);
-                ++fileTerrain;
+                if (opts.filter && opts.filter->contains(px, py)) {
+                    ++fileTerrainFiltered;   // ground inside footprint — drop
+                } else {
+                    terrain.insert(p);
+                    ++fileTerrain;
+                }
             } else if (opts.building_classes.count(cls)) {
-                buildings.insert(p);
-                ++fileBuildings;
+                if (opts.filter && !opts.filter->contains(px, py)) {
+                    ++fileBuildingsFiltered; // building point outside footprint — drop
+                } else {
+                    buildings.insert(p);
+                    ++fileBuildings;
+                }
             } else {
                 ++fileDropped;
             }
@@ -167,7 +240,11 @@ void IO::read_and_split_point_clouds(const std::vector<std::string>& files,
         droppedCount += fileDropped;
         std::cout << "  ->  terrain: " << fileTerrain
                   << "  buildings: " << fileBuildings
-                  << "  dropped (other class): " << fileDropped << std::endl;
+                  << "  dropped (other class): " << fileDropped;
+        if (opts.filter)
+            std::cout << "  terrain-in-footprint: " << fileTerrainFiltered
+                      << "  buildings-outside-footprint: " << fileBuildingsFiltered;
+        std::cout << std::endl;
     }
 
     if (droppedCount > 0) {

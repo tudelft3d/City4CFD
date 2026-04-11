@@ -99,6 +99,11 @@ namespace jsonschema {
                   "minItems": 1
                 }
               ]
+            },
+            "building_pc_footprint_buffer": {
+              "description": "Metres to dilate building footprints for point filter, default 1.0",
+              "type": "number",
+              "exclusiveMinimum": 0
             }
           },
           "additionalProperties": false
