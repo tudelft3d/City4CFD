@@ -134,7 +134,8 @@ bool IO::read_point_cloud(std::string& file, Point_set_3& pc) {
         LASreadOpener lasreadopener;
         lasreadopener.set_file_name(file.c_str());
         lasreadopener.set_populate_header(true);
-        LASreader* lasreader = lasreadopener.open();
+        auto lasDeleter = [](LASreader* r) { r->close(); delete r; };
+        std::unique_ptr<LASreader, decltype(lasDeleter)> lasreader(lasreadopener.open(), lasDeleter);
         if (lasreader == nullptr)
             throw city4cfd_error("Could not open point cloud file '" + file + "'.");
 
@@ -149,8 +150,6 @@ bool IO::read_point_cloud(std::string& file, Point_set_3& pc) {
                               lasreader->point.get_y() + ty,
                               lasreader->point.get_z()));
         }
-        lasreader->close();
-        delete lasreader;
     } else {
         std::ifstream ifile(file, std::ios_base::binary);
         ifile >> pc;
@@ -203,7 +202,8 @@ void IO::read_and_split_point_clouds(const std::vector<std::string>& files,
 
         LASreadOpener opener;
         opener.set_file_name(file.c_str());
-        LASreader* lasreader = opener.open();
+        auto lasDeleter = [](LASreader* r) { r->close(); delete r; };
+        std::unique_ptr<LASreader, decltype(lasDeleter)> lasreader(opener.open(), lasDeleter);
         if (lasreader == nullptr)
             throw city4cfd_error("Could not open point cloud file '" + file + "'.");
 
@@ -234,8 +234,6 @@ void IO::read_and_split_point_clouds(const std::vector<std::string>& files,
                 ++fileDropped;
             }
         }
-        lasreader->close();
-        delete lasreader;
 
         droppedCount += fileDropped;
         std::cout << "  ->  terrain: " << fileTerrain
