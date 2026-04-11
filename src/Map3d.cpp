@@ -235,8 +235,10 @@ void Map3d::add_building_pts() {
 
 void Map3d::remove_extra_terrain_pts() {
     std::cout << "\nRemoving extra terrain points" << std::endl;
-    //-- Handle terrain points that lay in buildings
-    m_pointCloud.terrain_points_in_polygon(m_buildingsPtr);
+    if (Config::get().point_cloud_files.empty()) {
+        //-- Legacy path: footprint filter was not applied at read time, run quadtree pass now
+        m_pointCloud.terrain_points_in_polygon(m_buildingsPtr);
+    }
     //-- Update DT for interpolation
     m_dt.clear();
     m_dt.insert(m_pointCloud.get_terrain().points().begin(),
