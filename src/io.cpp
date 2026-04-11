@@ -190,6 +190,16 @@ void IO::read_and_split_point_clouds(const std::vector<std::string>& files,
     const double tx = -Config::get().pointOfInterest.x();
     const double ty = -Config::get().pointOfInterest.y();
 
+    const bool doThinning = opts.keep_every_nth > 0 || opts.drop_every_nth > 0;
+    std::size_t terrainCounter = 0; // persists across files so stride is consistent
+
+    if (opts.keep_every_nth > 0)
+        std::cout << "\n  Terrain thinning: keeping every " << opts.keep_every_nth
+                  << " point(s)" << std::endl;
+    else if (opts.drop_every_nth > 0)
+        std::cout << "\n  Terrain thinning: dropping every " << opts.drop_every_nth
+                  << " point(s)" << std::endl;
+
     std::size_t droppedCount = 0;
     const std::size_t nFiles = files.size();
 
@@ -208,7 +218,7 @@ void IO::read_and_split_point_clouds(const std::vector<std::string>& files,
             throw city4cfd_error("Could not open point cloud file '" + file + "'.");
 
         std::size_t fileTerrain = 0, fileBuildings = 0, fileDropped = 0;
-        std::size_t fileTerrainFiltered = 0, fileBuildingsFiltered = 0;
+        std::size_t fileTerrainFiltered = 0, fileBuildingsFiltered = 0, fileTerrainThinned = 0;
 
         while (lasreader->read_point()) {
             const int    cls = static_cast<int>(lasreader->point.get_classification());
@@ -217,7 +227,11 @@ void IO::read_and_split_point_clouds(const std::vector<std::string>& files,
             const Point_3 p(px, py, lasreader->point.get_z());
 
             if (opts.terrain_classes.count(cls)) {
-                if (opts.filter && opts.filter->contains(px, py)) {
+                if (doThinning && (opts.keep_every_nth > 0
+                        ? (terrainCounter++ % opts.keep_every_nth != 0)
+                        : (terrainCounter++ % opts.drop_every_nth == 0))) {
+                    ++fileTerrainThinned;    // stride thinned
+                } else if (opts.filter && opts.filter->contains(px, py)) {
                     ++fileTerrainFiltered;   // ground inside footprint — drop
                 } else {
                     terrain.insert(p);
@@ -239,6 +253,8 @@ void IO::read_and_split_point_clouds(const std::vector<std::string>& files,
         std::cout << "  ->  terrain: " << fileTerrain
                   << "  buildings: " << fileBuildings
                   << "  dropped (other class): " << fileDropped;
+        if (doThinning)
+            std::cout << "  terrain-thinned: " << fileTerrainThinned;
         if (opts.filter)
             std::cout << "  terrain-in-footprint: " << fileTerrainFiltered
                       << "  buildings-outside-footprint: " << fileBuildingsFiltered;

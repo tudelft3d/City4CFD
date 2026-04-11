@@ -79,6 +79,8 @@ public:
     //-- Reconstruction
     //- Terrain
     double    terrainThinning                   = 0.;
+    int       keepEveryNthTerrain               = 0;  // new streaming path: keep 1 in N terrain points
+    int       dropEveryNthTerrain               = 0;  // new streaming path: drop 1 in N terrain points
     bool      smoothTerrain                     = false;
     int       nSmoothIterations                 = 0;
     int       maxSmoothPts                      = -9999;

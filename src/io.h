@@ -57,6 +57,8 @@ namespace IO {
         std::set<int> terrain_classes  = {2};   // ASPRS codes routed to terrain bucket
         std::set<int> building_classes = {6};   // ASPRS codes routed to buildings bucket
         const BuildingFootprintFilter* filter  = nullptr; // nullable; applied in hot loop
+        std::size_t keep_every_nth = 0; // 0 = disabled; keep 1 in N terrain points, drop the rest
+        std::size_t drop_every_nth = 0; // 0 = disabled; drop 1 in N terrain points, keep the rest
     };
 
     // Streaming LAS/LAZ reader with classification split.

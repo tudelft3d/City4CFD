@@ -104,6 +104,16 @@ namespace jsonschema {
               "description": "Metres to dilate building footprints for point filter, default 1.0",
               "type": "number",
               "exclusiveMinimum": 0
+            },
+            "keep_every_nth_terrain": {
+              "description": "Keep 1 in every N terrain points, drop the rest (e.g. 10 keeps 10%). Mutually exclusive with drop_every_nth_terrain.",
+              "type": "integer",
+              "minimum": 2
+            },
+            "drop_every_nth_terrain": {
+              "description": "Drop 1 in every N terrain points, keep the rest (e.g. 10 drops 10%). Mutually exclusive with keep_every_nth_terrain.",
+              "type": "integer",
+              "minimum": 2
             }
           },
           "additionalProperties": false

@@ -121,6 +121,13 @@ void Config::set_config(nlohmann::json& j) {
             parse_int_or_array(pc["building_las_classes"], building_las_classes);
         if (pc.contains("building_pc_footprint_buffer"))
             buildingPCFootprintBuffer = pc["building_pc_footprint_buffer"];
+        if (pc.contains("keep_every_nth_terrain"))
+            keepEveryNthTerrain = pc["keep_every_nth_terrain"];
+        if (pc.contains("drop_every_nth_terrain"))
+            dropEveryNthTerrain = pc["drop_every_nth_terrain"];
+        if (keepEveryNthTerrain > 0 && dropEveryNthTerrain > 0)
+            throw city4cfd_error("'keep_every_nth_terrain' and 'drop_every_nth_terrain' "
+                                 "are mutually exclusive; set only one.");
 
         // Validate: class sets must be disjoint
         for (int c : terrain_las_classes) {

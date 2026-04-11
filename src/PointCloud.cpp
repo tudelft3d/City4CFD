@@ -329,9 +329,11 @@ void PointCloud::read_point_clouds(const IO::BuildingFootprintFilter& filter) {
         std::cout << "Reading point cloud(s) with classification split" << std::endl;
 
         IO::PointCloudReadOptions opts;
-        opts.terrain_classes  = Config::get().terrain_las_classes;
-        opts.building_classes = Config::get().building_las_classes;
-        opts.filter           = filter.empty() ? nullptr : &filter;
+        opts.terrain_classes   = Config::get().terrain_las_classes;
+        opts.building_classes  = Config::get().building_las_classes;
+        opts.filter            = filter.empty() ? nullptr : &filter;
+        opts.keep_every_nth    = static_cast<std::size_t>(Config::get().keepEveryNthTerrain);
+        opts.drop_every_nth    = static_cast<std::size_t>(Config::get().dropEveryNthTerrain);
 
         IO::read_and_split_point_clouds(Config::get().point_cloud_files,
                                         m_pointCloudTerrain,

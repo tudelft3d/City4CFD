@@ -173,7 +173,10 @@ void Map3d::set_features() {
         m_pointCloud.create_flat_terrain(m_allFeaturesPtr, Config::get().flatTerrainElevation);
         Config::get().flatTerrain = false; // all points are already at flat terrain elevation
     } else {
-        m_pointCloud.random_thin_pts();
+        // On the new streaming path, thinning was already applied at read time.
+        // On the legacy two-file path, apply the post-read thinning pass as before.
+        if (Config::get().point_cloud_files.empty())
+            m_pointCloud.random_thin_pts();
     }
     if (Config::get().flatTerrain) std::cout << "\nINFO: Reconstructing with flat terrain" << std::endl;
 
