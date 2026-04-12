@@ -27,8 +27,11 @@
 
 #include <boost/geometry/geometries/point.hpp>
 #include <boost/geometry/geometries/box.hpp>
+#include <boost/version.hpp>
 #include <boost/geometry/index/rtree.hpp>
+#if BOOST_VERSION >= 107800
 #include <boost/geometry/strategies/index/cartesian.hpp>
+#endif
 
 #include <iostream>
 
@@ -131,13 +134,14 @@ bool BuildingFootprintFilter::collect_building_point(double x, double y, const P
     std::vector<BgVal> candidates;
     m_impl->rtree.query(bgi::intersects(BgBox(bgPt, bgPt)), std::back_inserter(candidates));
     const Point_2 cgalPt(x, y);
+    bool accepted = false;
     for (const auto& [box, idx] : candidates) {
         if (geomutils::point_in_poly_and_boundary(cgalPt, m_impl->entries[idx].polygon)) {
             m_impl->entries[idx].bucket.push_back(pt);
-            return true;
+            accepted = true;
         }
     }
-    return false;
+    return accepted;
 }
 
 const std::vector<BuildingFootprintFilter::PolygonEntry>&
