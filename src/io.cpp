@@ -160,7 +160,7 @@ void IO::read_and_split_point_clouds(const std::vector<std::string>& files,
             const double py  = lasreader->point.get_y() + ty;
             const Point_3 p(px, py, lasreader->point.get_z());
 
-            if (opts.terrain_classes.count(cls)) {
+            if (opts.terrain_classes.contains(cls)) {
                 if (doThinning && (opts.keep_every_nth > 0
                         ? (terrainCounter++ % opts.keep_every_nth != 0)
                         : (terrainCounter++ % opts.drop_every_nth == 0))) {
@@ -169,7 +169,7 @@ void IO::read_and_split_point_clouds(const std::vector<std::string>& files,
                     terrain.insert(p);
                     ++fileTerrain;
                 }
-            } else if (opts.building_classes.count(cls)) {
+            } else if (opts.building_classes.contains(cls)) {
                 if (opts.filter) {
                     // Route into the per-footprint bucket; drop as stray if outside every footprint.
                     if (opts.filter->collect_building_point(px, py, p))
@@ -507,10 +507,10 @@ void IO::output_obj(const OutputFeaturesPtr& allFeatures) {
                     dPts.emplace_back();
                     std::string buildingName = "Building_" + f->get_id();
                     // handle duplicated ids
-                    if (usedBuildingIDs.count(buildingName)) {
+                    if (usedBuildingIDs.contains(buildingName)) {
                         int suffix = 1;
                         std::string base = buildingName;
-                        while (usedBuildingIDs.count(buildingName))
+                        while (usedBuildingIDs.contains(buildingName))
                             buildingName = base + "_" + std::to_string(suffix++);
                         Config::write_to_log("Building ID: " + f->get_id() + " already exists in OBJ output. Stored as: " + buildingName);
                     }
@@ -562,10 +562,10 @@ void IO::output_stl(const OutputFeaturesPtr& allFeatures) {
         if (Config::get().outputBuildingsSeparately && f->get_class() == BUILDING) {
             std::string buildingName = "Building_" + f->get_id();
             // handle duplicated ids
-            if (usedBuildingIDs.count(buildingName)) {
+            if (usedBuildingIDs.contains(buildingName)) {
                 int suffix = 1;
                 std::string base = buildingName;
-                while (usedBuildingIDs.count(buildingName))
+                while (usedBuildingIDs.contains(buildingName))
                     buildingName = base + "_" + std::to_string(suffix++);
                 Config::write_to_log("Building ID: " + f->get_id() + " already exists in STL output. Stored as: " + buildingName);
             }

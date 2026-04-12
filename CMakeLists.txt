@@ -79,7 +79,7 @@ FILE(GLOB SRC_FILES "src/*.cpp")
 add_executable(city4cfd ${SRC_FILES})
 set_target_properties(
         city4cfd
-        PROPERTIES CXX_STANDARD 17
+        PROPERTIES CXX_STANDARD 20
 )
 
 target_link_libraries(city4cfd
