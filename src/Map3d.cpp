@@ -206,42 +206,52 @@ void Map3d::set_features() {
 }
 
 void Map3d::add_building_pts() {
+    if (!Config::get().point_cloud_files.empty()) {
+        //-- New path: drain per-building buckets accumulated during read-time hot loop.
+        //   No SearchTree or PIP needed — routing was already done at read time.
+        if (m_reconstructedBuildingsPtr.empty()) return;
+        std::cout << "\nAttaching point cloud points to buildings" << std::endl;
+        std::size_t total = 0;
+        for (const auto& entry : m_footprintFilter.get_entries()) {
+            if (entry.original_index >= m_reconstructedBuildingsPtr.size()) continue;
+            auto& building = m_reconstructedBuildingsPtr[entry.original_index];
+            for (const Point_3& pt : entry.bucket)
+                building->insert_point(pt);
+            total += entry.bucket.size();
+        }
+        std::cout << "    Building points attached: " << total << std::endl;
+        m_footprintFilter.clear(); // release bucket memory
+        return;
+    }
+
+    //-- Legacy path: global Point_set_3 → footprint filter → per-building bucket drain
     if (m_pointCloud.get_buildings().empty() || m_reconstructedBuildingsPtr.empty()) return;
     std::cout << "\nAttaching point cloud points to buildings" << std::endl;
 
-    //-- Construct a search tree from all building points
-    SearchTree searchTree(m_pointCloud.get_buildings().points().begin(),
-                          m_pointCloud.get_buildings().points().end(),
-                          Config::get().searchtree_bucket_size);
+    BuildingFootprintFilter legacyFilter;
+    legacyFilter.build(m_reconstructedBuildingsPtr, 2.);
 
-    m_pointCloud.get_buildings().clear(); // release the loaded building point cloud from memory
+    for (auto it = m_pointCloud.get_buildings().begin();
+         it != m_pointCloud.get_buildings().end(); ++it) {
+        const auto& pt = m_pointCloud.get_buildings().point(*it);
+        legacyFilter.collect_building_point(pt.x(), pt.y(), pt);
+    }
+    m_pointCloud.get_buildings().clear();
 
-    //-- Find points belonging to individual buildings
-    for (auto& b: m_reconstructedBuildingsPtr) {
-        auto cgalPoly = b->get_poly().get_cgal_type();
-        auto poly = geomutils::offset_polygon_geos(cgalPoly, 2.);
-
-        std::vector<Point_3> subsetPts;
-        Point_2 bbox1(poly.bbox().xmin(), poly.bbox().ymin());
-        Point_2 bbox2(poly.bbox().xmax(), poly.bbox().ymax());
-        Fuzzy_iso_box pts_range(bbox1, bbox2);
-        searchTree.search(std::back_inserter(subsetPts), pts_range);
-
-        //-- Check if subset point lies inside the offset polygon
-        for (auto& pt : subsetPts) {
-            if (geomutils::point_in_poly_and_boundary(pt, poly)) {
-                b->insert_point(pt);
-            }
-        }
+    std::size_t total = 0;
+    for (const auto& entry : legacyFilter.get_entries()) {
+        auto& b = m_reconstructedBuildingsPtr[entry.original_index];
+        for (const Point_3& pt : entry.bucket)
+            b->insert_point(pt);
+        total += entry.bucket.size();
     }
 }
 
 void Map3d::remove_extra_terrain_pts() {
     std::cout << "\nRemoving extra terrain points" << std::endl;
-    if (Config::get().point_cloud_files.empty()) {
-        //-- Legacy path: footprint filter was not applied at read time, run quadtree pass now
-        m_pointCloud.terrain_points_in_polygon(m_buildingsPtr);
-    }
+    BuildingFootprintFilter filter;
+    filter.build(m_buildingsPtr, 0.);
+    m_pointCloud.terrain_points_in_polygon(filter);
     //-- Update DT for interpolation
     m_dt.clear();
     m_dt.insert(m_pointCloud.get_terrain().points().begin(),
@@ -582,14 +592,14 @@ void Map3d::read_data() {
 
     //-- Build footprint filter for the new unified point cloud path.
     //   Built here (after polygons are loaded, before reads) so it's ready for the hot loop.
-    IO::BuildingFootprintFilter footprintFilter;
+    //   Stored as a member so the per-building point buckets survive into reconstruct().
     if (!Config::get().point_cloud_files.empty() && !m_polygonsBuildings.empty()) {
         std::cout << "\nBuilding footprint filter" << std::endl;
-        footprintFilter.build(m_polygonsBuildings, Config::get().buildingPCFootprintBuffer);
+        m_footprintFilter.build(m_polygonsBuildings, Config::get().buildingPCFootprintBuffer);
     }
 
     //-- Read point clouds
-    m_pointCloud.read_point_clouds(footprintFilter);
+    m_pointCloud.read_point_clouds(m_footprintFilter);
 }
 
 void Map3d::output() {

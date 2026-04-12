@@ -77,6 +77,9 @@
 
         bool empty() const;
 
+        // Release all indexed polygons and collected buckets.
+        void clear();
+
     private:
         struct Impl;
         std::unique_ptr<Impl> m_impl;

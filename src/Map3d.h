@@ -27,6 +27,7 @@
 #include "CGALTypes.h"
 #include "BoundingRegion.h"
 #include "PointCloud.h"
+#include "io.h"
 
 class Map3d {
 public:
@@ -63,6 +64,8 @@ private:
     std::vector<BoundingRegion> m_reconRegions; // one influ region -> vector of reconstruction regions
     BoundingRegion              m_domainBnd;
     DT                          m_dt;
+
+    BuildingFootprintFilter m_footprintFilter; // built in read_data(), drained in add_building_pts()
 
     bool                        m_bndBPG         = false;
     bool                        m_cityjsonInput  = false;

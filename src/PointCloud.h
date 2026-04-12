@@ -29,7 +29,7 @@
 #include "lasreader.hpp"
 #include "CSF/src/CSF.h"
 
-namespace IO { class BuildingFootprintFilter; }
+#include "BuildingFootprintFilter.h"
 
 class PointCloud {
 public:
@@ -40,11 +40,11 @@ public:
     void create_flat_terrain(const PolyFeaturesPtr& lsFeatures, const double elevation = 0.);
     void set_flat_terrain(const double elevation = 0.);
     void smooth_terrain();
-    void terrain_points_in_polygon(BuildingsPtr& features);
+    void terrain_points_in_polygon(const BuildingFootprintFilter& filter);
     void flatten_polygon_pts(const PolyFeaturesPtr& lsFeatures, std::vector<EPECK::Segment_3>& constrainedEdges,
                              std::vector<std::pair<Polygon_with_holes_2, int>>& newPolys);
     void buffer_flat_edges(const PolyFeaturesPtr& avgFeatures, std::vector<EPECK::Segment_3>& constrainedEdges);
-    void read_point_clouds(const IO::BuildingFootprintFilter& filter);
+    void read_point_clouds(BuildingFootprintFilter& filter);
 
     Point_set_3& get_terrain();
     Point_set_3& get_buildings();

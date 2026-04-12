@@ -148,3 +148,8 @@ BuildingFootprintFilter::get_entries() const {
 bool BuildingFootprintFilter::empty() const {
     return m_impl->entries.empty();
 }
+
+void BuildingFootprintFilter::clear() {
+    m_impl->entries.clear();
+    m_impl->rtree.clear();
+}

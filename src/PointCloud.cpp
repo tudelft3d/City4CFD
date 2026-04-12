@@ -26,7 +26,6 @@
 #include "geomutils.h"
 #include "Config.h"
 #include "Building.h"
-#include "Quadtree/Quadtree.h"
 
 #include <CGAL/Polygon_mesh_processing/remesh.h>
 #include <CGAL/Polygon_mesh_processing/smooth_shape.h>
@@ -103,38 +102,13 @@ void PointCloud::smooth_terrain() {
     }
 }
 
-void PointCloud::terrain_points_in_polygon(BuildingsPtr& features) {
-    typedef Quadtree_node<EPICK, Point_set_3> Point_index;
-    Point_index pointCloudIndex;
+void PointCloud::terrain_points_in_polygon(const BuildingFootprintFilter& filter) {
+    if (filter.empty()) return;
     auto& pointCloud = m_pointCloudTerrain;
-
-    pointCloudIndex.compute_extent(pointCloud);
-    for (auto pointIndex = pointCloud.begin();
-         pointIndex != pointCloud.end();
-         ++pointIndex) {
-        pointCloudIndex.insert_point(pointCloud, *pointIndex);
-    }
-    pointCloudIndex.optimise(pointCloud, 100, 10);
-
-    //-- Find points belonging to individual buildings
-    for (auto& f: features) {
-        auto poly = f->get_poly().get_cgal_type();
-//        const double offset = 1.; // offset hardcoded
-//        auto offsetPoly = geomutils::offset_polygon_geos(poly, offset);
-        auto& offsetPoly = poly; // temp until terrain is included in buildings
-
-        std::vector<Point_index*> intersected_nodes;
-        pointCloudIndex.find_intersections(intersected_nodes, offsetPoly.bbox().xmin(), offsetPoly.bbox().xmax(),
-                                           offsetPoly.bbox().ymin(), offsetPoly.bbox().ymax());
-        for (auto const& node: intersected_nodes) {
-            for (auto const& pointIdx: node->points) {
-                if (geomutils::point_in_poly_and_boundary(pointCloud.point(pointIdx), poly)) {
-                    pointCloud.remove(pointIdx);
-                }
-                //todo temp add to building
-//                f->insert_terrain_point(pointCloud.point(pointIdx)); //use bbox for roofer
-            }
-        }
+    for (auto it = pointCloud.begin(); it != pointCloud.end(); ++it) {
+        const auto& p = pointCloud.point(*it);
+        if (filter.contains(p.x(), p.y()))
+            pointCloud.remove(*it);
     }
     pointCloud.collect_garbage();
 }
@@ -323,7 +297,7 @@ void PointCloud::buffer_flat_edges(const PolyFeaturesPtr& avgFeatures,
     }
 }
 
-void PointCloud::read_point_clouds(const IO::BuildingFootprintFilter& filter) {
+void PointCloud::read_point_clouds(BuildingFootprintFilter& filter) {
     if (!Config::get().point_cloud_files.empty()) {
         //-- New unified path: single or multiple LAS/LAZ files split by classification
         std::cout << "Reading point cloud(s) with classification split" << std::endl;
@@ -337,7 +311,6 @@ void PointCloud::read_point_clouds(const IO::BuildingFootprintFilter& filter) {
 
         IO::read_and_split_point_clouds(Config::get().point_cloud_files,
                                         m_pointCloudTerrain,
-                                        m_pointCloudBuildings,
                                         opts);
 
         if (m_pointCloudTerrain.empty()) {
@@ -348,9 +321,6 @@ void PointCloud::read_point_clouds(const IO::BuildingFootprintFilter& filter) {
         } else {
             std::cout << "    Terrain points: " << m_pointCloudTerrain.size() << std::endl;
         }
-        if (!m_pointCloudBuildings.empty())
-            std::cout << "    Building points: " << m_pointCloudBuildings.size() << std::endl;
-
     } else {
         //-- Legacy two-file path
         if (!Config::get().ground_xyz.empty()) {
