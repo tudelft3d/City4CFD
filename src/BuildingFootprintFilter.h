@@ -25,13 +25,12 @@
 
 #include "types.h"
 #include "CGALTypes.h"
+#include "PolyFeature.h"
 
 #include <memory>
 #include <vector>
 
-namespace IO {
-
-    // Spatial index over building footprint polygons.
+// Spatial index over building footprint polygons.
     // Used in two contexts:
     //   1. Read-time: routes building-class LAS points into per-footprint buckets and
     //      filters stray building points that fall outside every footprint.
@@ -52,8 +51,18 @@ namespace IO {
         // Build from raw polygon data (outer boundary of each entry, dilated by buffer m).
         void build(const PolyVecPtr& polygons, double buffer);
 
-        // Build from already-constructed building features (e.g. post-influence-region subset).
-        void build(const BuildingsPtr& buildings, double buffer);
+        // Build from a vector of shared_ptr to any PolyFeature-derived type (Building,
+        // ReconstructedBuilding, etc.).  buffer=0 skips the GEOS offset.
+        template<typename T>
+        void build(const std::vector<std::shared_ptr<T>>& features, double buffer) {
+            static_assert(std::is_base_of<PolyFeature, T>::value,
+                          "T must derive from PolyFeature");
+            std::vector<Polygon_2> polys;
+            polys.reserve(features.size());
+            for (const auto& f : features)
+                polys.push_back(f->get_poly().outer_boundary());
+            build_from_polygons(polys, buffer);
+        }
 
         // Returns true if (x, y) lies inside (or on the boundary of) any indexed footprint.
         bool contains(double x, double y) const;
@@ -71,8 +80,9 @@ namespace IO {
     private:
         struct Impl;
         std::unique_ptr<Impl> m_impl;
-    };
 
-} // namespace IO
+        // Common implementation used by the template build() overload.
+        void build_from_polygons(const std::vector<Polygon_2>& polys, double buffer);
+    };
 
 #endif //CITY4CFD_BUILDINGFOOTPRINTFILTER_H

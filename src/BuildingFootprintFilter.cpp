@@ -24,7 +24,6 @@
 
 #include "Config.h"
 #include "geomutils.h"
-#include "Building.h"
 
 #include <boost/geometry/geometries/point.hpp>
 #include <boost/geometry/geometries/box.hpp>
@@ -42,17 +41,17 @@ namespace {
     typedef bgi::rtree<BgVal, bgi::quadratic<16>> BgRtree;
 }
 
-struct IO::BuildingFootprintFilter::Impl {
+struct BuildingFootprintFilter::Impl {
     std::vector<PolygonEntry> entries; // one per successfully indexed footprint
     BgRtree                   rtree;   // R-tree value is index into entries
 };
 
-IO::BuildingFootprintFilter::BuildingFootprintFilter()
+BuildingFootprintFilter::BuildingFootprintFilter()
     : m_impl(std::make_unique<Impl>()) {}
 
-IO::BuildingFootprintFilter::~BuildingFootprintFilter() = default;
+BuildingFootprintFilter::~BuildingFootprintFilter() = default;
 
-void IO::BuildingFootprintFilter::build(const PolyVecPtr& polygons, double buffer) {
+void BuildingFootprintFilter::build(const PolyVecPtr& polygons, double buffer) {
     m_impl->entries.reserve(polygons.size());
     std::size_t skipped = 0;
     for (std::size_t srcIdx = 0; srcIdx < polygons.size(); ++srcIdx) {
@@ -93,19 +92,15 @@ void IO::BuildingFootprintFilter::build(const PolyVecPtr& polygons, double buffe
     std::cout << std::endl;
 }
 
-void IO::BuildingFootprintFilter::build(const BuildingsPtr& buildings, double buffer) {
-    m_impl->entries.reserve(buildings.size());
+void BuildingFootprintFilter::build_from_polygons(const std::vector<Polygon_2>& polys, double buffer) {
+    m_impl->entries.reserve(polys.size());
     std::size_t skipped = 0;
-    for (std::size_t i = 0; i < buildings.size(); ++i) {
-        const Polygon_2& outer = buildings[i]->get_poly().outer_boundary();
-        if (outer.size() < 3) {
-            ++skipped;
-            continue;
-        }
+    for (std::size_t i = 0; i < polys.size(); ++i) {
+        if (polys[i].size() < 3) { ++skipped; continue; }
         try {
             Polygon_2 buffered = (buffer > 0.)
-                ? geomutils::offset_polygon_geos(outer, buffer)
-                : outer;
+                ? geomutils::offset_polygon_geos(polys[i], buffer)
+                : polys[i];
             if (buffered.is_empty()) { ++skipped; continue; }
             auto bb = buffered.bbox();
             BgBox box(BgPt(bb.xmin(), bb.ymin()), BgPt(bb.xmax(), bb.ymax()));
@@ -116,10 +111,10 @@ void IO::BuildingFootprintFilter::build(const BuildingsPtr& buildings, double bu
         }
     }
     if (skipped > 0)
-        std::cout << "  [WARNING: " << skipped << " degenerate footprint(s) skipped during terrain filter build]" << std::endl;
+        std::cout << "  [WARNING: " << skipped << " degenerate footprint(s) skipped]" << std::endl;
 }
 
-bool IO::BuildingFootprintFilter::contains(double x, double y) const {
+bool BuildingFootprintFilter::contains(double x, double y) const {
     BgPt pt(x, y);
     std::vector<BgVal> candidates;
     m_impl->rtree.query(bgi::intersects(BgBox(pt, pt)), std::back_inserter(candidates));
@@ -131,7 +126,7 @@ bool IO::BuildingFootprintFilter::contains(double x, double y) const {
     return false;
 }
 
-bool IO::BuildingFootprintFilter::collect_building_point(double x, double y, const Point_3& pt) {
+bool BuildingFootprintFilter::collect_building_point(double x, double y, const Point_3& pt) {
     BgPt bgPt(x, y);
     std::vector<BgVal> candidates;
     m_impl->rtree.query(bgi::intersects(BgBox(bgPt, bgPt)), std::back_inserter(candidates));
@@ -145,11 +140,11 @@ bool IO::BuildingFootprintFilter::collect_building_point(double x, double y, con
     return false;
 }
 
-const std::vector<IO::BuildingFootprintFilter::PolygonEntry>&
-IO::BuildingFootprintFilter::get_entries() const {
+const std::vector<BuildingFootprintFilter::PolygonEntry>&
+BuildingFootprintFilter::get_entries() const {
     return m_impl->entries;
 }
 
-bool IO::BuildingFootprintFilter::empty() const {
+bool BuildingFootprintFilter::empty() const {
     return m_impl->entries.empty();
 }
