@@ -238,7 +238,7 @@ void Map3d::set_point_features(const BuildingFootprintFilter& filter) {
 void Map3d::remove_extra_terrain_pts() {
     std::cout << "\nRemoving extra terrain points" << std::endl;
     BuildingFootprintFilter filter;
-    filter.build(m_buildingsPtr, 0.);
+    filter.build(m_buildingsPtr);
     m_pointCloud.terrain_points_in_polygon(filter);
     //-- Update DT for interpolation
     m_dt.clear();

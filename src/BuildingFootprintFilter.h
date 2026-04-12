@@ -49,12 +49,12 @@
         ~BuildingFootprintFilter();   // defined in .cpp where Impl is complete
 
         // Build from raw polygon data (outer boundary of each entry, dilated by buffer m).
-        void build(const PolyVecPtr& polygons, double buffer);
+        void build(const PolyVecPtr& polygons, double buffer = 0.);
 
         // Build from a vector of shared_ptr to any PolyFeature-derived type (Building,
         // ReconstructedBuilding, etc.).  buffer=0 skips the GEOS offset.
         template<typename T>
-        void build(const std::vector<std::shared_ptr<T>>& features, double buffer) {
+        void build(const std::vector<std::shared_ptr<T>>& features, double buffer = 0.) {
             static_assert(std::is_base_of<PolyFeature, T>::value,
                           "T must derive from PolyFeature");
             std::vector<Polygon_2> polys;
