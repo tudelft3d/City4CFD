@@ -32,12 +32,6 @@
 #include "Top.h"
 
 void Map3d::reconstruct() {
-    //-- Prepare features
-    this->set_features();
-
-    //-- Attach points to buildings
-    this->add_building_pts();
-
     //-- Define influence region
     this->set_influ_region();
 
@@ -93,22 +87,20 @@ void Map3d::reconstruct() {
     if (Config::get().reconstructBoundaries) this->reconstruct_boundaries();
 }
 
-void Map3d::set_features() {
+void Map3d::set_polygon_features() {
     //-- First feature is the terrain
     m_terrainPtr = std::make_shared<Terrain>();
 
     //-- Add features - order in m_allFeaturesPtr defines the advantage in marking terrain polygons
     //- Buildings
-    // Handle the number of building output layers
     TopoFeature::add_recon_region_output_layers(Config::get().reconRegions.size());
-    // Initalize buildings
     for (auto& poly : m_polygonsBuildings) {
         auto building = std::make_shared<ReconstructedBuilding>(*poly);
         m_reconstructedBuildingsPtr.push_back(building);
         m_buildingsPtr.push_back(building);
         m_allFeaturesPtr.push_back(building);
     }
-    this->clear_inactives(); // Remove buildings that potentially couldn't be imported
+    this->clear_inactives(); // Remove buildings that potentially couldn't be constructed
     //- Imported buildings
     if (!m_importedBuildingsJSON.empty()) {
         std::cout << "Importing CityJSON geometries" << std::endl;
@@ -168,28 +160,7 @@ void Map3d::set_features() {
     }
     std::cout << "Polygons read: " << m_allFeaturesPtr.size() << std::endl;
 
-    //-- Set flat terrain or random thin terrain points
-    if (m_pointCloud.get_terrain().empty()) {
-        m_pointCloud.create_flat_terrain(m_allFeaturesPtr, Config::get().flatTerrainElevation);
-        Config::get().flatTerrain = false; // all points are already at flat terrain elevation
-    } else {
-        // On the new streaming path, thinning was already applied at read time.
-        // On the legacy two-file path, apply the post-read thinning pass as before.
-        if (Config::get().point_cloud_files.empty())
-            m_pointCloud.random_thin_pts();
-    }
-    if (Config::get().flatTerrain) std::cout << "\nINFO: Reconstructing with flat terrain" << std::endl;
-
-    //-- Smooth terrain
-    if (Config::get().smoothTerrain) {
-        m_pointCloud.smooth_terrain();
-    }
-    //-- Make a DT with inexact constructions for fast interpolation
-    m_dt.insert(m_pointCloud.get_terrain().points().begin(),
-                m_pointCloud.get_terrain().points().end());
-
     //-- Initialize bounding regions (reconstruction/influence and domain boundary)
-    //BPG flags for influ region and domain boundary
     for (auto& reconRegion : Config::get().reconRegions) {
         m_reconRegions.emplace_back(reconRegion);
     }
@@ -205,46 +176,63 @@ void Map3d::set_features() {
     }
 }
 
-void Map3d::add_building_pts() {
+void Map3d::set_point_features(const BuildingFootprintFilter& filter) {
+    //-- Attach point cloud points to buildings
     if (!Config::get().point_cloud_files.empty()) {
-        //-- New path: drain per-building buckets accumulated during read-time hot loop.
-        //   No SearchTree or PIP needed — routing was already done at read time.
-        if (m_reconstructedBuildingsPtr.empty()) return;
-        std::cout << "\nAttaching point cloud points to buildings" << std::endl;
-        std::size_t total = 0;
-        for (const auto& entry : m_footprintFilter.get_entries()) {
-            if (entry.original_index >= m_reconstructedBuildingsPtr.size()) continue;
-            auto& building = m_reconstructedBuildingsPtr[entry.original_index];
-            for (const Point_3& pt : entry.bucket)
-                building->insert_point(pt);
-            total += entry.bucket.size();
+        //-- New path: drain per-building buckets accumulated during the read-time hot loop.
+        if (!m_reconstructedBuildingsPtr.empty() && !filter.empty()) {
+            std::cout << "\nAttaching point cloud points to buildings" << std::endl;
+            std::size_t total = 0;
+            for (const auto& entry : filter.get_entries()) {
+                auto& building = m_reconstructedBuildingsPtr[entry.original_index];
+                for (const Point_3& pt : entry.bucket)
+                    building->insert_point(pt);
+                total += entry.bucket.size();
+            }
+            std::cout << "    Building points attached: " << total << std::endl;
         }
-        std::cout << "    Building points attached: " << total << std::endl;
-        m_footprintFilter.clear(); // release bucket memory
-        return;
+        // filter goes out of scope here — bucket memory released automatically
+    } else {
+        //-- Legacy path: global Point_set_3 → per-building filter → bucket drain
+        if (!m_pointCloud.get_buildings().empty() && !m_reconstructedBuildingsPtr.empty()) {
+            std::cout << "\nAttaching point cloud points to buildings" << std::endl;
+            BuildingFootprintFilter legacyFilter;
+            legacyFilter.build(m_reconstructedBuildingsPtr, 2.);
+            for (auto it = m_pointCloud.get_buildings().begin();
+                 it != m_pointCloud.get_buildings().end(); ++it) {
+                const auto& pt = m_pointCloud.get_buildings().point(*it);
+                legacyFilter.collect_building_point(pt.x(), pt.y(), pt);
+            }
+            m_pointCloud.get_buildings().clear();
+            std::size_t total = 0;
+            for (const auto& entry : legacyFilter.get_entries()) {
+                auto& b = m_reconstructedBuildingsPtr[entry.original_index];
+                for (const Point_3& pt : entry.bucket)
+                    b->insert_point(pt);
+                total += entry.bucket.size();
+            }
+        }
     }
 
-    //-- Legacy path: global Point_set_3 → footprint filter → per-building bucket drain
-    if (m_pointCloud.get_buildings().empty() || m_reconstructedBuildingsPtr.empty()) return;
-    std::cout << "\nAttaching point cloud points to buildings" << std::endl;
-
-    BuildingFootprintFilter legacyFilter;
-    legacyFilter.build(m_reconstructedBuildingsPtr, 2.);
-
-    for (auto it = m_pointCloud.get_buildings().begin();
-         it != m_pointCloud.get_buildings().end(); ++it) {
-        const auto& pt = m_pointCloud.get_buildings().point(*it);
-        legacyFilter.collect_building_point(pt.x(), pt.y(), pt);
+    //-- Set flat terrain or apply post-read thinning
+    if (m_pointCloud.get_terrain().empty()) {
+        m_pointCloud.create_flat_terrain(m_allFeaturesPtr, Config::get().flatTerrainElevation);
+        Config::get().flatTerrain = false; // all points are already at flat terrain elevation
+    } else {
+        // On the new streaming path, thinning was already applied at read time.
+        // On the legacy two-file path, apply the post-read thinning pass as before.
+        if (Config::get().point_cloud_files.empty())
+            m_pointCloud.random_thin_pts();
     }
-    m_pointCloud.get_buildings().clear();
+    if (Config::get().flatTerrain) std::cout << "\nINFO: Reconstructing with flat terrain" << std::endl;
 
-    std::size_t total = 0;
-    for (const auto& entry : legacyFilter.get_entries()) {
-        auto& b = m_reconstructedBuildingsPtr[entry.original_index];
-        for (const Point_3& pt : entry.bucket)
-            b->insert_point(pt);
-        total += entry.bucket.size();
-    }
+    //-- Smooth terrain
+    if (Config::get().smoothTerrain)
+        m_pointCloud.smooth_terrain();
+
+    //-- Make a DT with inexact constructions for fast interpolation
+    m_dt.insert(m_pointCloud.get_terrain().points().begin(),
+                m_pointCloud.get_terrain().points().end());
 }
 
 void Map3d::remove_extra_terrain_pts() {
@@ -560,19 +548,16 @@ void Map3d::wrap() {
 }
 
 void Map3d::read_data() {
-    //-- Read building polygons
+    //-- Phase 1: Read polygon files
     if (!Config::get().gisdata.empty()) {
         IO::read_polygons(Config::get().gisdata, m_polygonsBuildings, &Config::get().crsInfo);
         if (m_polygonsBuildings.empty()) throw city4cfd_error("Didn't find any building polygons!");
     }
-    //-- Read surface layer polygons
     for (auto& topoLayer: Config::get().topoLayers) {
         m_polygonsSurfaceLayers.emplace_back();
         IO::read_polygons(topoLayer, m_polygonsSurfaceLayers.back(), nullptr);
     }
-    //-- Read imported buildings
     if (!Config::get().importedBuildingsPath.empty()) {
-//        std::cout << "Importing CityJSON geometries" << std::endl;
         auto& inputfile = Config::get().importedBuildingsPath;
         if (IO::has_substr(inputfile, ".json")) {
             m_importedBuildingsPts = std::make_shared<Point_set_3>();
@@ -590,16 +575,22 @@ void Map3d::read_data() {
         }
     }
 
-    //-- Build footprint filter for the new unified point cloud path.
-    //   Built here (after polygons are loaded, before reads) so it's ready for the hot loop.
-    //   Stored as a member so the per-building point buckets survive into reconstruct().
-    if (!Config::get().point_cloud_files.empty() && !m_polygonsBuildings.empty()) {
+    //-- Phase 2: Populate polygon data structures (includes area filtering)
+    this->set_polygon_features();
+
+    //-- Phase 3: Build footprint filter from the post-filtered building set.
+    //   Built after set_polygon_features() so indices into m_reconstructedBuildingsPtr are stable.
+    BuildingFootprintFilter filter;
+    if (!Config::get().point_cloud_files.empty() && !m_reconstructedBuildingsPtr.empty()) {
         std::cout << "\nBuilding footprint filter" << std::endl;
-        m_footprintFilter.build(m_polygonsBuildings, Config::get().buildingPCFootprintBuffer);
+        filter.build(m_reconstructedBuildingsPtr, Config::get().buildingPCFootprintBuffer);
     }
 
-    //-- Read point clouds
-    m_pointCloud.read_point_clouds(m_footprintFilter);
+    //-- Phase 4: Read point clouds
+    m_pointCloud.read_point_clouds(filter);
+
+    //-- Phase 5: Populate point cloud data structures and attach points to buildings
+    this->set_point_features(filter);
 }
 
 void Map3d::output() {

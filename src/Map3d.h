@@ -65,16 +65,15 @@ private:
     BoundingRegion              m_domainBnd;
     DT                          m_dt;
 
-    BuildingFootprintFilter m_footprintFilter; // built in read_data(), drained in add_building_pts()
 
     bool                        m_bndBPG         = false;
     bool                        m_cityjsonInput  = false;
 
-    void set_features();
+    void set_polygon_features();
+    void set_point_features(const BuildingFootprintFilter& filter);
     void set_influ_region();
     void set_bnd();
     void bnd_sanity_check();
-    void add_building_pts();
     void remove_extra_terrain_pts();
     void reconstruct_terrain();
     void reconstruct_buildings();
