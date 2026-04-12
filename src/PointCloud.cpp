@@ -22,7 +22,6 @@
 
 #include "PointCloud.h"
 
-#include "io.h"
 #include "geomutils.h"
 #include "Config.h"
 #include "Building.h"
@@ -297,51 +296,6 @@ void PointCloud::buffer_flat_edges(const PolyFeaturesPtr& avgFeatures,
     }
 }
 
-void PointCloud::read_point_clouds(BuildingFootprintFilter& filter) {
-    if (!Config::get().point_cloud_files.empty()) {
-        //-- New unified path: single or multiple LAS/LAZ files split by classification
-        std::cout << "Reading point cloud(s) with classification split" << std::endl;
-
-        IO::PointCloudReadOptions opts;
-        opts.terrain_classes   = Config::get().terrain_las_classes;
-        opts.building_classes  = Config::get().building_las_classes;
-        opts.filter            = filter.empty() ? nullptr : &filter;
-        opts.keep_every_nth    = static_cast<std::size_t>(Config::get().keepEveryNthTerrain);
-        opts.drop_every_nth    = static_cast<std::size_t>(Config::get().dropEveryNthTerrain);
-
-        IO::read_and_split_point_clouds(Config::get().point_cloud_files,
-                                        m_pointCloudTerrain,
-                                        opts);
-
-        if (m_pointCloudTerrain.empty()) {
-            std::cout << "INFO: No terrain points found in point cloud(s)! Will calculate ground as a flat surface." << std::endl;
-            std::cout << "WARNING: Ground elevation of buildings can only be approximated. "
-                      << "If you are using point cloud to reconstruct buildings, building height estimation can be wrong.\n"
-                      << std::endl;
-        } else {
-            std::cout << "    Terrain points: " << m_pointCloudTerrain.size() << std::endl;
-        }
-    } else {
-        //-- Legacy two-file path
-        if (!Config::get().ground_xyz.empty()) {
-            std::cout << "Reading ground points" << std::endl;
-            IO::read_point_cloud(Config::get().ground_xyz, m_pointCloudTerrain);
-            std::cout << "    Points read: " << m_pointCloudTerrain.size() << std::endl;
-        } else {
-            std::cout << "INFO: Did not find any ground points! Will calculate ground as a flat surface." << std::endl;
-            std::cout << "WARNING: Ground elevation of buildings can only be approximated. "
-                      << "If you are using point cloud to reconstruct buildings, building height estimation can be wrong.\n"
-                      << std::endl;
-        }
-
-        if (!Config::get().buildings_xyz.empty()) {
-            std::cout << "Reading building points" << std::endl;
-            IO::read_point_cloud(Config::get().buildings_xyz, m_pointCloudBuildings);
-            if (m_pointCloudBuildings.empty()) throw city4cfd_error("Didn't find any building points!");
-            std::cout << "    Points read: " << m_pointCloudBuildings.size() << std::endl;
-        }
-    }
-}
 
 Point_set_3& PointCloud::get_terrain() {
     return m_pointCloudTerrain;

@@ -47,6 +47,11 @@ namespace IO {
                                      Point_set_3& terrain,
                                      const PointCloudReadOptions& opts);
 
+    // High-level point cloud reader: new unified path (point_cloud_files) or legacy two-file
+    // path (ground_xyz + buildings_xyz).  Populates terrain and buildings in place.
+    void read_point_clouds(Point_set_3& terrain, Point_set_3& buildings,
+                           BuildingFootprintFilter& filter);
+
     //-- Input functions
     void read_config(std::string& config_path);
     bool read_point_cloud(std::string& file, Point_set_3& pc);

@@ -587,7 +587,7 @@ void Map3d::read_data() {
     }
 
     //-- Phase 4: Read point clouds
-    m_pointCloud.read_point_clouds(filter);
+    IO::read_point_clouds(m_pointCloud.get_terrain(), m_pointCloud.get_buildings(), filter);
 
     //-- Phase 5: Populate point cloud data structures and attach points to buildings
     this->set_point_features(filter);
