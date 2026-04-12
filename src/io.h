@@ -25,47 +25,26 @@
 
 #include "types.h"
 #include "CGALTypes.h"
+#include "BuildingFootprintFilter.h"
 
-#include <memory>
 #include <set>
 
 namespace IO {
 
-    // Footprint filter: built once from building polygon data, queried per point in the
-    // read hot loop to drop terrain points inside footprints and stray building points
-    // outside footprints.  boost::geometry internals are hidden behind pimpl.
-    class BuildingFootprintFilter {
-    public:
-        BuildingFootprintFilter();
-        ~BuildingFootprintFilter();   // defined in io.cpp where Impl is complete
-
-        // Build from raw polygon data (outer boundary of each entry, dilated by buffer m).
-        // Call once before any read.
-        void build(const PolyVecPtr& polygons, double buffer);
-
-        // Returns true if (x, y) lies inside (or on the boundary of) any buffered footprint.
-        bool contains(double x, double y) const;
-
-        bool empty() const;
-
-    private:
-        struct Impl;
-        std::unique_ptr<Impl> m_impl;
-    };
-
     struct PointCloudReadOptions {
         std::set<int> terrain_classes  = {2};   // ASPRS codes routed to terrain bucket
         std::set<int> building_classes = {6};   // ASPRS codes routed to buildings bucket
-        const BuildingFootprintFilter* filter  = nullptr; // nullable; applied in hot loop
+        BuildingFootprintFilter* filter  = nullptr; // nullable; non-const for bucket accumulation
         std::size_t keep_every_nth = 0; // 0 = disabled; keep 1 in N terrain points, drop the rest
         std::size_t drop_every_nth = 0; // 0 = disabled; drop 1 in N terrain points, keep the rest
     };
 
     // Streaming LAS/LAZ reader with classification split.
-    // Each file is streamed in sequence into the shared terrain/buildings containers.
+    // Terrain points are accumulated into terrain.
+    // Building points are routed into per-footprint buckets inside opts.filter (must be non-null
+    // when building_classes is non-empty; stray points outside every footprint are dropped).
     void read_and_split_point_clouds(const std::vector<std::string>& files,
                                      Point_set_3& terrain,
-                                     Point_set_3& buildings,
                                      const PointCloudReadOptions& opts);
 
     //-- Input functions
