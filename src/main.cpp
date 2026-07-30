@@ -26,7 +26,7 @@
 
 #include  <boost/algorithm/string/predicate.hpp>
 
-std::string CITY4CFD_VERSION = "0.8.1";
+std::string CITY4CFD_VERSION = "0.8.1+dev";
 
 void printWelcome() {
     auto logo{
