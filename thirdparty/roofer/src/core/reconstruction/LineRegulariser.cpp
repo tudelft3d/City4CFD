@@ -1,0 +1,136 @@
+// Copyright (c) 2018-2026 TU Delft 3D geoinformation group, Ravi Peters (3DGI),
+// and Balazs Dukai (3DGI)
+
+// This file is part of roofer (https://github.com/3DBAG/roofer)
+
+// geoflow-roofer was created as part of the 3DBAG project by the TU Delft 3D
+// geoinformation group (3d.bk.tudelf.nl) and 3DGI (3dgi.nl)
+
+// geoflow-roofer is free software: you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by the Free
+// Software Foundation, either version 3 of the License, or (at your option) any
+// later version. geoflow-roofer is distributed in the hope that it will be
+// useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+// Public License for more details. You should have received a copy of the GNU
+// General Public License along with geoflow-roofer. If not, see
+// <https://www.gnu.org/licenses/>.
+
+// Author(s):
+// Ravi Peters
+
+#include <roofer/reconstruction/LineRegulariser.hpp>
+#include <roofer/reconstruction/LineRegulariserBase.hpp>
+
+#include <numbers>
+
+namespace roofer::reconstruction {
+
+  class LineRegulariser : public LineRegulariserInterface {
+    void compute(const SegmentCollection& edge_segments,
+                 const SegmentCollection& ints_segments,
+                 LineRegulariserConfig cfg) override {
+      // get clusters from line regularisation
+      auto LR = linereg::LineRegulariser();
+      LR.add_segments(0, edge_segments);
+      LR.add_segments(2, ints_segments);
+      LR.dist_threshold = cfg.distance_threshold * cfg.distance_threshold;
+      LR.angle_threshold =
+          cfg.angle_threshold * std::numbers::pi_v<double> / 180.0;
+
+      LR.perform_angle_clustering();
+      LR.perform_distance_clustering();
+
+      SegmentCollection edges_out_;
+      vec1i priorities, angle_cluster_ids, dist_cluster_ids;
+      // we should iterate of the distance clusters and output one segment per
+      // cluster
+      for (auto& line : LR.lines) {
+        linereg::Segment_2 segment;
+        segment = line.segment;
+        auto new_seg = Segment();
+        new_seg[0] = {float(CGAL::to_double(segment.source().x())),
+                      float(CGAL::to_double(segment.source().y())), 0};
+        new_seg[1] = {float(CGAL::to_double(segment.target().x())),
+                      float(CGAL::to_double(segment.target().y())), 0};
+        edges_out_.push_back(new_seg);
+        priorities.push_back(line.priority);
+        priorities.push_back(line.priority);
+        angle_cluster_ids.push_back(line.angle_cluster_id);
+        angle_cluster_ids.push_back(line.angle_cluster_id);
+        dist_cluster_ids.push_back(line.dist_cluster_id);
+        dist_cluster_ids.push_back(line.dist_cluster_id);
+      }
+      for (auto& dclust : LR.dist_clusters) {
+        size_t dclust_size = dclust->lines.size();
+        linereg::Segment_2 segment;
+        // get lines with highest priority
+        size_t max_priority = 0;
+        for (auto line : dclust->lines) {
+          if (line->priority > max_priority) max_priority = line->priority;
+        }
+        std::vector<linereg::linetype*> prio_lines;
+        for (auto line : dclust->lines) {
+          if (line->priority == max_priority) {
+            prio_lines.push_back(line);
+          }
+        }
+        // TODO: split clusters using common planes if intersection segment(s)
+        // are present?
+        // TODO: compute distance clusters with 3D dists?
+        // TODO: output exact segments? quick solve of spikes?
+        // TODO: performance optimise clustering algo
+        // //skip if cluster only contains fp segments
+        // if(max_priority==1 && (dclust_size == prio_lines.size())) continue;
+        if (!cfg.merge_intersection_lines &&
+            (max_priority == 2 && (prio_lines.size() > 1))) {
+          std::vector<linereg::linetype*> other_lines;
+          for (auto line : dclust->lines) {
+            if (line->priority != 2) {
+              other_lines.push_back(line);
+            }
+          }
+          for (auto line : prio_lines) {
+            double mean_angle = line->angle;
+            auto centroid = line->midpoint;
+            segment = linereg::calc_segment(centroid, mean_angle, other_lines,
+                                            cfg.extension);
+            auto new_seg = Segment();
+            new_seg[0] = {float(CGAL::to_double(segment.source().x())),
+                          float(CGAL::to_double(segment.source().y())), 0};
+            new_seg[1] = {float(CGAL::to_double(segment.target().x())),
+                          float(CGAL::to_double(segment.target().y())), 0};
+            regularised_edges.push_back(new_seg);
+            exact_regularised_edges.push_back(segment);
+          }
+        } else {
+          // compute mean line with small extensions on both ends
+          double mean_angle = calc_mean_angle(prio_lines);
+          auto centroid = calc_centroid(prio_lines);
+          segment = linereg::calc_segment(centroid, mean_angle, dclust->lines,
+                                          cfg.extension);
+          auto new_seg = Segment();
+          new_seg[0] = {float(CGAL::to_double(segment.source().x())),
+                        float(CGAL::to_double(segment.source().y())), 0};
+          new_seg[1] = {float(CGAL::to_double(segment.target().x())),
+                        float(CGAL::to_double(segment.target().y())), 0};
+          regularised_edges.push_back(new_seg);
+          exact_regularised_edges.push_back(segment);
+        }
+      }
+      // output("angle_cluster_id").set(angle_cluster_ids);
+      // output("dist_cluster_id").set(dist_cluster_ids);
+      // output("priorities").set(priorities);
+      // output("edges_out_").set(edges_out_);
+      // output("n_angle_clusters").set(int(LR.angle_clusters.size()));
+      // output("edges_out").set(new_segments);
+      // output("rings_out").set(new_rings);
+      // output("footprint_out").set(new_fp);
+    }
+  };
+
+  std::unique_ptr<LineRegulariserInterface> createLineRegulariser() {
+    return std::make_unique<LineRegulariser>();
+  };
+
+}  // namespace roofer::reconstruction

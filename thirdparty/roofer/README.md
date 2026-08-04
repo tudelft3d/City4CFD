@@ -1,47 +1,46 @@
-# roofer
-Automatic 3D building reconstruction
+# roofer - automatic building reconstruction from pointclouds
 
-## Overview src/ folder (possibly subject to change)
-`src/common.hpp` and `src/Raster.hpp` contains some basic types to store pointclouds, polygons, rasters etc that are used throughout the library. Only depends on the C++17 standard library.
+**roofer** performs fully automatic LoD2 building reconstruction from a pointcloud and a building roofprint polygon. It was originally developed, and is still used, to create the [3DBAG dataset](https://3dbag.nl). To use it, read [how to get started](https://3dbag.github.io/roofer/getting_started.html).
 
-`src/detection` and `src/partitioning` contain everything needed to perform building reconstruction (see `apps/reconstruct.cpp` for how to use). These files only depend on CGAL, there are not other external dependencies.
+![Building reconstruction with roofer](https://raw.githubusercontent.com/3DBAG/roofer/refs/heads/main/docs/_static/img/banner.png)
 
-`src/io` contains functions to read and write OGR/GDAL datasources and LAS files. Has a bunch of external dependencies like GDAL, GEOS, PROJ, LASlib
+## Highlights
 
-`src/misc`, `src/quality` various function used by the `crop` application.
+- It reconstructs a 3D building model from a pointcloud and a 2D roofprint polygon
+- It is a fully automated process, there is no manual modelling required.
+- It is possible to tweak the reconstruction parameters to adjust it to different input data qualities.
+- It can output different Level of Details: LoD1.2, LoD1.3, LoD2.2. See [the refined Level of Details by the 3D geoinformation research group](https://3d.bk.tudelft.nl/lod/).
+- Usable either as a command line application or as a library with C++ and Python bindings.
+- With the CLI application the building models are outputted to a [CityJSONSequence](https://www.cityjson.org/cityjsonseq/) file.
 
-## Roofer apps
+## Documentation and Source Code
 
-### crop
-Takes a bunch of input las files and footprints and outputs a folder hierarchy with reconstruction inputs for each separate building
+Documentation is provided at [https://3dbag.github.io/roofer/](https://3dbag.github.io/roofer/)
+The source code is available at [https://github.com/3DBAG/roofer](https://github.com/3DBAG/roofer)
 
-### reconstruct
-Takes a point cloud and footprint for a single building and performs building reconstruction. 
+## Origin
 
-Currently it is using rerun.io to visualise the result. You need to install the rerun viewer if you want to see the output.
+The building reconstruction algorithms that underpin roofer were originally developed within the [3D geoinformation research group](https://3d.bk.tudelft.nl/) at the Technical University of Delft.
+In 2022, the core developers of roofer founded [3DGI](https://3dgi.nl), a spin-off company from the same research group, and have continued the development of roofer through the company.
 
-![reconstruct output visualised with Rerun](rerun.png)
+This project has received funding from the European Research Council (ERC):
+- *2016-2022* under the European Unions Horizon2020 Research & Innovation Programme (grant agreement no. 677312 UMnD: Urban modelling in higher dimensions).
+- *2022-2024* under the Horizon Europe Research & Innovation Programme (grant agreement no. 101068452 3DBAG: detailed 3D Building models Automatically Generated for very large areas).
 
-## Installation
+In *2024-2026* this project has received funding from Kadaster, the Netherlands' Cadastre, Land Registry and Mapping Agency.
 
-clone this repository. Then
+Prior to 2024 the building reconstruction algorithms were developed as part of *Geoflow* and the *gfp-building-reconstruction plugin*. During the summer of 2024 the code was refactored and the *roofer* project was born.
 
-```
-cd roofer-dev
-git submodule update --init --recursive
-mkdir build
-cd build
-cmake ..
-cmake --build . --parallel 10
-```
+## Sponsorship
 
-This assumes you have CGAL, GDAL, PROJ, GEOS, LASlib  preinstalled on your system
+Software doesn't maintain itself. If you are a (professional) user of roofer and have an interest in ensuring that roofer is maintained, bugs are fixed and new features are added, consider supporting the project through sponsorship.
 
-## Run with test-data
-Assuming you build roofer successfully. Unzip the contents of [wippolder.zip](https://data.3dgi.xyz/geoflow-test-data/wippolder.zip) into `test-data`, then
+You can make one-off donations via [this link](https://bunq.me/fundroofer). If you would like to sponsor the roofer project in another way, or need an invoice, please reach out to us via [email](mailto:info@3dgi.nl).
 
-```
-cd test-data
-../build/apps/crop -c crop_config.toml
-../build/apps/reconstruct --verbose
-```
+## License
+
+Roofer is licensed under the GPLv3 license.
+
+## 3DBAG organisation
+
+Roofer is part of the 3DBAG organisation. For more information visit the [3DBAG organisation](https://github.com/3DBAG) on GitHub.

@@ -1,0 +1,62 @@
+// Copyright (c) 2018-2026 TU Delft 3D geoinformation group, Ravi Peters (3DGI),
+// and Balazs Dukai (3DGI)
+
+// This file is part of roofer (https://github.com/3DBAG/roofer)
+
+// geoflow-roofer was created as part of the 3DBAG project by the TU Delft 3D
+// geoinformation group (3d.bk.tudelf.nl) and 3DGI (3dgi.nl)
+
+// geoflow-roofer is free software: you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by the Free
+// Software Foundation, either version 3 of the License, or (at your option) any
+// later version. geoflow-roofer is distributed in the hope that it will be
+// useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+// Public License for more details. You should have received a copy of the GNU
+// General Public License along with geoflow-roofer. If not, see
+// <https://www.gnu.org/licenses/>.
+
+// Author(s):
+// Ravi Peters
+
+#pragma once
+#include <memory>
+#include <roofer/common/datastructures.hpp>
+#include <roofer/reconstruction/cgal_shared_definitions.hpp>
+#include <roofer/common/ConfigField.hpp>
+
+namespace roofer::reconstruction {
+
+#define ROOFER_ALPHA_SHAPER_FIELDS(X)                                          \
+  X(float, alpha, 0.25F,                                                       \
+    "Alpha-shape squared-radius parameter, in square metres.",                 \
+    config::greater_than(0.0F), public_)                                       \
+  X(bool, extract_polygons, true, "Extract alpha-shape polygons.",             \
+    config::no_validation<bool>(), internal)                                   \
+  X(bool, optimal_alpha, false, "Autoselect alpha for 1 connected component.", \
+    config::no_validation<bool>(), public_)                                    \
+  X(bool, clamp_optimal_alpha, true,                                           \
+    "Clamp the optimal alpha to at least the configured alpha value.",         \
+    config::no_validation<bool>(), public_)
+  struct AlphaShaperConfig {
+    using Self = AlphaShaperConfig;
+    ROOFER_CONFIG_MEMBERS(ROOFER_ALPHA_SHAPER_FIELDS)
+  };
+#undef ROOFER_ALPHA_SHAPER_FIELDS
+
+  struct AlphaShaperInterface {
+    std::vector<LinearRing> alpha_rings;
+    TriangleCollection alpha_triangles;
+    vec1i roofplane_ids;
+
+    // add_output("edge_points", typeid(PointCollection));
+    // add_output("alpha_edges", typeid(LineStringCollection));
+    // add_output("segment_ids", typeid(vec1i));
+
+    virtual ~AlphaShaperInterface() = default;
+    virtual void compute(const IndexedPlanesWithPoints& pts_per_roofplane,
+                         AlphaShaperConfig config = AlphaShaperConfig()) = 0;
+  };
+
+  std::unique_ptr<AlphaShaperInterface> createAlphaShaper();
+}  // namespace roofer::reconstruction

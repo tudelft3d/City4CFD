@@ -1,0 +1,68 @@
+{
+  "version": 6,
+  "configurePresets": [
+    {
+      "name": "nix-minimal",
+      "description": "Build with pure nix just the apps",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "RF_USE_VAL3DITY": "OFF",
+        "RF_USE_RERUN": "OFF",
+        "RF_USE_LOGGER_SPDLOG": "OFF",
+        "RF_BUILD_TESTING": "OFF",
+        "RF_BUILD_APPS": "ON",
+        "RF_BUILD_BINDINGS": "OFF"
+      }
+    },
+    {
+      "name": "system-minimal-test",
+      "description": "Build with system packages without any optional dependencies, in order to get the quickest build possible for running tests.",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "RF_USE_VAL3DITY": "OFF",
+        "RF_USE_RERUN": "OFF",
+        "RF_USE_LOGGER_SPDLOG": "OFF",
+        "RF_BUILD_TESTING": "ON",
+        "RF_BUILD_APPS": "ON",
+        "RF_BUILD_BINDINGS": "ON"
+      }
+    },
+    {
+      "name": "gh-conan-release",
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "test-built",
+      "description": "Test the compiled targets in their build directory",
+      "configurePreset": "gh-conan-release",
+      "output": {
+        "outputOnFailure": true,
+        "verbosity": "verbose"
+      },
+      "filter": {
+        "exclude": {
+          "name": "^installed.*"
+        }
+      }
+    },
+    {
+      "name": "test-installed",
+      "description": "Test the installed artifacts",
+      "configurePreset": "gh-conan-release",
+      "output": {
+        "outputOnFailure": true,
+        "verbosity": "verbose"
+      },
+      "filter": {
+        "include": {
+          "name": "^installed.*"
+        }
+      }
+    }
+  ]
+}

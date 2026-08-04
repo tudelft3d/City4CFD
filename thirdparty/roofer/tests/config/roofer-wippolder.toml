@@ -1,0 +1,12 @@
+polygon-source = "data/wippolder/wippolder.gpkg"
+id-attribute = "identificatie"
+force-lod11-attribute = "kas_warenhuis"
+
+split-cjseq = false
+output-directory = 'output/wippolder'
+# srs_override = "EPSG:7415"
+
+[[pointclouds]]
+name = "AHN3"
+quality = 1
+source = ['data/wippolder/wippolder.las']
