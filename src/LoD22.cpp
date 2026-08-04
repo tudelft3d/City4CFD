@@ -22,7 +22,7 @@
 
 #include "LoD22.h"
 #include "Config.h"
-#include "misc/cgal_utils.hpp"
+#include <roofer/misc/cgal_utils.hpp>
 
 LoD22::LoD22(roofer::Mesh rooferMesh) {
     // shorten long poly edges
@@ -38,7 +38,7 @@ LoD22::LoD22(roofer::Mesh rooferMesh) {
         // remove bottom surface from rooferMesh
         this->remove_footprint_from_mesh(rooferMesh);
     }
-    m_mesh = roofer::Mesh2CGALSurfaceMesh<Point_3>(rooferMesh);
+    m_mesh = roofer::misc::Mesh2CGALSurfaceMesh<Point_3>(rooferMesh);
     m_rooferMeshes.push_back(rooferMesh);
 }
 
@@ -90,11 +90,13 @@ void LoD22::reconstruct(const PointSet3Ptr& buildingPtsPtr,
     }
 
     // reconstruct
-    m_rooferMeshes = roofer::reconstruct_single_instance(buildingPts, linearRing,
-//                                                       groundPts, //todo groundPts flag
-                                                         {.lambda = config.m_lambda,
-                                                          .lod = config.m_lod,
-                                                          .lod13_step_height = config.m_lod13_step_height});
+    roofer::ReconstructOptions options;
+    options.lod = config.m_lod;
+    options.reconstruction.lod13_step_height = config.m_lod13_step_height;
+    options.reconstruction.arrangement_optimiser.complexity_factor = config.m_lambda;
+    m_rooferMeshes = roofer::reconstruct(buildingPts, linearRing,
+//                                      groundPts, //todo groundPts flag
+                                        options);
 
     // store the first mesh from the vector, rest should be handled separately
     auto& rooferMesh = m_rooferMeshes.front();
@@ -111,7 +113,7 @@ void LoD22::reconstruct(const PointSet3Ptr& buildingPtsPtr,
         // remove bottom surface from rooferMesh
         this->remove_footprint_from_mesh(rooferMesh);
     }
-    m_mesh = roofer::Mesh2CGALSurfaceMesh<Point_3>(rooferMesh);
+    m_mesh = roofer::misc::Mesh2CGALSurfaceMesh<Point_3>(rooferMesh);
 }
 
 void LoD22::remove_footprint_from_mesh(roofer::Mesh& rooferMesh) {

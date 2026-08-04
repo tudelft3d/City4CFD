@@ -24,7 +24,7 @@
 
 #include "types.h"
 #include "CGALTypes.h"
-#include "roofer.h"
+#include <roofer/roofer.h>
 
 class LoD22 {
 public:

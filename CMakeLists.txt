@@ -64,12 +64,11 @@ endif()
 # Third-party
 add_subdirectory(${CMAKE_SOURCE_DIR}/thirdparty/LAStools)
 add_subdirectory(${CMAKE_SOURCE_DIR}/thirdparty/CSF/src)
-add_subdirectory(${CMAKE_SOURCE_DIR}/thirdparty/roofer/src)
+add_subdirectory(${CMAKE_SOURCE_DIR}/thirdparty/roofer)
 add_subdirectory(${CMAKE_SOURCE_DIR}/thirdparty/val3dity)
 include_directories(${CMAKE_SOURCE_DIR}/thirdparty)
 include_directories(${CMAKE_SOURCE_DIR}/thirdparty/valijson)
 include_directories(${Boost_INCLUDE_DIR})
-include_directories(${CMAKE_SOURCE_DIR}/thirdparty/roofer/src)
 
 # Tools
 add_subdirectory(${CMAKE_SOURCE_DIR}/tools/prepare_point_cloud)
@@ -79,7 +78,7 @@ FILE(GLOB SRC_FILES "src/*.cpp")
 add_executable(city4cfd ${SRC_FILES})
 set_target_properties(
         city4cfd
-        PROPERTIES CXX_STANDARD 17
+        PROPERTIES CXX_STANDARD 20
 )
 
 target_link_libraries(city4cfd
@@ -91,7 +90,7 @@ target_link_libraries(city4cfd
         ${Boost_LOCALE_LIBRARY}
         LASlib
         CGAL::Eigen3_support
-        roofer_api
+        roofer-core
         val3dity
         ${OpenMP_support}
         )

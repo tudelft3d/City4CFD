@@ -24,7 +24,7 @@
 #define CITY4CFD_RECONSTRUCTEDBUILDING_H
 
 #include "Building.h"
-#include "roofer.h"
+#include <roofer/roofer.h>
 
 class ReconstructedBuilding : public Building {
 public:
