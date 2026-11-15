@@ -1,5 +1,5 @@
 # Changelog
-## [Unreleased]
+## [0.8.2] 2026-11-15
 # Changed
 - Updated valjson to v1.1.4 to support newer GCC versions
 
