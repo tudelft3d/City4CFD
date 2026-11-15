@@ -12,7 +12,7 @@ set(CMAKE_BUILD_TYPE "Release")
 add_executable(city4cfd_pcprep src/city4cfd_pcprep.cpp)
 set_target_properties(
         city4cfd_pcprep
-        PROPERTIES CXX_STANDARD 14
+        PROPERTIES CXX_STANDARD 17
 )
 
 target_link_libraries(city4cfd_pcprep

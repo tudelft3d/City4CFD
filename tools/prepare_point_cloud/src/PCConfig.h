@@ -28,10 +28,8 @@
 
 #include "boost/filesystem.hpp"
 
-#include "valijson/adapters/nlohmann_json_adapter.hpp"
-#include "valijson/schema.hpp"
-#include "valijson/schema_parser.hpp"
-#include "valijson/validator.hpp"
+#define VALIJSON_USE_EXCEPTIONS 1
+#include "valijson/valijson_nlohmann_bundled.hpp"
 
 #include "PCconfigSchema.inc"
 

@@ -1,4 +1,8 @@
 # Changelog
+## [Unreleased]
+# Changed
+- Updated valjson to v1.1.4 to support newer GCC versions
+
 ## [0.8.1] 2026-07-26
 ### Fixed
 - CGAL 6.2 compatibility issues
